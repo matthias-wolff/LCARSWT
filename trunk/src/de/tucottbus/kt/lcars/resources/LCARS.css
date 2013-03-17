@@ -1,0 +1,59 @@
+BODY
+{
+  color: white;
+  background-color: black;
+  margin: 0px;
+  font-family: Compacta LT Light, Swiss911 UCm BT, sans-serif;
+  font-size: 20pt;
+  text-transform: uppercase;
+}
+P,TD,LI,I,B
+{
+  color: white;
+  font-size: 24pt;
+  font-weight: normal;
+  font-style: normal; 
+  text-decoration: none;
+}
+EM
+{
+  color: #FF9900;
+  font-size: 24pt;
+  font-weight: normal;
+  font-style: normal; 
+  text-decoration: none;
+}
+H1
+{
+  color: #FF9900;
+  font-size: 48pt;
+  font-weight: normal;
+}
+H2
+{
+  color: #FF9900;
+  font-size: 36pt;
+  font-weight: normal;
+}
+H3
+{
+  color: white;
+  font-size: 28pt;
+  font-weight: normal;
+}
+A:link, A:visited, A:focus, A:hover, A:active, DT
+{
+  color: #FF9900;
+  margin: 3px;
+  font-weight: normal;
+  font-style: normal; 
+  text-decoration: none;
+}
+.error
+{
+  color: #FF0066;
+}
+.large
+{
+  font-size: 48pt;
+}

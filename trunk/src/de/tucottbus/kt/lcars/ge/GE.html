@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <head>
+  <script src="http://www.google.com/jsapi?key=ABQIAAAAAfegiFO0whc7cK38drZ2GRR5BIsVEzEZjPSD1BL_IIuASDpj8hRoRrUWKWA1B45Kz4mtchvZ9qpaqQ"></script>
+  <script src="http://www.barnabu.co.uk/files/clouds/cloudmeta.js"></script>
+  <script>
+    google.load("earth","1");
+    google.load("maps", "2", { 'locale' : 'us'} );
+
+    var ge         = null;
+    var clouds     = null;
+    var fullalt    = 16000000;
+    var standalone = "${WORLD}".substr(0,2)=="${";
+    var world      = window.location.hash;
+    world = world.length>0 ? world.substr(1) : '${WORLD}';
+
+    function init()
+    {
+      google.earth.setLanguage('en');
+      if (world=='MOON')
+      {
+        google.earth.createInstance('map3d',initCallback,failureCallback, { database: 'http://khmdb.google.com/?db=moon' });
+        fullalt = 5000000;
+      }
+      else if (world=='MARS')
+      {
+        google.earth.createInstance('map3d',initCallback,failureCallback, { database: 'http://khmdb.google.com/?db=mars' });
+        fullalt = 10000000;
+      }
+      else
+        google.earth.createInstance('map3d',initCallback,failureCallback);
+
+      // -- RUNNING STAND-ALONE --
+      if (standalone)
+      {
+        document.getElementById('map3d').style.height='700px';
+      }
+    }
+
+    function initCallback(object)
+    {
+      ge = object;
+      if (world == 'SKY')
+      {
+        ge.getOptions().setMapType(ge.MAP_TYPE_SKY);
+        //TODO: ge.getLayerRoot().enableLayerById(ge.LAYER_CONSTELLATIONS,false);
+      }
+      else 
+        ge.getSun().setVisibility(true);
+
+      ge.getWindow().setVisibility(true);
+      try
+      {
+        ge.getTime().getControl().setVisibility(ge.VISIBILITY_HIDE);
+      } catch(e) {}
+      if (world=='EARTH')
+      {
+        clouds = createCloudOverlay();
+        clouds.setVisibility(true);
+      }
+
+      google.earth.addEventListener(ge.getView(),'viewchange',function()
+      {
+        try
+        {
+          var camera = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
+          var pos
+            = camera.getLatitude()  + ":"
+            + camera.getLongitude() + ":"
+            + camera.getAltitude()  + ":"
+            + camera.getHeading()   + ":"
+            + camera.getTilt()      + ":"
+            + camera.getRoll();
+          javaNotifyCameraPosition(pos);
+        }
+        catch(e)
+        {
+        }
+      });
+      
+      google.earth.addEventListener(ge.getGlobe(),'click',function()
+      {
+        try
+        {
+          javaNotifyGlobeClick();
+        }
+        catch(e)
+        {
+        }
+      });
+      
+      try
+      {
+    	  javaNotifyInitialized();
+      }
+      catch(e)
+      {
+      }
+    }
+
+    function failureCallback(object)
+    {
+    }
+
+    function createCloudOverlay()
+    {
+      var icon = ge.createIcon('');
+      icon.setHref('http://www.barnabu.co.uk/files/clouds/cloudimage.png?');
+      var latLonBox = ge.createLatLonBox('');
+      latLonBox.setBox(90,-90,180,-180,0);
+      var groundOverlay = ge.createGroundOverlay('');
+      groundOverlay.setIcon(icon);
+      groundOverlay.setLatLonBox(latLonBox);
+      groundOverlay.setAltitude(50000);
+      groundOverlay.setAltitudeMode(ge.ALTITUDE_ABSOLUTE); 
+      groundOverlay.getColor().setA(255);
+      ge.getFeatures().appendChild(groundOverlay);
+      return groundOverlay;
+    }
+
+    function flyTo(lat,lon,alt,hdg,tlt,rol,speed)
+    {
+    	if (speed<0) speed = 1;
+    	if (speed>5) speed = ge.SPEED_TELEPORT;
+      ge.getOptions().setFlyToSpeed(speed);
+      var camera = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
+      camera.setLatitude(lat);
+      camera.setLongitude(lon);
+      camera.setAltitude(alt);
+      camera.setHeading(hdg);
+      camera.setTilt(tlt);
+      camera.setRoll(rol);
+      camera.setTimePrimitive(ge.getTime().getSystemTime());
+      ge.getView().setAbstractView(camera);
+    }
+    
+  </script>
+  </head>
+  <body onload='init()' id='body' style="margin:0px; background-color:black;">
+    <div id='map3d' style='border: none; height: 90%; width: 100%;'></div>
+  </body>
+</html>
