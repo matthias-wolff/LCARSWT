@@ -584,8 +584,15 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void animate()
   {
-    if (panel==null) cancelTimerTask(TT_ANIMATION);
-    scheduleTimerTask(new AnimationTask(),TT_ANIMATION,0,100);
+    try
+    {
+      if (panel==null) cancelTimerTask(TT_ANIMATION);
+      scheduleTimerTask(new AnimationTask(),TT_ANIMATION,1,100);
+    }
+    catch (IllegalStateException e)
+    {
+      e.printStackTrace();
+    }
   }
   
   /**
