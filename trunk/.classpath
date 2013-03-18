@@ -2,9 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/swt.jar" sourcepath="lib/swt.source.jar"/>
 	<classpathentry kind="lib" path="lib-lgpl/jl1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib-lgpl/mp3spi1.9.5.jar"/>
 	<classpathentry kind="lib" path="lib-lgpl/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="lib/swt.jar" sourcepath="lib/swt.source.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
