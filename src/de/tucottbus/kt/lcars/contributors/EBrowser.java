@@ -4,8 +4,6 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
@@ -160,13 +158,12 @@ public class EBrowser extends ElementContributor
             }
             public void completed(ProgressEvent event)
             {
-              File file = LCARS.getResourceFile("de/tudresden/ias/lcars/resources/LCARS-css.js");
               try
               {
-                String script = LCARS.loadTextFile(file);
+                String script = LCARS.loadTextResource("de/tucottbus/kt/lcars/resources/LCARS-css.js");
                 browser.execute(script);
               }
-              catch (FileNotFoundException e)
+              catch (Exception e)
               {
                 e.printStackTrace();
               }
@@ -236,12 +233,11 @@ public class EBrowser extends ElementContributor
   {
     if (css==null)
     {
-      File file = LCARS.getResourceFile("de/tudresden/ias/lcars/resources/LCARS.css");
       try
       {
-        css = LCARS.loadTextFile(file);
+        css = LCARS.loadTextResource("de/tucottbus/kt/lcars/resources/LCARS.css");
       }
-      catch (FileNotFoundException e)
+      catch (Exception e)
       {
         e.printStackTrace();
         css = "";

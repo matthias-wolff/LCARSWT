@@ -22,11 +22,6 @@ import de.tucottbus.kt.lcars.Screen;
 public abstract class RmiAdapter implements Remote
 {
   /**
-   * The serial version ID.
-   */
-  private static final long serialVersionUID = 1L;
-  
-  /**
    * Copy of <code>this</code> for nested classes.
    */
   private RmiAdapter self;

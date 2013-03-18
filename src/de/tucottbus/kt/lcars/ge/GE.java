@@ -8,7 +8,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.FileNotFoundException;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -175,9 +174,9 @@ public class GE
       // Load Google Earth page
       try
       {
-        geHtml = LCARS.loadTextFile(LCARS.getResourceFile(GE_HTML));
+        geHtml = LCARS.loadTextResource(GE_HTML);
       }
-      catch (FileNotFoundException e)
+      catch (Exception e)
       {
         e.printStackTrace();
       }

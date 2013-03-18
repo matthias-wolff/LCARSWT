@@ -41,11 +41,6 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
 public class Panel implements IPanel, EEventListener, ISpeechEventListener
 {
   /**
-   * The default serial version ID.
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * This panel for nested classes.
    */
   protected Panel thisPanel;

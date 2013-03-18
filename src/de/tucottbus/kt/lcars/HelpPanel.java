@@ -1,7 +1,6 @@
 package de.tucottbus.kt.lcars;
 
-import java.io.File;
-
+import java.io.FileNotFoundException;
 import de.tucottbus.kt.lcars.contributors.EBrowser;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
@@ -217,11 +216,9 @@ public class HelpPanel extends Panel
     try
     {
       String name = this.helpFor.getName().replace(".","/")+".html";
-      File   file = LCARS.getResourceFile(name);
-      return eBrowser.setUrl(file.getAbsolutePath());
-//      String html = LCARS.loadTextFile(file);
-//      if (file==null || html==null) throw new FileNotFoundException(name);
-//      return eBrowser.setText(html);
+      String html = LCARS.loadTextResource(name);
+      if (html==null) throw new FileNotFoundException(name);
+      return eBrowser.setText(html);
     }
     catch (Exception e)
     {

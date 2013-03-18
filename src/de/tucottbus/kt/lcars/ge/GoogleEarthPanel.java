@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.AbstractList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -80,7 +81,7 @@ public class GoogleEarthPanel extends MainPanel
     super.init();
     setColorScheme(LCARS.CS_MULTIDISP);
     setTitle(null);
-    places = new Places(LCARS.getResourceFile(GE_PLACES));
+    places = new Places(getClass().getClassLoader().getResourceAsStream(GE_PLACES));
     
     // The top bar
     EElement e;
@@ -968,7 +969,7 @@ public class GoogleEarthPanel extends MainPanel
      * 
      * @param file the XML file
      */
-    Places(File file)
+    Places(InputStream is)
     {
       places = new Vector<GEPlace>();
       
@@ -977,7 +978,7 @@ public class GoogleEarthPanel extends MainPanel
         // Load XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(file);
+        Document doc = db.parse(is);
         doc.getDocumentElement().normalize();
         
         // Loop over <place>-tags

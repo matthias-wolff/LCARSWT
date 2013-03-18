@@ -37,7 +37,6 @@ public class ServerPanel extends Panel
   private static ArrayList<WeakReference<ServerPanel>> instances;
   
   // -- GUI element fields --
-  private ERect         eHiddenTitle;
   private EElementArray eLog;
   private EElementArray eScreens;
   private EElbo         eLogSize;
