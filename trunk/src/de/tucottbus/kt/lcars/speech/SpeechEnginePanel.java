@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.MainPanel;
+import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.contributors.ESignalDisplay;
 import de.tucottbus.kt.lcars.elements.EElbo;
 import de.tucottbus.kt.lcars.elements.EElement;
@@ -23,7 +23,7 @@ import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
 import de.tucottbus.kt.lcars.speech.events.SpeechEvent;
 import de.tucottbus.kt.lcars.util.Range;
 
-public class SpeechEnginePanel extends MainPanel
+public class SpeechEnginePanel extends Panel
 {
   // GUI elements
   private   EElbo           eElboU;
