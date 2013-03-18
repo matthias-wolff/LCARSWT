@@ -23,11 +23,6 @@ extends RmiAdapter
 implements IPanel, IRmiPanelAdapterRemote
 {
   /**
-   * The default serial version ID. 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * The wrapped panel.
    */
   protected Panel panel;

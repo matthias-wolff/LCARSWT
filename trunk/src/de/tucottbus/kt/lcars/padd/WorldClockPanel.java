@@ -305,4 +305,19 @@ public class WorldClockPanel extends PaddMainPanel
     }
   }
   
+  // -- Main method --
+  
+  /**
+   * Runs the world clock panel.
+   * 
+   * @param args
+   *          The command line arguments, see {@link LCARS#main(String[])}.
+   */
+  public static void main(String[] args)
+  {
+    args = LCARS.setArg(args,"--panel=",WorldClockPanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--PADD",null);
+    LCARS.main(args);
+  }
+  
 }

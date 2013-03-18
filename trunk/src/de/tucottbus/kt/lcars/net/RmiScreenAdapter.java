@@ -22,11 +22,6 @@ import de.tucottbus.kt.lcars.util.ObjectSize;
 public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenAdapterRemote
 {
   // -- Fields --
-  
-  /**
-   * The default serial version ID.
-   */
-  private static final long serialVersionUID = 1L;
 
   /**
    * The memory statistics of the update data transferred by {@link #update(PanelData, boolean)}.

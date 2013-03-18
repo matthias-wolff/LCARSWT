@@ -39,9 +39,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
@@ -58,7 +60,11 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeSet;
 import java.util.Vector;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -742,7 +748,7 @@ public class LCARS implements ILcarsRemote
     Vector<Class<?>> l = new Vector<Class<?>>();
     try
     {
-      Class<?>[] cls = getClasses("de");
+      Class<?>[] cls = getClassesInPackage("",null);
       for (int i=0; i<cls.length; i++)
         try
         {
@@ -768,7 +774,7 @@ public class LCARS implements ILcarsRemote
     Vector<Class<?>> l = new Vector<Class<?>>();
     try
     {
-      Class<?>[] cls = getClasses("de");
+      Class<?>[] cls = getClassesInPackage("",null);
       for (int i=0; i<cls.length; i++)
         try
         {
@@ -786,138 +792,130 @@ public class LCARS implements ILcarsRemote
   }
   
   /**
-   * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
-   *
-   * @author http://snippets.dzone.com/posts/show/4831
-   * @param packageName The base package
+   * Scans all classes accessible from the context class loader which belong to
+   * the given package and subpackages. Adapted from
+   * http://snippets.dzone.com/posts/show/4831 and extended to support use of
+   * JAR files.
+   * 
+   * @param packageName
+   *          The base package.
+   * @param regexFilter
+   *          An optional class name pattern.
    * @return The classes
-   * @throws ClassNotFoundException
-   * @throws IOException
    */
-  public static Class<?>[] getClasses(String packageName) throws ClassNotFoundException, IOException
+  public static Class<?>[] getClassesInPackage(String packageName, String regexFilter)
   {
-    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    assert classLoader != null;
-    String path = packageName.replace('.', '/');
-    Enumeration<URL> resources = classLoader.getResources(path);
-    ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-    while (resources.hasMoreElements())
+    Pattern regex = null;
+    if (regexFilter != null)
+      regex = Pattern.compile(regexFilter);
+    try
     {
-      URL resource = resources.nextElement();
-      classes.addAll(findClasses(resource, packageName));
+      String path = packageName.replace('.', '/');
+      Enumeration<URL> resources = ClassLoader.getSystemResources(path);
+      List<String> dirs = new ArrayList<String>();
+      while (resources.hasMoreElements())
+      {
+        URL resource = resources.nextElement();
+        dirs.add(resource.getFile());
+      }
+      TreeSet<String> classes = new TreeSet<String>();
+      for (String directory : dirs)
+      {
+        classes.addAll(findClasses(directory, packageName, regex));
+      }
+      ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
+      for (String clazz : classes)
+        try
+        {
+          classList.add(Class.forName(clazz));
+        }
+        catch (ClassNotFoundException e)
+        {
+          LCARS.err("SYS","Class \""+clazz+"\" is not accessible");
+        }
+
+      // FIXME: empty base package name does not work for JAR files!
+      //    --> Find at least system classes in package(s) de.* -->
+      if (path.length()==0 && classList.size()==0)
+        return getClassesInPackage("de",regexFilter);
+      // <--
+
+      return classList.toArray(new Class[classes.size()]);
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
     }
-    return classes.toArray(new Class[classes.size()]);
   }
-  
+
   /**
-   * Recursive method used to find all classes in a given directory and subdirs.
-   *
-   * @author http://snippets.dzone.com/posts/show/4831
-   * @param directory   The base directory
-   * @param packageName The package serverName for classes found inside the base directory
-   * @return The classes
-   * @throws ClassNotFoundException
+   * Recursive method used to find all classes in a given path (directory or zip
+   * file URL). Directories are searched recursively.
+   * 
+   * Adapted from http://snippets.dzone.com/posts/show/4831 and extended to
+   * support use of JAR files
+   * 
+   * @param path
+   *          The base directory or URL from which to search.
+   * @param packageName
+   *          The package name for classes found inside the base directory.
+   * @param regex
+   *          An optional class name pattern. e.g. .*Test
+   * @return The classes.
+   * @throws MalformedURLException
+   *           if no protocol is specified, or an unknown protocol is found, or
+   *           spec is <code>null</code>.
+   * @throws IOException
+   *           if an I/O exception occurs.
    */
-  private static List<Class<?>> findClasses(File directory, String packageName)
-      throws ClassNotFoundException
+  private static TreeSet<String> findClasses
+  (
+    String  path,
+    String  packageName,
+    Pattern regex
+  )
+  throws MalformedURLException, IOException
   {
-    List<Class<?>> classes = new ArrayList<Class<?>>();
-    if (!directory.exists()) { return classes; }
-    File[] files = directory.listFiles();
+    TreeSet<String> classes = new TreeSet<String>();
+    if (path.startsWith("file:") && path.contains("!"))
+    {
+      String[] split = path.split("!");
+      URL jar = new URL(split[0]);
+      ZipInputStream zip = new ZipInputStream(jar.openStream());
+      ZipEntry entry;
+      while ((entry = zip.getNextEntry()) != null)
+      {
+        if (entry.getName().endsWith(".class"))
+        {
+          String className = entry.getName().replaceAll("[$].*", "")
+              .replaceAll("[.]class", "").replace('/', '.');
+          if (className.startsWith(packageName)
+              && (regex == null || regex.matcher(className).matches()))
+            classes.add(className);
+        }
+      }
+    }
+    File dir = new File(path);
+    if (!dir.exists())
+    {
+      return classes;
+    }
+    File[] files = dir.listFiles();
     for (File file : files)
     {
       if (file.isDirectory())
       {
         assert !file.getName().contains(".");
-        classes.addAll(findClasses(file, packageName + "." + file.getName()));
-      }
-      else if (file.getName().endsWith(".class"))
+        classes.addAll(findClasses(file.getAbsolutePath(), packageName + "."
+            + file.getName(), regex));
+      } else if (file.getName().endsWith(".class"))
       {
-        try
+        String className = packageName + '.'
+            + file.getName().substring(0, file.getName().length() - 6);
+        if (regex == null || regex.matcher(className).matches())
         {
-          classes.add(Class.forName(packageName + '.'
-            + file.getName().substring(0, file.getName().length() - 6)));
-        }
-        catch (Throwable e)
-        {
-          //System.out.println(e.toString());
-        }
-      }
-    }
-    return classes;
-  }
-
-  /**
-   * Alternative to method <code>findClasses(File directory, String packageName)
-   * </code> to handle jar-archives.
-   *
-   * @param resource   The base directory
-   * @param packageName The package serverName for classes found inside the base directory
-   * @return The classes
-   * @throws ClassNotFoundException
-   */
-  private static List<Class<?>> findClasses(URL resource, String packageName)
-      throws ClassNotFoundException
-  {
-    List<Class<?>> classes = new ArrayList<Class<?>>();
-    if(resource.getProtocol().indexOf("jar") > -1)
-    {
-      String[] sSplit = resource.getFile().split("!/");
-      if(sSplit.length > 1)
-      {
-        sSplit[0] = sSplit[0].replaceAll("file:", "");
-        sSplit[0] = sSplit[0].replaceAll("%20", " ");                           // path serverName on windows os often include white spaces; 
-                                                                                // represented as URL => white space denoted by %20 => replace it
-        java.util.jar.JarFile file = null;
-        try
-        {
-          file = new java.util.jar.JarFile(sSplit[0]);
-        }
-        catch(IOException ioe)
-        {
-          return classes;
-        }
-        Enumeration<java.util.jar.JarEntry> entries = file.entries();
-        java.util.jar.JarEntry entry;
-        String sTemp;
-        while (entries.hasMoreElements())
-        {
-          entry = entries.nextElement();
-          if(entry.getName().startsWith(sSplit[1]) &&
-              entry.getName().endsWith(".class"))
-          {
-             sTemp = entry.getName();
-             sTemp = sTemp.replaceAll(".class", "");
-             sTemp = sTemp.replaceAll("/", ".");
-             try
-             {
-               classes.add(Class.forName(sTemp));
-             }
-             catch (Throwable e)
-             {
-               // Whatever...
-             }
-          }
-        }
-        try { file.close(); } catch (Exception e) {}
-      }
-    }
-    else
-    {
-      File directory = new File(resource.getFile());
-      if (!directory.exists()) { return classes; }
-      File[] files = directory.listFiles();
-      for (File file : files)
-      {
-        if (file.isDirectory())
-        {
-          assert !file.getName().contains(".");
-          classes.addAll(findClasses(file, packageName + "." + file.getName()));
-        }
-        else if (file.getName().endsWith(".class"))
-        {
-          classes.add(Class.forName(packageName + '.'
-              + file.getName().substring(0, file.getName().length() - 6)));
+          if (className.startsWith(".")) className=className.substring(1);
+          classes.add(className);
         }
       }
     }
@@ -931,6 +929,7 @@ public class LCARS implements ILcarsRemote
    * @param pckg the package name
    * @param file the file name
    * @return the file or <code>null</code> in case of errors
+   * @deprecated
    */
   public static File getResourceFile(String pckg, String file)
   {
@@ -947,10 +946,13 @@ public class LCARS implements ILcarsRemote
    *          The file name (the package separator '.' must be replaced by a
    *          slash '/')
    * @return the file or <code>null</code> in case of errors
+   * @deprecated
    */
   public static File getResourceFile(String file)
   {
     if (file==null) return null;
+    URL url = LCARS.class.getClassLoader().getResource(file);
+    System.out.println("\n*** RESOURCE-URL: \""+url.toExternalForm()+"\", FILE: \""+url.getFile()+"\"***");
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     URL resource = classLoader.getResource(file);
     if (resource==null) return null;
@@ -970,6 +972,7 @@ public class LCARS implements ILcarsRemote
    * 
    * @param file the file
    * @return the contents
+   * @deprecated Use {@link #loadTextResource(String)} instead!
    */
   public static String loadTextFile(File file) throws FileNotFoundException
   {
@@ -987,6 +990,33 @@ public class LCARS implements ILcarsRemote
       scanner.close();
     }
 
+    return text.toString();
+  }
+  
+  /**
+   * Loads a text resource.
+   * 
+   * @param name
+   *          The resource name, e.&nbsp;g. "de/tucottbus/kt/lcars/ge/GE.html".
+   * @throws FileNotFoundException if the resource could not be found.
+   * @return The text or <code>null</code> if the parameter is <code>null</code>.
+   */
+  public static String loadTextResource(String name) throws FileNotFoundException
+  {
+    InputStream is = LCARS.class.getClassLoader().getResourceAsStream(name);
+    if (is==null) throw new FileNotFoundException();
+    StringBuilder text = new StringBuilder();
+    String NL = System.getProperty("line.separator");
+    Scanner scanner = new Scanner(is);
+    try
+    {
+      while (scanner.hasNextLine())
+        text.append(scanner.nextLine() + NL);
+    }
+    finally
+    {
+      scanner.close();
+    }
     return text.toString();
   }
   

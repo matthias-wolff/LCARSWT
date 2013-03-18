@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -300,8 +302,34 @@ public class AudioLibraryPanel extends MainPanel
     if (LCARS.getArg("--musiclib=")!=null)
       return new File(LCARS.getArg("--musiclib="));
     
+    // Fake a music library
+    LCARS.err("ALP","Warning: Command line option --musiclib=<music-dir> not specified, entering demo mode");
+    String tmpDir = System.getProperty("java.io.tmpdir");
+    try
+    {
+      File f = new File(tmpDir+"/lcars-wt-music/Matthias Wolff/L2");
+      f.mkdirs();
+      f = new File(f.getAbsolutePath()+"/Captain's Lounge.mp3");
+      if (f.exists()) f.delete();
+      f.createNewFile();
+      FileOutputStream fos = new FileOutputStream(f);
+      InputStream is = LCARS.class.getClassLoader().getResourceAsStream("de/tucottbus/kt/lcars/al/resource/Captain'sLounge.mp3");
+      byte[] buf = new byte[1024];
+      int len;
+      while ((len = is.read(buf)) > 0)
+        fos.write(buf, 0, len);
+      is.close();
+      fos.close();
+      f.deleteOnExit();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+    return new File(tmpDir+"/lcars-wt-music");
+    
     // HACK: only Windoze...
-    return new File(System.getenv("USERPROFILE")+"/Music");
+    //return new File(System.getenv("USERPROFILE")+"/Music");
   }
 
   protected EElementArray getPlaylistElementArray()
