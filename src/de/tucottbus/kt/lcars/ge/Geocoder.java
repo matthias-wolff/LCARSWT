@@ -34,7 +34,7 @@ import de.tucottbus.kt.lcars.LCARS;
 public class Geocoder
 {
   private static       String kml     = ""; 
-  private static final String Q_EARTH = "http://maps.google.com/maps/geo?output=kml&oe=utf-8&q=[ADDRESS]&hl=en";
+  private static final String Q_EARTH = "http://maps.google.com/maps?output=kml&oe=utf-8&q=[ADDRESS]&hl=en";
   private static final String Q_MARS  = "http://sky-search.appspot.com/mars?q=[ADDRESS]&output=kml&hl=en";  
   private static final String Q_MOON  = "http://sky-search.appspot.com/moon?q=[ADDRESS]&output=kml&hl=en";
   private static final String Q_SKY   = "http://maps.google.com/maps?output=kml&oe=utf-8&q=sky%3A[ADDRESS]";
@@ -210,7 +210,8 @@ public class Geocoder
   
   public static void main(String[] args)
   {
-    String url = "http://maps.google.com/maps?q=sky%3Am83&sll=50.9995,96.5138&sspn=141,360&output=kml&ie=utf-8&v=2.2&cv=6.1.0.5001&hl=de";
+    //String url = "http://maps.google.com/maps?q=sky%3Am83&sll=50.9995,96.5138&sspn=141,360&output=kml&ie=utf-8&v=2.2&cv=6.1.0.5001&hl=de";
+    String url = "http://maps.google.com/maps?output=kml&oe=utf-8&q=Africa&hl=en";
     System.out.println("HTTP GET: "+url+"\n");
 
     HttpURLConnection conn;
@@ -218,7 +219,7 @@ public class Geocoder
     {
       conn = (HttpURLConnection)(new URL(url)).openConnection();
       conn.setRequestMethod("GET");
-//      conn.setRequestProperty("Accept","application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, image/*, */*");
+      //conn.setRequestProperty("Accept","application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, image/*, */*");
       conn.setRequestProperty("User-Agent","GoogleEarth");
       System.out.println(conn.getRequestProperties().toString());
       conn.connect();
