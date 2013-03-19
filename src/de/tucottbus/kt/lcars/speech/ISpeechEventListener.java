@@ -10,7 +10,7 @@ import de.tucottbus.kt.lcars.speech.events.SpeechEvent;
 public interface ISpeechEventListener
 {
   /**
-   * Called upon {@link SpeechEvents}.
+   * Called upon {@link SpeechEvent}s.
    * 
    * @param event The speech event.
    */

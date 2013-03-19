@@ -4,6 +4,7 @@ package de.tucottbus.kt.lcars.speech.events;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 
 /**
+ * A speech audio input level event. 
  * 
  * @author Matthias Wolff
  */
@@ -32,7 +33,6 @@ public class LevelEvent extends SpeechEvent
   
   /**
    * Returns the amplitude for the speech input level represented by this message.
-   * @return
    */
   public int getAmp()
   {

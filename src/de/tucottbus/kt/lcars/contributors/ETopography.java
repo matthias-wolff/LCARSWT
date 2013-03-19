@@ -164,7 +164,7 @@ public class ETopography extends ElementContributor
   /**
    * Sets a new topographic map image, e.g. a satellite photo.
    * 
-   * @param mapImageFile
+   * @param imageFile
    *          the image file
    * @param bounds
    *          the physicals bounds of the area showed on the image
@@ -202,7 +202,6 @@ public class ETopography extends ElementContributor
    *          major grid intervals in physical units
    * @param minor
    *          -- reserved, must be <code>null</code> --
-   * @param alpha
    * @param layout
    *          <code>true</code> to recompute the layout (this will make the changes visible)
    */
@@ -719,8 +718,6 @@ public class ETopography extends ElementContributor
   
   /**
    * Cursor sliding animation.
-   * 
-   * @see CursorSlideTask#CursorSlideTask(int, java.awt.geom.Point2D.Float, String)
    */
   class CursorSlideTask extends TimerTask
   {

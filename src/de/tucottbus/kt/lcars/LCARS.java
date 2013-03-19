@@ -433,8 +433,8 @@ public class LCARS implements ILcarsRemote
   /**
    * Determines if the specified font is installed.
    * 
-   * @param serverName
-   *          the font serverName (as used by {@link Font#Font(String, int, int)})
+   * @param name
+   *          The font name (as used by {@link Font#Font(String, int, int)})
    * @return <code>true</code> if the font is installed, <code>false</code>
    *          otherwise
    */
@@ -449,16 +449,16 @@ public class LCARS implements ILcarsRemote
   }
   
   /**
-   * Returns the serverName of the actually installed LCARS font.
+   * Returns the name of the actually installed LCARS font.
    * 
    * <p>Originally the (commercial) "Compacta LT Light" font by Linotype was
    * used for LCARS panels. Alternatively the more readily available "Swiss 911
    * Ultra Condensed" font can be used. As both fonts have extremely narrow
    * glyphs there is hardly any other acceptable font.</p>
    * 
-   * @param serverName
+   * @param name
    *          {@link #FN_COMPACTA} or {@link #FN_SWISS911}
-   * @return {@link serverName} if it is installed, {@link #FN_COMPACTA} or
+   * @return <code>name</code> if it is installed, {@link #FN_COMPACTA} or
    *         {@link #FN_SWISS911} (which ever is installed) or "Sans-Serif" if
    *         no acceptable LCARS font is installed.
    */
@@ -480,9 +480,10 @@ public class LCARS implements ILcarsRemote
   /**
    * Returns an LCARS font. 
    * 
-   * @param the LCARS element style, a combination of <code>LCARS.ES_XXX</code>
-   *        and <code>LCARS.EC_XXX</code> constants
-   * @return the font
+   * @param style
+   *        The LCARS element style, a combination of <code>LCARS.ES_XXX</code>
+   *        and <code>LCARS.EC_XXX</code> constants.
+   * @return The font.
    */
   public static Font getFont(int style)
   {
@@ -1055,10 +1056,11 @@ public class LCARS implements ILcarsRemote
   
   /**
    * Performs an HTTP GET request.
+   * <p><b>Author:</b> http://www.aviransplace.com/2008/01/08/make-http-post-or-get-request-from-java/</p>
    * 
-   * @author http://www.aviransplace.com/2008/01/08/make-http-post-or-get-request-from-java/
-   * @param  url the URL, e.g. "http://www.myserver.com?q=whats%20up"
-   * @return the response or <code>null</code> in case of errors
+   * @param  url
+   *           The URL, e.g. "http://www.myserver.com?q=whats%20up".
+   * @return The response or <code>null</code> in case of errors.
    */
   public static String HttpGet(String url)
   {

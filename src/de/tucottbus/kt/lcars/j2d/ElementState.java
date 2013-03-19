@@ -37,7 +37,7 @@ public class ElementState implements Serializable
 
   /**
    * The custom color of background {@link Geometry}s. If <code>null</code> the color is
-   * obtained from the {@link #style} of the geometry through {@link LCARS#getColor(int)}.
+   * obtained from the {@link #style} of the geometry through {@link LCARS#getColor(int, int)}.
    */
   private Color color;
   
@@ -132,7 +132,7 @@ public class ElementState implements Serializable
   /**
    * Returns the custom opacity of background {@linkplain Geometry geometries}. Note that the return
    * value is not necessarily the opacity actually used for painting. The obtain the actual opacity
-   * call {@link #getBgAlpha()}.
+   * call {@link #getBgAlpha(PanelState)}.
    */
   public float getAlpha()
   {
@@ -142,7 +142,7 @@ public class ElementState implements Serializable
   /**
    * Sets custom the opacity of background {@linkplain Geometry geometries}.
    * 
-   * @param bgAlpha
+   * @param alpha
    *          The new opacity (0: transparent ... 1: opaque).
    */
   public void setAlpha(float alpha)
@@ -177,9 +177,10 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Returns the custom color of background {@linkplain Geometry geometries}. If the value is
-   * <code>null</code> the background geometries will be painted in their "natural" color defined by
-   * the {@linkplain #style style}. Call {@link #getBgColor()} to obtain the color actually used for
+   * Returns the custom color of background {@linkplain Geometry geometries}. If
+   * the value is <code>null</code> the background geometries will be painted in
+   * their "natural" color defined by the {@linkplain #style style}. Call
+   * {@link #getBgColor(PanelState)} to obtain the color actually used for
    * painting the background geometries.
    */
   public Color getColor()

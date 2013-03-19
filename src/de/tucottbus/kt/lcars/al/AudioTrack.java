@@ -75,7 +75,7 @@ public class AudioTrack
   /**
    * Returns the meta data contained an MP3 file of the song using Mp3Spi.
    * 
-   * @see #guessMetaData()
+   * @see AudioTrack#guessMetaData(File)
    */
   public static Map<?,?> getMetaData(File file)
   {
@@ -101,7 +101,7 @@ public class AudioTrack
    * </pre>
    * 
    * @return The guessed meta data.
-   * @see #getMetaData()
+   * @see AudioTrack#getMetaData(File)
    */
   public static HashMap<String,String> guessMetaData(File file)
   {

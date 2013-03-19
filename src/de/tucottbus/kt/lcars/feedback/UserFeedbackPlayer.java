@@ -115,7 +115,7 @@ public abstract class UserFeedbackPlayer
   /**
    * Returns the current feedback mode.
    * 
-   * @return The mode: {@link NONE} or any bitwise-or combination of
+   * @return The mode: {@link #NONE} or any bitwise-or combination of
    *         {@link #AUDITORY}, {@link #VISUAL}, and {@link #SPEECH}.
    * @see #setMode(int)
    */
@@ -134,7 +134,7 @@ public abstract class UserFeedbackPlayer
    * 
    * @param signal
    *           The signal.
-   * @see #play(UserFeedback, boolean, boolean)
+   * @see #play(UserFeedback, int)
    */
   public void play(UserFeedback signal)
   {

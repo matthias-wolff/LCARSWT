@@ -84,7 +84,7 @@ public abstract class EElement
   /**
    * Returns the rectangular bounds of this LCARS GUI element.
    * 
-   * @see #setBounds(Rectangle, boolean)
+   * @see #setBounds(Rectangle)
    */
   public Rectangle getBounds()
   {
@@ -126,15 +126,15 @@ public abstract class EElement
 
   /**
    * Returns the custom color assigned to this LCARS GUI element by the last call of the
-   * {@link #setColor(Color, boolean)} method.
+   * {@link #setColor(Color)} method.
    * <p>
    * Note: If this element displays its natural color (i.e. the color determined by its style), the
-   * return value is <code>null</code>. Use {@link #getState()}<code>.</code>
-   * {@link ElementState#getBgColor() getBgColor()} to determine the current background color anyway.
+   * return value is <code>null</code>. Use {@link #data}.{@link ElementState#getBgColor(PanelState)
+   * getBgColor(PanelState)} to determine the current background color anyway.
    * </p>
    * 
    * @see #getColorStyle()
-   * @see #setColor(Color, boolean)
+   * @see #setColor(Color)
    */
   public Color getColor()
   {
@@ -152,7 +152,7 @@ public abstract class EElement
   /**
    * Returns the custom opacity of background {@linkplain Geometry geometries}.
    * 
-   * @see #setAlpha(float, boolean)
+   * @see #setAlpha(float)
    */
   public float getAlpha()
   {
@@ -227,7 +227,7 @@ public abstract class EElement
    * 
    * @param style
    *          One of the {@link LCARS}<code>.EC_XXX</code> constants.
-   * @see #setColor(Color, boolean)
+   * @see #setColor(Color)
    * @see #getColorStyle()
    */
   public void setColorStyle(int style)
@@ -307,7 +307,7 @@ public abstract class EElement
    * element will keep firing {@link EEvent#TOUCH_DRAG} events until the touch panel is released
    * even if the touched position has moved outside the element's shape.
    * 
-   * @see {@link LCARS#EB_OVERDRAG}
+   * @see LCARS#EB_OVERDRAG
    */
   public boolean isOverDrag()
   {
@@ -409,8 +409,6 @@ public abstract class EElement
    * 
    * @param highlighted
    *          <code>true</code> to highlight, <code>false</code> to clear
-   * @param repaint
-   *          repaint flag
    */
   public void setHighlighted(boolean highlighted)
   {
@@ -490,7 +488,7 @@ public abstract class EElement
   /**
    * Returns the label of this LCARS GUI element.
    * 
-   * @see #setLabel(String, boolean)
+   * @see #setLabel(String)
    */
   public String getLabel()
   {
@@ -560,7 +558,7 @@ public abstract class EElement
    * 
    * @param ee
    *          The event.
-   * @returns The appropriate user feedback type.
+   * @return The appropriate user feedback type.
    */
   public final UserFeedback.Type fireEEvent(EEvent ee)
   {
@@ -673,7 +671,7 @@ public abstract class EElement
    * Computes the insets of the label text from the GUI element's bounding
    * rectangle(!). Derived classes may override this method. The returned insets
    * may depend on the label position flags {@link LCARS}.<code>ES_LABEL_XXX</code>
-   * contained in the {@link style} field.
+   * contained in the {@link #data} field.
    * 
    * @return the insets
    */
@@ -723,7 +721,7 @@ public abstract class EElement
   }
 
   /**
-   * Recomputes the {@link #geometry geometry} if necessary. If the geometry is still valid.
+   * Recomputes the {@link ElementData#geometry geometry} if necessary. If the geometry is still valid.
    * 
    * @see #invalidate(boolean)
    */

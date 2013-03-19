@@ -43,7 +43,7 @@ public class Eyecon
   /**
    * Sets the sequence of color values.
    * 
-   * @param color
+   * @param samples
    *          The new sequence.
    * @see #getSamples()
    */

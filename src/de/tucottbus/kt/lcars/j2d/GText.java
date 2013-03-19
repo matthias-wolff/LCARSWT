@@ -35,8 +35,7 @@ public class GText extends Geometry
    *          the bounding rectangle for touch detection (can be
    *          <code>null</code> for static texts); note that upper left corner
    *          of the bounding rectangle is <em>not</em> identical with the
-   *          drawing position
-   *          {@link pos}
+   *          drawing position <code>pos</code>
    * @param font
    *          the font to render the text with
    * @param foreground

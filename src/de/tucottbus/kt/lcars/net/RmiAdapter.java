@@ -111,8 +111,6 @@ public abstract class RmiAdapter implements Remote
    *          The name of the host serving the {@link Panel}.
    * @param screenID
    *          Reserved for identifying multiple screens on a single host, must be <code>0</code>.
-   *          
-   * @see 
    */
   public static final String makeScreenAdapterRmiName
   (
