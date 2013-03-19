@@ -43,8 +43,11 @@ public class Geocoder
    * Performs geocoding.
    * 
    * @param world
+   *          The word to perform geocoding in: {@link GE#EARTH}, {@link GE#MOON}, {@link GE#MARS},
+   *          or {@link GE#SKY}.
    * @param address
-   * @return
+   *          The address to look up.
+   * @return A (possibly empty) list of matching places.
    */
   // TODO: Fix character encoding!
   public static AbstractList<GEPlace> geocode(String world, String address)

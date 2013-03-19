@@ -135,7 +135,7 @@ public interface ISpeechEngine
    * 
    * @return The mode (see {@link UserFeedbackPlayer#setMode(int)} for possible
    *         values).
-   * @see #setUserFeedbackMode()
+   * @see #setUserFeedbackMode(int)
    */
   public int getUserFeedbackMode();
 }

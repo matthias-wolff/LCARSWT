@@ -16,8 +16,8 @@ import de.tucottbus.kt.lcars.j2d.Geometry;
 /**
  * The serializable data of an {@linkplain EElement LCARS GUI element}. An element data instance
  * stores the {@link #state} and the {@link #geometry} of a GUI element. Element data instances are
- * also used to transfer rendering information from the {@linkplain Panel LCARS panel} to the
- * {@linkplain Screen screen}.
+ * also used to transfer rendering information from the {@linkplain de.tucottbus.kt.lcars.Panel LCARS
+ * panel} to the {@linkplain Screen screen}.
  * 
  * @author Matthias Wolff
  */
@@ -102,8 +102,8 @@ public class ElementData implements Serializable
    * Determines if the {@link #geometry geometry} (i.e. the graphical representation of this
    * element) is valid or needs to be recomputed.
    * 
-   * @see #invalidateGeometry()
-   * @see #validateGeometry()
+   * @see EElement#invalidate(boolean)
+   * @see EElement#validateGeometry()
    */
   public boolean isGeometryValid()
   {

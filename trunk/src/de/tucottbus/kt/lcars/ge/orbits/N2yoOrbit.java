@@ -301,11 +301,11 @@ public class N2yoOrbit extends GEOrbit
 
   /**
    * The Gaussian elimination algorithm.
+   * <p><b>Author:</b> helloworld922@www.javaprogrammingforums.com</p>
    * 
    * @param matrix
    *          The coefficient matrix.
    * @return The solution vector.
-   * @author helloworld922@www.javaprogrammingforums.com
    */
   private static double[] lin_solve(double[][] matrix)
   {
@@ -373,7 +373,8 @@ public class N2yoOrbit extends GEOrbit
   }
 
   /**
-   * Spline interpolation
+   * Spline interpolation.
+   * <p><b>Author:</b> helloworld922@www.javaprogrammingforums.com</p>
    * 
    * @param dataX
    *          Set of x values (power+1 elements)
@@ -384,7 +385,6 @@ public class N2yoOrbit extends GEOrbit
    * @param power
    *          The interpolation order (preferably 3).
    * @return The interpolated y value
-   * @author helloworld922@www.javaprogrammingforums.com
    */
   private static double poly_interpolate
   (

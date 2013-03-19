@@ -112,8 +112,6 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   /**
    * Creates a new LCARS screen.
    * 
-   * @param swtDisplay
-   *          The SWT display on which this screen is run.
    * @param device
    *          the graphics device to display the screen on
    * @param panelClass
@@ -369,7 +367,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    * Paints the panel elements of this screen on a {@link Graphics2D} context. 
    * 
    * @param g2d the graphics context
-   * @see #elements
+   * @see #panelData
    */
   protected void paint2D(Graphics2D g2d)
   {

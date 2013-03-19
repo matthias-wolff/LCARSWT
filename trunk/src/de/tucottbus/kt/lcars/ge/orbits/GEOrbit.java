@@ -8,7 +8,7 @@ import de.tucottbus.kt.lcars.ge.GECamera;
 
 /**
  * An orbit around earth, moon or mars. Orbits model the trajectory of some satellite and supply
- * {@linkplain #getPosition() positions} or {@linkplain #getCamera(float, float, float) cameras}.
+ * {@linkplain #getPosition() positions} or {@linkplain #getCamera() cameras}.
  * 
  * @author Matthias Wolff, BTU Cottbus
  */
@@ -49,7 +49,7 @@ public abstract class GEOrbit
    *          The heading angle (in degrees, {@link #AUTO} for direction of trajectory).
    * @param tilt
    *          The tilt angle (in degrees, {@link #AUTO} to look at the horizon).
-   * @param heading
+   * @param roll
    *          The roll angle (in degrees, {@link #AUTO} for 0).
    * @see #getCamera()
    */

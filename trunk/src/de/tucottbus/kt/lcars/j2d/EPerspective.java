@@ -66,11 +66,12 @@ public class EPerspective implements EGeometryModifier
   
   /**
    * Transforms a shape.
+   * <p><b>Author:</b> Tom Nelson
+   * (<code>edu.uci.ics.jung.visualization.jai</code>)</p>
    * 
    * @param shape
    *          The original shape.
    * @return The transformed shape.
-   * @author Tom Nelson (<code>edu.uci.ics.jung.visualization.jai</code>)
    */
   public Shape transform(Shape shape)
   {

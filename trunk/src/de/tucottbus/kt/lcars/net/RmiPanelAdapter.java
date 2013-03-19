@@ -16,7 +16,6 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  * Network adapter class wrapping an {@linkplain Panel LCARS panel} for remote service.
  *
  * @author Matthias Wolff
- * @see RmiRemoteScreen
  */
 public class RmiPanelAdapter
 extends RmiAdapter

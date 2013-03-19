@@ -965,9 +965,10 @@ public class GoogleEarthPanel extends MainPanel
     Vector<GEPlace> places;
     
     /**
-     * Creates a new list of places from an XML file.
+     * Creates a new list of places from an XML input stream.
      * 
-     * @param file the XML file
+     * @param is
+     *          The XML input stream.
      */
     Places(InputStream is)
     {

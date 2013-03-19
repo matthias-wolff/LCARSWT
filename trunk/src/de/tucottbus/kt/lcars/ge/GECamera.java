@@ -93,7 +93,7 @@ public class GECamera
   }
 
   /**
-   * Creates a new Camera from a text representation
+   * Creates a new camera from a text representation.
    * 
    * @param world
    *          the world, one of the {@link GECamera}<code>.XXXX</code> constants
@@ -103,7 +103,6 @@ public class GECamera
    *          &lt;heading&gt;, &lt;tilt&gt;, &lt;roll&gt;" where the spaces
    *          are optional and the fields enclosed in arrow brackets denote
    *          floating point values
-   * @return the camera
    */
   public GECamera(String world, String text)
   {

@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars.util;
 import java.io.Serializable;
 import java.util.Vector;
 
+// TODO: Write JavaDoc!
 /**
  * A statistics of load factors. A load factor is the percentage of real time consumed by a
  * periodically executed program task.
@@ -50,10 +51,6 @@ public class LoadStatistics implements Serializable
     return eventCounter;
   }
   
-  /**
-   * 
-   * @return
-   */
   public int getEventsPerPeriod()
   {
     return eventsPerPeriod;

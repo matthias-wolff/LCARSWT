@@ -61,7 +61,7 @@ public interface IScreen extends Remote
    * Performs an audio-visual user feedback.
    * 
    * @param type
-   *          The {@linkplain UserFeedback.Type user feedback type}.
+   *          The {@linkplain de.tucottbus.kt.lcars.feedback.UserFeedback.Type user feedback type}.
    */
   public void userFeedback(UserFeedback.Type type) throws RemoteException;
 

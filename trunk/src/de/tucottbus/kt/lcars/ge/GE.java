@@ -557,8 +557,8 @@ public class GE
    *          The fly-to speed. Possible values are:
    *          <table style="margin-left:2em">
    *            <tr><td>0..5</td><td>Speed values supported by Google Earth</td></tr>
-   *            <tr><td>{@link SPEED_TELEPORT}</td><td>Instant move</td></tr>
-   *            <tr><td>{@link SPEED_AUTO}</td><td>Chose automatically</td></tr>
+   *            <tr><td>{@link #SPEED_TELEPORT}</td><td>Instant move</td></tr>
+   *            <tr><td>{@link #SPEED_AUTO}</td><td>Chose automatically</td></tr>
    *          </table>
    * 
    * @see #getTargetCamera()
@@ -603,7 +603,7 @@ public class GE
    * position can be retrieved through {@link #getActualCamera()}. The returned object is a copy,
    * modifying it has no effect on the target camera.
    * 
-   * @see #setTargetCamera(GECamera)
+   * @see #setTargetCamera(GECamera, float)
    * @see #getActualCamera()
    * @see #flyTo(GECamera, float)
    * @see #flyTo(GECamera)
@@ -710,8 +710,8 @@ public class GE
    *          The fly-to speed. Possible values are:
    *          <table style="margin-left:2em">
    *            <tr><td>0..5</td><td>Speed values supported by Google Earth</td></tr>
-   *            <tr><td>{@link SPEED_TELEPORT}</td><td>Instant move</td></tr>
-   *            <tr><td>{@link SPEED_AUTO}</td><td>Chose automatically</td></tr>
+   *            <tr><td>{@link #SPEED_TELEPORT}</td><td>Instant move</td></tr>
+   *            <tr><td>{@link #SPEED_AUTO}</td><td>Chose automatically</td></tr>
    *          </table>
    * 
    * @see #flyTo(GECamera)

@@ -127,7 +127,7 @@ public class EPositioner extends ETopography
    * 
    * @param eLock
    *          The lock control, can be <code>null</code>.
-   * @param eVlaue
+   * @param eValue
    *          The value display control, can be <code>null</code>. The control is used for
    *          displaying the current position only. It cannot be used to modify the current
    *          position.

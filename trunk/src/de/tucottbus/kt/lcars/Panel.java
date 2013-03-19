@@ -128,7 +128,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   /**
    * Creates a new LCARS panel.
    * 
-   * @param screen
+   * @param iscreen
    *          The screen to display the panel on.
    */
    public Panel(IScreen iscreen)
@@ -469,7 +469,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   /**
    * Switches the silent mode on or off. In the silent mode the pabel does not play any earcons.
    * 
-   * @param modal
+   * @param silent
    *          The new silent mode.
    * @see #isSilent()
    */
@@ -559,11 +559,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   
   /**
    * Return the LCARS GUI element at the specified position (panel coordinates).
-   * Use {@link Panel#screenToPanel(Point)} to convert screen coordinates (e.g.
+   * Use {@link Screen#componentToPanel(Point)} to convert screen coordinates (e.g.
    * from mouse events) to panel coordinates.
    * 
    * @param pt
-   *          panel coordinates
+   *         panel coordinates
    * @return an LCARS GUI {@link EElement} or <code>null</code> if there is no
    *         element at this position
    */
