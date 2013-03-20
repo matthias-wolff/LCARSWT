@@ -49,6 +49,14 @@ public class EPanelSelector extends EMessageBox
       catch (ClassNotFoundException e1)
       {
       }
+    if (Panel.getSpeechEngine()!=null)
+      try
+      {
+        l.add(Class.forName("de.tucottbus.kt.lcars.speech.SpeechEnginePanel"));
+      }
+      catch (ClassNotFoundException e1)
+      {
+      }
 
     for (int i=0; i<l.size(); i++)
     {
@@ -80,9 +88,9 @@ public class EPanelSelector extends EMessageBox
         }
       });
       add(btn);
-      add(new ERect (null,250,93+i*53,90,3,style2|LCARS.ES_STATIC,null));
+      add(new ERect (null,250,93+i*56,90,3,style2|LCARS.ES_STATIC,null));
       String s = l.get(i).getPackage().getName().toUpperCase();
-      add(new ELabel(null,340,66+i*53,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s));
+      add(new ELabel(null,340,66+i*56,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s));
     }
     
     // Add the exit button

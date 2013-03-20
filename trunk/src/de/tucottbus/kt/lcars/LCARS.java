@@ -952,8 +952,6 @@ public class LCARS implements ILcarsRemote
   public static File getResourceFile(String file)
   {
     if (file==null) return null;
-    URL url = LCARS.class.getClassLoader().getResource(file);
-    System.out.println("\n*** RESOURCE-URL: \""+url.toExternalForm()+"\", FILE: \""+url.getFile()+"\"***");
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     URL resource = classLoader.getResource(file);
     if (resource==null) return null;

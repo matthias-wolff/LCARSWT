@@ -405,18 +405,35 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     else
       g2d.drawImage(bgImg,null,this);
 
-    // Draw LCARS widgets
+    // Draw elements
     //GImage.beginCacheRun();
     if (elementData!=null)
+    {
+      // - Draw non-modal elements (or all if panel not in modal state)
       for (ElementData data : elementData)
         try
         {
-          data.render2D(g2d,panelState);
+          if (!panelState.modal || data.state.getStyle(LCARS.ES_MODAL)==0)
+            data.render2D(g2d,panelState);
         }
         catch (Throwable e)
         {
           e.printStackTrace();
         }
+
+      // - Draw modal elements if panel is in modal state
+      if (panelState.modal)
+        for (ElementData data : elementData)
+          try
+          {
+            if (data.state.getStyle(LCARS.ES_MODAL)!=0)
+              data.render2D(g2d,panelState);
+          }
+          catch (Throwable e)
+          {
+            e.printStackTrace();
+          }
+    }
     //GImage.endCacheRun();
 
     // Aftermath

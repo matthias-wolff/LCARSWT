@@ -85,6 +85,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   private LoadStatistics loadStat;
   
+  /**
+   * Flag indicating that the screen needs to be redrawn.
+   */
   private boolean screenInvalid;
   
   private   EMessageBox    eMsgBox;
@@ -435,7 +438,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * 
    * @see #setModal(boolean)
    */
-  public boolean getModal()
+  public boolean isModal()
   {
     return this.state.modal;
   }
@@ -447,7 +450,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * 
    * @param modal
    *          The new modal mode.
-   * @see #getModal()
+   * @see #isModal()
    */
   public void setModal(boolean modal)
   {
@@ -563,11 +566,38 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * from mouse events) to panel coordinates.
    * 
    * @param pt
-   *         panel coordinates
-   * @return an LCARS GUI {@link EElement} or <code>null</code> if there is no
+   *         Panel coordinates.
+   * @return An LCARS GUI {@link EElement} or <code>null</code> if there is no
    *         element at this position
    */
   public EElement elementAt(Point pt)
+  {
+    if (isModal())
+      return elementAt(pt,true);
+    else
+    {
+      EElement el = elementAt(pt,true);
+      if (el==null)
+        el = elementAt(pt,false);
+      return el;
+    }
+  }
+  
+  /**
+   * Return the LCARS GUI element at the specified position (panel coordinates).
+   * Use {@link Screen#componentToPanel(Point)} to convert screen coordinates (e.g.
+   * from mouse events) to panel coordinates.
+   * 
+   * @param pt
+   *         The panel coordinates.
+   * @param modal
+   *         If <code>true</code> consider {@link EElement#isModal() modal}
+   *         {@link EElement}s only, otherwise consider non-modal {@link EElement}s
+   *         only.
+   * @return An LCARS GUI {@link EElement} or <code>null</code> if there is no
+   *         element at this position
+   */
+  protected EElement elementAt(Point pt, boolean modal)
   {
     synchronized (elements)
     {
@@ -578,6 +608,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           EElement el = elements.get(i);
           Shape   es = el.getShape();
           if (es==null || el.isStatic()) continue;
+          if (el.isModal()!=modal) continue;
           if (el.getShape().contains(new Point2D.Float(pt.x,pt.y)))
             return el;
         }

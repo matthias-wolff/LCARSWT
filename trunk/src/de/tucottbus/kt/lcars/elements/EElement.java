@@ -380,6 +380,18 @@ public abstract class EElement
   }
 
   /**
+   * Determines if this LCARS GUI element is modal. Modal elements remain active
+   * in the modal {@linkplain Panel panel} state.
+   * 
+   * @see Panel#isModal()
+   * @see Panel#setModal(boolean)
+   */
+  public boolean isModal()
+  {
+    return data.state.getStyle(LCARS.ES_MODAL)!=0;
+  }
+  
+  /**
    * Sets the static property of this LCARS GUI element. Static elements do not
    * accept user input.
    * 
@@ -569,7 +581,7 @@ public abstract class EElement
     if
     (
       panel!=null &&
-      panel.getModal() &&
+      panel.isModal() &&
       data.state.getStyle(LCARS.ES_MODAL)==0
     )
     {
