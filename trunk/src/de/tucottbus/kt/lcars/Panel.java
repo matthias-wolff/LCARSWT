@@ -897,7 +897,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
       ee.pt = ee.el.panelToElement(ee.pt);
       UserFeedback.Type ft = ee.el.fireEEvent(ee);
-      if (!isSilent())
+      if (!isSilent() && getScreen()!=null)
       {
         try { getScreen().userFeedback(ft); }
         catch (RemoteException e){}
