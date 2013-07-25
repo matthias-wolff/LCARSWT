@@ -1473,7 +1473,10 @@ public class LCARS implements ILcarsRemote
       {
       }
       boolean fullscreen = !("window".equals(getArg("--mode=")));
-      iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen);
+      if (getArg("--nogui")==null)
+        iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen);
+      else
+        log("LCARS","Command line mode (no GUI)");
 
       // Install shut-down hook
       Runtime.getRuntime().addShutdownHook(new Thread()
@@ -1483,19 +1486,22 @@ public class LCARS implements ILcarsRemote
           log("LCARS","Shutting down ...");
 
           // Shut-down panel
-          try
+          if (iscreen!=null)
           {
-            if (iscreen.getPanel()!=null)
-            {
-              iscreen.getPanel().stop();
-            }
+	        try
+	        {
+	          if (iscreen.getPanel()!=null)
+	          {
+	            iscreen.getPanel().stop();
+	          }
+	        }
+	        catch (RemoteException e) {}
+	
+	        // Shut-down RMI screen adapter
+	        if (iscreen instanceof RmiScreenAdapter)
+	          ((RmiScreenAdapter)iscreen).shutDown();
+	        iscreen = null;
           }
-          catch (RemoteException e) {}
-
-          // Shut-down RMI screen adapter
-          if (iscreen instanceof RmiScreenAdapter)
-            ((RmiScreenAdapter)iscreen).shutDown();
-          iscreen = null;
 
           // Shut-down RMI panel adapters
           if (server!=null)
@@ -1558,21 +1564,22 @@ public class LCARS implements ILcarsRemote
       }
       
       // Create initial panel
-      try
-      {
-        String pcn = getArg("--panel=");
-        if (pcn==null && getArg("--server")!=null)
-          pcn = "de.tucottbus.kt.lcars.net.ServerPanel";
-        iscreen.setPanel(pcn);
-      }
-      catch (ClassNotFoundException e)
-      {
-        e.printStackTrace();
-      }
-      catch (RemoteException e)
-      {
-        e.printStackTrace();
-      }
+      if (iscreen!=null)
+        try
+        {
+          String pcn = getArg("--panel=");
+          if (pcn==null && getArg("--server")!=null)
+            pcn = "de.tucottbus.kt.lcars.net.ServerPanel";
+          iscreen.setPanel(pcn);
+        }
+        catch (ClassNotFoundException e)
+        {
+          e.printStackTrace();
+        }
+        catch (RemoteException e)
+        {
+          e.printStackTrace();
+        }
 
       // Run SWT event loop 
       while (true)
