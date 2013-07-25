@@ -890,7 +890,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         if (!isSilent())
         {
           try { getScreen().userFeedback(UserFeedback.Type.DENY); }
-          catch (RemoteException e){}
+          catch (RemoteException|NullPointerException e){}
         }
         return;
       }
