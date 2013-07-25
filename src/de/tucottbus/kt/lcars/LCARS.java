@@ -1402,21 +1402,22 @@ public class LCARS implements ILcarsRemote
    *  --device=devicename                  - Name of host device, e.g. wetab [2]
    *  --help, -h, ?                        - Print help and exit
    *  --mode=[fullscreen|maximized|window] - Screen mode (default: fullscreen)
+   *  --nogui                              - Do not display a screen [3]
    *  --nomouse                            - Hide mouse cursor
    *  --nospeech                           - Disable speech I/O
    *  --PADD                               - Running on a PADD
    *  --panel=classname                    - LCARS panel to display at start-up 
-   *  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [3]
-   *  --screen=n                           - Use n-th screen (default: 1) [4]
+   *  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]
+   *  --screen=n                           - Use n-th screen (default: 1) [5]
    *  --server                             - Serve remote panels [1]
    *  --wallpaper=filename                 - Use wall paper (slower!)
-   *  --xpos=n                             - Horizontal position of window [5]
+   *  --xpos=n                             - Horizontal position of window [6]
    *  
    *  [1] mutually exclusive
    *  [2] currently the only use is --device=wetab which adjusts PADD-panels
-   *  [3] useful when multiple NICs are installed in a host
-   *  [4] only valid with --mode=fullscreen
-   *  [5] valid with --mode=maximized for displaying panel at secondary screen
+   *  [4] useful when multiple NICs are installed in a host
+   *  [5] only valid with --mode=fullscreen
+   *  [6] valid with --mode=maximized for displaying panel at secondary screen
    *  </pre>
    */
   public static void main(String[] args)
@@ -1436,21 +1437,23 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
       System.out.print("\n  --help, -h, ?                        - Print help and exit");
       System.out.print("\n  --mode=[fullscreen|maximized|window] - Screen mode (default: fullscreen)");
+      System.out.print("\n  --nogui                              - Do not display a screen [3]");
       System.out.print("\n  --nomouse                            - Hide mouse cursor");
       System.out.print("\n  --nospeech                           - Disable speech I/O");
       System.out.print("\n  --PADD                               - Running on a PADD");
       System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
-      System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [3]");
-      System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [4]");
+      System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
+      System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [5]");
       System.out.print("\n  --server                             - Serve remote panels [1]");
       System.out.print("\n  --wallpaper=filename                 - Use wall paper (slower!)");
-      System.out.print("\n  --xpos=n                             - Horizontal position of window [5]");
+      System.out.print("\n  --xpos=n                             - Horizontal position of window [6]");
       System.out.print("\n  ");
       System.out.print("\n  [1] mutually exclusive");
       System.out.print("\n  [2] currently the only use is --device=wetab which adjusts PADD-panels");
-      System.out.print("\n  [3] useful when multiple NICs are installed in a host");
-      System.out.print("\n  [4] only valid with --mode=fullscreen");
-      System.out.print("\n  [5] valid with --mode=maximized for displaying panel at secondary screen");
+      System.out.print("\n  [3] only valid with --server");
+      System.out.print("\n  [4] useful when multiple NICs are installed in a host");
+      System.out.print("\n  [5] only valid with --mode=fullscreen");
+      System.out.print("\n  [6] valid with --mode=maximized for displaying panel at secondary screen");
       System.out.print("\n----------------------------------------------------------------------------");
       System.out.print("\n\n");
       return;
