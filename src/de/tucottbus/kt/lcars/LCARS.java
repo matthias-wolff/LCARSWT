@@ -929,10 +929,13 @@ public class LCARS implements ILcarsRemote
    * 
    * @param pckg the package name
    * @param file the file name
-   * @return the file or <code>null</code> in case of errors
+   * @return The file.
+   * @throws FileNotFoundException
+   *           If the resource file was not found.
    * @deprecated
    */
   public static File getResourceFile(String pckg, String file)
+  throws FileNotFoundException
   {
     if (file==null) return null;
     pckg = (pckg!=null ? pckg.replace(".","/")+"/" : "");
@@ -946,23 +949,28 @@ public class LCARS implements ILcarsRemote
    * @param file
    *          The file name (the package separator '.' must be replaced by a
    *          slash '/')
-   * @return the file or <code>null</code> in case of errors
+   * @return The file.
+   * @throws FileNotFoundException
+   *           If the resource file was not found.
    * @deprecated
    */
-  public static File getResourceFile(String file)
+  public static File getResourceFile(String file) throws FileNotFoundException
   {
     if (file==null) return null;
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     URL resource = classLoader.getResource(file);
-    if (resource==null) return null;
+    if (resource==null) throw new FileNotFoundException(file);
     try
     {
-      return new File(resource.getFile());
+      File f = new File(resource.getFile());
+      if (!f.exists()) throw new FileNotFoundException(file);
+      return f;
     }
     catch (Exception e)
     {
-      e.printStackTrace();
-      return null;
+      FileNotFoundException e2 = new FileNotFoundException(file+" ("+e.toString()+")");
+      e2.initCause(e);
+      throw e2;
     }
   }
   
