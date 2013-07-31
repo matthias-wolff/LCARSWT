@@ -686,7 +686,12 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       // Every second...
       if (ctr%25==0)
       {
-        if (!isScreenInvalid() && loadStat.getEventCount()==0) repaint();
+        if (!isScreenInvalid() && loadStat.getEventCount()==0)
+        {
+          invalidateScreen();
+          invalidate();
+          repaint();
+        }
         loadStat.period();
       }
 
