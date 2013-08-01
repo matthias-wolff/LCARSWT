@@ -942,7 +942,6 @@ public class LCARS implements ILcarsRemote
    * @return The file.
    * @throws FileNotFoundException
    *           If the resource file was not found.
-   * @deprecated
    */
   public static File getResourceFile(String pckg, String file)
   throws FileNotFoundException
@@ -962,7 +961,6 @@ public class LCARS implements ILcarsRemote
    * @return The file.
    * @throws FileNotFoundException
    *           If the resource file was not found.
-   * @deprecated
    */
   public static File getResourceFile(String file) throws FileNotFoundException
   {
