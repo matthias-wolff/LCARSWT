@@ -481,8 +481,8 @@ public class LCARS implements ILcarsRemote
    * Returns an LCARS font. 
    * 
    * @param style
-   *        The LCARS element style, a combination of <code>LCARS.ES_XXX</code>
-   *        and <code>LCARS.EC_XXX</code> constants.
+   *          The LCARS element style, a combination of <code>LCARS.ES_XXX</code>
+   *          and <code>LCARS.EC_XXX</code> constants.
    * @return The font.
    */
   public static Font getFont(int style)
@@ -519,6 +519,16 @@ public class LCARS implements ILcarsRemote
     return fonts[font];
   }
 
+  /**
+   * Returns an LCARS font with a custom font size.
+   * 
+   * @param style
+   *          The LCARS element style, a combination of <code>LCARS.ES_XXX</code>
+   *          and <code>LCARS.EC_XXX</code> constants.
+   * @param size
+   *          The point size of the font.
+   * @return The font.
+   */
   public static Font getFont(int style, int size)
   {
     return new Font(getFont(style).getFontName(),Font.PLAIN,size);
