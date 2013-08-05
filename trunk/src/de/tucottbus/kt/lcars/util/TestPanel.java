@@ -51,7 +51,7 @@ public class TestPanel extends Panel
     add(eRect);
    
     EFvrValue eFvr = new EFvrValue(this,x,y,w,h,LCARS.ES_STATIC,null);
-    eFvr.setLabel("[SWITCH[switch[on]][MCID[CN2[t[0]][o[1]]]][MCID[-]][MCID[CN2[o[0]][t[1]]]][MCID[CN2[o[0]][t[2]]]][MCID[CN2[o[8]][t[2]]]][MCID[CN2[o[4]][t[4]]]]]");
+    eFvr.setLabel("SWITCH[switch[on]][MCID[CN2[o[1]]]][MCID[-]][MCID[CN2[o[0]][t[1]]]][MCID[CN2[t[2]]]][MCID[CN2[o[8]][t[2]]]][MCID[CN2[o[4]][t[4]]]]");
     add(eFvr);
   }
 

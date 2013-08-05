@@ -2,7 +2,6 @@ package de.tucottbus.kt.lcars.speech;
 
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,6 +23,12 @@ public class ESpeechInput extends ElementContributor
 {
   private EElbo[] eFrame  = new EElbo[7];
   private ERect[] eCursor = new ERect[2];
+
+  private EElbo[]   eFvrFrame = new EElbo[4];
+  private EFvrValue eFvrVal;
+  private EValue    eLex;
+  
+  /*
   private ERect   eResultL;
   private EValue  eResult;
   private EValue  eAccept;
@@ -38,6 +43,8 @@ public class ESpeechInput extends ElementContributor
   private ELabel  eRres;
   private ERect   eConfirm;
   private ERect   ePoll;
+  */
+
   private int     width;
   private int     height;
   private int     numBars;
@@ -64,7 +71,7 @@ public class ESpeechInput extends ElementContributor
     Color clrLo   = new Color(0x110066FF/*0x3366FF00*/,true); 
     for (int i=0; i<this.numBars; i++)
     {
-      ERect e = new ERect(null,width-50,+hh-i*barHeight-barHeight,52,barHeight,LCARS.ES_STATIC,null);
+      ERect e = new ERect(null,width-40,+hh-i*barHeight-barHeight,52,barHeight,LCARS.ES_STATIC,null);
       if (i>numHi)
         e.setColor(LCARS.interpolateColors(clrMid,clrHi,(float)(i-numHi)/(float)(numBars-numHi)));
       else if (i>numMid)
@@ -78,10 +85,10 @@ public class ESpeechInput extends ElementContributor
     int style = LCARS.EC_ELBOUP|LCARS.ES_STATIC;
     int y1 = +hh-numBars*barHeight;
     int y2 = +hh;
-    add(new ERect(null,width-51,y1,1,y2-y1,style,null));
-    add(new ERect(null,width+2,y1,1,y2-y1,style,null));
-    add(new ERect(null,width-51,y1,54,1,style,null));
-    add(new ERect(null,width-51,y2,54,1,style,null));
+    add(new ERect(null,width-41,y1,1,y2-y1,style,null));
+    add(new ERect(null,width+12,y1,1,y2-y1,style,null));
+    add(new ERect(null,width-41,y1,54,1,style,null));
+    add(new ERect(null,width-41,y2,54,1,style,null));
     //eFrame[0] = new EElbo(null,width-80,-hh,14,hh,style|LCARS.ES_SHAPE_NW,null);
     //eFrame[0].setArmWidths(4,8); eFrame[0].setArcWidths(18,10); add(eFrame[0]);
     //eFrame[1] = new EElbo(null,width-80,0,14,hh+14,style|LCARS.ES_SHAPE_SW,null);
@@ -112,6 +119,28 @@ public class ESpeechInput extends ElementContributor
     eCursor[1].setColor(Color.white); add(eCursor[1]);
     
     // The speech engine elements
+    eFvrFrame[0] = new EElbo(null,0,-96,72,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_NW|LCARS.ES_LABEL_NE,"FVR");
+    eFvrFrame[0].setArmWidths(72,62); eFvrFrame[0].setArcWidths(38,1);
+    add(eFvrFrame[0]);
+    eFvrFrame[1] = new EElbo(null,0,-34,72,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_SW,null);
+    eFvrFrame[1].setArmWidths(9,6); eFvrFrame[1].setArcWidths(38,28);
+    add(eFvrFrame[1]);
+    eFvrFrame[2] = new EElbo(null,this.width-80,-96,28,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_NE,null);
+    eFvrFrame[2].setArmWidths(72,62); eFvrFrame[2].setArcWidths(38,1);
+    add(eFvrFrame[2]);
+    eFvrFrame[3] = new EElbo(null,this.width-80,-34,28,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_SE,null);
+    eFvrFrame[3].setArmWidths(72,62); eFvrFrame[3].setArcWidths(38,1);
+    add(eFvrFrame[3]);
+
+    eFvrVal = new EFvrValue(null,75,-96,this.width-158,124,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC,null);
+    add(eFvrVal);
+
+    eLex = new EValue(null,0,35,this.width-52,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E|LCARS.ES_VALUE_W|LCARS.ES_STATIC,"LEX");
+    eLex.setValueWidth(this.width-152); eLex.setValueMargin(28);
+    add(eLex); // Max. 60 characters
+    
+    
+/*
     eResultL = new ERect(null,0,-96,131,38,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"RESULT");
     add(eResultL);
     
@@ -153,10 +182,12 @@ public class ESpeechInput extends ElementContributor
     add(eConfirm);
     ePoll = new ERect(null,403+(this.width-482)/2,-6,(this.width-482)/2,120,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE,"POLL");
     add(ePoll);
+*/
   }
 
   public void setRecResult(RecognitionEvent event)
   {
+    /*
     eResult.setValue(event.result);
     eRres  .setLabel(event.getDetail("reference",null));
     eAccept.setValue(event.accepted?"ACC":"REJ");
@@ -167,11 +198,14 @@ public class ESpeechInput extends ElementContributor
     eTnad  .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("tnad"  ,0)));
     eNed   .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("ned"   ,0)));
     eTned  .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("tned"  ,0)));
+    */
+
+    eFvrVal.setLabel(event.result!=null?event.result:"?");
+    eLex.setValue(event.text!=null?LCARS.abbreviate(event.text.toUpperCase(),60,true):"?");
     
     Color color = event.accepted ? new Color(0x00FF66) : new Color (0xFF0066);
-    eResultL.setColor(color);
-    eResult .setColor(color);
-    eAccept .setColor(color);
+    for (EElbo e : eFvrFrame) e.setColor(color);
+    eFvrVal.setColor(color);
     hilightCtr = 50;
     
     if (panel!=null) panel.invalidate();
@@ -246,9 +280,9 @@ public class ESpeechInput extends ElementContributor
         hilightCtr--;
         if (hilightCtr==0)
         {
-          eResultL.setColor(null);
-          eResult.setColor(null);
-          eAccept.setColor(null);
+          for (EElbo e : eFvrFrame) e.setColor(null);
+          eFvrVal.setColor(null);
+
           if (panel!=null && panel instanceof SpeechEnginePanel)
             if (((SpeechEnginePanel)panel).getModeUAuto())
               ((SpeechEnginePanel)panel).switchModeU(0);

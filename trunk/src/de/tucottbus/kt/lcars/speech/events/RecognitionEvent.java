@@ -17,6 +17,11 @@ public class RecognitionEvent extends SpeechEvent
   public String result;
 
   /**
+   * The recognized text (may be identical with {@link #result}
+   */
+  public String text;
+  
+  /**
    * Recognition result accepted flag.
    */
   public boolean accepted;

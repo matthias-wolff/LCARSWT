@@ -144,6 +144,7 @@ public class EFvrValue extends EElement
     Font      font  = LCARS.getFont(LCARS.EF_LARGE);
     Shape     tshp  = LCARS.getTextShape(font,rawLabel(label));
     
+    if (bnds==null || tshp==null) return font;
     if (tshp.getBounds().width<=bnds.width) return font;
 
     float size = font.getSize()*(float)bnds.width/(float)tshp.getBounds().width;
