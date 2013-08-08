@@ -1,17 +1,27 @@
 package de.tucottbus.kt.lcars.speech;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Area;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
 import de.tucottbus.kt.lcars.elements.EElbo;
+import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.j2d.GArea;
+import de.tucottbus.kt.lcars.j2d.Geometry;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
 
 /**
@@ -21,46 +31,35 @@ import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
  */
 public class ESpeechInput extends ElementContributor
 {
-  private EElbo[] eFrame  = new EElbo[7];
-  private ERect[] eCursor = new ERect[2];
+  private EElbo[]           eFrame  = new EElbo[7];
+  private ERect[]           eCursor = new ERect[2];
 
-  private EElbo[]   eFvrFrame = new EElbo[4];
-  private EFvrValue eFvrVal;
-  private EValue    eLex;
+  private EElement[]        eFvrFrame = new EElement[5];
+  private EFvrValue         eFvrVal;
+  private EValue            eLex;
+  private EValue            eAccept;
+  private EValue            eConf;
+  private EValue            eNad;
+  private EValue            eNed;
+
+  private int               height;
+  private int               numBars;
+  private int               barHeight;
+  private Timer             runt;
+  private int               hilightCtr;
+  private long              lvlCount;
+  private float             lvlValue;
+  private int               marqueeCtr;
+  private ArrayList<String> lexValue = new ArrayList<String>();
+
+  private static final int  LEX_MAXLENGTH = 60;
   
-  /*
-  private ERect   eResultL;
-  private EValue  eResult;
-  private EValue  eAccept;
-  private EValue  eNad;
-  private EValue  eNed;
-  private EValue  eTnad;
-  private EValue  eTned;
-  private EValue  eScore;
-  private EValue  eRscore;
-  private EValue  eXrt;
-  private EValue  eRresFrame;
-  private ELabel  eRres;
-  private ERect   eConfirm;
-  private ERect   ePoll;
-  */
-
-  private int     width;
-  private int     height;
-  private int     numBars;
-  private int     barHeight;
-  private Timer   runt;
-  private int     hilightCtr;
-  private long    lvlCount;
-  private float   lvlValue;
-
   public ESpeechInput(int x, int y, int width, int height)
   {
     super(x,y);
-    this.width     = width;
     this.height    = height;
     this.barHeight = 3;
-    int hh         = this.height/2;
+    int hh         = height/2;
     
     // Add level meter bars
     this.numBars  = (hh-7)/barHeight*2;
@@ -96,7 +95,7 @@ public class ESpeechInput extends ElementContributor
     eFrame[2] = new EElbo(null,width+22,-hh,20,28,style|LCARS.ES_SHAPE_NE,null);
     eFrame[2].setArmWidths(12,8); eFrame[2].setArcWidths(18,10); add(eFrame[2]);
     add(new ELabel(null,width+50,-hh+2,50,14,LCARS.EF_TINY|LCARS.EC_PRIMARY|LCARS.ES_STATIC|LCARS.ES_LABEL_SW," LEVEL"));
-    float shf = (float)(this.height-46f)/3f;
+    float shf = (float)(height-46f)/3f;
     for (int i=0; i<3; i++)
     {
       int sy = -hh+29+Math.round(i*shf);
@@ -120,97 +119,94 @@ public class ESpeechInput extends ElementContributor
     
     // The speech engine elements
     eFvrFrame[0] = new EElbo(null,0,-96,72,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_NW|LCARS.ES_LABEL_NE,"FVR");
-    eFvrFrame[0].setArmWidths(72,62); eFvrFrame[0].setArcWidths(38,1);
+    ((EElbo)eFvrFrame[0]).setArmWidths(72,62); ((EElbo)eFvrFrame[0]).setArcWidths(38,1);
     add(eFvrFrame[0]);
     eFvrFrame[1] = new EElbo(null,0,-34,72,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_SW,null);
-    eFvrFrame[1].setArmWidths(9,6); eFvrFrame[1].setArcWidths(38,28);
+    ((EElbo)eFvrFrame[1]).setArmWidths(9,6); ((EElbo)eFvrFrame[1]).setArcWidths(38,28);
     add(eFvrFrame[1]);
-    eFvrFrame[2] = new EElbo(null,this.width-80,-96,28,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_NE,null);
-    eFvrFrame[2].setArmWidths(72,62); eFvrFrame[2].setArcWidths(38,1);
+    eFvrFrame[2] = new EElbo(null,width-71,-96,19,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_NE,null);
+    ((EElbo)eFvrFrame[2]).setArmWidths(72,62); ((EElbo)eFvrFrame[2]).setArcWidths(38,1);
     add(eFvrFrame[2]);
-    eFvrFrame[3] = new EElbo(null,this.width-80,-34,28,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_SE,null);
-    eFvrFrame[3].setArmWidths(72,62); eFvrFrame[3].setArcWidths(38,1);
+    eFvrFrame[3] = new EElbo(null,width-71,-34,19,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_SE,null);
+    ((EElbo)eFvrFrame[3]).setArmWidths(72,62); ((EElbo)eFvrFrame[3]).setArcWidths(38,1);
     add(eFvrFrame[3]);
+    eFvrFrame[4] = new ERect(null,75,22,width-149,6,LCARS.EC_ELBOUP|LCARS.ES_STATIC,null);
+    add(eFvrFrame[4]);
 
-    eFvrVal = new EFvrValue(null,75,-96,this.width-158,124,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC,null);
+    eFvrVal = new EFvrValue(null,75,-96,width-149,115,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC,null);
     add(eFvrVal);
 
-    eLex = new EValue(null,0,35,this.width-52,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E|LCARS.ES_VALUE_W|LCARS.ES_STATIC,"LEX");
-    eLex.setValueWidth(this.width-152); eLex.setValueMargin(28);
-    add(eLex); // Max. 60 characters
-    
-    
-/*
-    eResultL = new ERect(null,0,-96,131,38,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"RESULT");
-    add(eResultL);
-    
-    eResult = new EValue(null,134,-96,this.width-308,38,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC,null);
-    eResult.setValueMargin(0); eResult.setValue("");
-    add(eResult);
+    eLex = new EValue(null,0,35,width-52,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E|LCARS.ES_VALUE_W|LCARS.ES_STATIC,"LEX");
+    eLex.setValueWidth(width-143);
+    add(eLex);
 
-    eAccept = new EValue(null,this.width-174,-96,95,38,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_RECT_RND_E|LCARS.ES_STATIC,null);
-    eAccept.setValue("");
+    eAccept = new EValue(null,width-147,76,95,38,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_RECT_RND_E|LCARS.ES_STATIC,null);
     add(eAccept);
-
-    eXrt = new EValue(null,0,-47,216,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"XRT");
-    eXrt.setValueWidth(66); eXrt.setValue("0");
-    add(eXrt);
-    eScore = new EValue(null,0,-6,216,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"NLL");
-    eScore.setValueWidth(66); eScore.setValue("500");
-    add(eScore);
-    eRscore = new EValue(null,219,-6,178,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"RNLL");
-    eRscore.setValueWidth(66); eRscore.setValue("500");
-    add(eRscore);
-    eNad = new EValue(null,0,35,216,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"NAD");
-    eNad.setValueWidth(66); eNad.setValue("0.00");
-    add(eNad);
-    eNed = new EValue(null,219,35,178,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"NED");
-    eNed.setValueWidth(66); eNed.setValue("0.00");
+    eConf = new EValue(null,width-285,76,135,38,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"CONF");
+    eConf.setValueMargin(0); eConf.setValueWidth(66); eConf.setValue("0.00");
+    add(eConf);
+    eNed = new EValue(null,width-488,76,200,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"NED");
     add(eNed);
-    eTnad = new EValue(null,0,76,216,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"TNAD");
-    eTnad.setValueWidth(66); eTnad.setValue("0.00");
-    add(eTnad);
-    eTned = new EValue(null,219,76,178,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"TNED");
-    eTned.setValueWidth(66); eTned.setValue("0.00");
-    add(eTned);
-    eRresFrame = new EValue(null,219,-47,this.width-298,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"RRES");
-    eRresFrame.setValueWidth(this.width-410);
-    add(eRresFrame);
-    eRres = new ELabel(null,320,-42,485,28,LCARS.EC_ELBOUP|LCARS.ES_LABEL_W,null);
-    add(eRres);
-    eConfirm = new ERect(null,400,-6,(this.width-482)/2,120,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE,"CONFIRM");
-    add(eConfirm);
-    ePoll = new ERect(null,403+(this.width-482)/2,-6,(this.width-482)/2,120,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE,"POLL");
-    add(ePoll);
-*/
+    eNad = new EValue(null,width-701,76,210,38,LCARS.EC_ELBOUP|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E|LCARS.ES_STATIC,"NAD");
+    add(eNad);
   }
 
   public void setRecResult(RecognitionEvent event)
   {
-    /*
-    eResult.setValue(event.result);
-    eRres  .setLabel(event.getDetail("reference",null));
+    eFvrVal.setLabel(event.result!=null?event.result:"?");
     eAccept.setValue(event.accepted?"ACC":"REJ");
+    eConf.setValue(String.format("%3.2f",event.confidence));
+    
+    lexValue = makeLexValue(event.text!=null ? event.text.toUpperCase() : "?");
+    eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
+    
+    Color color = event.accepted ? new Color(0x00FF66) : new Color (0xFF0066);
+    for (EElement e : eFvrFrame) e.setColor(color);
+    eFvrVal.setColor(color);
+    eAccept.setColor(color);
+    eConf.setColor(color);
+
+    float f1 = event.getDetailFloat("nad" ,0);
+    float f2 = event.getDetailFloat("tnad",0);
+    eNad.setValue(String.format(Locale.US,"%3.2f/%3.2f",f1,f2));
+
+    f1 = event.getDetailFloat("ned" ,0);
+    f2 = event.getDetailFloat("tned",0);
+    eNed.setValue(String.format(Locale.US,"%3.2f/%3.2f",f1,f2));
+
+    marqueeCtr = 0;
+    hilightCtr = 50;
+
+    /* Other information in event:
+    eRres  .setLabel(event.getDetail("reference",null));
     eXrt   .setValue("?");
     eScore .setValue(String.format(Locale.US,"%4.0f",event.getDetailFloat("gw.res",0)));
     eRscore.setValue(String.format(Locale.US,"%4.0f",event.getDetailFloat("gw.ref",0)));
-    eNad   .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("nad"   ,0)));
-    eTnad  .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("tnad"  ,0)));
-    eNed   .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("ned"   ,0)));
-    eTned  .setValue(String.format(Locale.US,"%3.2f",event.getDetailFloat("tned"  ,0)));
     */
-
-    eFvrVal.setLabel(event.result!=null?event.result:"?");
-    eLex.setValue(event.text!=null?LCARS.abbreviate(event.text.toUpperCase(),60,true):"?");
-    
-    Color color = event.accepted ? new Color(0x00FF66) : new Color (0xFF0066);
-    for (EElbo e : eFvrFrame) e.setColor(color);
-    eFvrVal.setColor(color);
-    hilightCtr = 50;
     
     if (panel!=null) panel.invalidate();
   }
 
+  private ArrayList<String> makeLexValue(String string)
+  {
+    ArrayList<String> result = new ArrayList<String>();
+    if (string==null) string = "";
+
+    while (string.length()>0)
+    {
+      int endIndex = Math.min(LEX_MAXLENGTH,string.length());
+      if (endIndex==LEX_MAXLENGTH)
+        for (; endIndex>LEX_MAXLENGTH-20; endIndex--)
+          if (Character.isWhitespace(string.charAt(endIndex)))
+            break;
+      result.add(string.substring(0,endIndex).trim());
+      string = string.substring(endIndex).trim();
+    }
+    
+    if (result.isEmpty()) result.add("");
+    return result;
+  }
+  
   /**
    * Displays a new level.
    * 
@@ -280,8 +276,10 @@ public class ESpeechInput extends ElementContributor
         hilightCtr--;
         if (hilightCtr==0)
         {
-          for (EElbo e : eFvrFrame) e.setColor(null);
+          for (EElement e : eFvrFrame) e.setColor(null);
           eFvrVal.setColor(null);
+          eAccept.setColor(null);
+          eConf.setColor(null);
 
           if (panel!=null && panel instanceof SpeechEnginePanel)
             if (((SpeechEnginePanel)panel).getModeUAuto())
@@ -289,10 +287,192 @@ public class ESpeechInput extends ElementContributor
         }
       }
       
+      if (lexValue.size()>1)
+      {
+        
+        if (marqueeCtr%LEX_MAXLENGTH ==0)
+        {
+          int line = ( marqueeCtr / LEX_MAXLENGTH ) % lexValue.size();
+          String s = lexValue.get(line);
+          if (line<lexValue.size()-1) s += "...";
+          if (line>0) s = "..."+s;
+          eLex.setValue(s);          
+        }
+        marqueeCtr++;
+      }
+      
       if (panel!=null) panel.invalidate();
     }
   }
 
+  // -- Nested classes --
+
+  /**
+   * An LCARS {@link EElement} displaying feature-value relation strings. A
+   * feature-value relation string represents tree structures with labeled nodes,
+   * e.~g. <code>"[root[child1[grandchild]][child2]]"</code>.
+   * 
+   * @author Matthias Wolff
+   */
+  public static class EFvrValue extends EElement
+  {
+    
+    /**
+     * Create a new semantic value display.
+     * 
+     * @param panel
+     *          The LCARS panel to place the GUI element on.
+     * @param x
+     *          The x-coordinate of the upper left corner (in LCARS panel pixels).
+     * @param y
+     *          The y-coordinate of the upper left corner (in LCARS panel pixels).
+     * @param w
+     *          The width (in LCARS panel pixels).
+     * @param h
+     *          The height (in LCARS panel pixels).
+     * @param style
+     *          The style (see class {@link LCARS}).
+     * @param label
+     *          The label (a feature-value relation string). A feature-value
+     *          relation string represents tree structures with labeled nodes,
+     *          e.~g. <code>"[root[child1[grandchild]][child2]]"</code>.
+     */
+    public EFvrValue
+    (
+      Panel  panel,
+      int    x,
+      int    y,
+      int    w,
+      int    h,
+      int    style,
+      String label
+    )
+    {
+      super(panel,x,y,w,h,style,label);
+    }
+    
+    @Override
+    protected Vector<Geometry> createGeometriesInt()
+    {
+      Vector<Geometry> geos = new Vector<Geometry>();
+      Rectangle        bnds = getBounds();
+      Font             font = getFont();
+      String           fvrs = label==null?"":label;
+      int              xofs = 0;
+      int              yofs = 0;
+      int              linh = LCARS.getTextShape(font,"M").getBounds().height;
+      int              yinc = linh/3;
+  
+      // Trim on leading and one tailing square brace from label 
+      if (fvrs.startsWith("[") && fvrs.endsWith("]"))
+        fvrs = fvrs.substring(1,fvrs.length()-1);
+      
+      // Count lines
+      int lcnt = 0;
+      int bcnt = 0;
+      for (char c : fvrs.toCharArray())
+        if (c=='[')
+        {
+          bcnt++;
+          lcnt = Math.max(bcnt,lcnt);
+        }
+        else if (c==']')
+          bcnt--;
+      lcnt++;
+  
+      // Adjust line increment
+      if (linh+lcnt*yinc>bnds.height)
+        yinc = Math.max((bnds.height-linh)/lcnt,3);
+      
+      // Create lines
+      Area[] lines = new Area[lcnt];
+      for (int i=0; i<lines.length; i++)
+        lines[i] = new Area(new Rectangle(bnds.x,bnds.y+i*yinc+linh+1,bnds.width,1));
+      
+      // Create node label geometries
+      StringWriter sw = new StringWriter();
+      for (int i=0; i<fvrs.length(); i++)
+      {
+        char c = fvrs.charAt(i);
+        if (c=='[' || c==']' || i==fvrs.length()-1)
+        {
+          if (i==fvrs.length()-1 && c!='[' && c!=']')
+            sw.append(c);
+          if (sw.getBuffer().length()>0)
+          {
+            String    nlab = sw.toString();
+            Rectangle tbnd = LCARS.getTextShape(font,nlab).getBounds();
+            tbnd.x = bnds.x + xofs;
+            tbnd.y = bnds.y + yofs - (int)(tbnd.height*0.15);
+            tbnd.height = linh;
+            for (Area area : lines)
+            {
+              Rectangle r = new Rectangle(tbnd);
+              r.x-=2; r.y-=2; r.width+=4; r.height+=4;
+              area.subtract(new Area(r));
+            }
+            geos.addAll(LCARS.createTextGeometry2D(font,nlab,tbnd,LCARS.ES_LABEL_NW,null,false));      
+            xofs += tbnd.width + 6;
+            sw = new StringWriter();
+          }
+          yofs += c=='[' ? yinc : -yinc;
+        }
+        else
+          sw.append(c);
+      }
+  
+      // Add line geometries
+      for (Area area : lines)
+        geos.add(new GArea(area,false));
+      
+      return geos;
+    }
+  
+    /**
+     * Returns a font which allows to display the semantic value within the bounds
+     * of this element.
+     */
+    protected Font getFont()
+    {
+      Rectangle bnds  = getBounds();
+      Font      font  = LCARS.getFont(LCARS.EF_LARGE);
+      Shape     tshp  = LCARS.getTextShape(font,rawLabel(label));
+      
+      if (bnds==null || tshp==null) return font;
+      if (tshp.getBounds().width<=bnds.width) return font;
+  
+      float size = font.getSize()*(float)bnds.width/(float)tshp.getBounds().width;
+      return LCARS.getFont(LCARS.EF_LARGE,(int)(size));
+    }
+  
+    /**
+     * Removed heading and tailing braces, replaces every remaining sequence of
+     * opening and closing square brackets by a space and returns the result of
+     * this operation.
+     * 
+     * @param label
+     *          The label string to be processed.
+     */
+    protected String rawLabel(String label)
+    {
+      if (label==null) return "";
+      StringWriter sw = new StringWriter();
+      boolean braceflag = true;
+      for (char c : label.toCharArray())
+        if (c!='[' && c!=']')
+        {
+          sw.append(c);
+          braceflag = false;
+        }
+        else if (!braceflag)
+        {
+          sw.append(' ');
+          braceflag = true;
+        }
+      return sw.toString().trim();
+    }
+  }  
+  
 }
 
 // EOF
