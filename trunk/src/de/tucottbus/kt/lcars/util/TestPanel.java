@@ -9,7 +9,7 @@ import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ERect;
-import de.tucottbus.kt.lcars.speech.EFvrValue;
+import de.tucottbus.kt.lcars.speech.ESpeechInput;
 
 public class TestPanel extends Panel
 {
@@ -50,7 +50,7 @@ public class TestPanel extends Panel
     eRect.setColor(new Color(0x404040));
     add(eRect);
    
-    EFvrValue eFvr = new EFvrValue(this,x,y,w,h,LCARS.ES_STATIC,null);
+    ESpeechInput.EFvrValue eFvr = new ESpeechInput.EFvrValue(this,x,y,w,h,LCARS.ES_STATIC,null);
     eFvr.setLabel("SWITCH[switch[on]][MCID[CN2[o[1]]]][MCID[-]][MCID[CN2[o[0]][t[1]]]][MCID[CN2[t[2]]]][MCID[CN2[o[8]][t[2]]]][MCID[CN2[o[4]][t[4]]]]");
     add(eFvr);
   }
