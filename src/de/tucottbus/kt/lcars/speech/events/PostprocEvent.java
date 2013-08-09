@@ -18,6 +18,7 @@ public class PostprocEvent extends SpeechEvent
   {
     public String recPhn;
     public String refPhn;
+    public String recOut;
     public float  dlsr;
     public float  dnll;
   }
