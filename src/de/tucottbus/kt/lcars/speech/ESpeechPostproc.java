@@ -280,8 +280,8 @@ public class ESpeechPostproc extends ElementContributor
       if (data==null) break;
       if (bar+ofs>=data.frames.size()) break;
       PostprocEvent.Frame f = data.frames.get(bar+ofs);
-      dlsr = f.dlsr;
-      dnll = f.dnll;
+      dlsr = f.lsr;
+      dnll = f.nll;
       
       if (prevRefPhn!=null && !prevRefPhn.equals(f.refPhn))
         addMarker(1,prevRefPhn,bar,Math.min(Math.min(dlsr,dnll),0));
