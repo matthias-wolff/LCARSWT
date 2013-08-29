@@ -437,6 +437,7 @@ public class ShowcasePanel extends Panel
   public static void main(String[] args)
   {
     args = LCARS.setArg(args,"--panel=",ShowcasePanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--nospeech",null);
     LCARS.main(args);
   }
 
