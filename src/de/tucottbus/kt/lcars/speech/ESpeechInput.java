@@ -208,7 +208,7 @@ public class ESpeechInput extends ElementContributor
       int endIndex = Math.min(LEX_MAXLENGTH,string.length());
       if (endIndex==LEX_MAXLENGTH)
         for (; endIndex>LEX_MAXLENGTH-20; endIndex--)
-          if (Character.isWhitespace(string.charAt(endIndex)))
+          if (endIndex>=0 && endIndex<string.length() && Character.isWhitespace(string.charAt(endIndex)))
             break;
       result.add(string.substring(0,endIndex).trim());
       string = string.substring(endIndex).trim();
