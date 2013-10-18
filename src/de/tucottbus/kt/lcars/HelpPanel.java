@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars;
 
 import java.io.FileNotFoundException;
+
 import de.tucottbus.kt.lcars.contributors.EBrowser;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
@@ -82,6 +83,11 @@ public class HelpPanel extends Panel
       public void titleChanged(String title)
       {
         eCaption.setValue(title.toUpperCase());
+      }
+
+      @Override
+      public void statusTextChanged(String text)
+      {
       }
     });
     

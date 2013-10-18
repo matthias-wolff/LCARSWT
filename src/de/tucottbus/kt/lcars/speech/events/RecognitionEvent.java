@@ -25,6 +25,13 @@ public class RecognitionEvent extends SpeechEvent
    * Recognition result accepted flag.
    */
   public boolean accepted;
+  
+  /**
+   * Indicates that the result is incremental and recognition is still in
+   * progress. The incremental result is stored in {@link #result}, all other
+   * fields may be uninitialized.
+   */
+  public boolean incremenral;
 
   /**
    * The recognizer confidence, a value between 0 (most uncertain) through 1 (sure).

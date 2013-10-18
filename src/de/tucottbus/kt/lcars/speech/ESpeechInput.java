@@ -153,29 +153,40 @@ public class ESpeechInput extends ElementContributor
 
   public void setRecResult(RecognitionEvent event)
   {
-    eFvrVal.setLabel(event.result!=null?event.result:"?");
-    eAccept.setValue(event.accepted?"ACC":"REJ");
-    eConf.setValue(String.format("%3.2f",event.confidence));
-    
-    lexValue = makeLexValue(event.text!=null ? event.text.toUpperCase() : "?");
-    eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
-    
-    Color color = event.accepted ? new Color(0x00FF66) : new Color (0xFF0066);
-    for (EElement e : eFvrFrame) e.setColor(color);
-    eFvrVal.setColor(color);
-    eAccept.setColor(color);
-    eConf.setColor(color);
-
-    float f1 = event.getDetailFloat("nad" ,0);
-    float f2 = event.getDetailFloat("tnad",0);
-    eNad.setValue(String.format(Locale.US,"%3.2f/%3.2f",f1,f2));
-
-    f1 = event.getDetailFloat("ned" ,0);
-    f2 = event.getDetailFloat("tned",0);
-    eNed.setValue(String.format(Locale.US,"%3.2f/%3.2f",f1,f2));
-
-    marqueeCtr = 0;
-    hilightCtr = 50;
+    if (event.incremenral==false)
+    {
+      // Final result
+      eFvrVal.setLabel(event.result!=null?event.result:"?");
+      eAccept.setValue(event.accepted?"ACC":"REJ");
+      eConf.setValue(String.format("%3.2f",event.confidence));
+      
+      lexValue = makeLexValue(event.text!=null ? event.text.toUpperCase() : "?");
+      //eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
+      
+      Color color = event.accepted ? new Color(0x00FF66) : new Color (0xFF0066);
+      for (EElement e : eFvrFrame) e.setColor(color);
+      eFvrVal.setColor(color);
+      eAccept.setColor(color);
+      eConf.setColor(color);
+  
+      float f1 = event.getDetailFloat("nad" ,0);
+      float f2 = event.getDetailFloat("tnad",0);
+      eNad.setValue(String.format(Locale.US,"%3.2f/%3.2f",f1,f2));
+  
+      f1 = event.getDetailFloat("ned" ,0);
+      f2 = event.getDetailFloat("tned",0);
+      eNed.setValue(String.format(Locale.US,"%3.2f/%3.2f",f1,f2));
+  
+      marqueeCtr = 0;
+      hilightCtr = 50;
+    }
+    else
+    {
+      // Incremental result
+      lexValue = makeLexValue(event.text!=null ? event.text.toUpperCase() : "?");
+      //eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
+      marqueeCtr = 0;
+    }
 
     /* Other information in event:
     eRres  .setLabel(event.getDetail("reference",null));
