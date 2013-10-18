@@ -1431,6 +1431,7 @@ public class LCARS implements ILcarsRemote
    *  
    *  [1] mutually exclusive
    *  [2] currently the only use is --device=wetab which adjusts PADD-panels
+   *  [3] only valid with --server
    *  [4] useful when multiple NICs are installed in a host
    *  [5] only valid with --mode=fullscreen
    *  [6] valid with --mode=maximized for displaying panel at secondary screen

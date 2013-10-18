@@ -293,7 +293,7 @@ public class ESpeechPostproc extends ElementContributor
       addBar(bar,cLsr,dlsr);
       addBar(bar,cNll,dnll);
     }
-    if (bar+ofs==data.frames.size())
+    if (data!=null && bar+ofs==data.frames.size())
     {
       addMarker(1,prevRefPhn,bar-1,Math.min(Math.min(dlsr,dnll),0));
       addMarker(0,prevRecPhn,bar-1,Math.max(Math.max(dlsr,dnll),0));
