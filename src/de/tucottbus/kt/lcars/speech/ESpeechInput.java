@@ -158,10 +158,10 @@ public class ESpeechInput extends ElementContributor
       // Final result
       eFvrVal.setLabel(event.result!=null?event.result:"?");
       eAccept.setValue(event.accepted?"ACC":"REJ");
-      eConf.setValue(String.format("%3.2f",event.confidence));
+      eConf.setValue(String.format(Locale.US,"%3.2f",event.confidence));
       
       lexValue = makeLexValue(event.text!=null ? event.text.toUpperCase() : "?");
-      //eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
+      eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
       
       Color color = event.accepted ? new Color(0x00FF66) : new Color (0xFF0066);
       for (EElement e : eFvrFrame) e.setColor(color);
@@ -184,7 +184,7 @@ public class ESpeechInput extends ElementContributor
     {
       // Incremental result
       lexValue = makeLexValue(event.text!=null ? event.text.toUpperCase() : "?");
-      //eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
+      eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
       marqueeCtr = 0;
     }
 
