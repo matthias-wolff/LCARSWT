@@ -339,9 +339,17 @@ public class SpeechEnginePanel extends Panel
     if (event instanceof RecognitionEvent)
     {
       RecognitionEvent re = (RecognitionEvent)event;
-      //LCARS.log("SEP","Recognized \""+re.result+"\"");
-      if (eModeUAuto.isBlinking()) switchModeU(1);
-      cSpeechIo.setRecResult(re);
+      if (re.incremenral==true)
+      {
+        // Incremental result
+        cSpeechIo.setRecResult(re);
+      }
+      else
+      {
+        // Final result
+        if (eModeUAuto.isBlinking()) switchModeU(1);
+        cSpeechIo.setRecResult(re);
+      }
     }
     
     // Speech recognition post-processing events

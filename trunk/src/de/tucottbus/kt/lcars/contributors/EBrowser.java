@@ -148,6 +148,7 @@ public class EBrowser extends ElementContributor
               synchronized(eBrowser)
               {
                 browserStatusText = event.text;
+                fireStatusTextChanged(event.text);
               }
             }
           });
@@ -374,6 +375,7 @@ public class EBrowser extends ElementContributor
   public interface EventListener
   {
     public void titleChanged(String title);
+    public void statusTextChanged(String text);
   }
   
   public void addBrowserEventListener(EventListener listener)
@@ -393,5 +395,11 @@ public class EBrowser extends ElementContributor
         listener.titleChanged(title);
   }
   
+  protected void fireStatusTextChanged(String text)
+  {
+    for (EventListener listener : browserEventListeners)
+      if (listener!=null)
+        listener.statusTextChanged(text);
+  }
   
 }
