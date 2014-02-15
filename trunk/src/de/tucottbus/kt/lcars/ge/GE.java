@@ -800,7 +800,7 @@ public class GE
     final Point br = screen.panelToComponent(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
     if (canvas!=null) canvas.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
     if (swtShell!=null) swtShell.setSize(br.x-tl.x,br.y-tl.y);
-    if (browser!=null) browser.setSize(br.x-tl.x+20/* <- this "hides" the scroll bar */,br.y-tl.y);
+    if (browser!=null) browser.setSize(br.x-tl.x+28/* <- this "hides" the scroll bar */,br.y-tl.y);
   }
   
   /**
