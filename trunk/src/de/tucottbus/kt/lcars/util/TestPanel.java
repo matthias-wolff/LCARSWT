@@ -25,7 +25,17 @@ public class TestPanel extends Panel
     super.init();
     setTitle("TEST PANEL");
     
-    ERect eRect = new ERect(this,1420,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"EXIT");
+    ERect eRect = new ERect(this,1209,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"HELP");
+    eRect.addEEventListener(new EEventListenerAdapter()
+    {
+      @Override
+      public void touchDown(EEvent ee)
+      {
+        help();
+      }
+    });
+    add(eRect);
+    eRect = new ERect(this,1420,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"EXIT");
     eRect.addEEventListener(new EEventListenerAdapter()
     {
       @Override
