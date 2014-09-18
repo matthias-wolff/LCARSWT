@@ -90,9 +90,13 @@ public class EBrowser extends ElementContributor
   public void addToPanel(Panel panel)
   {
     super.addToPanel(panel);
-    if (panel!=null && canvas!=null && browser!=null) return;
+    if (panel==null) return;
+    if (canvas!=null || browser!=null) return; // FIXME: What if only one is non-null? 
     try
     {
+      if (canvas!=null) throw new IllegalStateException("AWT canvas already existing");
+      if (browser!=null) throw new IllegalStateException("Browser already existing");
+
       screen = Screen.getLocal(panel.getScreen());
       canvasText = "LOADING HTML ...";
       canvas = new Canvas();

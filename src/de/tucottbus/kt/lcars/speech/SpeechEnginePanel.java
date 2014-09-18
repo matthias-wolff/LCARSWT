@@ -32,6 +32,7 @@ public class SpeechEnginePanel extends Panel
   private   ERect           eSrvName;
   private   ERect           eSrvPort;
   private   ERect           eModeU;
+  private   ERect           eModeL;
   private   ERect           eLight;
   private   ERect           eDim;
   private   ERect           eLock;
@@ -127,7 +128,16 @@ public class SpeechEnginePanel extends Panel
     eSrvPort = new ERect(this,23,757,208, 47,LCARS.EC_SECONDARY|LCARS.ES_LABEL_E |LCARS.ES_STATIC,"UNK");
     add(eSrvPort);
 
-    add(new ERect(this,23,807,208,250,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE|LCARS.ES_SELECTED,"MODE\nSELECT"));
+    eModeL = new ERect(this,23,807,208,250,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE|LCARS.ES_SELECTED,"MODE\nSELECT");
+    eModeL.addEEventListener(new EEventListenerAdapter()
+    {
+      @Override
+      public void touchDown(EEvent ee)
+      {
+        doc();
+      }
+    });
+    add(eModeL);
     
     eLock = new ERect(this,490,276,151,38,LCARS.EC_PRIMARY|LCARS.ES_LABEL_E,"LOCK");
     eLock.addEEventListener(new EEventListenerAdapter()
