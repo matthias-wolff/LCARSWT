@@ -26,6 +26,7 @@ import de.tucottbus.kt.lcars.util.Range;
 public class SpeechEnginePanel extends Panel
 {
   // GUI elements
+  private   ERect           eLcars;
   private   EElbo           eElboU;
   private   EElbo           eElboL;
   private   ERect           eModeUAuto;
@@ -74,15 +75,16 @@ public class SpeechEnginePanel extends Panel
     
     // The GUI elements
     EElement e;
-    e = new ERect(this,23, 21,208,148,LCARS.EC_ELBOUP|LCARS.ES_LABEL_SE|LCARS.ES_SELECTED,"LCARS");
-    e.addEEventListener(new EEventListenerAdapter(){
+    eLcars = new ERect(this,23, 21,208,148,LCARS.EC_ELBOUP|LCARS.ES_LABEL_SE|LCARS.ES_SELECTED,"LCARS");
+    eLcars.addEEventListener(new EEventListenerAdapter()
+    {
       @Override
       public void touchDown(EEvent ee)
       {
         panelSelectionDialog();
       }
     });
-    add(e);
+    add(eLcars);
 
     String pnlHost = LCARS.getHostName().toUpperCase();
     eElboU = new EElbo(this,23,172,464,142,LCARS.EC_ELBOUP|LCARS.ES_SHAPE_SW|LCARS.ES_LABEL_NE|LCARS.ES_STATIC,pnlHost);
@@ -129,14 +131,6 @@ public class SpeechEnginePanel extends Panel
     add(eSrvPort);
 
     eModeL = new ERect(this,23,807,208,250,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE|LCARS.ES_SELECTED,"MODE\nSELECT");
-    eModeL.addEEventListener(new EEventListenerAdapter()
-    {
-      @Override
-      public void touchDown(EEvent ee)
-      {
-        doc();
-      }
-    });
     add(eModeL);
     
     eLock = new ERect(this,490,276,151,38,LCARS.EC_PRIMARY|LCARS.ES_LABEL_E,"LOCK");
@@ -290,7 +284,7 @@ public class SpeechEnginePanel extends Panel
     cSpeechPostproc = new ESpeechPostproc(294,408,212,7,569);
     cSpeechPostproc.addToPanel(this);
   }
-  
+
   public boolean getModeUAuto()
   {
     return eModeUAuto.isBlinking();
@@ -460,6 +454,41 @@ public class SpeechEnginePanel extends Panel
       setAlpha(1.f);
       setTitle(guessName(getClass()).toUpperCase());
     }
+  }
+
+  // -- Getters and setters --
+
+  /**
+   * Returns the LCARS button.
+   */
+  protected ERect getELcars()
+  {
+    return eLcars;
+  }
+
+  /**
+   * Returns the lower elbo element.
+   */
+  protected EElbo getEElboL()
+  {
+    return eElboL;
+  }
+
+  /**
+   * Returns the lower mode select button. 
+   */
+  protected ERect getEModeL()
+  {
+    return eModeL;
+  }
+
+  /**
+   * Return the recognition post-processing element group.
+   * @return
+   */
+  protected ESpeechPostproc getCSpeechPostproc()
+  {
+    return cSpeechPostproc;
   }
 
   // -- Main method --

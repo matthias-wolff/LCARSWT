@@ -132,7 +132,7 @@ public class EBrowser extends ElementContributor
           browser = new Browser(swtShell,SWT.NONE);
           browser.setBackground(screen.getSwtDisplay().getSystemColor(SWT.COLOR_BLACK));
           browser.setVisible(false);
-          browser.setSize(br.x-tl.x+20/*<- this "hides" the scroll bar*/,br.y-tl.y);
+          browser.setSize(br.x-tl.x+28/*<- this "hides" the scroll bar*/,br.y-tl.y);
           if (eBrowser.browserText!=null)
             browser.setText(eBrowser.browserText);
           else if (eBrowser.browserUrl!=null)
