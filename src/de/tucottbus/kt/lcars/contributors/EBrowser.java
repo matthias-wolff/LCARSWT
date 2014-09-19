@@ -48,6 +48,8 @@ public class EBrowser extends ElementContributor
 
   private Vector<EventListener> browserEventListeners;
   
+  private int       style;
+  
   // SWT thread transfer fields
   private Point     tl;
   private Point     br;
@@ -73,13 +75,16 @@ public class EBrowser extends ElementContributor
    *          the width (LCARS panel coordinates)
    * @param h
    *          the height (LCARS panel coordinates)
+   * @param style
+   *          The style (see class {@link LCARS}).
    */
-  public EBrowser(int x, int y, int w, int h)
+  public EBrowser(int x, int y, int w, int h, int style)
   {
     super(x,y);
     this.eBrowser              = this;
     this.bounds                = new Rectangle(x,y,w,h);
     this.browserEventListeners = new Vector<EventListener>();
+    this.style                 = style;
   }
   
   /*
@@ -163,14 +168,17 @@ public class EBrowser extends ElementContributor
             }
             public void completed(ProgressEvent event)
             {
-              try
+              if (!isNoRestyleHtml())
               {
-                String script = LCARS.loadTextResource("de/tucottbus/kt/lcars/resources/LCARS-css.js");
-                browser.execute(script);
-              }
-              catch (Exception e)
-              {
-                e.printStackTrace();
+                try
+                {
+                  String script = LCARS.loadTextResource("de/tucottbus/kt/lcars/resources/LCARS-css.js");
+                  browser.execute(script);
+                }
+                catch (Exception e)
+                {
+                  e.printStackTrace();
+                }
               }
               browser.setVisible(true);
             }
@@ -373,6 +381,46 @@ public class EBrowser extends ElementContributor
     });
     return this.setUrl_;
   }
+  
+
+  /**
+   * Determines if this browser re-styles its HTML content to the LCARS look.
+   */
+  public boolean isNoRestyleHtml()
+  {
+    return (style & LCARS.ES_BROWSER_NORESTYLEHTML)!=0;
+  }
+
+  /**
+   * Set the HTML no-restyle flag. If set, this browser does <em>not</em>
+   * re-style its HTML content to the LCARS look.
+   * 
+   * @param noRestyleHtml
+   *          <code>true</code> to disable HTML re-styling, <code>false</code>
+   *          to enable.
+   */
+  public void setNoRestyleHtml(boolean noRestyleHtml)
+  {
+    if (isNoRestyleHtml()==noRestyleHtml) return;
+
+    if (noRestyleHtml)
+      style |= LCARS.ES_BROWSER_NORESTYLEHTML;
+    else
+      style &= ~LCARS.ES_BROWSER_NORESTYLEHTML;
+
+    screen.getSwtDisplay().syncExec(new Runnable()
+    {
+      public void run()
+      {
+        try
+        {
+          browser.refresh();
+        }
+        catch (Exception e) {}
+      }
+    });  
+  }
+
   
   // -- Event handling --
   

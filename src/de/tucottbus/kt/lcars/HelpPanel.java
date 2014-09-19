@@ -21,7 +21,8 @@ public class HelpPanel extends Panel
   private EValue                 eCaption;
   private EBrowser               eBrowser;
   private String                 docIndex;
-
+  private boolean                noRestyleHtml;
+  
   private final int ST_AMBER = LCARS.EC_PRIMARY | LCARS.ES_SELECTED;
   private final int ST_YELLO = LCARS.EC_SECONDARY | LCARS.ES_SELECTED;
   
@@ -77,7 +78,7 @@ public class HelpPanel extends Panel
     add(new ERect(this,1839,23,58,58,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null));
 
     // The browser
-    eBrowser = new EBrowser(85,85,1750,926);
+    eBrowser = new EBrowser(85,85,1750,926,LCARS.ES_NONE);
     eBrowser.addBrowserEventListener(new EBrowser.EventListener()
     {
       public void titleChanged(String title)
@@ -190,10 +191,11 @@ public class HelpPanel extends Panel
     eBrowser.removeFromPanel();
   }
 
-  protected void setDocs(Class<? extends Panel> helpFor, String docIndex)
+  protected void setDocs(Class<? extends Panel> helpFor, String docIndex, boolean noRestyleHtml)
   {
-    this.helpFor  = helpFor;
-    this.docIndex = docIndex;
+    this.helpFor       = helpFor;
+    this.docIndex      = docIndex;
+    this.noRestyleHtml = noRestyleHtml;
   }
   
   protected boolean loadDoc()
@@ -206,6 +208,7 @@ public class HelpPanel extends Panel
     }
     try
     {
+      eBrowser.setNoRestyleHtml(noRestyleHtml);
       return eBrowser.setUrl(this.docIndex);
     }
     catch (Exception e)
@@ -225,6 +228,7 @@ public class HelpPanel extends Panel
       String name = this.helpFor.getName().replace(".","/")+".html";
       String html = LCARS.loadTextResource(name);
       if (html==null) throw new FileNotFoundException(name);
+      eBrowser.setNoRestyleHtml(noRestyleHtml);
       return eBrowser.setText(html);
     }
     catch (Exception e)
@@ -255,9 +259,11 @@ public class HelpPanel extends Panel
     + "    </tr></table>\n"
     + "  </body>\n"
     + "</html>\n";
+    eBrowser.setNoRestyleHtml(false);
     eBrowser.setText(html);
   }
-  
+
+
 }
 
 // EOF
