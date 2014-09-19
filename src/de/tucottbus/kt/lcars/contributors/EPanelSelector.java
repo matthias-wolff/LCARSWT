@@ -93,8 +93,18 @@ public class EPanelSelector extends EMessageBox
       add(new ELabel(null,340,66+i*56,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s));
     }
     
-    // Add the exit button
-    ERect btn = new ERect(null,0,d.height+16,250,53,style2|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E,"EXIT");
+    // Add the dismiss and exit buttons
+    ERect btn = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");
+    btn.addEEventListener(new EEventListenerAdapter()
+    {
+      public void touchDown(EEvent ee)
+      {
+        close();
+      }
+    });
+    add(btn);
+
+    btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
     btn.addEEventListener(new EEventListenerAdapter()
     {
       public void touchDown(EEvent ee)
@@ -116,4 +126,12 @@ public class EPanelSelector extends EMessageBox
     addToPanel(panel);
   }
 
+  public void close()
+  {
+    if (panel==null) return;
+    panel.dim(1f);
+    panel.setModal(false);
+    removeFromPanel();
+  }
+  
 }

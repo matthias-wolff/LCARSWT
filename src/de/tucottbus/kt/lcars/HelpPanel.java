@@ -77,7 +77,7 @@ public class HelpPanel extends Panel
     add(new ERect(this,1839,23,58,58,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null));
 
     // The browser
-    eBrowser = new EBrowser(85,85,1750,1046);
+    eBrowser = new EBrowser(85,85,1750,926);
     eBrowser.addBrowserEventListener(new EBrowser.EventListener()
     {
       public void titleChanged(String title)
@@ -92,9 +92,9 @@ public class HelpPanel extends Panel
     });
     
     // The bottom bar
-    add(new ERect(this,23,1135,58,38,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_W,null));
+    add(new ERect(this,23,1019,58,38,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_W,null));
 
-    e = new ERect(this,84,1135,188,38,ST_AMBER|LCARS.ES_LABEL_E|LCARS.ES_DISABLED,"HELP ON HELP");
+    e = new ERect(this,84,1019,188,38,ST_AMBER|LCARS.ES_LABEL_E|LCARS.ES_DISABLED,"HELP ON HELP");
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -103,7 +103,7 @@ public class HelpPanel extends Panel
       }
     });
     add(e);
-    e = new ERect(this,275,1135,116,38,ST_YELLO|LCARS.ES_LABEL_E,"BACK");
+    e = new ERect(this,275,1019,116,38,ST_YELLO|LCARS.ES_LABEL_E,"BACK");
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -115,7 +115,7 @@ public class HelpPanel extends Panel
       }
     });
     add(e);
-    e = new ERect(this,394,1135,116,38,ST_YELLO|LCARS.ES_LABEL_E,"FORWARD");
+    e = new ERect(this,394,1019,116,38,ST_YELLO|LCARS.ES_LABEL_E,"FORWARD");
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -126,9 +126,10 @@ public class HelpPanel extends Panel
     });
     add(e);
 
-    add(new ERect(this,513,1135,1085,38,ST_YELLO|LCARS.ES_LABEL_E,"[UP]/[DOWN] TO SCROLL, [DISMISS] TO CLOSE"));
+    //add(new ERect(this,513,1019,1085,38,ST_YELLO|LCARS.ES_LABEL_E,"[UP]/[DOWN] TO SCROLL, [DISMISS] TO CLOSE"));
+    add(new ERect(this,513,1019,1085,38,ST_YELLO|LCARS.ES_LABEL_E,"BTU/KT"));
     
-    e = new ERect(this,1601,1135,116,38,ST_AMBER|LCARS.ES_LABEL_E,"UP");
+    e = new ERect(this,1601,1019,116,38,ST_AMBER|LCARS.ES_LABEL_E,"UP");
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -149,7 +150,7 @@ public class HelpPanel extends Panel
       }
     });
     add(e);
-    e = new ERect(this,1720,1135,116,38,ST_AMBER|LCARS.ES_LABEL_E,"DOWN");
+    e = new ERect(this,1720,1019,116,38,ST_AMBER|LCARS.ES_LABEL_E,"DOWN");
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -171,7 +172,7 @@ public class HelpPanel extends Panel
     });
     add(e);
     
-    add(new ERect(this,1839,1135,58,38,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null));
+    add(new ERect(this,1839,1019,58,38,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null));
     
   }
   

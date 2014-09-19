@@ -642,13 +642,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   @Override
   public void panelSelectionDialog()
   {
-    ePnlSel.addListener(new EMessageBoxListener()
-    {
-      public void answer(String answer)
-      {
-        System.out.println("THE ANSWER IS: "+answer);
-      }
-    });
     ePnlSel.open(this);
   }
   
@@ -656,7 +649,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * Dims this panel to the specified alpha value.
    * 
    * @param alpha
-   *          The new alpha value (0: tranparent ... 1: opaque).
+   *          The new alpha value (0: transparent ... 1: opaque).
    */
   public void dim(float alpha)
   {
