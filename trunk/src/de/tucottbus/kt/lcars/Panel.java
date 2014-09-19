@@ -222,10 +222,21 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public void doc()
   {
+    doc(false);
+  }
+
+  /**
+   * Displays the documentation root for this panel on the {@link HelpPanel}.
+   * 
+   * @param noRestyleHtml
+   *          <code>true</code> to prevent the documentation to be re-styled to the LCARS look.
+   */
+  public void doc(boolean noRestyleHtml)
+  {
     try
     {
       getScreen().setPanel(HelpPanel.class.getName());
-      ((HelpPanel)getScreen().getPanel()).setDocs(this.getClass(),getDocIndex());
+      ((HelpPanel)getScreen().getPanel()).setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
       ((HelpPanel)getScreen().getPanel()).loadDoc();
     }
     catch (ClassNotFoundException e)
@@ -240,10 +251,21 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public void help()
   {
+    help(false);
+  }
+
+  /**
+   * Displays help for this panel on the {@link HelpPanel}.
+   * 
+   * @param noRestyleHtml
+   *          <code>true</code> to prevent help to be re-styled to the LCARS look.
+   */
+  public void help(boolean noRestyleHtml)
+  {
     try
     {
       getScreen().setPanel(HelpPanel.class.getName());
-      ((HelpPanel)getScreen().getPanel()).setDocs(this.getClass(),getDocIndex());
+      ((HelpPanel)getScreen().getPanel()).setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
       ((HelpPanel)getScreen().getPanel()).loadHelp();
     }
     catch (ClassNotFoundException e)
