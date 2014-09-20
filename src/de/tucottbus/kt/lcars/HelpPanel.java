@@ -1,5 +1,7 @@
 package de.tucottbus.kt.lcars;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.FileNotFoundException;
 
 import de.tucottbus.kt.lcars.contributors.EBrowser;
@@ -18,6 +20,9 @@ public class HelpPanel extends Panel
 {
 
   private Class<? extends Panel> helpFor;
+  private ERect                  eDismiss;
+  private ERect                  eForward;
+  private ERect                  eBack;
   private EValue                 eCaption;
   private EBrowser               eBrowser;
   private String                 docIndex;
@@ -40,16 +45,16 @@ public class HelpPanel extends Panel
     // The top bar
     EElement e;
     add(new ERect(this,23,23,58,58,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_W,null));
-    e = new ERect(this,85,23,156,58,ST_AMBER|LCARS.ES_LABEL_SE,"DISMISS");
-    e.addEEventListener(new EEventListenerAdapter()
+    eDismiss = new ERect(this,85,23,156,58,ST_AMBER|LCARS.ES_LABEL_SE,"DISMISS");
+    eDismiss.addEEventListener(new EEventListenerAdapter()
     {
       @Override
       public void touchDown(EEvent ee)
       {
-        try { getScreen().setPanel(helpFor.getName()); } catch (Exception e) {}
+        onEDismiss();
       }
     });
-    add(e);
+    add(eDismiss);
     e = new ERect(this,244,23,156,58,ST_YELLO|LCARS.ES_LABEL_SE,"HELP");
     e.addEEventListener(new EEventListenerAdapter()
     {
@@ -104,28 +109,26 @@ public class HelpPanel extends Panel
       }
     });
     add(e);
-    e = new ERect(this,275,1019,116,38,ST_YELLO|LCARS.ES_LABEL_E,"BACK");
-    e.addEEventListener(new EEventListenerAdapter()
+    eBack = new ERect(this,275,1019,116,38,ST_YELLO|LCARS.ES_LABEL_E,"BACK");
+    eBack.addEEventListener(new EEventListenerAdapter()
     {
       @Override
       public void touchDown(EEvent ee)
       {
-        if (!eBrowser.isBackEnabled()) 
-          try { getScreen().setPanel(helpFor.getName()); } catch (Exception e) {}
-        eBrowser.back();
+        onEBack();
       }
     });
-    add(e);
-    e = new ERect(this,394,1019,116,38,ST_YELLO|LCARS.ES_LABEL_E,"FORWARD");
-    e.addEEventListener(new EEventListenerAdapter()
+    add(eBack);
+    eForward = new ERect(this,394,1019,116,38,ST_YELLO|LCARS.ES_LABEL_E,"FORWARD");
+    eForward.addEEventListener(new EEventListenerAdapter()
     {
       @Override
       public void touchDown(EEvent ee)
       {
-        eBrowser.forward();
+        onEForward();
       }
     });
-    add(e);
+    add(eForward);
 
     //add(new ERect(this,513,1019,1085,38,ST_YELLO|LCARS.ES_LABEL_E,"[UP]/[DOWN] TO SCROLL, [DISMISS] TO CLOSE"));
     add(new ERect(this,513,1019,1085,38,ST_YELLO|LCARS.ES_LABEL_E,"BTU/KT"));
@@ -174,7 +177,72 @@ public class HelpPanel extends Panel
     add(e);
     
     add(new ERect(this,1839,1019,58,38,ST_YELLO|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null));
-    
+
+    // Add listener for presenter keys
+    addKeyListener(new KeyListener()
+    {
+      @Override
+      public void keyTyped(KeyEvent e)
+      {
+      }
+      
+      @Override
+      public void keyPressed(KeyEvent e)
+      {
+        if (e.getModifiers()!=0) return;
+        switch (e.getKeyCode())
+        {
+        case KeyEvent.VK_F5:        // aka. "Play"
+        case KeyEvent.VK_ESCAPE:    // aka. "Play"
+          eDismiss.setHighlighted(true);
+          break;
+        case KeyEvent.VK_PERIOD:    // aka. "Hide"
+          eDismiss.setHighlighted(true);
+          break;
+        case KeyEvent.VK_PAGE_DOWN: // aka. "Forward"
+        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_KP_RIGHT:
+          eForward.setHighlighted(true);
+          break;
+        case KeyEvent.VK_PAGE_UP:   // aka. "Backward"
+        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_KP_LEFT:
+          eBack.setHighlighted(true);
+          break;
+        }
+      }
+      
+      @Override
+      public void keyReleased(KeyEvent e)
+      {
+        if (e.getModifiers()!=0) return;
+        switch (e.getKeyCode())
+        {
+        case KeyEvent.VK_F5:        // aka. "Play"
+        case KeyEvent.VK_ESCAPE:    // aka. "Play"
+          eDismiss.setHighlighted(false);
+          onEDismiss();
+          break;
+        case KeyEvent.VK_PERIOD:    // aka. "Hide"
+          eDismiss.setHighlighted(false);
+          onEDismiss();
+          break;
+        case KeyEvent.VK_PAGE_DOWN: // aka. "Forward"
+        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_KP_RIGHT:
+          eForward.setHighlighted(false);
+          onEForward();
+          break;
+        case KeyEvent.VK_PAGE_UP:   // aka. "Backward"
+        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_KP_LEFT:
+          eBack.setHighlighted(false);
+          onEBack();
+          break;
+        }
+      }
+    });
+
   }
   
   @Override
@@ -228,7 +296,6 @@ public class HelpPanel extends Panel
       String name = this.helpFor.getName().replace(".","/")+".html";
       String html = LCARS.loadTextResource(name);
       if (html==null) throw new FileNotFoundException(name);
-      eBrowser.setNoRestyleHtml(noRestyleHtml);
       return eBrowser.setText(html);
     }
     catch (Exception e)
@@ -259,11 +326,33 @@ public class HelpPanel extends Panel
     + "    </tr></table>\n"
     + "  </body>\n"
     + "</html>\n";
-    eBrowser.setNoRestyleHtml(false);
     eBrowser.setText(html);
   }
 
+  // -- Operations --
+  
+  protected void onEDismiss()
+  {
+    try { getScreen().setPanel(helpFor.getName()); } catch (Exception e) {}    
+  }
+  
+  protected void onEBack()
+  {
+    if (eBrowser.execute("previousPage();"))
+      return;
 
+    if (!eBrowser.isBackEnabled()) 
+      try { getScreen().setPanel(helpFor.getName()); } catch (Exception e) {}
+    eBrowser.back();
+  }
+  
+  protected void onEForward()
+  {
+    if (eBrowser.execute("nextPage();"))
+      return;
+
+    eBrowser.forward();
+  }
 }
 
 // EOF

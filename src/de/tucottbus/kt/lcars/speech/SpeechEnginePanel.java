@@ -254,10 +254,7 @@ public class SpeechEnginePanel extends Panel
       @Override
       public void touchDown(EEvent ee)
       {
-        ISpeechEngine spe = getSpeechEngine();
-        if (spe==null) return;
-        spe.setListenMode(spe.getListenMode()<0?0:-1);
-        //if (spe.isStarted()) spe.stop(); else spe.start();
+        onVad();
       }
     });
     add(eVad);
@@ -364,6 +361,17 @@ public class SpeechEnginePanel extends Panel
       LCARS.log("SEP","Post-processing event ("+pe.frames.size()+" frames)");
     }
   }
+
+  /**
+   * Handler for the VAD button.
+   */
+  protected void onVad()
+  {
+    ISpeechEngine spe = getSpeechEngine();
+    if (spe==null) return;
+    spe.setListenMode(spe.getListenMode()<0?0:-1);
+    //if (spe.isStarted()) spe.stop(); else spe.start();
+  }
   
   // -- Overrides --
 
@@ -465,6 +473,15 @@ public class SpeechEnginePanel extends Panel
   {
     return eLcars;
   }
+
+  /**
+   * Returns the VAD button
+   */
+  protected EValue getEVad()
+  {
+    return eVad;
+  }
+
 
   /**
    * Returns the lower elbo element.
