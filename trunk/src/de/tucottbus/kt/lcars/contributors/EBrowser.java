@@ -4,7 +4,6 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.rmi.RemoteException;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -25,7 +24,6 @@ import org.eclipse.swt.widgets.Shell;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
-import de.tucottbus.kt.lcars.feedback.UserFeedback;
 
 /**
  * Wraps an SWT web {@link Browser browser} in an {@link ElementContributor}. 
@@ -34,7 +32,6 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
  */
 public class EBrowser extends ElementContributor
 {
-  private EBrowser  eBrowser;
   private Rectangle bounds;
   private Screen    screen;
   private Canvas    canvas;
@@ -60,6 +57,7 @@ public class EBrowser extends ElementContributor
   private boolean   back_;
   private boolean   forward_;
   private boolean   isBackEnabled_;
+  private boolean   execute_;
 
   /**
    * Creates a new web browser. 
@@ -81,7 +79,6 @@ public class EBrowser extends ElementContributor
   public EBrowser(int x, int y, int w, int h, int style)
   {
     super(x,y);
-    this.eBrowser              = this;
     this.bounds                = new Rectangle(x,y,w,h);
     this.browserEventListeners = new Vector<EventListener>();
     this.style                 = style;
@@ -138,15 +135,15 @@ public class EBrowser extends ElementContributor
           browser.setBackground(screen.getSwtDisplay().getSystemColor(SWT.COLOR_BLACK));
           browser.setVisible(false);
           browser.setSize(br.x-tl.x+28/*<- this "hides" the scroll bar*/,br.y-tl.y);
-          if (eBrowser.browserText!=null)
-            browser.setText(eBrowser.browserText);
-          else if (eBrowser.browserUrl!=null)
-            browser.setUrl(eBrowser.browserUrl);
+          if (EBrowser.this.browserText!=null)
+            browser.setText(EBrowser.this.browserText);
+          else if (EBrowser.this.browserUrl!=null)
+            browser.setUrl(EBrowser.this.browserUrl);
           browser.addTitleListener(new TitleListener()
           {
             public void changed(TitleEvent event)
             {
-              eBrowser.browserTitleText = event.title;
+              EBrowser.this.browserTitleText = event.title;
               fireTitleChanged(event.title);
             }
           });
@@ -154,7 +151,7 @@ public class EBrowser extends ElementContributor
           {
             public void changed(StatusTextEvent event)
             {
-              synchronized(eBrowser)
+              synchronized(EBrowser.this)
               {
                 browserStatusText = event.text;
                 fireStatusTextChanged(event.text);
@@ -191,13 +188,15 @@ public class EBrowser extends ElementContributor
             }
             public void changing(LocationEvent event)
             {
+              /* WHY??
               try
               {
-                eBrowser.panel.getScreen().userFeedback(UserFeedback.Type.TOUCH);
+                EBrowser.this.panel.getScreen().userFeedback(UserFeedback.Type.TOUCH); 
               }
               catch (RemoteException e)
               {
               } 
+              */
             }
           });
         }
@@ -283,7 +282,7 @@ public class EBrowser extends ElementContributor
     {
       public void run()
       {
-        eBrowser.back_ = browser.back();
+        EBrowser.this.back_ = browser.back();
       }
     });
     return this.back_;
@@ -298,12 +297,28 @@ public class EBrowser extends ElementContributor
     {
       public void run()
       {
-        eBrowser.forward_ = browser.forward();
+        EBrowser.this.forward_ = browser.forward();
       }
     });
     return this.forward_;
   }
 
+  public boolean execute(String script)
+  {
+    if (browser==null       ) return false;
+    if (browser.isDisposed()) return false;
+    final String script_ = script;
+    execute_ = false;
+    screen.getSwtDisplay().syncExec(new Runnable()
+    {
+      public void run()
+      {
+        EBrowser.this.execute_ = browser.execute(script_);
+      }
+    });
+    return execute_;
+  }
+  
   public boolean isBackEnabled()
   {
     if (browser==null       ) return true;
@@ -313,7 +328,7 @@ public class EBrowser extends ElementContributor
     {
       public void run()
       {
-        eBrowser.isBackEnabled_ = browser.isBackEnabled();
+        EBrowser.this.isBackEnabled_ = browser.isBackEnabled();
       }
     });
     return this.isBackEnabled_;
@@ -329,11 +344,11 @@ public class EBrowser extends ElementContributor
     {
       public void run()
       {
-        eBrowser.scrollBy_ = browser.execute("window.scrollBy(0,"+eBrowser.scrollBy_pixels+");");
+        EBrowser.this.scrollBy_ = browser.execute("window.scrollBy(0,"+EBrowser.this.scrollBy_pixels+");");
       }
     });
     return this.scrollBy_;  }
-  
+
   /**
    * Renders HTML
    * 
@@ -347,12 +362,12 @@ public class EBrowser extends ElementContributor
     this.setText_    = false;
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtDisplay().asyncExec(new Runnable()
     {
       public void run()
       {
         browser.setVisible(false);
-        eBrowser.setText_ = browser.setText(eBrowser.browserText);
+        EBrowser.this.setText_ = browser.setText(EBrowser.this.browserText);
       }
     });
     return this.setText_;
@@ -371,17 +386,16 @@ public class EBrowser extends ElementContributor
     this.setUrl_    = false;
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtDisplay().asyncExec(new Runnable()
     {
       public void run()
       {
         browser.setVisible(false);
-        eBrowser.setUrl_ = browser.setUrl(eBrowser.browserUrl);
+        EBrowser.this.setUrl_ = browser.setUrl(EBrowser.this.browserUrl);
       }
     });
     return this.setUrl_;
   }
-  
 
   /**
    * Determines if this browser re-styles its HTML content to the LCARS look.
@@ -408,7 +422,7 @@ public class EBrowser extends ElementContributor
     else
       style &= ~LCARS.ES_BROWSER_NORESTYLEHTML;
 
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtDisplay().asyncExec(new Runnable()
     {
       public void run()
       {
@@ -421,7 +435,6 @@ public class EBrowser extends ElementContributor
     });  
   }
 
-  
   // -- Event handling --
   
   public interface EventListener
