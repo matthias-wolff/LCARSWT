@@ -1494,7 +1494,7 @@ public class LCARS implements ILcarsRemote
       }
       boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
-        iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen);
+        iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
       else
         log("LCARS","Command line mode (no GUI)");
 

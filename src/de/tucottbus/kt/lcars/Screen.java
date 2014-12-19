@@ -38,6 +38,14 @@ import javax.swing.event.MouseInputListener;
 
 import org.eclipse.swt.widgets.Display;
 
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLJPanel;
+
+import agile2d.AgileGraphics2D;
+import agile2d.AgileRenderingHints;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
@@ -55,63 +63,78 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  */
 public class Screen extends JFrame implements IScreen, MouseInputListener, KeyListener
 {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   // -- Fields --
 
   /**
-   * The default serial version ID.
-   */
-  private static final long  serialVersionUID = -1L;
-  
-  /**
    * The panel this screen is displaying. 
    */
-  private IPanel ipanel;
-
+  protected IPanel panel;
+    
   /**
    * The current state of the {@link Panel} displayed on this screen.
    */
-  private PanelData panelData;
+  protected PanelData panelData;
   
   /**
    * Full screen mode flag.
    */
-  private boolean fullScreenMode;
+  protected boolean fullScreenMode;
   
   /**
    * The cache for the 2D rendering transform.
    */
-  private AffineTransform renderingTransform;
+  protected AffineTransform renderingTransform;
   
   /**
    * The screen timer. Blocks the screen saver and keeps the frames-per-second-statistics.
    */
-  private Timer screenTimer;
+  protected Timer screenTimer;
 
   /**
    * The user feedback player.
    */
-  private UserFeedbackPlayer userFeedbackPlayer;
+  protected UserFeedbackPlayer userFeedbackPlayer;
   
   /**
    * The screen rendering load statistics.
    */
-  private LoadStatistics loadStat;
+  protected LoadStatistics loadStat;
   
   /**
    * The background image.
    */
-  private Image bgImg;
+  protected Image bgImg;
   
   /**
    * The background image resource file.
    */
-  private String bgImgRes;
+  protected String bgImgRes;
   
+   
+  // -- OpenGL parameters
+  
+  /**
+   * The quality of text rendering in OpenGL (default is rough).
+   */
+  public final static int TEXT_RENDERING_STRATEGY = AgileGraphics2D.ROUGH_TEXT_RENDERING_STRATEGY;
+
+  /**
+   * The number of samples for multisample in OpenGL used for antialiasing (MSAA). 16 is max and zero deactivates MSAA.
+   */
+  public final static int NUM_SAMPLES_FOR_MULTISAMPLE = 16;
+ 
   // -- Constructors --
   
   /**
    * Creates a new LCARS screen.
    * 
+   * @param swtDisplay
+   *          The SWT display on which this screen is run.
    * @param device
    *          the graphics device to display the screen on
    * @param panelClass
@@ -124,27 +147,20 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   (
     GraphicsDevice device,
     String         panelClass,
-    boolean        fullScreen
+    boolean        fullScreen,
+    boolean        openGl
   ) throws ClassNotFoundException
   {
     super(device.getDefaultConfiguration());
-    this.loadStat   = new LoadStatistics(25);
-
+    loadStat   = new LoadStatistics(25);
+    
     // Create Swings widgets
     setTitle("LCARS");
-    setDefaultCloseOperation(EXIT_ON_CLOSE);
-    JComponent component = new JComponent()
-    {
-      private static final long serialVersionUID = 1L;
-
-      @Override
-      public void paintComponent(Graphics g)
-      {
-        super.paintComponent(g);
-        paint2D((Graphics2D)g);
-      }
-    };
-    setContentPane(component);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+    if(!(openGl && initGLContentPane()))
+      initContentPane();
+      
     setPanel(panelClass);
     fullScreenMode = fullScreen && device.isFullScreenSupported();
     setUndecorated(fullScreen);
@@ -156,6 +172,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       device.setFullScreenWindow(this);
       setAlwaysOnTop(fullScreen);
       validate();
+      createBufferStrategy(1);
     }
     else
     {
@@ -172,11 +189,13 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       setVisible(true);
       if (fullScreen)
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+      
+      createBufferStrategy(2);
     }
-    createBufferStrategy(2);
     
     if (LCARS.getArg("--nomouse")!=null)
-      this.setCursor(LCARS.getBlankCursor());
+      setCursor(LCARS.getBlankCursor());
+    
     
     // The screen timer
     screenTimer = new Timer(true);
@@ -193,14 +212,14 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     };
     
     // Window event handlers
-    this.addWindowStateListener(new WindowStateListener()
+    addWindowStateListener(new WindowStateListener()
     {
       @Override
       public void windowStateChanged(WindowEvent e)
       {
       }
     });
-    this.addWindowListener(new WindowListener(){
+    addWindowListener(new WindowListener(){
       public void windowActivated(WindowEvent e)
       {
       }
@@ -223,7 +242,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       {
       }   
     });
-    this.addComponentListener(new ComponentListener()
+    addComponentListener(new ComponentListener()
     {
       @Override
       public void componentShown(ComponentEvent e)
@@ -256,8 +275,91 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     addKeyListener(this);
   }
 
-  // -- Getters and setters --
+  
+  /**
+   * Initialize the ContentPane with a {@link javax.swing.JComponent}. Rendering will be performed
+   * on the cpu.
+   * @return Always true
+   */
+  private boolean initContentPane()
+  {
+    JComponent component = new JComponent()
+    {
+      private static final long serialVersionUID = 1L;
 
+      @Override
+      public void paintComponent(Graphics g)
+      {
+        long time = System.nanoTime();
+        
+        super.paintComponent(g);
+        paint2D((Graphics2D)g);
+        
+        loadStat.add((int)((System.nanoTime()-time)/400000));
+      }
+    };
+    setContentPane(component);
+    LCARS.log("SCR", "OpenGL disabled");
+    return true;
+  }
+  
+  /**
+   * Initialize the ContentPane with the OpenGL component {@link javax.media.opengl.awt.GLJPanel}.
+   * Rendering will be performed on the gpu. 
+   * @return Return true if OpenGL 2.0 is available, otherwise false
+   */
+  private boolean initGLContentPane()
+  {
+    // check, if openGL is available
+    if(!GLProfile.getDefault().isGL2())
+      return false;
+       
+    GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
+    caps.setDoubleBuffered(true);// request double buffer display mode
+    caps.setSampleBuffers(NUM_SAMPLES_FOR_MULTISAMPLE > 0);
+    caps.setNumSamples(NUM_SAMPLES_FOR_MULTISAMPLE);
+    GLJPanel gljPanel = new GLJPanel(caps);
+          
+    gljPanel.addGLEventListener(new GLEventListener()
+    { 
+      private AgileGraphics2D g2d;
+         
+      @Override
+      public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {}
+      
+      @Override
+      public void init(GLAutoDrawable drawable)
+      {
+        AgileGraphics2D.destroyInstance();
+        g2d = AgileGraphics2D.getInstance(drawable);           
+        g2d.setFontRenderingStrategy(TEXT_RENDERING_STRATEGY);
+      }
+      
+      @Override
+      public void dispose(GLAutoDrawable drawable)
+      {}
+      
+      @Override
+      public void display(GLAutoDrawable drawable)
+      {
+        long time = System.nanoTime();
+        
+        g2d.resetAll(drawable);
+        paint2D(g2d);          
+
+        loadStat.add((int)((System.nanoTime()-time)/400000));
+      }
+    });
+    
+    setContentPane(gljPanel);
+    LCARS.log("SCR", "OpenGL enabled");
+    return true;
+  }
+  
+  
+  
+  // -- Getters and setters --
+    
   /**
    * Returns the actual {@link Screen} for an {@linkplain IScreen LCARS screen interface}. This is
    * only possible if the screen is run by the virtual machine on which this method is invoked. If
@@ -274,7 +376,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   {
     return (Screen)screen;
   }
-
+  
   /**
    * Returns the SWT display this screen is running on. 
    */
@@ -296,7 +398,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   /**
    * Marks the screen as needing to be redrawn. 
    */
-  protected synchronized void invalidateScreen()
+  public synchronized void invalidateScreen()
   {
     renderingTransform = null;
   }
@@ -312,7 +414,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       return new AffineTransform();
     
     Dimension dp = panelData.panelState.dimension;
-    Dimension ds = getContentPane().getSize();
+    Dimension ds = super.getContentPane().getSize();
     renderingTransform = new AffineTransform();
     double sx = (double)ds.getWidth() /(double)dp.width;
     double sy = (double)ds.getHeight()/(double)dp.height;
@@ -367,12 +469,13 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    * Paints the panel elements of this screen on a {@link Graphics2D} context. 
    * 
    * @param g2d the graphics context
-   * @see #panelData
+   * @see #elements
    */
   protected void paint2D(Graphics2D g2d)
   {
     PanelState panelState;
     Vector<ElementData> elementData;
+    
     synchronized (this)
     {
       if (this.panelData!=null)
@@ -387,58 +490,58 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       }
     }
 
-    // Prepare
-    g2d.setTransform(getTransform());
+    // Prepare    
+    AffineTransform transform = getTransform();
+    g2d.setTransform(transform);
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
     g2d.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
     g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_NORMALIZE);
     g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,1.0f));
-    long time = System.nanoTime();
-
+    if (g2d instanceof AgileGraphics2D)
+    {
+      g2d.setRenderingHint(AgileRenderingHints.KEY_USING_GL_HINT,true);
+      g2d.setRenderingHint(AgileRenderingHints.KEY_IMMUTABLE_IMAGE_HINT,true);
+      g2d.setRenderingHint(AgileRenderingHints.KEY_IMMUTABLE_SHAPE_HINT,true);
+      g2d.setRenderingHint(AgileRenderingHints.KEY_INCREMENTAL_FONT_RENDERER_HINT,true);      
+    }
+    
     // Draw background
     if (bgImg==null)
-    {
+    {      
       g2d.setColor(Color.black);
-      g2d.fillRect(0,0,getWidth(),getHeight());
+      g2d.fillRect(0,0,super.getWidth(),super.getHeight());
     }
     else
-      g2d.drawImage(bgImg,null,this);
+      g2d.drawImage(bgImg,transform,this);
 
-    // Draw elements
+    paint2D(g2d, elementData, panelState);
+  }
+  
+  /**
+   * Draws widgets to the graphic.
+   * @param g2d - graphic to draw on
+   * @param elementData - elements/widgets to be drawn on the graphic
+   * @param panelState - state of the panel
+   * @return load time in nano seconds
+   */  
+  static void paint2D (Graphics2D g2d, Vector<ElementData> elementData, PanelState panelState)
+  {
+    if (elementData==null)
+      return;
+        
     //GImage.beginCacheRun();
-    if (elementData!=null)
+    try
     {
-      // - Draw non-modal elements (or all if panel not in modal state)
       for (ElementData data : elementData)
-        try
-        {
-          if (!panelState.modal || data.state.getStyle(LCARS.ES_MODAL)==0)
-            data.render2D(g2d,panelState);
-        }
-        catch (Throwable e)
-        {
-          e.printStackTrace();
-        }
-
-      // - Draw modal elements if panel is in modal state
-      if (panelState.modal)
-        for (ElementData data : elementData)
-          try
-          {
-            if (data.state.getStyle(LCARS.ES_MODAL)!=0)
-              data.render2D(g2d,panelState);
-          }
-          catch (Throwable e)
-          {
-            e.printStackTrace();
-          }
+        data.render2D(g2d,panelState);
+    }
+    catch (Throwable e)
+    {
+      LCARS.err("SCR", "error at 'static void paint2D(Graphics2D, Vector<ElementData>, PanelState)'");
+      e.printStackTrace();
     }
     //GImage.endCacheRun();
-
-    // Aftermath
-    time = System.nanoTime()-time;
-    loadStat.add((int)(time/400000));
   }
   
   /**
@@ -476,27 +579,27 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    */
   public void setPanel(IPanel ipanel)
   {
-    if (ipanel==null && this.ipanel==null         ) return;
-    if (ipanel!=null && ipanel.equals(this.ipanel)) return;
+    if (ipanel==null && this.panel==null         ) return;
+    if (ipanel!=null && ipanel.equals(this.panel)) return;
     
     // Stop current panel (if any)
-    if (this.ipanel!=null) 
+    if (this.panel!=null) 
       try
       {
-        this.ipanel.stop();
+        this.panel.stop();
       }
       catch (RemoteException e)
       {
       }
 
     // Set and start new panel  
-    this.ipanel = ipanel;
+    this.panel = ipanel;
     this.panelData = null;
-    if (this.ipanel!=null)
+    if (this.panel!=null)
       try
       {
-        LCARS.log("SCR","Starting panel "+this.ipanel.getClass().getSimpleName()+"...");
-        this.ipanel.start();
+        LCARS.log("SCR","Starting panel "+this.panel.getClass().getSimpleName()+"...");
+        this.panel.start();
         LCARS.log("SCR","...Panel started");
       }
       catch (RemoteException e)
@@ -524,14 +627,14 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   
   @Override
   public void setPanel(String className) throws ClassNotFoundException
-  {
+  {    
     setPanel(Panel.createPanel(className,this));
   }
 
   @Override
   public IPanel getPanel()
   {
-    return ipanel;
+    return panel;
   }
 
   @Override
@@ -560,6 +663,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     
     // Set new panel data and invalidate the screen
     panelData = data;
+
     updateBgImage();
     invalidateScreen();
   }
@@ -599,7 +703,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     te.type = TouchEvent.DOWN;
     te.x    = pt.x;
     te.y    = pt.y;
-    try { ipanel.processTouchEvent(te); } catch (RemoteException e1) {}
+    try { panel.processTouchEvent(te); } catch (RemoteException e1) {}
   }
 
   @Override
@@ -610,7 +714,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     te.type = TouchEvent.UP;
     te.x    = pt.x;
     te.y    = pt.y;
-    try { ipanel.processTouchEvent(te); } catch (RemoteException e1) {}
+    try { panel.processTouchEvent(te); } catch (RemoteException e1) {}
   }
 
   @Override
@@ -633,7 +737,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     te.type = TouchEvent.DRAG;
     te.x    = pt.x;
     te.y    = pt.y;
-    try { ipanel.processTouchEvent(te); } catch (RemoteException e1) {}
+    try { panel.processTouchEvent(te); } catch (RemoteException e1) {}
   }
 
   @Override
@@ -647,22 +751,22 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   @Override
   public void keyTyped(KeyEvent e)
   {
-    if (ipanel!=null) 
-      try { ipanel.processKeyEvent(e); } catch (RemoteException e1) {}
+    if (panel!=null) 
+      try { panel.processKeyEvent(e); } catch (RemoteException e1) {}
   }
 
   @Override
   public void keyPressed(KeyEvent e)
   {
-    if (ipanel!=null) 
-      try { ipanel.processKeyEvent(e); } catch (RemoteException e1) {}
+    if (panel!=null) 
+      try { panel.processKeyEvent(e); } catch (RemoteException e1) {}
   }
 
   @Override
   public void keyReleased(KeyEvent e)
   {
-    if (ipanel!=null) 
-      try { ipanel.processKeyEvent(e); } catch (RemoteException e1) {}
+    if (panel!=null) 
+      try { panel.processKeyEvent(e); } catch (RemoteException e1) {}
   }
 
   // -- Nested classes --
@@ -680,18 +784,15 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     {
       // Every 40 milliseconds...
       {
-        if (isScreenInvalid()) repaint();
+        if (isScreenInvalid())
+          repaint();
       }
 
       // Every second...
       if (ctr%25==0)
       {
         if (!isScreenInvalid() && loadStat.getEventCount()==0)
-        {
-          invalidateScreen();
-          invalidate();
           repaint();
-        }
         loadStat.period();
       }
 
@@ -706,14 +807,11 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
           m = MouseInfo.getPointerInfo().getLocation();
           r.mouseMove(m.x+1,m.y);
         }
-        catch (Exception e)
-        {
-        }
+        catch (Exception e) {}
         
       ctr++;
     }
   }
-
 }
 
 // EOF

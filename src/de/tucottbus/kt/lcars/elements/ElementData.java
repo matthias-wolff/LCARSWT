@@ -16,8 +16,8 @@ import de.tucottbus.kt.lcars.j2d.Geometry;
 /**
  * The serializable data of an {@linkplain EElement LCARS GUI element}. An element data instance
  * stores the {@link #state} and the {@link #geometry} of a GUI element. Element data instances are
- * also used to transfer rendering information from the {@linkplain de.tucottbus.kt.lcars.Panel LCARS
- * panel} to the {@linkplain Screen screen}.
+ * also used to transfer rendering information from the {@linkplain Panel LCARS panel} to the
+ * {@linkplain Screen screen}.
  * 
  * @author Matthias Wolff
  */
@@ -102,8 +102,8 @@ public class ElementData implements Serializable
    * Determines if the {@link #geometry geometry} (i.e. the graphical representation of this
    * element) is valid or needs to be recomputed.
    * 
-   * @see EElement#invalidate(boolean)
-   * @see EElement#validateGeometry()
+   * @see #invalidateGeometry()
+   * @see #validateGeometry()
    */
   public boolean isGeometryValid()
   {
@@ -221,12 +221,41 @@ public class ElementData implements Serializable
     if (state==null) LCARS.err("ELD","Invalid state #"+serialNo);
     if (!state.isVisible()) return;
 
-    for (Geometry gi : geometry)
+    float fgAlpha = state.getFgAlpha();
+    float bgAlpha = state.getBgAlpha(panelState);
+    AlphaComposite fgAlphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,fgAlpha);
+    AlphaComposite bgAlphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,bgAlpha);    
+    Color fgColor = state.getFgColor();
+    Color bgColor = state.getBgColor(panelState);
+    
+    g2d.setComposite(bgAlphaComposite);
+    g2d.setColor(bgColor);
+    
+    int i = 0;
+    int l = geometry.capacity();
+    
+    // render all background elements
+    for (; i < l; i++)
     {
-      float alpha = gi.isForeground()?state.getFgAlpha():state.getBgAlpha(panelState);
-      Color color = gi.isForeground()?state.getFgColor():state.getBgColor(panelState);
-      g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,alpha));
-      g2d.setColor(color);
+      Geometry gi = geometry.get(i);
+
+      if (gi.isForeground())
+      {
+        g2d.setComposite(fgAlphaComposite);
+        g2d.setColor(fgColor);
+        gi.paint2D(g2d);
+        
+        i++;
+        break;
+      }
+              
+      gi.paint2D(g2d);
+    }
+    
+    // render all foreground elements
+    for (; i < l; i++)
+    {
+      Geometry gi = geometry.get(i);      
       gi.paint2D(g2d);
     }
   }
