@@ -54,6 +54,11 @@ public class GImage extends Geometry
   public void paint2D(Graphics2D g2d)
   {
     Image image = GImage.getImage(this.resourceName);
+    if(image == null)
+    {
+      //LCARS.err("GImage", "Image not found at Location: "+ this.resourceName);
+      return;
+    }
     g2d.drawImage(image,this.pos.x,this.pos.y,this.imageObserver);
   }
 
