@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.al;
+package de.tucottbus.kt.lcarsx.al;
 
 import java.io.File;
 import java.util.Vector;

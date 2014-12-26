@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.al;
+package de.tucottbus.kt.lcarsx.al;
 
 /**
  * Implementations can listen to {@linkplain AudioPlayerEvent audio player events}.

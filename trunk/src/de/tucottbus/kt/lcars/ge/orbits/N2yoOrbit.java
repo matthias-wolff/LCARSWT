@@ -21,6 +21,8 @@ import de.tucottbus.kt.lcars.ge.GE;
  * 
  * @author Matthias Wolff, BTU Cottbus
  * @author helloworld922@www.javaprogrammingforums.com (spline interpolation)
+ * @deprecated Because Goggle Earth API has been deprecated. New implementation in
+ *             {@link de.tucottbus.kt.lcarsx.wwj.orbits.N2yoOrbit}.
  */
 @SuppressWarnings("unused")
 public class N2yoOrbit extends GEOrbit

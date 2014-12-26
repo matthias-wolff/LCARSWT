@@ -31,6 +31,9 @@ import org.xml.sax.SAXException;
 
 import de.tucottbus.kt.lcars.LCARS;
 
+/**
+ * @deprecated Because Goggle Earth API has been deprecated.
+ */
 public class Geocoder
 {
   private static       String kml     = ""; 

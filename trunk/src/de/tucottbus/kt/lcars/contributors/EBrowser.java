@@ -204,7 +204,7 @@ public class EBrowser extends ElementContributor
     }
     catch (ClassCastException e)
     {
-      System.err.println("LCARS: Function not supported on remove screens.");
+      System.err.println("LCARS: Function not supported on remote screens.");
       e.printStackTrace();
     }
   }

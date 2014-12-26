@@ -7,11 +7,13 @@ import de.tucottbus.kt.lcars.ge.GECamera;
 /**
  * The standard orbit of earth, moon, or mars.
  * <ul>
- *   <li>25° N at earth, over equator at moon and mars</li>.
- *   <li>One revolution per hour.</li>
+ * <li>25° N at earth, over equator at moon and mars</li>.
+ * <li>One revolution per hour.</li>
  * </ul>
  * 
  * @author Matthias Wolff
+ * @deprecated Because Goggle Earth API has been deprecated. New implementation in
+ *             {@link de.tucottbus.kt.lcarsx.wwj.orbits.StdEarthOrbit}.
  */
 public class StdOrbit extends GEOrbit
 {
