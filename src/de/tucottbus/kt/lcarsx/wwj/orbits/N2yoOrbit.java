@@ -1,4 +1,7 @@
-package de.tucottbus.kt.lcars.ge.orbits;
+package de.tucottbus.kt.lcarsx.wwj.orbits;
+
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -7,40 +10,28 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.ge.GE;
 
 /**
- * Instances of this class provide real time tracking of earth satellites including the
- * international space station. Orbit data are obtained from <a
+ * Instances of this class provide real time tracking of earth satellites
+ * including the international space station. Orbit data are obtained from <a
  * href="http://www.n2yo.com">http://www.n2yo.com</a>.
  * 
  * @author Matthias Wolff, BTU Cottbus
  * @author helloworld922@www.javaprogrammingforums.com (spline interpolation)
- * @deprecated Because Goggle Earth API has been deprecated. New implementation in
- *             {@link de.tucottbus.kt.lcarsx.wwj.orbits.N2yoOrbit}.
  */
-@SuppressWarnings("unused")
-public class N2yoOrbit extends GEOrbit
+public abstract class N2yoOrbit extends Orbit
 { 
-  /**
-   * The orbit of the international space station.
-   */
-  public static final String ID_ISS = "25544";
-
+  private static final double EARTH_RADIUS = 6371000;
+  //private static final double MOON_RADIUS = 1738000;
+  //private static final double MARS_RADIUS = 3400000;
+  
   /**
    * The HTTP-GET query retrieving a satellite orbit.
    */
   private static final String Q_ORBIT = "http://www.n2yo.com/sat/gg.php?s=%s";
-
-  /**
-   * The n2yo satellite ID, one of the <code>ID_XXX</code> constants.
-   */
-  private String satID;
 
   /**
    * The name of the satellite traveling this orbit. This field is initialized by
@@ -51,20 +42,22 @@ public class N2yoOrbit extends GEOrbit
   /**
    * The orbit.
    */
-  protected Vector<Pos> orbit;
+  protected Vector<OrbitState> orbit;
 
   /**
    * Creates a new satellite orbit.
-   * 
-   * @param satID
-   *          The n2yo satellite ID, one of the <code>ID_XXX</code> constants.
    */
-  public N2yoOrbit(String satID)
+  public N2yoOrbit()
   {
-    this.satID = satID;
+    // Load orbit
     this.orbit = queryOrbit();
   }
 
+  /**
+   * Must be overridden by implementations an return the N2YO satellite ID.
+   */
+  public abstract String getSatID(); 
+  
   @Override
   public String getName()
   {
@@ -72,13 +65,43 @@ public class N2yoOrbit extends GEOrbit
   }
 
   @Override
-  public String getWorld()
+  public Position getDefaultEyePosition()
   {
-    return GE.EARTH;
+    return new Position(Angle.ZERO, Angle.ZERO, 27000000);
   }
-  
+
   @Override
-  public Pos getPosition(Date date)
+  public boolean controlsLatitude()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean controlsLongitude()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean controlsAltitude()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean controlsHeading()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean controlsPitch()
+  {
+    return false;
+  }
+
+  @Override
+  protected OrbitState getState(Date date)
   {
     if (date==null) date = new Date();
     if (date.before(getFirstDate())) return null;
@@ -87,13 +110,13 @@ public class N2yoOrbit extends GEOrbit
       orbit = queryOrbit();
       if (date.after(getLastDate())) return null;
     }
-
+    
     for (int step=1; step<orbit.size()-2; step++)
     {
-      Pos pos1 = orbit.get(step-1);
-      Pos pos2 = orbit.get(step  );
-      Pos pos3 = orbit.get(step+1);
-      Pos pos4 = orbit.get(step+2);
+      OrbitState pos1 = orbit.get(step-1);
+      OrbitState pos2 = orbit.get(step  );
+      OrbitState pos3 = orbit.get(step+1);
+      OrbitState pos4 = orbit.get(step+2);
       if 
       (
         date.getTime()>=pos2.date.getTime() &&
@@ -104,133 +127,33 @@ public class N2yoOrbit extends GEOrbit
           = (float)(date.getTime()-pos2.date.getTime())
           / (float)(pos3.date.getTime()-pos2.date.getTime());
         
-        //Pos pos = getPositionLI(pos2,pos3,f);
-        Pos pos = getPositionSI(pos1,pos2,pos3,pos4,f);
+        //OrbitState pos = getPositionLI(pos2,pos3,f);
+        OrbitState pos = getPositionSI(pos1,pos2,pos3,pos4,f);
+
+        // Standard pitch: five degrees below the horizon
+        double a = Math.asin(EARTH_RADIUS/(EARTH_RADIUS+pos.alt))/Math.PI*180-5;
+        pos.pitch = Angle.fromDegrees(a); 
+
         pos.date = date;
         return pos;
       }
     }
     return null;
   }
+
+  // -- Operations --
   
-  /**
-   * Get position by linear interpolation.
-   * 
-   * @param posA
-   *          The left position.
-   * @param posB
-   *          The right position.
-   * @param f
-   *          The interpolation factor, 0 (left position) ... 1 (right position).
-   * @return The interpolated position.
-   */
-  private Pos getPositionLI(Pos posA, Pos posB, float f)
-  {
-    // Compute latitude delta
-    float dlat = posB.lat-posA.lat;
-
-    // Compute longitude delta
-    float dlon = posB.lon-posA.lon;
-    if (Math.abs(dlon)>300)
-    {
-      if (posB.lon<0) dlon = posB.lon+360-posA.lon;
-      else dlon = posB.lon-360-posA.lon;
-    }
-
-    // Compute interpolated position
-    Pos pos = new Pos();
-    pos.lat = posA.lat+f*dlat;
-    pos.lon = posA.lon+f*dlon;
-    pos.alt = (posA.alt+f*(posB.alt-posA.alt))*1000;
-    pos.spd = posA.spd+f*(posB.spd-posA.spd);
-    pos.hdg = dlon==0?0:(float)(Math.atan(dlon/dlat)/Math.PI*180f);
-    if (pos.lon>180) pos.lon -= 360;
-    if (dlon>0&&pos.hdg<0) pos.hdg += 180;
-    else if (dlon<0&&pos.hdg>0) pos.hdg -= 180;
-    return pos;
-  }
-
-  /**
-   * Get position by spline interpolation.
-   * 
-   * @param pos1
-   *          The first position.
-   * @param pos2
-   *          The second position.
-   * @param pos3
-   *          The third position.
-   * @param pos4
-   *          The forth position.
-   * @param f
-   *          The interpolation factor between the 2nd and 3rd position, 0 (2nd position) ... 1 (3rd
-   *          position).
-   * @return The interpolated position.
-   */
-  private Pos getPositionSI(Pos pos1, Pos pos2, Pos pos3, Pos pos4, float f)
-  {
-    // Unwrap longitudes
-    float lon1 = pos1.lon;
-    float lon2 = lon_unwrap(lon1,pos2.lon);
-    float lon3 = lon_unwrap(lon2,pos3.lon);
-    float lon4 = lon_unwrap(lon3,pos4.lon);
-
-    // Compute interpolated position
-    Pos pos = new Pos();
-    double[] x = {-1,0,1,2};
-    double[] y = {pos1.lat,pos2.lat,pos3.lat,pos4.lat};
-    pos.lat    = (float)poly_interpolate(x,y,f,3);
-    float dlat = (float)poly_interpolate(x,y,f+0.01,3)-pos.lat;
-    y          = new double[] {lon1,lon2,lon3,lon4};
-    pos.lon    = (float)poly_interpolate(x,y,f,3);
-    float dlon = (float)poly_interpolate(x,y,f+0.01,3)-pos.lon;
-    pos.alt    = (pos2.alt+f*(pos3.alt-pos2.alt))*1000; // Linear!
-    pos.spd    = pos2.spd+f*(pos3.spd-pos2.spd); // Linear!
-    pos.hdg    = dlon==0?0:(float)(Math.atan(dlon/dlat)/Math.PI*180f);
-    
-    // Finish position
-    if (pos.lon>180) pos.lon -= 360;
-    if (lon3-lon2>0&&pos.hdg<0) pos.hdg += 180;
-    else if (lon3-lon2<0&&pos.hdg>0) pos.hdg -= 180;
-    return pos;
-  }
-
-  /**
-   * Returns 10 (i.&nbsp;e. "teleport").
-   */
-  @Override
-  public float getFlytoSpeed()
-  {
-    return 10; // i.e. teleport
-  }
-
-  /**
-   * Returns the first date for which orbit positions are available.
-   */
-  private Date getFirstDate()
-  {
-    return orbit.get(1).date;
-  }
-
-  /**
-   * Returns the last date for which orbit positions are available.
-   */
-  private Date getLastDate()
-  {
-    return orbit.get(orbit.size()-2).date;
-  }
-
   /**
    * Gets the orbit from <code>www.n2yo.com</code>.
    * 
    * @return
    *    The orbit.
    */
-  protected Vector<N2yoOrbit.Pos> queryOrbit()
+  protected Vector<N2yoOrbit.OrbitState> queryOrbit()
   {
-    Vector<Pos> orbit = new Vector<Pos>();
+    Vector<OrbitState> orbit = new Vector<OrbitState>();
     
-    if (satID==null) satID = ID_ISS;
-    String url = String.format(Locale.US,Q_ORBIT,satID);
+    String url = String.format(Locale.US,Q_ORBIT,getSatID());
     LCARS.log("N2Y","HTTP-GET \""+url+"\"");
     HttpURLConnection conn;
     try
@@ -255,10 +178,10 @@ public class N2yoOrbit extends GEOrbit
           }
           else
           {
-            Pos pos  = new Pos();
-            pos.lat  = Float.valueOf(tokens[0]);
-            pos.lon  = Float.valueOf(tokens[1]);
-            pos.alt  = Float.valueOf(tokens[2]);
+            OrbitState pos  = new OrbitState();
+            pos.lat  = Angle.fromDegreesLatitude(Double.valueOf(tokens[0]));
+            pos.lon  = Angle.fromDegreesLongitude(Double.valueOf(tokens[1]));
+            pos.alt  = Double.valueOf(tokens[2]);
             pos.date = new Date(Long.valueOf(tokens[3])*1000);
             pos.spd  = Float.valueOf(tokens[4]);
             orbit.add(pos);
@@ -279,6 +202,113 @@ public class N2yoOrbit extends GEOrbit
     }
     return orbit;
   }
+  
+  // -- Private API --
+
+  /**
+   * Get position by linear interpolation.
+   * 
+   * @param posA
+   *          The left position.
+   * @param posB
+   *          The right position.
+   * @param f
+   *          The interpolation factor, 0 (left position) ... 1 (right position).
+   * @return The interpolated position.
+   */
+  @SuppressWarnings("unused")
+  private OrbitState getPositionLI(OrbitState posA, OrbitState posB, float f)
+  {
+    // Compute latitude delta
+    double dlat = posB.lat.degrees-posA.lat.degrees;
+
+    // Compute longitude delta
+    double dlon = posB.lon.degrees-posA.lon.degrees;
+    if (Math.abs(dlon)>300)
+    {
+      if (posB.lon.degrees<0) dlon = posB.lon.degrees+360-posA.lon.degrees;
+      else dlon = posB.lon.degrees-360-posA.lon.degrees;
+    }
+
+    // Compute interpolated position
+    double lat = posA.lat.degrees+f*dlat;
+    double lon = posA.lon.degrees+f*dlon;
+    double alt = (posA.alt+f*(posB.alt-posA.alt))*1000;
+    double spd = posA.spd+f*(posB.spd-posA.spd);
+    double hdg = dlon==0?0:Math.atan(dlon/dlat)/Math.PI*180;
+    if (lon>180) lon -= 360;
+    if (dlon>0&&hdg<0) hdg += 180;
+    else if (dlon<0&&hdg>0) hdg -= 180;
+
+    OrbitState pos = new OrbitState();
+    pos.lat = Angle.fromDegreesLatitude(lat);
+    pos.lon = Angle.fromDegreesLongitude(lon);
+    pos.alt = alt;
+    pos.spd = spd;
+    pos.hdg = Angle.fromDegrees(hdg);
+    return pos;
+  }
+
+  /**
+   * Get position by spline interpolation.
+   * 
+   * @param pos1
+   *          The first position.
+   * @param pos2
+   *          The second position.
+   * @param pos3
+   *          The third position.
+   * @param pos4
+   *          The forth position.
+   * @param f
+   *          The interpolation factor between the 2nd and 3rd position, 0 (2nd position) ... 1 (3rd
+   *          position).
+   * @return The interpolated position.
+   */
+  private OrbitState getPositionSI(OrbitState pos1, OrbitState pos2, OrbitState pos3, OrbitState pos4, float f)
+  {
+    // Unwrap longitudes
+    double lon1 = pos1.lon.degrees;
+    double lon2 = lon_unwrap(lon1,pos2.lon.degrees);
+    double lon3 = lon_unwrap(lon2,pos3.lon.degrees);
+    double lon4 = lon_unwrap(lon3,pos4.lon.degrees);
+
+    // Compute interpolated position
+    double[] x  = {-1,0,1,2};
+    double[] y  = {pos1.lat.degrees,pos2.lat.degrees,pos3.lat.degrees,pos4.lat.degrees};
+    double lat  = poly_interpolate(x,y,f,3);
+    double dlat = poly_interpolate(x,y,f+0.1,3)-poly_interpolate(x,y,f-0.1,3);;
+    y           = new double[] {lon1,lon2,lon3,lon4};
+    double lon  = poly_interpolate(x,y,f,3);
+    double dlon = poly_interpolate(x,y,f+0.1,3)-poly_interpolate(x,y,f-0.1,3);
+    double alt  = (pos2.alt+f*(pos3.alt-pos2.alt))*1000; // Linear!
+    double spd  = pos2.spd+f*(pos3.spd-pos2.spd); // Linear!
+    double hdg  = dlon==0?0:Math.atan(dlon/dlat)/Math.PI*180;
+    
+    // Finish position
+    if (lon>180) lon -= 360;
+    if (lon3-lon2>0&&hdg<0) hdg += 180;
+    else if (lon3-lon2<0&&hdg>0) hdg -= 180;
+
+    // Make orbit state
+    return new OrbitState(lat,lon,alt,spd,hdg,0);
+  }
+
+  /**
+   * Returns the first date for which orbit positions are available.
+   */
+  private Date getFirstDate()
+  {
+    return orbit.get(1).date;
+  }
+
+  /**
+   * Returns the last date for which orbit positions are available.
+   */
+  private Date getLastDate()
+  {
+    return orbit.get(orbit.size()-2).date;
+  }
 
   /**
    * Unwraps longitude values so that meaningful differences can be computed. 
@@ -289,7 +319,7 @@ public class N2yoOrbit extends GEOrbit
    *          The second longitude.
    * @return The second longitude unwrapped with respect to the first one.
    */
-  private static float lon_unwrap(float lon1, float lon2)
+  private static double lon_unwrap(double lon1, double lon2)
   {
     if (Math.abs(lon2-lon1)>300)
     {
@@ -299,7 +329,7 @@ public class N2yoOrbit extends GEOrbit
     return lon2;
   }
   
-  // -- Spline interpolation --
+  // -- Private API -- Spline interpolation --
 
   /**
    * The Gaussian elimination algorithm.
@@ -420,28 +450,5 @@ public class N2yoOrbit extends GEOrbit
       answer += coefficients[i]*Math.pow(x,(power-i));
     }
     return answer;
-  }
-  
-  // -- Main method --
-  
-  /**
-   * DEBUGGING: Main method.
-   * 
-   * @param args
-   *          The method does not use any command line arguments.
-   */
-  public static void main(String[] args)
-  {
-    final N2yoOrbit iss = new N2yoOrbit(ID_ISS);
-    
-    (new Timer()).schedule(new TimerTask()
-    {
-      
-      @Override
-      public void run()
-      {
-        System.out.print("\n"+iss.getPosition());
-      }
-    },1000,1000);
   }
 }

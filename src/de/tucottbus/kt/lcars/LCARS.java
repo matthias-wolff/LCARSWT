@@ -766,7 +766,8 @@ public class LCARS implements ILcarsRemote
       for (int i=0; i<cls.length; i++)
         try
         {
-          Class<?> clazz = cls[i].asSubclass(onPADD()?PaddMainPanel.class:MainPanel.class);
+          Class<?> clazz = cls[i].asSubclass(MainPanel.class);
+          if (onPADD()) clazz = cls[i].asSubclass(PaddMainPanel.class);
           if (clazz.equals(Panel.class)) continue;
           if (Modifier.isAbstract(clazz.getModifiers())) continue;
           l.add(clazz);
@@ -1384,21 +1385,24 @@ public class LCARS implements ILcarsRemote
     return null;
   }
 
-  /**
-   * Adds or changes a command line argument. Note: this method solely works on the committed string
-   * array, the actual command line or the static field {@link LCARS#args} will not be changed! A
-   * typical usage of this method is to modify the command line arguments before calling the
-   * {@link LCARS#main(String[])} method.
-   * 
-   * @param args
-   *          The command line arguments.
-   * @param prefix
-   *          The prefix of the argument to add or change, e.g. <code>"--key="</code>. If an
-   *          argument with this prefix is already present, the method will replace it.
-   * @param suffix
-   *          The suffix of the argument to add or change, e.g. <code>"value"</code>.
-   * @return The modified command line arguments.
-   */
+  	/**
+	 * Adds or changes a command line argument. Note: this method solely works
+	 * on the committed string array, the actual command line or the static
+	 * field {@link LCARS#args} will not be changed! A typical usage of this
+	 * method is to modify the command line arguments before calling the
+	 * {@link LCARS#main(String[])} method.
+	 * 
+	 * @param args
+	 *            The command line arguments.
+	 * @param prefix
+	 *            The prefix of the argument to add or change, e.g.
+	 *            <code>"--key="</code>. If an argument with this prefix is
+	 *            already present, the method will replace it.
+	 * @param suffix
+	 *            The suffix of the argument to add or change, e.g.
+	 *            <code>"value"</code>.
+	 * @return The modified command line arguments.
+	 */
   public static String[] setArg(String[] args, String prefix, String suffix)
   {
     ArrayList<String> largs = new ArrayList<String>(args.length);
@@ -1420,7 +1424,7 @@ public class LCARS implements ILcarsRemote
    *  --debug                              - Print debug messages
    *  --device=devicename                  - Name of host device, e.g. wetab [2]
    *  --help, -h, ?                        - Print help and exit
-   *  --mode=[fullscreen|maximized|window] - Screen mode (default: fullscreen)
+   *  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)
    *  --nogui                              - Do not display a screen [3]
    *  --nomouse                            - Hide mouse cursor
    *  --nospeech                           - Disable speech I/O
@@ -1456,7 +1460,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n  --debug                              - Print debug messages");
       System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
       System.out.print("\n  --help, -h, ?                        - Print help and exit");
-      System.out.print("\n  --mode=[fullscreen|maximized|window] - Screen mode (default: fullscreen)");
+      System.out.print("\n  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)");
       System.out.print("\n  --nogui                              - Do not display a screen [3]");
       System.out.print("\n  --nomouse                            - Hide mouse cursor");
       System.out.print("\n  --nospeech                           - Disable speech I/O");
@@ -1492,6 +1496,8 @@ public class LCARS implements ILcarsRemote
       catch (Exception e)
       {
       }
+      if (getArg("--mode=") == null)
+        LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
       boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
         iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);

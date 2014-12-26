@@ -11,6 +11,8 @@ import de.tucottbus.kt.lcars.ge.GECamera;
  * {@linkplain #getPosition() positions} or {@linkplain #getCamera() cameras}.
  * 
  * @author Matthias Wolff, BTU Cottbus
+ * @deprecated Because Goggle Earth API has been deprecated. New implementation in
+ *             {@link de.tucottbus.kt.lcarsx.wwj.orbits.Orbit}.
  */
 public abstract class GEOrbit
 {

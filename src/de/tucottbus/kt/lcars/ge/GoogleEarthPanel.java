@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.MainPanel;
+import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.contributors.EAlphaKeyboard;
 import de.tucottbus.kt.lcars.contributors.EElementArray;
@@ -38,7 +39,10 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.ge.orbits.GEOrbit;
 import de.tucottbus.kt.lcars.ge.orbits.N2yoOrbit;
 
-public class GoogleEarthPanel extends MainPanel
+/**
+ * @deprecated Because Goggle Earth API has been deprecated.
+ */
+public class GoogleEarthPanel extends Panel
 {
   private EValue          eDate;
   private EValue          eTime;

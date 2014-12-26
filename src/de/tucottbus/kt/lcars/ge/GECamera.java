@@ -2,6 +2,7 @@ package de.tucottbus.kt.lcars.ge;
 
 /**
  * A camera position in Google Earth.
+ * @deprecated Because Goggle Earth API has been deprecated.
  */
 public class GECamera
 {

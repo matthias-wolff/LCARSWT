@@ -2,7 +2,9 @@ package de.tucottbus.kt.lcars.ge;
 
 /**
  * One place comprising a name, a world, a camera position and a speech
- * control grammar. 
+ * control grammar.
+ *  
+ * @deprecated Because Goggle Earth API has been deprecated.
  */
 class GEPlace
 {

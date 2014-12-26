@@ -34,6 +34,7 @@ import de.tucottbus.kt.lcars.ge.orbits.StdOrbit;
  * Wrapper class embedding Google Earth on an LCARS panel. The class places
  * the Google Earth plugin in a {@link Browser} and builds an
  * {@link SWT_AWT}-bridge which embeds the browser in the panel.
+ * @deprecated Because Goggle Earth API has been deprecated.
  */
 // TODO: Subclass EBrowser?
 public class GE

@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.al;
+package de.tucottbus.kt.lcarsx.al;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -313,7 +313,7 @@ public class AudioLibraryPanel extends MainPanel
       if (f.exists()) f.delete();
       f.createNewFile();
       FileOutputStream fos = new FileOutputStream(f);
-      InputStream is = LCARS.class.getClassLoader().getResourceAsStream("de/tucottbus/kt/lcars/al/resource/Captain'sLounge.mp3");
+      InputStream is = LCARS.class.getClassLoader().getResourceAsStream("de/tucottbus/kt/lcarsx/al/resource/Captain'sLounge.mp3");
       byte[] buf = new byte[1024];
       int len;
       while ((len = is.read(buf)) > 0)

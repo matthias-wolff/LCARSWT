@@ -16,7 +16,8 @@ import de.tucottbus.kt.lcars.elements.EValue;
 
 public class EPanelSelector extends EMessageBox
 {
-
+  private ERect eDismiss;
+	
   public EPanelSelector(int x, int y, int w, int h)
   {
     super(x,y,w,h);
@@ -94,17 +95,17 @@ public class EPanelSelector extends EMessageBox
     }
     
     // Add the dismiss and exit buttons
-    ERect btn = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");
-    btn.addEEventListener(new EEventListenerAdapter()
+    eDismiss = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");
+    eDismiss.addEEventListener(new EEventListenerAdapter()
     {
       public void touchDown(EEvent ee)
       {
         close();
       }
     });
-    add(btn);
+    add(eDismiss);
 
-    btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
+    ERect btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
     btn.addEEventListener(new EEventListenerAdapter()
     {
       public void touchDown(EEvent ee)
@@ -124,6 +125,8 @@ public class EPanelSelector extends EMessageBox
     panel.dim(0.3f);
     panel.setModal(true);
     addToPanel(panel);
+    System.out.println(panel.getClass().getCanonicalName());
+    eDismiss.setDisabled(panel!=null?Panel.class.equals(panel.getClass()):true);
   }
 
   public void close()

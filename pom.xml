@@ -1,21 +1,130 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.tucottbus.kt.lcars</groupId>
   <artifactId>lcars-wt</artifactId>
-  <version>2014.12.08</version>
+  <version>201412230000</version>
+  <name>LCARS Widget Toolkit</name>
+  <url>https://sourceforge.net/projects/lcars-wt</url>
+  <description>The LCARS widget toolkit supplies a pure Java API for programming graphical user interfaces in the Star Trek(TM) LCARS look and feel. It is based on the Abstract Window Toolkit (AWT) and, partially, on the Standard Widget Toolkit (SWT).</description>
+  <inceptionYear>2013</inceptionYear>
+  <organization>
+    <name>Chair of Communications Engineering, BTU Cottbus-Senftenberg</name>
+    <url>https://www.tu-cottbus.de/fakultaet3/en/communications-engineering.html</url>
+  </organization>
+  <packaging>jar</packaging>
+
+  <!-- PROJECT PROPERTIES -->
   <properties>
-  	<!-- TODO: only enable next property after all java classes are prepared to be UTF8 encoded -->
-    <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
-    <jogl.version>2.0-rc9</jogl.version>
+    <!-- TODO: only enable next property after all java classes are prepared 
+      to be UTF8 encoded -->
+    <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
+    <jdk.version>1.7</jdk.version>
+    <jogl.version>2.1.5</jogl.version>
+    <wwj.version>2.0.0</wwj.version>
   </properties>
-  <!--
-  <scm>
-	<connection>scm:svn:https://svn.code.sf.net/p/lcars-wt/code/trunk</connection>
-	<developerConnection>scm:svn:https://svn.code.sf.net/p/lcars-wt/code/trunk/</developerConnection>
-	<url>http://svn.code.sf.net/p/lcars-wt/code/trunk</url>
-  </scm>
-  -->
+
+  <!-- <scm> <connection>scm:svn:https://svn.code.sf.net/p/lcars-wt/code/trunk</connection> 
+    <developerConnection>scm:svn:https://svn.code.sf.net/p/lcars-wt/code/trunk/</developerConnection> 
+    <url>http://svn.code.sf.net/p/lcars-wt/code/trunk</url> </scm> -->
+
+  <!-- PROJECT DEPENDENCIES -->
+  <dependencies>
+    <dependency>
+      <groupId>agile2d</groupId>
+      <artifactId>agile2d</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.soundlibs</groupId>
+      <artifactId>jlayer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.soundlibs</groupId>
+      <artifactId>mp3spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.soundlibs</groupId>
+      <artifactId>tritonus-share</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all</artifactId>
+      <version>${jogl.version}</version>
+      <classifier>${jogl-all.classifier}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt</artifactId>
+      <version>${jogl.version}</version>
+      <classifier>${jogl-all.classifier}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.swt</groupId>
+      <artifactId>${swt.artifactId}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>gov.nasa</groupId>
+      <artifactId>worldwind</artifactId>
+      <!-- <version>${wwj.version}</version> -->
+    </dependency>
+    <dependency>
+      <groupId>gov.nasa</groupId>
+      <artifactId>worldwindx</artifactId>
+      <!-- <version>${wwj.version}</version> -->
+    </dependency>
+  </dependencies>
+
+  <!-- REPOSITORIES -->
+  <repositories>
+    <repository>
+      <id>swt-repo</id>
+      <url>https://swt-repo.googlecode.com/svn/repo/</url>
+    </repository>
+    <repository>
+      <id>jogamp.org</id>
+      <url>http://jogamp.org/deployment/maven</url>
+    </repository>
+    <repository>
+      <id>agile2d.sf.net</id>
+      <url>http://agile2d.sourceforge.net/maven/</url>
+    </repository>
+  </repositories>
+
+  <!-- OS/ARCHITECTURE PROFILES FOR SWT -->
+  <profiles>
+    <profile>
+      <id>windows-x86</id>
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+        <swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
+        <jogl-all.classifier>natives-windows-i586</jogl-all.classifier>
+        <profile.id>windows-x86</profile.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows-x86_64</id>
+      <activation>
+        <os>
+          <family>windows</family>
+          <arch>x86_64</arch>
+        </os>
+      </activation>
+      <properties>
+        <swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
+        <jogl-all.classifier>natives-windows-amd64</jogl-all.classifier>
+        <profile.id>windows-x86_64</profile.id>
+      </properties>
+    </profile>
+  </profiles>
+
+  <!-- BUILD -->
   <build>
+    <finalName>${project.artifactId}.${profile.id}</finalName>
     <sourceDirectory>src</sourceDirectory>
     <resources>
       <resource>
@@ -30,73 +139,91 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>${jdk.version}</source>
+          <target>${jdk.version}</target>
         </configuration>
       </plugin>
       <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-        	<version>2.5</version>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <addClasspath>true</addClasspath>
-                        <mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-        </plugin>
-      
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>
+              <classpathPrefix>dependency-jars.${project.build.finalName}/</classpathPrefix>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.5.1</version>
+        <executions>
+          <execution>
+          <id>copy-dependencies</id>
+          <phase>package</phase>
+          <goals>
+            <goal>copy-dependencies</goal>
+          </goals>
+          <configuration>
+            <outputDirectory>${project.build.directory}/dependency-jars.${project.build.finalName}/</outputDirectory>
+          </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-  </build> 
-  <dependencies>
-  	<dependency>
-  		<groupId>agile2d</groupId>
-  		<artifactId>agile2d</artifactId>
-  		<version>3.0.1</version>
-  	</dependency>
-	<dependency>
-		<groupId>com.googlecode.soundlibs</groupId>
-		<artifactId>jlayer</artifactId>
-		<version>1.0.1-1</version>
-	</dependency>
-	<dependency>
-		<groupId>com.googlecode.soundlibs</groupId>
-		<artifactId>mp3spi</artifactId>
-		<version>1.9.5-1</version>
-	</dependency>
-	<dependency>
-		<groupId>com.googlecode.soundlibs</groupId>
-		<artifactId>tritonus-share</artifactId>
-		<version>0.3.7-2</version>
-	</dependency>
-	<dependency>
-		<groupId>org.jogamp.jogl</groupId>
-		<artifactId>jogl-all</artifactId>
-		<version>2.0-rc9</version>
-		<classifier>natives-windows-i586</classifier>
-	</dependency>
-	<!-- SWT -->
-    <dependency>
+  </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>agile2d</groupId>
+        <artifactId>agile2d</artifactId>
+        <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.googlecode.soundlibs</groupId>
+        <artifactId>jlayer</artifactId>
+        <version>1.0.1-1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.googlecode.soundlibs</groupId>
+        <artifactId>mp3spi</artifactId>
+        <version>1.9.5-1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.googlecode.soundlibs</groupId>
+        <artifactId>tritonus-share</artifactId>
+        <version>0.3.7-2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jogamp.jogl</groupId>
+        <artifactId>jogl-all</artifactId>
+        <version>${jogl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jogamp.gluegen</groupId>
+        <artifactId>gluegen-rt</artifactId>
+        <version>${jogl.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.eclipse.swt</groupId>
-        <artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
+        <artifactId>${swt.artifactId}</artifactId>
         <version>3.7.2</version>
-    </dependency>
-	
-  </dependencies>
- <repositories>
-   <repository>
-        <id>swt-repo</id>
-        <url>https://swt-repo.googlecode.com/svn/repo/</url>
-    </repository>
-	<repository>
-        <id>jogamp.org</id>
-        <url>http://jogamp.org/deployment/maven</url>
-    </repository>
-	<repository>
-        <id>agile2d.sf.net</id>
-        <url>http://agile2d.sourceforge.net/maven/</url>
-    </repository>
- </repositories>
+      </dependency>
+      <dependency>
+        <groupId>gov.nasa</groupId>
+        <artifactId>worldwind</artifactId>
+       <version>${wwj.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>gov.nasa</groupId>
+        <artifactId>worldwindx</artifactId>
+        <version>${wwj.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
