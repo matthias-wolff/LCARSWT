@@ -2,15 +2,22 @@ package de.tucottbus.kt.lcarsx.wwj;
 
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.event.PositionEvent;
+import gov.nasa.worldwind.event.PositionListener;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.IScreen;
@@ -25,6 +32,11 @@ import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit.ListItem;
 import de.tucottbus.kt.lcarsx.wwj.orbits.StdEarthOrbit;
 import de.tucottbus.kt.lcarsx.wwj.places.Place;
 import de.tucottbus.kt.lcarsx.wwj.places.Poi;
+import de.tucottbus.kt.lcarsx.wwj.sunlight.AtmosphereLayer;
+import de.tucottbus.kt.lcarsx.wwj.sunlight.BasicSunPositionProvider;
+import de.tucottbus.kt.lcarsx.wwj.sunlight.RectangularNormalTessellator;
+import de.tucottbus.kt.lcarsx.wwj.sunlight.SunLayer;
+import de.tucottbus.kt.lcarsx.wwj.sunlight.SunPositionProvider;
 
 /**
  * <p><i><b style="color:red">Experimental API.</b></i></p>
@@ -36,11 +48,18 @@ import de.tucottbus.kt.lcarsx.wwj.places.Poi;
 public class EarthPanel extends WorldWindPanel
 {
   private Model model;
-  
   private ArrayList<LayerSet> layerSets;
-  
   private Poi poi;
 
+  /* gov.nasa.worldwindx -->
+  private SunController sunController;
+  private SunLayer sunLayer;
+  */
+  private AtmosphereLayer atmosphereLayer;
+  private SunLayer sunLayer;
+  private SunPositionProvider spp = new BasicSunPositionProvider();  
+  // <-- */
+  
   private static final String POI_URI = "de/tucottbus/kt/lcarsx/wwj/places/poi.xml";
   
   public EarthPanel(IScreen screen)
@@ -53,10 +72,21 @@ public class EarthPanel extends WorldWindPanel
   {
     poi = new Poi(getClass().getClassLoader().getResourceAsStream(POI_URI));
     super.fatInit();
+
+    getEWorldWind().getWwd().addPositionListener(new PositionListener()
+    {
+        Vec4 eyePoint;
+        public void moved(PositionEvent event)
+        {
+            if (eyePoint == null || eyePoint.distanceTo3(getEWorldWind().getView().getEyePoint()) > 1000)
+            {
+                updateSun();
+                eyePoint = getEWorldWind().getView().getEyePoint();
+            }
+        }
+    });
+
   }
-  
-
-
 
   @Override
   public Model getModel()
@@ -75,6 +105,29 @@ public class EarthPanel extends WorldWindPanel
       this.model.getLayers().add(new LcarsScalebarLayer());
       this.model.getLayers().add(new LcarsPlaceNameLayer());
       this.model.getLayers().add(new MSVirtualEarthLayer());
+
+      // Adjust sun and atmosphere
+      this.atmosphereLayer = new AtmosphereLayer();
+      for (int i=0; i<this.model.getLayers().size(); i++)
+      {
+        Layer layer = this.model.getLayers().get(i);
+        if (layer instanceof SkyGradientLayer) 
+        {
+          this.atmosphereLayer.setEnabled(layer.isEnabled());
+          this.model.getLayers().set(i,this.atmosphereLayer);
+          break;
+        }
+      }
+      this.sunLayer = new SunLayer();
+      this.model.getLayers().add(this.sunLayer);
+      this.model.getGlobe().setTessellator(new RectangularNormalTessellator());
+      // <-- */
+      /* gov.nasa.worldwindx -->      
+      this.sunLayer = new SunLayer();
+      this.model.getLayers().add(this.sunLayer);
+      this.sunController = new SunController(this.model,this.sunLayer,this.atmosphereLayer);
+      this.sunLayer.setEnabled(false); this.sunLayer.setEnabled(true); // Activate tesselator
+      <-- */
       
       // Group layers
       getLayerSets();
@@ -86,6 +139,23 @@ public class EarthPanel extends WorldWindPanel
           layer.getName()+(layer.isEnabled()?" (on)":" (off)"));
     }
     return this.model;
+  }
+  
+  @Override
+  protected void fps10()
+  {
+    super.fps10();
+
+    /* gov.nasa.worldwindx -->
+    sunController.update(new Date());
+    */
+  }
+
+  @Override
+  protected void fps1()
+  {
+    super.fps1();
+    updateSun();
   }
   
   @Override
@@ -108,7 +178,11 @@ public class EarthPanel extends WorldWindPanel
       
       // Sun, sun shade, atmospheric scattering and lens flares 
       ls = new LayerSet("SUN");
-      // TODO: add layers...
+      /* gov.nasa.worldwindx -->      
+      ls.addAll(ll.getLayersByClass(SunLayer.class));
+      */
+      for (Layer layer : ls)
+        layer.setEnabled(false);
       this.layerSets.add(ls);
   
       // Graticule and compass
@@ -141,6 +215,29 @@ public class EarthPanel extends WorldWindPanel
   {
     if (poi==null) return new ArrayList<Place>();
     return new ArrayList<Place>(poi.getPlacesOn(Place.ONEARTH));
+  }
+  
+  protected void updateSun()
+  {
+    if (getEWorldWind()==null) return;
+    if (getEWorldWind().getModel()==null) return;
+    if (getEWorldWind().getModel().getGlobe()==null) return;
+
+    // Set tessellator colors
+    RectangularNormalTessellator tessellator = (RectangularNormalTessellator)getEWorldWind().getModel().getGlobe().getTessellator();
+    tessellator.setLightColor(Color.WHITE);
+    tessellator.setAmbientColor(Color.BLACK);
+    
+    // Compute Sun direction
+    LatLon sunPos = spp.getPosition();
+//    System.out.println("SUNPOS: lat="+(Math.round(sunPos.latitude.degrees*1000.0)/1000.0)+", lon="+
+//        (Math.round(sunPos.longitude.degrees*1000.0)/1000.0));
+    Vec4 sun = getEWorldWind().getModel().getGlobe().computePointFromPosition(new Position(sunPos, 0)).normalize3();
+    Vec4 light = sun.getNegative3();
+    sunLayer.setSunDirection(sun); 
+    tessellator.setLightDirection(light);    
+    tessellator.setAmbientColor(Color.WHITE);
+    atmosphereLayer.setSunDirection(sun);                 
   }
   
   // == MAIN METHOD ==
