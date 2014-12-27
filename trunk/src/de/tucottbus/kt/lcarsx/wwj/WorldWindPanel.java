@@ -13,11 +13,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
@@ -34,6 +33,9 @@ import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcarsx.wwj.layers.LayerSet;
 import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
+import de.tucottbus.kt.lcarsx.wwj.places.Camera;
+import de.tucottbus.kt.lcarsx.wwj.places.LcarsGazetteer;
+import de.tucottbus.kt.lcarsx.wwj.places.Place;
 
 /**
  * <p><i><b style="color:red">Experimental API.</b></i></p>
@@ -48,7 +50,7 @@ public abstract class WorldWindPanel extends MainPanel
   // Main modes
   protected static final int MODE_INIT      = 0;
   protected static final int MODE_WORLDWIND = 1;
-  protected static final int MODE_PALCES    = 2;
+  protected static final int MODE_PLACES    = 2;
   
   // Bottom bar modes
   protected static final int NUM_BARMODES   = 3;
@@ -144,35 +146,40 @@ public abstract class WorldWindPanel extends MainPanel
       @Override
       public void touchDown(EEvent ee)
       {
-        /* TODO: ...
-        String   caption = ee.el.getLabel();
-        GECamera camera  = null;
-        
-        // Get camera and place name stored with widget
-        if (ee.el.getData()!=null && ee.el.getData() instanceof GEPlace)
+        setMainMode(MODE_WORLDWIND);
+
+        invokeLater(new Runnable()
         {
-          GEPlace place = (GEPlace)ee.el.getData();
-          camera  = place.camera;
-          caption = place.name; 
-        }
-        
-        // No camera with widget: geocode widget's label
-        if (camera==null)
-        {
-          AbstractList<GEPlace> places = Geocoder.geocode(ge.getWorld(),caption);
-          if (places!=null && places.size()>0)
-            camera = places.get(0).camera;
-        }
-        
-        // Still no camera: display error
-        if (camera==null)
-        {
-          // TODO: Display "Unknown place <caption>"
-          return;
-        }
-        showSearchPanel(false);
-        ge.flyTo(camera);
-         */
+          @Override
+          public void run()
+          {
+            Place  place;
+            Camera camera;
+                
+            // Get camera and place name stored with widget
+            if (ee.el.getData()!=null && ee.el.getData() instanceof Place)
+              place = (Place)ee.el.getData();
+            else
+              place = new Place(ee.el.getLabel(),Place.ONEARTH,(Camera)null,null);
+            camera = place.camera;
+                
+            // No camera with widget: find place for widget's label
+            if (camera==null)
+            {
+              AbstractList<Place> places = LcarsGazetteer.findPlaces(place.world,place.name);
+              if (places!=null && places.size()>0)
+                camera = places.get(0).camera;
+            }
+            
+            // Still no camera: display error
+            if (camera==null)
+            {
+              // TODO: Display "Unknown place <caption>"
+              return;
+            }
+            eWw.flyTo(camera);
+          }
+        });
       }
     });
     ePlaceNoMatch = new EPlaceNoMatch(600,440);
@@ -188,6 +195,7 @@ public abstract class WorldWindPanel extends MainPanel
       add(eInsteadOfWwText);
     
     // The bottom bar
+    // - NOTE: The first secret debug button...
     ERect e = new ERect(this,23,1015,58,38,style|LCARS.ES_STATIC|LCARS.ES_RECT_RND_W,null);
     e.setStatic(false);
     e.addEEventListener(new EEventListenerAdapter()
@@ -195,6 +203,7 @@ public abstract class WorldWindPanel extends MainPanel
       @Override
       public void touchDown(EEvent ee)
       {
+        if (getMainMode()!=MODE_WORLDWIND) return;
         try
         {
           String NL = System.getProperty("line.separator");
@@ -212,7 +221,6 @@ public abstract class WorldWindPanel extends MainPanel
       }
     });
     add(e);
-
 
     eModeSel = new ERect(this,84,1015,131,38,style|LCARS.ES_LABEL_E,"MODE SELECT");
     eModeSel.addEEventListener(new EEventListenerAdapter()
@@ -260,12 +268,12 @@ public abstract class WorldWindPanel extends MainPanel
         if (ePlaceArray.isDisplayed())
           setMainMode(MODE_WORLDWIND);
         else
-          setMainMode(MODE_PALCES);
+          setMainMode(MODE_PLACES);
       }
     });
     add(ePlaces);
 
-    // NOTE: The second secret debug button...
+    // - NOTE: The second secret debug button...
     e = new ERect(this,1839,1015,58,38,style|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null);
     e.setStatic(false);
     e.addEEventListener(new EEventListenerAdapter()
@@ -273,6 +281,7 @@ public abstract class WorldWindPanel extends MainPanel
       @Override
       public void touchDown(EEvent ee)
       {
+        if (getMainMode()!=MODE_WORLDWIND) return;
         getEWorldWind().flyTo(new Camera(51.7577,14.3234,1000,2.1,52,0,0));
       }
     });
@@ -282,15 +291,16 @@ public abstract class WorldWindPanel extends MainPanel
     setBarMode(BARMODE_NAVI);
 
     // Schedule fatInit()
-    // NOTE: Is more responsive that EventQueue.invokeLater
-    (new Timer()).schedule(new TimerTask()
+    // NOTE: invokeLater() is more responsive that EventQueue.invokeLater
+    invokeLater(new Runnable()
+    //EventQueue.invokeLater(new Runnable()
     {
       @Override
       public void run()
       {
         fatInit();
       }
-    },100);
+    });
   }
 
   /**
@@ -380,51 +390,7 @@ public abstract class WorldWindPanel extends MainPanel
    * 
    * Returns the places of interest list.
    */
-  //public abstract ArrayList<?> getPoiList();
-  
-  // -- Deprecated API --
-  
-  /**
-   * Fills the places array ({@link #ePlaceArray}) in the search panel. If
-   * <code>address</code> is not <code>null</code> and not empty, the method
-   * will geocode the address an display the result. 
-   * 
-   * @param address
-   *          <code>null</code>: display standard places on the current world,
-   *          "": clear places array, otherwise: geocode address an fill places
-   *          array with the result
-   * @deprecated
-   */
-  protected void fillPlacesArray(String address)
-  {
-    /*
-    ePlaces.removeAll();
-    if (address!=null && address.equals("")) return;
-    AbstractList<GEPlace> places = null;
-    if (address==null)
-      places = this.places.getPlacesOn(ge.getWorld());
-    else
-      places = Geocoder.geocode(ge.getWorld(),address);    
-    
-    if (places==null || places.size()==0)
-    {
-      ePlaces.removeFromPanel();
-      ePlaceNoMatch.addToPanel(this);
-    }
-    else
-    {
-      ePlaceNoMatch.removeFromPanel();
-      if (eKeyboard.isDisplayed()) ePlaces.addToPanel(this);
-      for (GEPlace place : places)
-      {
-        EElement el = ePlaces.add(place.name);
-        if (place.name.length()>50)
-          el.setLabel((place.name.substring(0,47)+"...").toUpperCase());
-        el.setData(place);
-      }
-    }
-    */
-  }
+  public abstract ArrayList<Place> getPoiList();
   
   // -- Getters and setters --
   
@@ -458,7 +424,7 @@ public abstract class WorldWindPanel extends MainPanel
       ePlaceArray.removeFromPanel();
       ePlaceNoMatch.removeFromPanel();
       break;
-    case MODE_PALCES:
+    case MODE_PLACES:
       if (eWw!=null)
         eWw.removeFromPanel();
       eKeyboard.addToPanel(this);
@@ -486,7 +452,7 @@ public abstract class WorldWindPanel extends MainPanel
   protected int getMainMode()
   {
     if (eWw!=null && eWw.isDisplayed()) return MODE_WORLDWIND;
-    if (ePlaceSearch.isDisplayed()) return MODE_PALCES;
+    if (ePlaceSearch.isDisplayed()) return MODE_PLACES;
     return MODE_INIT;
   }
   
@@ -674,6 +640,45 @@ public abstract class WorldWindPanel extends MainPanel
           layerSet.setEnabled(!layerSet.isMajorityEnabled());
         }
       });
+    }
+  }
+  
+  /**
+   * Fills the places array ({@link #ePlaceArray}) in the search panel. If
+   * <code>address</code> is not <code>null</code> and not empty, the method
+   * will geocode the address an display the result. 
+   * 
+   * @param address
+   *          <code>null</code>: display standard places on the current world,
+   *          "": clear places array, otherwise: geocode address an fill places
+   *          array with the result
+   */
+  protected void fillPlacesArray(String address)
+  {
+    ePlaceArray.removeAll();
+    if (address!=null && address.equals("")) return;
+    AbstractList<Place> places = null;
+    if (address==null)
+      places = getPoiList();
+    else
+      places = LcarsGazetteer.findPlaces(Place.ONEARTH,address);    
+    
+    if (places==null || places.size()==0)
+    {
+      ePlaceArray.removeFromPanel();
+      ePlaceNoMatch.addToPanel(this);
+    }
+    else
+    {
+      ePlaceNoMatch.removeFromPanel();
+      if (eKeyboard.isDisplayed()) ePlaceArray.addToPanel(this);
+      for (Place place : places)
+      {
+        EElement el = ePlaceArray.add(place.name);
+        if (place.name.length()>50)
+          el.setLabel((place.name.substring(0,47)+"...").toUpperCase());
+        el.setData(place);
+      }
     }
   }
   
@@ -1219,7 +1224,7 @@ public abstract class WorldWindPanel extends MainPanel
       e = new EElbo(null,324,41,1047,34,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_SE,null);
       ((EElbo)e).setArcWidths(1,34); ((EElbo)e).setArmWidths(100,9);
       add(e);
-      e = new ERect(null,1374,4,258,71,LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_LABEL_NW,"GO");
+      e = new ERect(null,1374,4,258,71,LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_LABEL_W,"FIND PLACES");
       e.addEEventListener(new EEventListenerAdapter()
       {
         @Override

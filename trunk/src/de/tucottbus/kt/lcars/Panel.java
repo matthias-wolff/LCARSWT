@@ -712,7 +712,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
   }
   
-  // -- Periodic actions --
+  // -- Periodic and timer actions --
   
   class PanelTimerTask extends TimerTask
   {
@@ -765,6 +765,28 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       if (runc%50==0) invalidate();
       if (runc% 2==0) updateScreen();
     }
+  }
+  
+  /**
+   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   *
+   * Runs the <code>runnable</code> after a short period of time.
+   * 
+   * @param runnable
+   *          The runnable.
+   */
+  protected void invokeLater(Runnable runnable)
+  {
+    final Runnable __runnable = runnable;
+    (new Timer()).schedule(new TimerTask()
+    {
+      @Override
+      public void run()
+      {
+        __runnable.run();
+      }
+    },10);
+    
   }
   
   /**
