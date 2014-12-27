@@ -26,12 +26,13 @@ import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
 import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
+import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 
 /**
+ * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * 
  * Wraps a {@link gov.nasa.worldwind.awt.WorldWindowGLCanvas
  * WorldWindowGLCanvas} into an an {@link ElementContributor}.
- * 
- * <p><i><b style="color:red">Experimental API.</b></i></p>
  * 
  * @author Matthias Wolff, BTU Cottbus-Senftenberg
  */
@@ -132,6 +133,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
           animator = new Animator();
           animator.add(wwd);
           animator.start();
+          wwd.redrawNow();
         }
         catch (ClassCastException e)
         {

@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcarsx.wwj;
+package de.tucottbus.kt.lcarsx.wwj.places;
 
 import gov.nasa.worldwind.View;
 
@@ -25,6 +25,7 @@ public class Camera
 
   static Camera fromString(String text)
   {
+    if (text==null) return null;
     Camera camera = new Camera(0,0,0,0,0,0,0);
     String[] fields = text.split(",");
     try { camera.latitude = parseLatLon(fields[0].trim()); }

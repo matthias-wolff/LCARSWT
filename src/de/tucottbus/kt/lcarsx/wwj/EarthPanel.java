@@ -23,6 +23,8 @@ import de.tucottbus.kt.lcarsx.wwj.orbits.IssOrbit;
 import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
 import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit.ListItem;
 import de.tucottbus.kt.lcarsx.wwj.orbits.StdEarthOrbit;
+import de.tucottbus.kt.lcarsx.wwj.places.Place;
+import de.tucottbus.kt.lcarsx.wwj.places.Poi;
 
 /**
  * <p><i><b style="color:red">Experimental API.</b></i></p>
@@ -37,10 +39,24 @@ public class EarthPanel extends WorldWindPanel
   
   private ArrayList<LayerSet> layerSets;
   
+  private Poi poi;
+
+  private static final String POI_URI = "de/tucottbus/kt/lcarsx/wwj/places/poi.xml";
+  
   public EarthPanel(IScreen screen)
   {
     super(screen);
   }
+
+  @Override
+  protected void fatInit()
+  {
+    poi = new Poi(getClass().getClassLoader().getResourceAsStream(POI_URI));
+    super.fatInit();
+  }
+  
+
+
 
   @Override
   public Model getModel()
@@ -118,6 +134,13 @@ public class EarthPanel extends WorldWindPanel
     ol.add(new Orbit.ListItem(StdEarthOrbit.class,"STANDARD"));
     ol.add(new Orbit.ListItem(IssOrbit.class,"ISS"));
     return ol;
+  }
+
+  @Override
+  public ArrayList<Place> getPoiList()
+  {
+    if (poi==null) return new ArrayList<Place>();
+    return new ArrayList<Place>(poi.getPlacesOn(Place.ONEARTH));
   }
   
   // == MAIN METHOD ==
