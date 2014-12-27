@@ -347,7 +347,7 @@ public class ENavigation extends ElementContributor
         if (ENavigation.this.worldWindPanel.getEWorldWind()==null) return;
         Angle heading = ENavigation.this.worldWindPanel.getEWorldWind().getHeading();
         if (heading==null) return;
-        heading = Angle.fromDegreesLongitude(heading.degrees-1);
+        heading = Angle.fromDegrees(heading.degrees-1);
         ENavigation.this.worldWindPanel.getEWorldWind().setHeading(heading);
       }
       @Override
@@ -373,7 +373,7 @@ public class ENavigation extends ElementContributor
         if (ENavigation.this.worldWindPanel.getEWorldWind()==null) return;
         Angle heading = ENavigation.this.worldWindPanel.getEWorldWind().getHeading();
         if (heading==null) return;
-        heading = Angle.fromDegreesLongitude(heading.degrees+1);
+        heading = Angle.fromDegrees(heading.degrees+1);
         ENavigation.this.worldWindPanel.getEWorldWind().setHeading(heading);
       }
       @Override

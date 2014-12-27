@@ -4,21 +4,18 @@ import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.event.PositionEvent;
 import gov.nasa.worldwind.event.PositionListener;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
-import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer;
 
-import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Date;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
@@ -33,10 +30,8 @@ import de.tucottbus.kt.lcarsx.wwj.orbits.StdEarthOrbit;
 import de.tucottbus.kt.lcarsx.wwj.places.Place;
 import de.tucottbus.kt.lcarsx.wwj.places.Poi;
 import de.tucottbus.kt.lcarsx.wwj.sunlight.AtmosphereLayer;
-import de.tucottbus.kt.lcarsx.wwj.sunlight.BasicSunPositionProvider;
-import de.tucottbus.kt.lcarsx.wwj.sunlight.RectangularNormalTessellator;
+import de.tucottbus.kt.lcarsx.wwj.sunlight.SunController;
 import de.tucottbus.kt.lcarsx.wwj.sunlight.SunLayer;
-import de.tucottbus.kt.lcarsx.wwj.sunlight.SunPositionProvider;
 
 /**
  * <p><i><b style="color:red">Experimental API.</b></i></p>
@@ -51,10 +46,11 @@ public class EarthPanel extends WorldWindPanel
   private ArrayList<LayerSet> layerSets;
   private Poi poi;
 
-  /* gov.nasa.worldwindx -->
+  // gov.nasa.worldwindx -->
   private SunController sunController;
   private SunLayer sunLayer;
-  */
+  private AtmosphereLayer atmosphereLayer;
+  /*
   private AtmosphereLayer atmosphereLayer;
   private SunLayer sunLayer;
   private SunPositionProvider spp = new BasicSunPositionProvider();  
@@ -75,15 +71,19 @@ public class EarthPanel extends WorldWindPanel
 
     getEWorldWind().getWwd().addPositionListener(new PositionListener()
     {
-        Vec4 eyePoint;
-        public void moved(PositionEvent event)
+      Vec4 eyePoint;
+
+      public void moved(PositionEvent event)
+      {
+        if (eyePoint == null || eyePoint.distanceTo3(getEWorldWind().getView().getEyePoint()) > 1000)
         {
-            if (eyePoint == null || eyePoint.distanceTo3(getEWorldWind().getView().getEyePoint()) > 1000)
-            {
-                updateSun();
-                eyePoint = getEWorldWind().getView().getEyePoint();
-            }
+          /* gov.nasa.worldwindx
+          updateSun();
+          */
+          sunController.update(new Date());
+          eyePoint = getEWorldWind().getView().getEyePoint();
         }
+      }
     });
 
   }
@@ -107,6 +107,7 @@ public class EarthPanel extends WorldWindPanel
       this.model.getLayers().add(new MSVirtualEarthLayer());
 
       // Adjust sun and atmosphere
+      /* gov.nasa.worldwindx
       this.atmosphereLayer = new AtmosphereLayer();
       for (int i=0; i<this.model.getLayers().size(); i++)
       {
@@ -121,13 +122,14 @@ public class EarthPanel extends WorldWindPanel
       this.sunLayer = new SunLayer();
       this.model.getLayers().add(this.sunLayer);
       this.model.getGlobe().setTessellator(new RectangularNormalTessellator());
-      // <-- */
-      /* gov.nasa.worldwindx -->      
+       <-- */
+      // gov.nasa.worldwindx -->      
       this.sunLayer = new SunLayer();
+      this.atmosphereLayer = new AtmosphereLayer();
       this.model.getLayers().add(this.sunLayer);
       this.sunController = new SunController(this.model,this.sunLayer,this.atmosphereLayer);
-      this.sunLayer.setEnabled(false); this.sunLayer.setEnabled(true); // Activate tesselator
-      <-- */
+      this.sunLayer.setEnabled(false); this.sunLayer.setEnabled(true); // Activate tessellator
+      //<-- */
       
       // Group layers
       getLayerSets();
@@ -140,22 +142,15 @@ public class EarthPanel extends WorldWindPanel
     }
     return this.model;
   }
-  
-  @Override
-  protected void fps10()
-  {
-    super.fps10();
-
-    /* gov.nasa.worldwindx -->
-    sunController.update(new Date());
-    */
-  }
 
   @Override
   protected void fps1()
   {
     super.fps1();
+    /* gov.nasa.worldwindx
     updateSun();
+    */
+    sunController.update(new Date());
   }
   
   @Override
@@ -178,11 +173,9 @@ public class EarthPanel extends WorldWindPanel
       
       // Sun, sun shade, atmospheric scattering and lens flares 
       ls = new LayerSet("SUN");
-      /* gov.nasa.worldwindx -->      
       ls.addAll(ll.getLayersByClass(SunLayer.class));
-      */
-      for (Layer layer : ls)
-        layer.setEnabled(false);
+//      for (Layer layer : ls)
+//        layer.setEnabled(false);
       this.layerSets.add(ls);
   
       // Graticule and compass
@@ -217,6 +210,7 @@ public class EarthPanel extends WorldWindPanel
     return new ArrayList<Place>(poi.getPlacesOn(Place.ONEARTH));
   }
   
+  /*
   protected void updateSun()
   {
     if (getEWorldWind()==null) return;
@@ -239,7 +233,7 @@ public class EarthPanel extends WorldWindPanel
     tessellator.setAmbientColor(Color.WHITE);
     atmosphereLayer.setSunDirection(sun);                 
   }
-  
+  */
   // == MAIN METHOD ==
 
   /**
