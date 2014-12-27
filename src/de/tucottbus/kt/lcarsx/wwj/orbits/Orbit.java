@@ -7,7 +7,7 @@ import gov.nasa.worldwind.geom.Position;
 
 import java.util.Date;
 
-import de.tucottbus.kt.lcarsx.wwj.EWorldWind;
+import de.tucottbus.kt.lcarsx.wwj.contributors.EWorldWind;
 
 /**
  * <p><i><b style="color:red">Experimental API.</b></i></p>

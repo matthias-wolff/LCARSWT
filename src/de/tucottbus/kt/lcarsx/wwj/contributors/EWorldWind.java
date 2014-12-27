@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcarsx.wwj;
+package de.tucottbus.kt.lcarsx.wwj.contributors;
 
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Model;
@@ -15,7 +15,6 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 
-import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -110,11 +109,11 @@ public class EWorldWind extends ElementContributor implements RenderingListener
     super.addToPanel(panel);
     
     final Panel __panel = panel;
-    EventQueue.invokeLater(new Runnable()
-    {
-      @Override
-      public void run()
-      {
+//    EventQueue.invokeLater(new Runnable()
+//    {
+//      @Override
+//      public void run()
+//      {
         try
         {
           screen = Screen.getLocal(__panel.getScreen());
@@ -140,8 +139,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
           System.err.println("LCARS: Function not supported on remote screens.");
           e.printStackTrace();
         }
-      }
-    });
+//      }
+//    });
   }
 
   @Override
@@ -161,6 +160,11 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
 
   // -- World Wind API --
+  
+  public WorldWindowGLCanvas getWwd()
+  {
+    return wwd;
+  }
   
   /**
    * <p><i><b style="color:red">Experimental API.</b></i></p>
@@ -359,7 +363,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
       }
       setView(view);
     }
-    wwd.redrawNow();
+    if (wwd!=null) wwd.redrawNow();
     this.orbit = orbit;
   }
 

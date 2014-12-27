@@ -19,8 +19,8 @@
     <!-- TODO: only enable next property after all java classes are prepared 
       to be UTF8 encoded -->
     <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
-    <jdk.version>1.7</jdk.version>
-    <jogl.version>2.1.5</jogl.version>
+    <jdk.version>1.8</jdk.version>
+    <jogl.version>2.1.5-01</jogl.version>
     <wwj.version>2.0.0</wwj.version>
   </properties>
 
