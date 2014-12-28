@@ -750,7 +750,7 @@ public abstract class EElement
     data.geometry = geos;
   }
   
-  // -- API that may become deprecated --
+  // -- Deprecation candidates --
   
   /**
    * The panel this element is displayed on, <code>null</code> if the element is currently not displayed.

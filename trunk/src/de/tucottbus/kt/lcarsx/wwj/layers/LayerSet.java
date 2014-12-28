@@ -4,7 +4,7 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * A named set of {@linkplain Layer layers} which can be enable and disabled
  * together.
@@ -16,7 +16,7 @@ public class LayerSet extends LayerList
   private static final long serialVersionUID = 1L;
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a new layer set.
    * 
@@ -30,7 +30,7 @@ public class LayerSet extends LayerList
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Indicates if the majority of layers in this set is enabled for rendering 
    * and selection.
@@ -45,7 +45,7 @@ public class LayerSet extends LayerList
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Controls whether the layers of this set are enabled for rendering and 
    * selection.

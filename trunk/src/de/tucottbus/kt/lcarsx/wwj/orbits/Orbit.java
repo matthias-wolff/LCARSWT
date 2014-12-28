@@ -10,7 +10,7 @@ import java.util.Date;
 import de.tucottbus.kt.lcarsx.wwj.contributors.EWorldWind;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * An orbit around a globe. Orbits model the trajectory of some satellite and
  * supply eye {@linkplain Position positions}, a heading, and a pitch angle. 
@@ -57,7 +57,7 @@ public abstract class Orbit
   /**
    * Returns the view provided by this orbit.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    */
   public View getView()
   {
@@ -69,7 +69,7 @@ public abstract class Orbit
    * altitude become effective only if the respective values are not controlled
    * be the orbit.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @param eyePosition
    *          The new eye position (<code>null</code> for a default position).
@@ -86,7 +86,7 @@ public abstract class Orbit
   /**
    * Returns the current eye position of this orbit.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @see #setEyePosition(Position)
    */
@@ -104,7 +104,7 @@ public abstract class Orbit
    * Returns the default eye position of this orbit. Derived classes may 
    * override this method to provide an own standard eye position.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @return Latitude 0°, longitude 0°, and altitude 100 km.
    */
@@ -117,7 +117,7 @@ public abstract class Orbit
    * Sets the view heading angle of this orbit. The new value becomes effective
    * only if the view heading is not controlled by the orbit.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @param heading
    *          The heading angle (<code>null</code> for direction of trajectory).
@@ -132,7 +132,7 @@ public abstract class Orbit
   /**
    * Returns the current heading {@link Angle angle}.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    */
   public Angle getHeading()
   {
@@ -146,7 +146,7 @@ public abstract class Orbit
    * Sets the view pitch angle of this orbit. The new value becomes effective
    * only if the pitch angle is not controlled by the orbit.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @param pitch
    *          The pitch angle (<code>null</code> to look 5 degrees below the
@@ -162,7 +162,7 @@ public abstract class Orbit
   /**
    * Returns the current pitch {@link Angle angle}.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    */
   public Angle getPitch()
   {
@@ -176,7 +176,7 @@ public abstract class Orbit
    * Returns the current {@linkplain OrbitState orbit state}. Shortcut for
    * {@link #getState(Date) getState(null)}.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @return The state or <code>null</code> if no orbit data are available.
    * @see #getState(Date)
@@ -193,7 +193,7 @@ public abstract class Orbit
    * {@link EWorldWind#stageChanged(RenderingEvent)} to update the view provided
    * by this orbit with the internal orbit data.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    */
   public final void updateView()
   {
@@ -209,7 +209,7 @@ public abstract class Orbit
   /**
    * Returns the name of this orbit.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    */
   public abstract String getName();
   
@@ -217,7 +217,7 @@ public abstract class Orbit
    * Determines if this orbit controls the latitude of its eye position. If not,
    * the latitude of the provided view can be freely adjusted.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @see #getView()
    */
@@ -227,7 +227,7 @@ public abstract class Orbit
    * Determines if this orbit controls the longitude of its eye position. If 
    * not, the longitude of the provided view can be freely adjusted.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @see #getView()
    */
@@ -237,7 +237,7 @@ public abstract class Orbit
    * Determines if this orbit controls the altitude of its eye position. If 
    * not, the altitude of the provided view can be freely adjusted.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @see #getView()
    */
@@ -247,7 +247,7 @@ public abstract class Orbit
    * Determines if this orbit controls the heading of its view. If not, the 
    * heading can be freely adjusted.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @see #getView()
    */
@@ -257,7 +257,7 @@ public abstract class Orbit
    * Determines if this orbit controls the pitch of its view. If not, the pitch 
    * can be freely adjusted.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @see #getView()
    */
@@ -266,7 +266,7 @@ public abstract class Orbit
   /**
    * Returns the orbit position at a given date.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * @param date
    *          The date, can be <code>null</code> for "now". Possible values
@@ -283,7 +283,7 @@ public abstract class Orbit
   /**
    * An item  of list of orbits.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * @author Matthias Wolff, BTU Cottbus-Senftenberg
    */
   public static final class ListItem
@@ -302,7 +302,7 @@ public abstract class Orbit
   /**
    * Position, heading, pitch, and speed on an orbit at a given time.
    * 
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * @author Matthias Wolff, BTU Cottbus-Senftenberg
    */
   protected final class OrbitState

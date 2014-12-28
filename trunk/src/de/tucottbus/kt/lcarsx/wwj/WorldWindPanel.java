@@ -36,7 +36,7 @@ import de.tucottbus.kt.lcarsx.wwj.places.LcarsGazetteer;
 import de.tucottbus.kt.lcarsx.wwj.places.Place;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * The NASA World Wind panel.
  * 
@@ -81,7 +81,7 @@ public abstract class WorldWindPanel extends MainPanel
   // -- LCARS API --
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a new World Wind panel.
    * 
@@ -302,7 +302,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Initializes "fat" components which take their time. Invoked by a timer task
    * scheduled by {@link #init()}.
@@ -362,14 +362,14 @@ public abstract class WorldWindPanel extends MainPanel
   //-- Abstract API --
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the {@linkplain Model globe model} to be displayed on this panel.
    */
   public abstract Model getModel();
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the list of {@linkplain LayerList layer sets} to be displayed on
    * this panel.
@@ -377,14 +377,14 @@ public abstract class WorldWindPanel extends MainPanel
   public abstract ArrayList<LayerSet> getLayerSets();
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the list of {@linkplain Orbit orbits} for this World Wind panel.
    */
   public abstract ArrayList<Orbit.ListItem> getOrbitList();
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the places of interest list.
    */
@@ -393,7 +393,7 @@ public abstract class WorldWindPanel extends MainPanel
   // -- Getters and setters --
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the World Wind element contributor.
    */
@@ -403,7 +403,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Sets the main mode.
    * 
@@ -441,7 +441,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the current main mode.
    * 
@@ -455,7 +455,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Sets the bottom bar mode.
    * 
@@ -491,7 +491,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the current bottom bar mode.
    * 
@@ -508,7 +508,7 @@ public abstract class WorldWindPanel extends MainPanel
   // -- Operations --
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Displays the current date and time in the panel's headline.
    */
@@ -525,7 +525,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Updates the GUI.
    */
@@ -569,7 +569,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Fills the orbit array in the bottom bar.
    */
@@ -614,7 +614,7 @@ public abstract class WorldWindPanel extends MainPanel
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Fills the view array in the bottom bar.
    */

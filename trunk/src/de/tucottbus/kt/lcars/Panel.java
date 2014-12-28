@@ -768,7 +768,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    *
    * Runs the <code>runnable</code> after a short period of time.
    * 

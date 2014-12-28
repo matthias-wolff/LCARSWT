@@ -34,7 +34,7 @@ import de.tucottbus.kt.lcarsx.wwj.places.Place;
 import de.tucottbus.kt.lcarsx.wwj.places.Poi;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * The NASA World Wind panel for Earth.
  * 

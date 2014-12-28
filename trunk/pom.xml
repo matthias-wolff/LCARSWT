@@ -2,8 +2,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.tucottbus.kt.lcars</groupId>
-  <artifactId>lcars-wt</artifactId>
-  <version>201412230000</version>
+  <artifactId>lcarswt</artifactId>
+  <version>2.0.0-rc.1</version>
   <name>LCARS Widget Toolkit</name>
   <url>https://sourceforge.net/projects/lcars-wt</url>
   <description>The LCARS widget toolkit supplies a pure Java API for programming graphical user interfaces in the Star Trek(TM) LCARS look and feel. It is based on the Abstract Window Toolkit (AWT) and, partially, on the Standard Widget Toolkit (SWT).</description>
@@ -124,7 +124,7 @@
 
   <!-- BUILD -->
   <build>
-    <finalName>${project.artifactId}.${profile.id}</finalName>
+    <finalName>${project.artifactId}-${project.version}.${profile.id}</finalName>
     <sourceDirectory>src</sourceDirectory>
     <resources>
       <resource>
@@ -156,6 +156,33 @@
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
