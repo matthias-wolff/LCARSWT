@@ -203,7 +203,7 @@ public abstract class N2yoOrbit extends Orbit
     return orbit;
   }
   
-  // -- Private API --
+  // -- Private helpers --
 
   /**
    * Get position by linear interpolation.
@@ -329,7 +329,7 @@ public abstract class N2yoOrbit extends Orbit
     return lon2;
   }
   
-  // -- Private API -- Spline interpolation --
+  // -- Private helpers: Spline interpolation --
 
   /**
    * The Gaussian elimination algorithm.

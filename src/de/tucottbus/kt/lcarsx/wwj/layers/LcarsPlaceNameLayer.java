@@ -11,7 +11,7 @@ import java.util.GregorianCalendar;
 import de.tucottbus.kt.lcars.LCARS;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b> FIXME: Should be derived 
+ * <p><i><b style="color:red">Experimental.</b> FIXME: Should be derived 
  * from {@link gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer 
  * NASAWFSPlaceNameLayer}, but I did not find a way to change the fonts...
  * </i></p>

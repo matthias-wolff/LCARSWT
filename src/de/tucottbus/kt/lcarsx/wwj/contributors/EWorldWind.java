@@ -28,7 +28,7 @@ import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
 import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * Wraps a {@link gov.nasa.worldwind.awt.WorldWindowGLCanvas
  * WorldWindowGLCanvas} into an an {@link ElementContributor}.
@@ -81,7 +81,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   // -- ElementContributor API --
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a World Wind contributor. 
    * 
@@ -167,7 +167,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Sets to {@linkplain Model model} to be displayed in this World Wind
    * Wrapper.
@@ -198,7 +198,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    *
    * Sets the {@linkplain View view} of this World Wind Wrapper.
    * 
@@ -216,7 +216,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the current {@linkplain View view} of this World Wind Wrapper.
    * 
@@ -230,7 +230,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns a new standard view.
    */
@@ -240,7 +240,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the current eye position.
    */
@@ -251,7 +251,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Sets the current eye position.
    * 
@@ -271,7 +271,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the view heading.
    */
@@ -282,7 +282,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Sets the view heading.
    * 
@@ -299,7 +299,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Returns the view pitch.
    */
@@ -310,7 +310,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Sets the view pitch.
    * 
@@ -329,7 +329,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   // -- Orbiting and flying API --
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    *
    * Starts or stops orbiting.
    * 
@@ -368,7 +368,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    *
    * Returns the currently pursued orbit.
    * 
@@ -380,7 +380,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    *
    * Flies to a KML look-at position.
    * 

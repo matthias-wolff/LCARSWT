@@ -4,7 +4,7 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * One place comprising a name, a world, a camera position and a voice control 
  * grammar.
@@ -24,7 +24,7 @@ public class Place
   public final String grammar;
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a new place.
    * 
@@ -43,7 +43,7 @@ public class Place
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a new place.
    * 
@@ -67,7 +67,7 @@ public class Place
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a new place.
    * 
@@ -94,7 +94,7 @@ public class Place
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a place from a geographical position.
    * 
@@ -115,7 +115,7 @@ public class Place
   }
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a place from a geographical position.
    * 
@@ -139,7 +139,7 @@ public class Place
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Creates a place from latitude-longitude box.
    * 
@@ -182,7 +182,7 @@ public class Place
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b> This will change. Should
+   * <p><i><b style="color:red">Experimental.</b> This will change. Should
    * rather return the {@link gov.nasa.worldwind.Globe Globe} or the {@link
    * gov.nasa.worldwind.Model Model}.</i></p>
    * 
@@ -194,7 +194,7 @@ public class Place
   }
   
   /**
-   * <p><i><b style="color:red">Experimental API.</b> This will change. The full
+   * <p><i><b style="color:red">Experimental.</b> This will change. The full
    * altitude can be computed from the {@linkplain gov.nasa.worldwind.Globe 
    * globe} and the current {@linkplain gov.nasa.worldwind.View#getFieldOfView()
    * field of view}.</i></p>

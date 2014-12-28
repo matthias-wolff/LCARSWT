@@ -5,8 +5,8 @@ import java.util.Properties;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 
 /**
- * Interface of lightweight speech recognition and synthesis engines. This interface may be
- * replaced by the Java Speech API.
+ * Interface of lightweight speech recognition and synthesis engines. This
+ * interface may be replaced by the Java Speech API.
  * 
  * @author Matthias Wolff
  */

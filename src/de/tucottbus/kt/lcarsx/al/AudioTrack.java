@@ -688,7 +688,7 @@ public class AudioTrack
     return prefetch;
   }
   
-  // -- Debug and test API --
+  // -- Debugging and testing --
   
   /**
    * DEBUGGING ONLY: Simple play-back method.

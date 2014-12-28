@@ -5,10 +5,11 @@ import java.util.Vector;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 
 /**
+ * <p><i><b style="color:red">Experimental.</b></i></p>
+ *
  * A recognition post-processing event. The event can contain a
  * {@linkplain #result refined recognition result} and {@linkplain #frames
  * per-frame details}.
- * <p><b style="color:red">NOTE:</b> This API is experimental an may change.</p>
  * 
  * @author Matthias Wolff
  */

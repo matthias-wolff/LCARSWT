@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 import de.tucottbus.kt.lcars.LCARS;
 
 /**
- * <p><i><b style="color:red">Experimental API.</b></i></p>
+ * <p><i><b style="color:red">Experimental.</b></i></p>
  * 
  * A geocoder for Earth.
  * 
@@ -44,7 +44,7 @@ public class LcarsGazetteer
   private static final String Q_SKY_KML   = "http://maps.google.com/maps?output=kml&oe=utf-8&q=sky%3A[ADDRESS]";
 
   /**
-   * <p><i><b style="color:red">Experimental API.</b></i></p>
+   * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
    * Looks up places for a given address string.
    * 
