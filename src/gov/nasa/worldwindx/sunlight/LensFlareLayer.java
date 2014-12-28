@@ -1,12 +1,26 @@
-package de.tucottbus.kt.lcarsx.wwj.sunlight;
+package gov.nasa.worldwindx.sunlight;
 
-import gov.nasa.worldwind.geom.*;
+import gov.nasa.worldwind.geom.Line;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.render.*;
+import gov.nasa.worldwind.render.Annotation;
+import gov.nasa.worldwind.render.AnnotationAttributes;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.PatternFactory;
+import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.render.ScreenAnnotation;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.geom.GeneralPath;
+import java.awt.image.BufferedImage;
 
 /**
  * Displays a lens flare effect when the Sun is in view.

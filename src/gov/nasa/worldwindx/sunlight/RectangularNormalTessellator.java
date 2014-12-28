@@ -4,7 +4,7 @@
  National Aeronautics and Space Administration.
  All Rights Reserved.
  */
-package de.tucottbus.kt.lcarsx.wwj.sunlight;
+package gov.nasa.worldwindx.sunlight;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.View;

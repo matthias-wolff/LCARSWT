@@ -13,6 +13,9 @@ import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer;
+import gov.nasa.worldwindx.sunlight.AtmosphereLayer;
+import gov.nasa.worldwindx.sunlight.SunController;
+import gov.nasa.worldwindx.sunlight.SunLayer;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,9 +32,6 @@ import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit.ListItem;
 import de.tucottbus.kt.lcarsx.wwj.orbits.StdEarthOrbit;
 import de.tucottbus.kt.lcarsx.wwj.places.Place;
 import de.tucottbus.kt.lcarsx.wwj.places.Poi;
-import de.tucottbus.kt.lcarsx.wwj.sunlight.AtmosphereLayer;
-import de.tucottbus.kt.lcarsx.wwj.sunlight.SunController;
-import de.tucottbus.kt.lcarsx.wwj.sunlight.SunLayer;
 
 /**
  * <p><i><b style="color:red">Experimental API.</b></i></p>

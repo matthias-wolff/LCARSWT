@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcarsx.wwj.sunlight;
+package gov.nasa.worldwindx.sunlight;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
