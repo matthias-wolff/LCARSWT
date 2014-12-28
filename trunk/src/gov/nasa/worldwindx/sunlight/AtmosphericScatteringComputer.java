@@ -1,8 +1,8 @@
-package de.tucottbus.kt.lcarsx.wwj.sunlight;
+package gov.nasa.worldwindx.sunlight;
 
-import gov.nasa.worldwind.geom.*;
+import gov.nasa.worldwind.geom.Vec4;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * Computes the color of the atmosphere according to the Sun position, the eye position and a direction.

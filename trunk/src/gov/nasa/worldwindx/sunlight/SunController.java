@@ -10,7 +10,7 @@
  * http://opensource.org/licenses/CDDL-1.0
  * http://opensource.org/licenses/GPL-3.0
  */
-package de.tucottbus.kt.lcarsx.wwj.sunlight;
+package gov.nasa.worldwindx.sunlight;
 
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.geom.LatLon;
