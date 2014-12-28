@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+
+<places>
+  
+  <!-- ON EARTH -->
+  <place world="EARTH" name="Africa"/>
+  <place world="EARTH" name="Asia"/>
+  <place world="EARTH" name="Antarctica"/>
+  <place world="EARTH" name="Australia"/>
+  <place world="EARTH" name="Europe">
+    <grammar>
+      LEX: Europa QOYro:pa:
+      LEX: Europa OYro:pa:
+      GRM: NAV Europa:NAV_Europa
+    </grammar>
+  </place>
+  <place world="EARTH" name="North America"/>
+  <place world="EARTH" name="South America"/>
+
+  <!-- ON THE MOON -->
+  <place world="MOON" name="Aitken Basin">
+    <camera>-16.8, 173.4, 135000, -4.378803, 0</camera>
+  </place>
+  <place world="MOON" name="Apollo 11 Landing Site">
+    <camera>0.681400, 23.460550, 130, -1.946649, 0, 0</camera>
+  </place>
+  <place world="MOON" name="Lambert Crater">
+    <camera>24.9, -20.9, 9600, -1.811669, 69</camera>
+  </place>
+  
+
+  <!-- ON MARS -->
+  <place world="MARS" name="Candor Chasma I">
+    <camera>-6.276, -70.5, 800, 53.0, 84.3</camera>
+  </place>
+  <place world="MARS" name="Candor Chasma II">
+		<camera>-7.246897,-68.38727,12486.243,-46.408066,68.119514,1.1177145E-9</camera>
+  </place>
+  <place world="MARS" name="Olympus Mons">
+    <camera>18.4, -134, 650000</camera>
+  </place>
+  <place world="MARS" name="The Face on Mars">
+    <camera>40.745, -9.457, 10150, -44.158</camera>
+  </place>
+  <place world="MARS" name="Utopia Planitia">
+    <camera>48°27'15.78"N, 115°23'29.85"E, 913424</camera>
+  </place>
+
+  <!-- IN THE SKY -->
+  <place world="SKY" name="40 Eridani A (VULCAN)">
+    <camera>-7.6363163,-116.1971,46103.773,-31.77122,0.0,0.0</camera>
+  </place>  
+  <place world="SKY" name="Abell 2218">
+    <camera>66.20645,68.95541,2910.354,-0.05828105,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Andromeda Galaxy">
+    <camera>41.238976,-169.3759,195355.95,-83.035194,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Ant Nebula">
+    <camera>-51.98739,64.30436,4109.3486,6.0104957,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Boomerang Nebula">
+    <camera>-54.52139,11.192942,1236.1854,54.995937,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Herbig Haro 32">
+    <camera>11.0317,110.128944,2038.8158,-23.284136,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Horsehead Nebula">
+    <camera>-2.1888685,-94.93682,205545.23,-9.795747,0.0,0.0</camera>
+  </place>  
+  <place world="SKY" name="Galactic Center">
+    <camera>-30.660969,86.3602,1408260.1,26.822655,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Large Magellanic Cloud">
+    <camera>-69.110344,-102.55151,909565.4,-8.691728,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Small Magellanic Cloud">
+    <camera>-72.72797,-167.08171,423300.03,-39.526253,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="NGC 1300">
+    <camera>-19.413034,-130.08195,10603.293,-1.7579741,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="NGC 3132">
+    <camera>-40.436672,-28.24566,3356.3564,25.719227,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="North America Nebula">
+    <camera>44.57762,134.77153,408224.78,-156.18222,0.0,0.0</camera>
+  </place>  
+  <place world="SKY" name="Orion Nebula">
+    <camera>-5.314463,-96.25513,142026.75,-9.794642,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="The Pillars of Creation">
+    <camera>-13.799586,94.764755,17362.916,29.72089,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Sombrero Galaxy">
+    <camera>-11.624329,9.9964485,11092.533,-12.942472,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="V838 Monocerotis">
+    <camera>-3.845633,-73.97336,5134.4727,45.285496,0.0,0.0</camera>
+  </place>
+  <place world="SKY" name="Whirlpool Galaxy">
+    <camera>47.206604,22.479053,17352.58,-5.436136,0.0,0.0</camera>
+  </place>  
+</places>
