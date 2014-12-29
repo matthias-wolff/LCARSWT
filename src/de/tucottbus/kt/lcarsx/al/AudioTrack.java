@@ -13,7 +13,10 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -730,7 +733,7 @@ public class AudioTrack
     try
     {
       AudioFormat    af   = getAudioFormat();
-      DataLine.Info  dli  = new DataLine.Info(SourceDataLine.class,af);
+      DataLine.Info  dli  = new DataLine.Info(Clip.class,af);
       SourceDataLine line = (SourceDataLine)AudioSystem.getLine(dli);
       line.open(af);
       line.start();
@@ -758,6 +761,51 @@ public class AudioTrack
     }
   }
   
+  private void play3()
+  {
+    
+    try
+    {
+      AudioInputStream ais = getAudioInputStream();
+      DataLine.Info info = new DataLine.Info(Clip.class, ais.getFormat());
+      Clip clip = (Clip)AudioSystem.getLine(info);
+      clip.open(ais);
+
+      // due to bug in Java Sound, explicitly exit the VM when
+      // the sound has stopped.
+      clip.addLineListener(new LineListener() 
+      {
+        public void update(LineEvent event) 
+        {
+          System.out.println(event);
+        }
+      });
+
+      (new Thread()
+      {
+        @Override
+        public void run()
+        {
+          while (true)
+          {
+            if (clip.getMicrosecondPosition()>10e6)
+              clip.setMicrosecondPosition((long) 1e6);
+            System.out.println(clip.getMicrosecondPosition());
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
+          }
+        }
+      }).start();
+      
+      // play the sound clip
+      clip.start();
+      Thread.sleep(100000);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+  
   /**
    * Main method for testing.
    * <p><b>Usage:</b>
@@ -772,8 +820,9 @@ public class AudioTrack
     try
     {
       AudioTrack track = new AudioTrack(new File(args[0]));
+//      System.out.println("play3 ..."); track.play3();
       System.out.println("play2 ..."); track.play2();
-      System.out.println("play1 ..."); track.play1();
+//      System.out.println("play1 ..."); track.play1();
     }
     catch (Exception e)
     {

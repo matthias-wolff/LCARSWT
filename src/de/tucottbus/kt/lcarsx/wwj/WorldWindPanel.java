@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcarsx.wwj;
 
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.layers.LayerList;
 
 import java.awt.Dimension;
@@ -75,6 +76,7 @@ public abstract class WorldWindPanel extends MainPanel
   private   EElementArray   ePlaceArray;
   private   ERect           eOrbit;
   private   ERect           ePlaces;
+  private   EValue          eNetworkState;
   
   public final int style = LCARS.EC_SECONDARY | LCARS.ES_SELECTED;
   
@@ -285,6 +287,11 @@ public abstract class WorldWindPanel extends MainPanel
     });
     add(e);
     
+    // The status line
+    eNetworkState = new EValue(null,1346,1056,278,18,LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_RECT_RND,null);
+    eNetworkState.setVisible(false);
+    add(eNetworkState);
+
     // Initialize
     setBarMode(BARMODE_NAVI);
 
@@ -334,6 +341,40 @@ public abstract class WorldWindPanel extends MainPanel
   {
     super.start();
   }
+
+  @Override
+  protected void fps2()
+  {
+    // Show network state
+    if (WorldWind.getNetworkStatus().isNetworkUnavailable())
+    {
+      if (eNetworkState.getData()==null)
+      {
+        eNetworkState.setColor(LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED));
+        eNetworkState.setData(new Boolean(true));
+      }
+      else
+      {
+        eNetworkState.setColor(LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_SECONDARY));
+        eNetworkState.setData(null);
+      }
+      eNetworkState.setValue("NO CONNECTION");
+      eNetworkState.setVisible(true);
+    }
+    else if (WorldWind.getRetrievalService().hasActiveTasks())
+    {
+      eNetworkState.setVisible(true);
+      eNetworkState.setColor(null);
+      eNetworkState.setValue("DATA TRANSMISSION");
+    }
+    else
+    {
+      eNetworkState.setVisible(false);
+      eNetworkState.setColor(null);
+      eNetworkState.setValue("");
+    }
+  }
+
 
   @Override
   protected void fps25()

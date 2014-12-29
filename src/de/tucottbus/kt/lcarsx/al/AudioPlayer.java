@@ -62,9 +62,10 @@ public class AudioPlayer implements Runnable
   // -- Constructors --
   
   /**
-   * Creates a new audio player.
+   * Internal constructor. Call {@link AudioPlayer#getInstance()} to get the
+   * singleton.
    */
-  public AudioPlayer()
+  private AudioPlayer()
   {
     this.time = 0;
     this.listeners = new Vector<IAudioPlayerEventListener>();
@@ -196,6 +197,7 @@ public class AudioPlayer implements Runnable
     if (playThread==null || !playThread.isAlive())
     {
       playThread = new Thread(this);
+      playThread.setDaemon(true);
       playThread.start();
     }
   }
@@ -375,11 +377,19 @@ public class AudioPlayer implements Runnable
     }
   }
   
-  // -- The main method --
+  // -- Statics --
   
-  static AudioPlayer player;
-  static AudioTrack  song1;
-  static AudioTrack  song2;
+  protected static AudioPlayer player;
+  
+  static
+  {
+    player = new AudioPlayer();
+  }
+  
+  public static AudioPlayer getInstance()
+  {
+    return player;
+  }
   
   /**
    * Main method used for testing only.
@@ -402,8 +412,8 @@ public class AudioPlayer implements Runnable
     
     try
     {
-      song1 = new AudioTrack(new File(f1));
-      song2 = new AudioTrack(new File(f2));
+      AudioTrack song1 = new AudioTrack(new File(f1));
+      AudioTrack song2 = new AudioTrack(new File(f2));
       
       player.addEventListener(new IAudioPlayerEventListener()
       {

@@ -38,7 +38,7 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  * 
  * @author Matthias Wolff
  */
-public class AudioLibraryPanel extends MainPanel
+public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventListener
 {
    private EValue eTitle;
    private EValue eTimecode;
@@ -51,7 +51,7 @@ public class AudioLibraryPanel extends MainPanel
    private ERect  eStop;
    private ELabel eGuiLd;
    
-   // Contollers
+   // Controllers
    private EGainSlider eGain;
    
    // Elements in mode 0 (browse library) 
@@ -68,8 +68,6 @@ public class AudioLibraryPanel extends MainPanel
    private int eBrace1Top = -1;
    private int eBrace2Top = -1;
    
-   private AudioPlayer player;
-   
   /**
    * Creates a new MP3 player panel
    * 
@@ -79,28 +77,6 @@ public class AudioLibraryPanel extends MainPanel
   public AudioLibraryPanel(IScreen screen)
   {
     super(screen);
-
-    // Create the audio player
-    player = new AudioPlayer();
-    player.addEventListener(new IAudioPlayerEventListener()
-    {
-      @Override
-      public void processEvent(AudioPlayerEvent event)
-      {
-        eGain.setControl(player.getGainControl());
-        switch (event.type)
-        {
-        case AudioPlayerEvent.STARTED:
-          setMode(1);
-          break;
-        case AudioPlayerEvent.STOPPED:
-          setMode(0);
-          break;
-        }
-        LCARS.log("ALP",event.toString());
-      }
-    });
-    player.addEventListener(eInfo);
   }
 
   @Override
@@ -220,13 +196,10 @@ public class AudioLibraryPanel extends MainPanel
       @Override
       public void touchDown(EEvent ee)
       {
-        if (player!=null)
-        {
-          if (player.isPaused())
-            player.play();
-          else
-            player.pause();
-        }
+        if (AudioPlayer.getInstance().isPaused())
+          AudioPlayer.getInstance().play();
+        else
+          AudioPlayer.getInstance().pause();
       }
     });
     add(ePause);
@@ -237,7 +210,7 @@ public class AudioLibraryPanel extends MainPanel
       @Override
       public void touchDown(EEvent ee)
       {
-        player.stop();
+        AudioPlayer.getInstance().stop();
       }
     });
     add(eStop);
@@ -295,6 +268,165 @@ public class AudioLibraryPanel extends MainPanel
     invalidate();
   }
 
+  @Override
+  public void stop()
+  {
+    AudioPlayer.getInstance().removeEventListener(eInfo);
+    AudioPlayer.getInstance().removeEventListener(this);
+    super.stop();
+  }
+  
+  @Override
+  public void start()
+  {
+    super.start();
+    AudioPlayer.getInstance().addEventListener(this);
+    AudioPlayer.getInstance().addEventListener(eInfo);
+  }
+
+  @Override
+  protected void fps2()
+  {
+    super.fps2();
+ 
+    if (eBrace1Top>=0 && eBrace1Top!=eBrace1.getFirstVisibleItemIndex())
+      selectArtist(null);
+    
+    if (eBrace2Top>=0 && eBrace2Top!=eBrace2.getFirstVisibleItemIndex())
+      selectAlbum(null);
+    
+    // Display current and next track
+    EElementArray ea = getPlaylistElementArray();
+    if (ea!=null)      
+      for (int i=0; i<ea.getItemCount(); i++)
+      {
+        EElement   e  = ea.getItemElement(i);
+        AudioTrack at = (AudioTrack)e.getData();
+        if (AudioPlayer.getInstance()!=null && AudioPlayer.getInstance().isPlaying())
+        {
+          if (AudioPlayer.getInstance().getCurrentTrack()==at && at.isExcluded())
+            AudioPlayer.getInstance().stop();
+          if (AudioPlayer.getInstance().getNextTrack()==at && at.isExcluded())
+            AudioPlayer.getInstance().setNextTrack(null);
+          
+          e.setSelected(AudioPlayer.getInstance().getCurrentTrack()==at);
+          e.setBlinking(AudioPlayer.getInstance().getNextTrack()   ==at);
+          
+          // - Automatically set next track
+          if (AudioPlayer.getInstance().getCurrentTrack()==at && AudioPlayer.getInstance().getNextTrack()==null)
+            for (int j=i+1; j<ea.getItemCount(); j++)
+            {
+              AudioTrack at2 = (AudioTrack)ea.getItemElement(j).getData();
+              if (!at2.isExcluded())
+              {
+                AudioPlayer.getInstance().setNextTrack(at2);
+                break;
+              }
+            }
+        }
+        else
+        {
+          e.setSelected(false);
+          e.setBlinking(false);
+        }
+        e.setAlpha(at.isExcluded()?0.33f:1f);
+      }
+  }
+
+  @Override
+  protected void fps10()
+  {
+    LoadStatistics ls1 = getLoadStatistics();
+    String s = String.format("%03d-%02d",ls1.getLoad(),ls1.getEventsPerPeriod());
+    try
+    {
+      LoadStatistics ls2 = getScreen().getLoadStatistics();
+      s += String.format("/%03d-%02d",ls2.getLoad(),ls2.getEventsPerPeriod());
+    }
+    catch (RemoteException e)
+    {
+      e.printStackTrace();
+    }
+    eGuiLd.setLabel(s);
+  }
+
+  @Override
+  protected void fps25()
+  {
+    // Display track select mode
+    if (trackMode<0 || trackMode>2) trackMode = 0;
+    eTrackCurrent.setSelected(trackMode==0);
+    eTrackNext   .setSelected(trackMode==1);
+    eTrackExclude.setSelected(trackMode==2);
+
+    // Display current player status
+    if (AudioPlayer.getInstance().isPlaying())
+    {
+      eTitle.setLabel((""+AudioPlayer.getInstance().getCurrentTrack().getArtist()).toUpperCase());
+      if (getMode()==0)
+        eTitle.setValue((""+AudioPlayer.getInstance().getCurrentTrack().getTitle()).toUpperCase());
+      else
+        eTitle.setValue((""+AudioPlayer.getInstance().getCurrentTrack().getAlbum()).toUpperCase());
+
+      double sec = AudioPlayer.getInstance().getMediaTime();
+      int    min = (int)sec/60;
+      String s   = String.format(Locale.ENGLISH,"%02d:%04.1f",min,sec-min*60);
+      eTimecode.setValue(s);
+      
+      ePause.setDisabled(false);
+      ePause.setBlinking(AudioPlayer.getInstance().isPaused());
+      ePause.setColorStyle(AudioPlayer.getInstance().isPaused()?LCARS.EC_SECONDARY:LCARS.EC_PRIMARY);
+      eStop.setDisabled(false);
+    }
+    else
+    {
+      eTitle.setLabel("");
+      eTitle.setValue("");
+      eTimecode.setValue("00:00.0");
+      ePause.setDisabled(true);
+      ePause.setBlinking(false);
+      ePause.setColorStyle(LCARS.EC_PRIMARY);
+      eStop.setDisabled(true);
+    }
+
+    // Feed audio visualization
+    if (eDisplay.isDisplayed())
+    {
+      Vector<AudioBuffer> win = AudioPlayer.getInstance().getAudioWindow();
+      eDisplay.setAudioWindow(win,AudioPlayer.getInstance().getMediaTime());
+      if (AudioPlayer.getInstance().isPlaying())
+      {
+        AudioTrack track = AudioPlayer.getInstance().getCurrentTrack();
+        eDisplay.setTitle((""+track.getTitle()).toUpperCase());
+        eDisplay.setDuration(track.getDuration());
+      }
+      else
+      {
+        eDisplay.setTitle("");
+        eDisplay.setDuration(0);
+        eDisplay.setAudioWindow(null,0);
+      }
+    }
+  }
+
+  // -- Implementation of IAudioPlayerEventListener --
+
+  @Override
+  public void processEvent(AudioPlayerEvent event)
+  {
+    eGain.setControl(AudioPlayer.getInstance().getGainControl());
+    switch (event.type)
+    {
+    case AudioPlayerEvent.STARTED:
+      setMode(1);
+      break;
+    case AudioPlayerEvent.STOPPED:
+      setMode(0);
+      break;
+    }
+    LCARS.log("ALP",event.toString());
+  }
+  
   // -- Operations --
   
   public static File getMusicDirectory()
@@ -502,18 +634,18 @@ public class AudioLibraryPanel extends MainPanel
     case 1:
       // Next
       track.setExcluded(false);
-      if (!player.isPlaying())
+      if (!AudioPlayer.getInstance().isPlaying())
         try
         {
-          player.setCurrentTrack(track);
-          player.play();
+          AudioPlayer.getInstance().setCurrentTrack(track);
+          AudioPlayer.getInstance().play();
         }
         catch (Exception e)
         {
           e.printStackTrace();
         }
       else
-        player.setNextTrack(/*player.getNextTrack()==track?null:*/track);
+        AudioPlayer.getInstance().setNextTrack(/*player.getNextTrack()==track?null:*/track);
       break;
     case 2:
       // Exclude
@@ -522,11 +654,11 @@ public class AudioLibraryPanel extends MainPanel
     default:
       // Current
       track.setExcluded(false);
-      player.stop();
+      AudioPlayer.getInstance().stop();
       try
       {
-        player.setCurrentTrack(track);
-        player.play();
+        AudioPlayer.getInstance().setCurrentTrack(track);
+        AudioPlayer.getInstance().play();
       }
       catch (Exception e)
       {
@@ -604,140 +736,6 @@ public class AudioLibraryPanel extends MainPanel
         return i;
     }
     return -1;
-  }
-
-  // -- Overrides --
-
-  @Override
-  public void stop()
-  {
-    player.stop();
-    super.stop();
-  }
-  
-  @Override
-  protected void fps2()
-  {
-    super.fps2();
- 
-    if (eBrace1Top>=0 && eBrace1Top!=eBrace1.getFirstVisibleItemIndex())
-      selectArtist(null);
-    
-    if (eBrace2Top>=0 && eBrace2Top!=eBrace2.getFirstVisibleItemIndex())
-      selectAlbum(null);
-    
-    // Display current and next track
-    EElementArray ea = getPlaylistElementArray();
-    if (ea!=null)      
-      for (int i=0; i<ea.getItemCount(); i++)
-      {
-        EElement   e  = ea.getItemElement(i);
-        AudioTrack at = (AudioTrack)e.getData();
-        if (player!=null && player.isPlaying())
-        {
-          if (player.getCurrentTrack()==at && at.isExcluded())
-            player.stop();
-          if (player.getNextTrack()==at && at.isExcluded())
-            player.setNextTrack(null);
-          
-          e.setSelected(player.getCurrentTrack()==at);
-          e.setBlinking(player.getNextTrack()   ==at);
-          
-          // - Automatically set next track
-          if (player.getCurrentTrack()==at && player.getNextTrack()==null)
-            for (int j=i+1; j<ea.getItemCount(); j++)
-            {
-              AudioTrack at2 = (AudioTrack)ea.getItemElement(j).getData();
-              if (!at2.isExcluded())
-              {
-                player.setNextTrack(at2);
-                break;
-              }
-            }
-        }
-        else
-        {
-          e.setSelected(false);
-          e.setBlinking(false);
-        }
-        e.setAlpha(at.isExcluded()?0.33f:1f);
-      }
-  }
-
-  @Override
-  protected void fps10()
-  {
-    LoadStatistics ls1 = getLoadStatistics();
-    String s = String.format("%03d-%02d",ls1.getLoad(),ls1.getEventsPerPeriod());
-    try
-    {
-      LoadStatistics ls2 = getScreen().getLoadStatistics();
-      s += String.format("/%03d-%02d",ls2.getLoad(),ls2.getEventsPerPeriod());
-    }
-    catch (RemoteException e)
-    {
-      e.printStackTrace();
-    }
-    eGuiLd.setLabel(s);
-  }
-
-  @Override
-  protected void fps25()
-  {
-    // Display track select mode
-    if (trackMode<0 || trackMode>2) trackMode = 0;
-    eTrackCurrent.setSelected(trackMode==0);
-    eTrackNext   .setSelected(trackMode==1);
-    eTrackExclude.setSelected(trackMode==2);
-
-    // Display current player status
-    if (player!=null && player.isPlaying())
-    {
-      eTitle.setLabel((""+player.getCurrentTrack().getArtist()).toUpperCase());
-      if (getMode()==0)
-        eTitle.setValue((""+player.getCurrentTrack().getTitle()).toUpperCase());
-      else
-        eTitle.setValue((""+player.getCurrentTrack().getAlbum()).toUpperCase());
-
-      double sec = player.getMediaTime();
-      int    min = (int)sec/60;
-      String s   = String.format(Locale.ENGLISH,"%02d:%04.1f",min,sec-min*60);
-      eTimecode.setValue(s);
-      
-      ePause.setDisabled(false);
-      ePause.setBlinking(player.isPaused());
-      ePause.setColorStyle(player.isPaused()?LCARS.EC_SECONDARY:LCARS.EC_PRIMARY);
-      eStop.setDisabled(false);
-    }
-    else
-    {
-      eTitle.setLabel("");
-      eTitle.setValue("");
-      eTimecode.setValue("00:00.0");
-      ePause.setDisabled(true);
-      ePause.setBlinking(false);
-      ePause.setColorStyle(LCARS.EC_PRIMARY);
-      eStop.setDisabled(true);
-    }
-
-    // Feed audio visualization
-    if (player!=null && eDisplay.isDisplayed())
-    {
-      Vector<AudioBuffer> win = player.getAudioWindow();
-      eDisplay.setAudioWindow(win,player.getMediaTime());
-      if (player.isPlaying())
-      {
-        AudioTrack track = player.getCurrentTrack();
-        eDisplay.setTitle((""+track.getTitle()).toUpperCase());
-        eDisplay.setDuration(track.getDuration());
-      }
-      else
-      {
-        eDisplay.setTitle("");
-        eDisplay.setDuration(0);
-        eDisplay.setAudioWindow(null,0);
-      }
-    }
   }
 
   // -- Nested classes --
