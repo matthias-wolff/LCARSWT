@@ -138,7 +138,7 @@ public class AudioPlayer implements Runnable
    */
   public float getDuration()
   {
-    return track.getDuration();
+    return track.getLength();
   }
 
   /**

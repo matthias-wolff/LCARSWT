@@ -36,7 +36,7 @@ public class SunLayer extends LensFlareLayer {
         BufferedImage rainbow = createRainbowImage(128);
         BufferedImage rays = createRaysImage(128, 12, Color.WHITE);
 
-        ArrayList flares = new ArrayList();
+        ArrayList<FlareImage> flares = new ArrayList<FlareImage>();
         flares.add(new FlareImage(rays, 4, 0, .05));
         flares.add(new FlareImage(star, 1.4, 0, .1));
         flares.add(new FlareImage(star, 2.5, 0, .04));

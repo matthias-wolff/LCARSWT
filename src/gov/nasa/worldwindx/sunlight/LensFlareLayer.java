@@ -1,9 +1,9 @@
 package gov.nasa.worldwindx.sunlight;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.render.Annotation;
 import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.PatternFactory;
@@ -52,7 +52,7 @@ public class LensFlareLayer extends RenderableLayer
             AnnotationAttributes aa = this.getAttributes();
             aa.setBorderWidth(0);
             aa.setImageSource(this.image);
-            aa.setAdjustWidthToText(Annotation.SIZE_FIXED);
+            aa.setAdjustWidthToText(AVKey.SIZE_FIT_TEXT/*Annotation.SIZE_FIXED*/);
             aa.setSize(new Dimension(this.image.getWidth(), this.image.getHeight()));
             aa.setBackgroundColor(new Color(0, 0, 0, 0));
             aa.setCornerRadius(0);
@@ -151,7 +151,7 @@ public class LensFlareLayer extends RenderableLayer
     public static LensFlareLayer getPresetInstance(String preset)
     {
         LensFlareLayer lensFlareLayer = new LensFlareLayer();
-        BufferedImage sun = createDiskImage(64, Color.YELLOW);
+        //BufferedImage sun = createDiskImage(64, Color.YELLOW);
         BufferedImage sunDisk = createHaloImage(64, new Color(1f, 1f, .8f), 2f);
         BufferedImage disk = createDiskImage(128, Color.WHITE);
         BufferedImage star = createStarImage(128, Color.WHITE);

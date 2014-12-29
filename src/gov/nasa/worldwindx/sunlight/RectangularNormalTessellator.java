@@ -246,7 +246,6 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             this.globeStateKey = dc.getGlobe().getStateKey(dc);
         }
 
-        @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
         public boolean equals(Object o) {
             if (this == o) {
                 return true;

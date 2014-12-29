@@ -8,7 +8,6 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
@@ -398,7 +397,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       {
         AudioTrack track = AudioPlayer.getInstance().getCurrentTrack();
         eDisplay.setTitle((""+track.getTitle()).toUpperCase());
-        eDisplay.setDuration(track.getDuration());
+        eDisplay.setDuration(track.getLength());
       }
       else
       {
@@ -587,7 +586,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     });
     if (trackFiles!=null)
     {
-      ArrayList<AudioTrack> trackList = new ArrayList<AudioTrack>();
+      AudioTrackList trackList = new AudioTrackList();
       for (File trackFile : trackFiles)
         try
         {
