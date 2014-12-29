@@ -24,10 +24,20 @@
     <wwj.version>2.0.0</wwj.version>
   </properties>
 
-  <!-- <scm> <connection>scm:svn:https://svn.code.sf.net/p/lcars-wt/code/trunk</connection> 
-    <developerConnection>scm:svn:https://svn.code.sf.net/p/lcars-wt/code/trunk/</developerConnection> 
-    <url>http://svn.code.sf.net/p/lcars-wt/code/trunk</url> </scm> -->
-
+  <!-- VERSIONING -->
+  <distributionManagement>
+    <repository>
+      <id>LcarsWtReleases</id>
+      <name>LCARS-WT Releases</name>
+      <url>http://svn.code.sf.net/p/lcars-wt/maven/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>LcarsWtSnapshots</id>
+      <name>LCARS-WT Snapshots</name>
+      <url>http://svn.code.sf.net/p/lcars-wt/maven/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+   
   <!-- PROJECT DEPENDENCIES -->
   <dependencies>
     <dependency>
@@ -80,18 +90,19 @@
       <id>swt-repo</id>
       <url>https://swt-repo.googlecode.com/svn/repo/</url>
     </repository>
-    <repository>
+    <!-- <repository>
       <id>jogamp.org</id>
       <url>http://jogamp.org/deployment/maven</url>
-    </repository>
+    </repository> -->
     <repository>
       <id>agile2d.sf.net</id>
       <url>http://agile2d.sourceforge.net/maven/</url>
     </repository>
   </repositories>
 
-  <!-- OS/ARCHITECTURE PROFILES FOR SWT -->
+  <!-- OS/ARCHITECTURE PROFILES FOR SWT AND JOGL -->
   <profiles>
+  	<!-- WINDOWS PROFILES -->
     <profile>
       <id>windows-x86</id>
       <activation>
@@ -101,23 +112,83 @@
         </os>
       </activation>
       <properties>
-        <swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
-        <jogl-all.classifier>natives-windows-i586</jogl-all.classifier>
+	    <swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
+	    <jogl-all.classifier>natives-windows-i586</jogl-all.classifier> 
         <profile.id>windows-x86</profile.id>
       </properties>
     </profile>
     <profile>
-      <id>windows-x86_64</id>
+      <id>windows-amd64</id>
       <activation>
         <os>
           <family>windows</family>
-          <arch>x86_64</arch>
+          <arch>amd64</arch>
         </os>
       </activation>
       <properties>
         <swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
         <jogl-all.classifier>natives-windows-amd64</jogl-all.classifier>
-        <profile.id>windows-x86_64</profile.id>
+        <profile.id>windows-amd64</profile.id>
+      </properties>
+    </profile>
+    
+  	<!-- LINUX PROFILES -->
+    <profile>
+      <id>Linux-x86</id>
+      <activation>
+        <os>
+          <family>Linux</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+	    <swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
+	    <jogl-all.classifier>natives-linux-i586</jogl-all.classifier> 
+        <profile.id>Linux-x86</profile.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>Linux-amd64</id>
+      <activation>
+        <os>
+          <family>Linux</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
+        <jogl-all.classifier>natives-linux-amd64</jogl-all.classifier>
+        <profile.id>Linux-amd64</profile.id>
+      </properties>
+    </profile>
+
+  	<!-- MAC OSX PROFILES -->
+    <profile>
+      <id>MacOSX-x86</id>
+      <activation>
+        <os>
+          <family>MacosX</family>
+          <arch>x86</arch>
+        </os>
+      </activation>
+      <properties>
+	    <swt.artifactId>org.eclipse.swt.cocoa.macosx</swt.artifactId>
+	    <jogl-all.classifier>natives-macosx-universal</jogl-all.classifier> 
+        <profile.id>MacOSX-x86</profile.id>
+      </properties>
+    </profile>
+    <profile>
+      <id>MacOSX-amd64</id>
+      <activation>
+        <os>
+          <family>MacosX</family>
+          <arch>amd64</arch>
+        </os>
+      </activation>
+      <properties>
+        <swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
+        <jogl-all.classifier>natives-macosx-universal</jogl-all.classifier>
+        <profile.id>MacOSX-amd64</profile.id>
       </properties>
     </profile>
   </profiles>
