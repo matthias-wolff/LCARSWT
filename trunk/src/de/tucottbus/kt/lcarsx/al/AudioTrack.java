@@ -56,7 +56,7 @@ public class AudioTrack
   /**
    * The duration in seconds.
    */
-  private float duration;
+  private float length;
 
   /**
    * Track is excluded from a play list.
@@ -166,7 +166,7 @@ public class AudioTrack
       throw new IllegalArgumentException();
     
     this.file     = file;
-    this.duration = Float.NaN;
+    this.length = Float.NaN;
     
     // Get the song's audio stream format
     AudioInputStream ais = AudioSystem.getAudioInputStream(this.file);
@@ -243,15 +243,15 @@ public class AudioTrack
   }
   
   /**
-   * Returns the duration of the song.
+   * Returns the length of the track in milliseconds.
    */
-  public float getDuration()
+  public float getLength()
   {
-    if (Float.isNaN(duration) && mp3MetaData!=null)
+    if (Float.isNaN(length) && mp3MetaData!=null)
       if (mp3MetaData.containsKey("duration"))
-        duration = ((Long)mp3MetaData.get("duration"))/1.E6f;
+        length = ((Long)mp3MetaData.get("duration"))/1.E6f;
 
-    return duration;
+    return length;
   }
 
   /**
@@ -355,8 +355,8 @@ public class AudioTrack
   }
 
   /**
-   * Determines if two audio tracks are compatible. Compatible tracks can be played at the same
-   * {@link SourceDataLine}.
+   * Determines if two audio tracks are compatible. Compatible tracks can be
+   * played at the same {@link SourceDataLine}.
    * 
    * @param other
    *          The other audio track.
@@ -820,9 +820,9 @@ public class AudioTrack
     try
     {
       AudioTrack track = new AudioTrack(new File(args[0]));
-//      System.out.println("play3 ..."); track.play3();
+      System.out.println("play3 ..."); track.play3();
       System.out.println("play2 ..."); track.play2();
-//      System.out.println("play1 ..."); track.play1();
+      System.out.println("play1 ..."); track.play1();
     }
     catch (Exception e)
     {
