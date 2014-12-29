@@ -1,9 +1,0 @@
-TODO:
------
-o Implement locked state of screen
-
-TO-THINK-ABOUT:
----------------
-o A browser-"GShape" acting as the screen-side front end of EBrowser (which would than become an EElement)
-  - comm. screen->panel: BrowserEvent
-  - comm. panel->screen: fields in browser-"GShape"(?)
