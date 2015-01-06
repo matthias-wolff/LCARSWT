@@ -5,7 +5,7 @@
   <artifactId>lcarswt</artifactId>
   <version>2.0.0-rc.2-SNAPSHOT</version>
   <name>LCARS Widget Toolkit</name>
-  <url>https://sourceforge.net/projects/lcars-wt</url>
+  <url>https://github.com/matthias-wolff/LCARSWT</url>
   <description>The LCARS widget toolkit supplies a pure Java API for programming graphical user interfaces in the Star Trek(TM) LCARS look and feel. It is based on the Abstract Window Toolkit (AWT) and, partially, on the Standard Widget Toolkit (SWT).</description>
   <inceptionYear>2013</inceptionYear>
   <organization>

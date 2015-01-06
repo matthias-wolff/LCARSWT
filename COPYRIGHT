@@ -1,7 +1,7 @@
 LCARSWT: LCARS Widget Toolkit
 
-Copyright 2014-2015 LCARSWT contributors (see below)
-- Chair of Communications Engineering, BTU Cottbus
+Copyright 2013-2015 LCARSWT contributors (see below)
+- Chair of Communications Engineering, BTU Cottbus-Senftenberg
 
 LCARSWT is free software: you can redistribute it and/or modify it under the
 terms of the GNU Lesser General Public License as published by the Free
@@ -16,6 +16,6 @@ details.
 You should have received a copy of the GNU Lesser General Public License
 along with LCARSWT. If not, see <http://www.gnu.org/licenses/>.
 
-UASR contributors:
+LCARSWT contributors:
 - Christian Borck
 - Matthias Wolff
