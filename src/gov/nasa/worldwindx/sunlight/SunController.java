@@ -19,6 +19,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.terrain.Tessellator;
+import incubator.worldwind.CityLightsLayer;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import de.tucottbus.kt.lcarsx.wwj.layers.CloudLayer;
 
 
 /**
@@ -41,6 +44,8 @@ public class SunController implements PropertyChangeListener
   private final AtmosphereLayer atmosphereLayer;
   private final RectangularNormalTessellator suntessellator;
   private final SunLayer sunLayer;
+  private final CloudLayer cloudLayer;
+  private final CityLightsLayer cityLightsLayer;
   private final Model model;
   private final Tessellator originalTessellator;
   private final SkyGradientLayer originalAtmosphere;
@@ -50,9 +55,18 @@ public class SunController implements PropertyChangeListener
     logger.setLevel(Level.WARNING);
   }
 
-  public SunController(Model model, SunLayer sunLayer, AtmosphereLayer atmosphereLayer)
+  public SunController
+  (
+    Model model,
+    SunLayer sunLayer,
+    AtmosphereLayer atmosphereLayer,
+    CityLightsLayer cityLightsLayer,
+    CloudLayer cloudLayer
+  )
   {
     this.sunLayer = sunLayer;
+    this.cityLightsLayer = cityLightsLayer;
+    this.cloudLayer = cloudLayer;
     this.model = model;
     this.originalTessellator = model.getGlobe().getTessellator();
     this.suntessellator = new RectangularNormalTessellator();
@@ -69,43 +83,14 @@ public class SunController implements PropertyChangeListener
       model.getLayers().add(originalAtmosphere);
     }
     sunLayer.addPropertyChangeListener(this);
+    applySunEnabled(isSunEnabled());
   }
 
   @Override
   public void propertyChange(PropertyChangeEvent evt)
   {
     if (evt.getPropertyName().equals("Enabled"))
-    {
-      boolean enabled = (Boolean) evt.getNewValue();
-      if (enabled)
-      { // enable shading, use AtmosphereLayer
-        model.getGlobe().setTessellator(suntessellator);
-        for (int i = 0; i < this.model.getLayers().size(); i++)
-        {
-          Layer l = this.model.getLayers().get(i);
-          if (l instanceof SkyGradientLayer)
-          {
-            this.atmosphereLayer.setEnabled(l.isEnabled());
-            this.model.getLayers().set(i, this.atmosphereLayer);
-            break;
-          }
-        }
-      }
-      else
-      { // disable lighting, use SkyGradientLayer
-        model.getGlobe().setTessellator(originalTessellator);
-        for (int i = 0; i <this.model.getLayers().size(); i++)
-        {
-          Layer l = this.model.getLayers().get(i);
-          if (l instanceof AtmosphereLayer)
-          {
-            this.originalAtmosphere.setEnabled(l.isEnabled());
-            this.model.getLayers().set(i, this.originalAtmosphere);
-            break;
-          }
-        }
-      }
-    }
+      applySunEnabled((Boolean)evt.getNewValue());
   }
 
   /**
@@ -124,6 +109,12 @@ public class SunController implements PropertyChangeListener
     this.sunLayer.setSunDirection(sunVector);
     this.suntessellator.setLightDirection(sunVector.getNegative3());
     this.atmosphereLayer.setSunDirection(sunVector);
+    
+    if (this.cloudLayer!=null)
+      this.cloudLayer.setLightDirection(isSunEnabled()?sunVector.getNegative3():null);
+
+    if (this.cityLightsLayer!=null)
+      this.cityLightsLayer.setSubsolarPoint(LatLon.fromRadians(ll[0], ll[1]));
   }
 
   /**
@@ -249,4 +240,41 @@ public class SunController implements PropertyChangeListener
     return new double[] { declination, longitude };
   }
 
+  public boolean isSunEnabled()
+  {
+    return this.sunLayer.isEnabled();
+  }
+  
+  protected void applySunEnabled(boolean enabled)
+  {
+    if (enabled)
+    { // enable shading, use AtmosphereLayer
+      model.getGlobe().setTessellator(suntessellator);
+      for (int i = 0; i < this.model.getLayers().size(); i++)
+      {
+        Layer l = this.model.getLayers().get(i);
+        if (l instanceof SkyGradientLayer)
+        {
+          this.atmosphereLayer.setEnabled(l.isEnabled());
+          this.model.getLayers().set(i, this.atmosphereLayer);
+          break;
+        }
+      }
+    }
+    else
+    { // disable lighting, use SkyGradientLayer
+      model.getGlobe().setTessellator(originalTessellator);
+      for (int i = 0; i <this.model.getLayers().size(); i++)
+      {
+        Layer l = this.model.getLayers().get(i);
+        if (l instanceof AtmosphereLayer)
+        {
+          this.originalAtmosphere.setEnabled(l.isEnabled());
+          this.model.getLayers().set(i, this.originalAtmosphere);
+          break;
+        }
+      }
+    }
+    update(new Date());
+  }
 }
