@@ -10,22 +10,20 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
-import agile2d.AgileGraphics2D;
-
 /**
  * A geometry representing a text.
  * 
  * @author Matthias Wolff
  */
-public class GText extends Geometry
-{
+public class GText extends Geometry {
   private static final long serialVersionUID = 1L;
-  protected Font            font;
-  protected Point2D.Float   pos;
-  protected GeneralPath     shape;
-  protected String          text;
-  protected float           descent;
-  protected Shape           textShape;
+  protected Font font;
+  protected Point2D.Float pos;
+  protected GeneralPath shape;
+  protected String text;
+  protected float descent;
+  protected Shape textShape;
+  protected TextLayout textLayout;
 
   /**
    * Creates a new text geometry. A text geometry provides information and
@@ -39,76 +37,67 @@ public class GText extends Geometry
    *          the bounding rectangle for touch detection (can be
    *          <code>null</code> for static texts); note that upper left corner
    *          of the bounding rectangle is <em>not</em> identical with the
-   *          drawing position
-   *          {@link pos}
+   *          drawing position {@link pos}
    * @param font
    *          the font to render the text with
    * @param foreground
    *          foreground/background flag
    */
-  public GText(String text, Point2D.Float pos, Rectangle shape, Font font, boolean foreground)
-  {
+  public GText(String text, Point2D.Float pos, Rectangle shape, Font font,
+      boolean foreground) {
     super(foreground);
-    this.text  = text;
-    this.font  = font;
-    this.pos   = pos;
+    this.text = text;
+    this.font = font;
+    this.pos = pos;
     this.shape = new GeneralPath(shape);
   }
-  
-  public Font getFont()
-  {
+
+  public Font getFont() {
     return this.font;
   }
-  
-  public Point2D.Float getPos()
-  {
+
+  public Point2D.Float getPos() {
     return this.pos;
   }
-  
+
   @Override
-  public Area getArea()
-  {
+  public Area getArea() {
     return new Area(shape);
   }
-  
-  public String getText()
-  {
+
+  public String getText() {
     return this.text;
   }
 
-  public float getDescent()
-  {
+  public float getDescent() {
     return this.descent;
   }
-  
-  public void setDescent(float ascent)
-  {
+
+  public void setDescent(float ascent) {
     this.descent = ascent;
   }
-  
+
   /*
    * (non-Javadoc)
+   * 
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
    */
   @Override
-  public void paint2D(Graphics2D g2d)
-  { 
-    if (g2d instanceof AgileGraphics2D)
-    {
-      g2d.setFont(this.font);
-      g2d.drawString(this.text, pos.x, pos.y);
-    }
-    else
-    {
-      FontRenderContext frc = g2d.getFontRenderContext();
-      TextLayout        tly = new TextLayout(this.text,this.font,frc);
-      tly.draw(g2d,pos.x,pos.y);
-      
-      // g2d.setFont(this.font);
-      // g2d.drawString(this.text, pos.x, pos.y);
-    }    
+  public void paint2D(Graphics2D g2d) {
+    if (textLayout == null) 
+      synchronized (this) {
+        if (textLayout == null) {
+          FontRenderContext frc = g2d.getFontRenderContext();
+          textLayout = new TextLayout(this.text, this.font, frc);
+        }
+      }
+    
+    textLayout.draw(g2d, pos.x, pos.y);
+
+    // g2d.setFont(this.font);
+    // g2d.drawString(this.text, pos.x, pos.y);
   }
 
 }
 
-//EOF
+// EOF

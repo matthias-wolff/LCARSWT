@@ -46,6 +46,7 @@ import javax.media.opengl.awt.GLJPanel;
 
 import agile2d.AgileGraphics2D;
 import agile2d.AgileRenderingHints;
+
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
@@ -62,7 +63,7 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  * @author Matthias Wolff
  */
 public class Screen extends JFrame implements IScreen, MouseInputListener, KeyListener
-{
+{ 
   /**
    * 
    */
@@ -114,8 +115,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    * The background image resource file.
    */
   protected String bgImgRes;
-  
-   
+    
   // -- OpenGL parameters
   
   /**
@@ -343,10 +343,9 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       public void display(GLAutoDrawable drawable)
       {
         long time = System.nanoTime();
-        
         g2d.resetAll(drawable);
-        paint2D(g2d);          
-
+        paint2D(g2d);
+        
         loadStat.add((int)((System.nanoTime()-time)/400000));
       }
     });
@@ -355,8 +354,6 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     LCARS.log("SCR", "OpenGL enabled");
     return true;
   }
-  
-  
   
   // -- Getters and setters --
     
@@ -464,7 +461,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     Point2D pt2d = getTransform().transform(pt,null);
     return new Point((int)Math.round(pt2d.getX()),(int)Math.round(pt2d.getY()));
   }
-  
+    
   /**
    * Paints the panel elements of this screen on a {@link Graphics2D} context. 
    * 
@@ -588,9 +585,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       {
         this.panel.stop();
       }
-      catch (RemoteException e)
-      {
-      }
+      catch (RemoteException e) {}
 
     // Set and start new panel  
     this.panel = ipanel;
@@ -667,7 +662,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     updateBgImage();
     invalidateScreen();
   }
-
+  
   @Override
   public void userFeedback(UserFeedback.Type type)
   {
