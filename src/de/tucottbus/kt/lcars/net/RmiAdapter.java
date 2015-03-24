@@ -62,6 +62,24 @@ public abstract class RmiAdapter implements Remote
     this.connection   = new ConnectionThread();
     this.connection.start();
   }
+  
+  // -- Feedback --
+  
+  /**
+   * Returns true if it is connected
+   * @return
+   */
+  public boolean isConnected() {
+    return this.connection.run;
+  }
+  
+  /**
+   * Returns the last log message of peer/server
+   * @return
+   */
+  public String getServerMsg() {
+    return connection.serverMsg;
+  }
 
   // -- Operations --
   
@@ -388,8 +406,7 @@ public abstract class RmiAdapter implements Remote
     {
       run = false;
       interrupt();
-    }
-
+    }    
   }
   
 }
