@@ -27,6 +27,8 @@
 		<!-- TODO: only enable next property after all java classes are prepared 
 			to be UTF8 encoded -->
 		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
+		
+		<!-- MAIN CLASS -->
 		<mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>
 
 		<!-- Dependency versions -->
@@ -40,18 +42,6 @@
 		<github.maven.owner>matthias-wolff</github.maven.owner>
 		<github.maven.branch>refs/heads/mvn-repo</github.maven.branch>
 
-		<!-- Artifact identifieres -->
-		<swt.artifactId.win32>org.eclipse.swt.win32.win32.x86</swt.artifactId.win32>
-		<swt.artifactId.win64>org.eclipse.swt.win32.win32.x86_64</swt.artifactId.win64>
-		<swt.artifactId.linux32>org.eclipse.swt.gtk.linux.x86</swt.artifactId.linux32>
-		<swt.artifactId.linux64>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId.linux64>
-		<swt.artifactId.macosx32>org.eclipse.swt.cocoa.macosx</swt.artifactId.macosx32>
-		<swt.artifactId.macosx64>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId.macosx64>
-		<jogl-all.classifier.win32>natives-windows-i586</jogl-all.classifier.win32>
-		<jogl-all.classifier.win64>natives-windows-amd64</jogl-all.classifier.win64>
-		<jogl-all.classifier.linux32>natives-linux-i586</jogl-all.classifier.linux32>
-		<jogl-all.classifier.linux64>natives-linux-amd64</jogl-all.classifier.linux64>
-		<jogl-all.classifier.macosx>natives-macosx-universal</jogl-all.classifier.macosx>
 	</properties>
 
 	<distributionManagement>
@@ -74,8 +64,8 @@
 				</os>
 			</activation>
 			<properties>
-				<swt.artifactId>${swt.artifactId.win32}</swt.artifactId>
-				<jogl-all.classifier>${jogl-all.classifier.win32}</jogl-all.classifier>
+				<swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
+				<jogl-all.classifier>natives-windows-i586</jogl-all.classifier>
 				<profile.id>Win86</profile.id>
 			</properties>
 		</profile>
@@ -88,9 +78,8 @@
 				</os>
 			</activation>
 			<properties>
+				<swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
 				<jogl-all.classifier>natives-windows-amd64</jogl-all.classifier>
-				<jogl-all.classifier>${jogl-all.classifier.win64}</jogl-all.classifier>
-				<swt.artifactId>${swt.artifactId.win64}</swt.artifactId>
 				<profile.id>Win64</profile.id>
 			</properties>
 		</profile>
@@ -105,8 +94,8 @@
 				</os>
 			</activation>
 			<properties>
-				<swt.artifactId>${swt.artifactId.linux32}</swt.artifactId>
-				<jogl-all.classifier>${jogl-all.classifier.linux32}</jogl-all.classifier>
+				<swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
+				<jogl-all.classifier>natives-linux-i586</jogl-all.classifier>
 				<profile.id>Linux86</profile.id>
 			</properties>
 		</profile>
@@ -119,8 +108,8 @@
 				</os>
 			</activation>
 			<properties>
-				<swt.artifactId>${swt.artifactId.linux64}</swt.artifactId>
-				<jogl-all.classifier>${jogl-all.classifier.linux64}</jogl-all.classifier>
+				<swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
+				<jogl-all.classifier>natives-linux-amd64</jogl-all.classifier>
 				<profile.id>Linux64</profile.id>
 			</properties>
 		</profile>
@@ -135,8 +124,8 @@
 				</os>
 			</activation>
 			<properties>
-				<swt.artifactId>${swt.artifactId.macosx32}</swt.artifactId>
-				<jogl-all.classifier>${jogl-all.classifier.macosx}</jogl-all.classifier>
+				<swt.artifactId>org.eclipse.swt.cocoa.macosx</swt.artifactId>
+				<jogl-all.classifier>natives-macosx-universal</jogl-all.classifier>
 				<profile.id>MacOSX86</profile.id>
 			</properties>
 		</profile>
@@ -149,8 +138,8 @@
 				</os>
 			</activation>
 			<properties>
-				<swt.artifactId>${swt.artifactId.macosx64}</swt.artifactId>
-				<jogl-all.classifier>${jogl-all.classifier.macosx}</jogl-all.classifier>
+				<swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
+				<jogl-all.classifier>natives-macosx-universal</jogl-all.classifier>
 				<profile.id>MacOSX64</profile.id>
 			</properties>
 		</profile>
@@ -247,24 +236,77 @@
 				</configuration>
 			</plugin>
 
-			<!--
-				This generates an extra jar file that can be run standalone (platform
-				specifically, see profiles in this pom).
-			 -->
+			<!-- 
+        	<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-jar-plugin</artifactId>
+	            <version>2.4</version>
+	            <configuration>
+	                <finalname>${project.artifactId}</finalname>
+	                <archive>
+	                    <manifest>
+	                        <mainClass>${mainClass}</mainClass>      
+	                        <addClasspath>true</addClasspath>
+	                    </manifest>
+	                </archive>
+	            </configuration>
+	        </plugin>
+	 
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <version>2.5.1</version>
+	            <configuration>
+	                <outputDirectory>${project.build.directory}/classes</outputDirectory>
+	                <includeScope>runtime</includeScope>
+	            </configuration>
+	            <executions>
+	                <execution>
+	                    <id>unpack-dependencies</id>
+	                    <phase>prepare-package</phase>
+	                    <goals>
+	                        <goal>unpack-dependencies</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+	        </plugin> -->
+
+			<!-- Modifies the jars manifest file. Here we add the Main-Class attribute, 
+				for example. -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jar-plugin</artifactId> 
+				<version>2.5</version> <configuration> <archive> <manifest> <addClasspath>true</addClasspath> 
+				<classpathPrefix>dependency</classpathPrefix> <packageName>${project.packageName}</packageName> 
+				<mainClass>${project.mainClass}</mainClass> </manifest> </archive> </configuration> 
+				</plugin> -->
+
+			<!-- This generates an extra jar file that can be run standalone (platform 
+				specifically, see profiles in this pom). -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.3</version>
 				<configuration>
+					<!-- get all project dependencies -->
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<!-- MainClass in mainfest make a executable jar -->
 					<archive>
 						<manifest>
-							<mainClass>${project.mainClass}</mainClass>
+							<mainClass>${mainClass}</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
+				<executions>
+				  <execution>
+					<id>make-assembly</id>
+                                        <!-- bind to the packaging phase -->
+					<phase>package</phase> 
+					<goals>
+						<goal>single</goal>
+					</goals>
+				  </execution>
+				</executions>
 			</plugin>
 
 			<plugin>

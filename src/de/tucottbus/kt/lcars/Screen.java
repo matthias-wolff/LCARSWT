@@ -38,6 +38,8 @@ import javax.swing.event.MouseInputListener;
 
 import org.eclipse.swt.widgets.Display;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
@@ -46,7 +48,6 @@ import javax.media.opengl.awt.GLJPanel;
 
 import agile2d.AgileGraphics2D;
 import agile2d.AgileRenderingHints;
-
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
@@ -158,8 +159,8 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     setTitle("LCARS");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-    if(!(openGl && initGLContentPane()))
-      initContentPane();
+    if(!(openGl && initGpuContentPane()))
+      initCpuContentPane();
       
     setPanel(panelClass);
     fullScreenMode = fullScreen && device.isFullScreenSupported();
@@ -281,7 +282,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    * on the cpu.
    * @return Always true
    */
-  private boolean initContentPane()
+  private boolean initCpuContentPane()
   {
     JComponent component = new JComponent()
     {
@@ -306,9 +307,9 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   /**
    * Initialize the ContentPane with the OpenGL component {@link javax.media.opengl.awt.GLJPanel}.
    * Rendering will be performed on the gpu. 
-   * @return Return true if OpenGL 2.0 is available, otherwise false
+   * @return Return true if OpenGL [1.0 ... 3.0] is available, otherwise false
    */
-  private boolean initGLContentPane()
+  private boolean initGpuContentPane()
   {
     // check, if openGL is available
     if(!GLProfile.getDefault().isGL2())
@@ -318,8 +319,8 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     caps.setDoubleBuffered(true);// request double buffer display mode
     caps.setSampleBuffers(NUM_SAMPLES_FOR_MULTISAMPLE > 0);
     caps.setNumSamples(NUM_SAMPLES_FOR_MULTISAMPLE);
+    
     GLJPanel gljPanel = new GLJPanel(caps);
-          
     gljPanel.addGLEventListener(new GLEventListener()
     { 
       private AgileGraphics2D g2d;
@@ -329,10 +330,15 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       
       @Override
       public void init(GLAutoDrawable drawable)
-      {
+      {   
         AgileGraphics2D.destroyInstance();
         g2d = AgileGraphics2D.getInstance(drawable);           
-        g2d.setFontRenderingStrategy(TEXT_RENDERING_STRATEGY);
+        g2d.setFontRenderingStrategy(TEXT_RENDERING_STRATEGY);        
+
+        GL2 gl = drawable.getGL().getGL2();
+
+        // Disable depth test
+        gl.glDisable(GL.GL_DEPTH_TEST);        
       }
       
       @Override
@@ -342,6 +348,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       @Override
       public void display(GLAutoDrawable drawable)
       {
+        
         long time = System.nanoTime();
         g2d.resetAll(drawable);
         paint2D(g2d);
@@ -484,6 +491,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       {
         panelState  = null;
         elementData = null;
+        return;
       }
     }
 
@@ -512,21 +520,6 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     else
       g2d.drawImage(bgImg,transform,this);
 
-    paint2D(g2d, elementData, panelState);
-  }
-  
-  /**
-   * Draws widgets to the graphic.
-   * @param g2d - graphic to draw on
-   * @param elementData - elements/widgets to be drawn on the graphic
-   * @param panelState - state of the panel
-   * @return load time in nano seconds
-   */  
-  static void paint2D (Graphics2D g2d, Vector<ElementData> elementData, PanelState panelState)
-  {
-    if (elementData==null)
-      return;
-        
     //GImage.beginCacheRun();
     try
     {
@@ -540,7 +533,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     }
     //GImage.endCacheRun();
   }
-  
+    
   /**
    * Called to update the background image of the screen.
    */
