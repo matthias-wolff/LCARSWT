@@ -4,8 +4,8 @@
   <artifactId>lcarswt</artifactId>
   <versioning>
     <versions>
-      <version>2.0.0-rc.2-SNAPSHOT</version>
+      <version>2.0.0-rc.3-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20150301181016</lastUpdated>
+    <lastUpdated>20150326085919</lastUpdated>
   </versioning>
 </metadata>
