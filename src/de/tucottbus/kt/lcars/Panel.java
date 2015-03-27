@@ -876,7 +876,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
     catch (RemoteException e)
     {
-      //e.printStackTrace();
+      LCARS.err("PNL", "Error while sending update to screen. Reason: " + e.getMessage());
     }
     time = System.nanoTime()-time;
     loadStat.add((int)(time/400000));

@@ -61,9 +61,6 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   {
     super(panelHostName);
     this.screen = screen;
-    
-    if (!isConnected())
-      showRmiErrors();
   }
   
   // -- Implementation of abstract methods --
