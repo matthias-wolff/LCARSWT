@@ -171,6 +171,7 @@ public class EarthPanel extends WorldWindPanel
 //      //ls.add(ll.getLayerByName("Earth at Night"));
 //      for (Layer layer : ls) layer.setEnabled(false);
 //      this.layerSets.add(ls);
+      
     }
     return this.layerSets;
   }

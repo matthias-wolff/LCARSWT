@@ -1,317 +1,383 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>de.tucottbus.kt.lcars</groupId>
-  <artifactId>lcarswt</artifactId>
-  <version>2.0.0-rc.2-SNAPSHOT</version>
-  <name>LCARS Widget Toolkit</name>
-  <url>https://github.com/matthias-wolff/LCARSWT</url>
-  <description>The LCARS widget toolkit supplies a pure Java API for programming graphical user interfaces in the Star Trek(TM) LCARS look and feel. It is based on the Abstract Window Toolkit (AWT) and, partially, on the Standard Widget Toolkit (SWT).</description>
-  <inceptionYear>2013</inceptionYear>
-  <organization>
-    <name>Chair of Communications Engineering, BTU Cottbus-Senftenberg</name>
-    <url>https://www.tu-cottbus.de/fakultaet3/en/communications-engineering.html</url>
-  </organization>
-  <packaging>jar</packaging>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.tucottbus.kt.lcars</groupId>
+	<artifactId>lcarswt</artifactId>
+	<version>2.0.0-rc.4-SNAPSHOT</version>
+	<name>LCARS Widget Toolkit</name>
+	<url>https://github.com/matthias-wolff/LCARSWT</url>
+	<description>The LCARS widget toolkit supplies a pure Java API for programming graphical user interfaces in the Star Trek(TM) LCARS look and feel. It is based on the Abstract Window Toolkit (AWT) and, partially, on the Standard Widget Toolkit (SWT).</description>
+	<inceptionYear>2013</inceptionYear>
+	<organization>
+		<name>Chair of Communications Engineering, BTU Cottbus-Senftenberg</name>
+		<url>https://www.tu-cottbus.de/fakultaet3/en/communications-engineering.html</url>
+	</organization>
+	<packaging>jar</packaging>
 
-  <!-- PROJECT PROPERTIES -->
-  <properties>
-    <!-- TODO: only enable next property after all java classes are prepared 
-      to be UTF8 encoded -->
-    <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
-    <jdk.version>1.8</jdk.version>
-    <jogl.version>2.1.5-01</jogl.version>
-    <wwj.version>2.0.0</wwj.version>
-  </properties>
+	<!-- LICENSES -->
+	<licenses>
+		<license>
+			<name>GNU Library or Lesser General Public License (LGPL)</name>
+			<url>http://www.gnu.org/licenses/lgpl.html</url>
+		</license>
+	</licenses>
 
-  <!-- VERSIONING -->
-  <distributionManagement>
-    <repository>
-      <id>LcarsWtReleases</id>
-      <name>LCARS-WT Releases</name>
-      <url>http://svn.code.sf.net/p/lcars-wt/maven/releases/</url>
-    </repository>
-    <snapshotRepository>
-      <id>LcarsWtSnapshots</id>
-      <name>LCARS-WT Snapshots</name>
-      <url>http://svn.code.sf.net/p/lcars-wt/maven/snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
-   
-  <!-- PROJECT DEPENDENCIES -->
-  <dependencies>
-    <dependency>
-      <groupId>agile2d</groupId>
-      <artifactId>agile2d</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.soundlibs</groupId>
-      <artifactId>mp3spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.jogl</groupId>
-      <artifactId>jogl-all</artifactId>
-      <version>${jogl.version}</version>
-      <classifier>${jogl-all.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.gluegen</groupId>
-      <artifactId>gluegen-rt</artifactId>
-      <version>${jogl.version}</version>
-      <classifier>${jogl-all.classifier}</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.swt</groupId>
-      <artifactId>${swt.artifactId}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>gov.nasa</groupId>
-      <artifactId>worldwind</artifactId>
-      <!-- <version>${wwj.version}</version> -->
-    </dependency>
-    <dependency>
-      <groupId>gov.nasa</groupId>
-      <artifactId>worldwindx</artifactId>
-      <!-- <version>${wwj.version}</version> -->
-    </dependency>
-  </dependencies>
+	<!-- PROJECT PROPERTIES -->
+	<properties>
+		<!-- TODO: only enable next property after all java classes are prepared 
+			to be UTF8 encoded -->
+		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
 
-  <!-- REPOSITORIES -->
-  <repositories>
-    <repository>
-      <id>swt-repo</id>
-      <url>https://swt-repo.googlecode.com/svn/repo/</url>
-    </repository>
-    <!-- <repository>
-      <id>jogamp.org</id>
-      <url>http://jogamp.org/deployment/maven</url>
-    </repository> -->
-    <repository>
-      <id>agile2d.sf.net</id>
-      <url>http://agile2d.sourceforge.net/maven/</url>
-    </repository>
-  </repositories>
+		<!-- MAIN CLASS -->
+		<mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>
 
-  <!-- OS/ARCHITECTURE PROFILES FOR SWT AND JOGL -->
-  <profiles>
-  	<!-- WINDOWS PROFILES -->
-    <profile>
-      <id>windows-x86</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-	    <swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
-	    <jogl-all.classifier>natives-windows-i586</jogl-all.classifier> 
-        <profile.id>windows-x86</profile.id>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows-x86_64</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
-        <jogl-all.classifier>natives-windows-amd64</jogl-all.classifier>
-        <profile.id>windows-x86_64</profile.id>
-      </properties>
-    </profile>
-    
-  	<!-- LINUX PROFILES -->
-    <profile>
-      <id>Linux-x86</id>
-      <activation>
-        <os>
-          <family>Linux</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-	    <swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
-	    <jogl-all.classifier>natives-linux-i586</jogl-all.classifier> 
-        <profile.id>Linux-x86</profile.id>
-      </properties>
-    </profile>
-    <profile>
-      <id>Linux-amd64</id>
-      <activation>
-        <os>
-          <family>Linux</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
-        <jogl-all.classifier>natives-linux-amd64</jogl-all.classifier>
-        <profile.id>Linux-amd64</profile.id>
-      </properties>
-    </profile>
+		<!-- Dependency versions -->
+		<jdk.version>1.8</jdk.version>
+		<jogl.version>2.1.5-01</jogl.version>
+		<wwj.version>2.0.0</wwj.version>
 
-  	<!-- MAC OSX PROFILES -->
-    <profile>
-      <id>MacOSX-x86</id>
-      <activation>
-        <os>
-          <family>MacosX</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-	    <swt.artifactId>org.eclipse.swt.cocoa.macosx</swt.artifactId>
-	    <jogl-all.classifier>natives-macosx-universal</jogl-all.classifier> 
-        <profile.id>MacOSX-x86</profile.id>
-      </properties>
-    </profile>
-    <profile>
-      <id>MacOSX-amd64</id>
-      <activation>
-        <os>
-          <family>MacosX</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
-        <jogl-all.classifier>natives-macosx-universal</jogl-all.classifier>
-        <profile.id>MacOSX-amd64</profile.id>
-      </properties>
-    </profile>
-  </profiles>
+		<!-- GitHub location for maven repository -->
+		<github.server.id>LcarswtGithub</github.server.id> <!-- server id in settings.xml under ~/.m2 -->
+		<github.maven.project>LCARSWT</github.maven.project>
+		<github.maven.owner>matthias-wolff</github.maven.owner>
+		<github.maven.branch>refs/heads/mvn-repo</github.maven.branch>
 
-  <!-- BUILD -->
-  <build>
-    <finalName>${project.artifactId}-${project.version}.${profile.id}</finalName>
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>${jdk.version}</source>
-          <target>${jdk.version}</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>
-              <classpathPrefix>dependency-jars.${project.build.finalName}/</classpathPrefix>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.5.1</version>
-        <executions>
-          <execution>
-          <id>copy-dependencies</id>
-          <phase>package</phase>
-          <goals>
-            <goal>copy-dependencies</goal>
-          </goals>
-          <configuration>
-            <outputDirectory>${project.build.directory}/dependency-jars.${project.build.finalName}/</outputDirectory>
-          </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.5.1</version>
-        <configuration>
-          <createChecksum>true</createChecksum>
-          <performRelease>true</performRelease>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+	</properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>agile2d</groupId>
-        <artifactId>agile2d</artifactId>
-        <version>3.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>com.googlecode.soundlibs</groupId>
-        <artifactId>mp3spi</artifactId>
-        <version>1.9.5-1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jogamp.jogl</groupId>
-        <artifactId>jogl-all</artifactId>
-        <version>${jogl.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jogamp.gluegen</groupId>
-        <artifactId>gluegen-rt</artifactId>
-        <version>${jogl.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.swt</groupId>
-        <artifactId>${swt.artifactId}</artifactId>
-        <version>3.7.2</version>
-      </dependency>
-      <dependency>
-        <groupId>gov.nasa</groupId>
-        <artifactId>worldwind</artifactId>
-       <version>${wwj.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>gov.nasa</groupId>
-        <artifactId>worldwindx</artifactId>
-        <version>${wwj.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+	<distributionManagement>
+		<repository>
+			<id>internal.repo</id>
+			<name>Temporary Staging Repository</name>
+			<url>file://${project.build.directory}/mvn-repo</url>
+		</repository>
+	</distributionManagement>
+
+	<!-- OS/ARCHITECTURE PROFILES FOR SWT AND JOGL -->
+	<profiles>
+		<!-- WINDOWS PROFILES -->
+		<profile>
+			<id>Win86</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<properties>
+				<swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
+				<jogl-all.classifier>natives-windows-i586</jogl-all.classifier>
+				<profile.id>Win86</profile.id>
+			</properties>
+		</profile>
+		<profile>
+			<id>Win64</id>
+			<activation>
+				<os>
+					<family>windows</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
+				<jogl-all.classifier>natives-windows-amd64</jogl-all.classifier>
+				<profile.id>Win64</profile.id>
+			</properties>
+		</profile>
+
+		<!-- LINUX PROFILES -->
+		<profile>
+			<id>Linux86</id>
+			<activation>
+				<os>
+					<family>Linux</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<properties>
+				<swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
+				<jogl-all.classifier>natives-linux-i586</jogl-all.classifier>
+				<profile.id>Linux86</profile.id>
+			</properties>
+		</profile>
+		<profile>
+			<id>Linux64</id>
+			<activation>
+				<os>
+					<family>Linux</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
+				<jogl-all.classifier>natives-linux-amd64</jogl-all.classifier>
+				<profile.id>Linux64</profile.id>
+			</properties>
+		</profile>
+
+		<!-- MAC OSX PROFILES -->
+		<profile>
+			<id>MacOSX86</id>
+			<activation>
+				<os>
+					<family>MacosX</family>
+					<arch>x86</arch>
+				</os>
+			</activation>
+			<properties>
+				<swt.artifactId>org.eclipse.swt.cocoa.macosx</swt.artifactId>
+				<jogl-all.classifier>natives-macosx-universal</jogl-all.classifier>
+				<profile.id>MacOSX86</profile.id>
+			</properties>
+		</profile>
+		<profile>
+			<id>MacOSX64</id>
+			<activation>
+				<os>
+					<family>MacosX</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
+				<jogl-all.classifier>natives-macosx-universal</jogl-all.classifier>
+				<profile.id>MacOSX64</profile.id>
+			</properties>
+		</profile>
+	</profiles>
+
+	<!-- BUILD -->
+	<build>
+		<finalName>${project.artifactId}-${project.version}.${profile.id}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<plugins>
+			<!-- Deployment on GitHub.com -->
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.11</version>
+				<configuration>
+					<message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
+					<server>${github.server.id}</server>
+					<noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
+					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+					<branch>${github.maven.branch}</branch>                       <!-- remote branch name -->
+					<includes>
+						<include>**/*</include>
+					</includes>
+					<repositoryName>${github.maven.project}</repositoryName>      <!-- github repo name -->
+					<repositoryOwner>${github.maven.owner}</repositoryOwner>    <!-- github username -->
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase><!-- site -->
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Setting up a local temporary repository to deploy on GitHub.com -->
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.1</version>
+				<configuration>
+					<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+				</configuration>
+			</plugin>
+
+			<!-- Generates a API webpage of this project (automatically) -->
+			<plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
+				<executions> <execution> <id>attach-javadocs</id> <goals> <goal>jar</goal> 
+				</goals> <configuration> <additionalparam>-Xdoclint:none</additionalparam> 
+				</configuration> </execution> </executions> </plugin>
+
+			<!-- Creates a JAR with all source files (automatically) -->
+			<plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-source-plugin</artifactId> 
+				<executions> <execution> <id>attach-sources</id> <goals> <goal>jar</goal> 
+				</goals> </execution> </executions> </plugin>
+
+			<!-- Set up java version to the hole project -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+				</configuration>
+			</plugin>
+
+			<!-- This generates an extra jar file that can be run standalone (platform 
+				specifically, see profiles in this pom). -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<!-- get all project dependencies -->
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<!-- MainClass in mainfest make a executable jar -->
+					<archive>
+						<manifest>
+							<mainClass>${mainClass}</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<createChecksum>true</createChecksum>
+					<performRelease>true</performRelease>
+				</configuration>
+			</plugin>
+			
+			<!-- download source files automatically -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.8</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<!-- PROJECT DEPENDENCIES -->
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.swt</groupId>
+			<artifactId>${swt.artifactId}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>agile2d</groupId>
+			<artifactId>agile2d</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jogamp.jogl</groupId>
+					<artifactId>jogl-all</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jogamp.gluegen</groupId>
+					<artifactId>gluegen-rt</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>mp3spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>gov.nasa</groupId>
+			<artifactId>worldwind</artifactId>
+			<!-- <version>${wwj.version}</version> -->
+		</dependency>
+		<dependency>
+			<groupId>gov.nasa</groupId>
+			<artifactId>worldwindx</artifactId>
+			<!-- <version>${wwj.version}</version> -->
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<classifier>${jogl-all.classifier}</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+			<classifier>${jogl-all.classifier}</classifier>
+		</dependency>
+	</dependencies>
+
+	<!-- REPOSITORIES -->
+	<repositories>
+		<repository>
+			<id>swt-repo</id>
+			<url>https://swt-repo.googlecode.com/svn/repo/</url>
+		</repository>
+		<repository>
+			<id>agile2d.sf.net</id>
+			<url>http://agile2d.sourceforge.net/maven/</url>
+		</repository>
+		<repository>
+			<id>org.jogamp</id>
+			<url>http://jogamp.org/deployment/maven/</url>
+		</repository>
+	</repositories>
+
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>agile2d</groupId>
+				<artifactId>agile2d</artifactId>
+				<version>3.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.soundlibs</groupId>
+				<artifactId>mp3spi</artifactId>
+				<version>1.9.5-1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.swt</groupId>
+				<artifactId>${swt.artifactId}</artifactId>
+				<version>3.7.2</version>
+			</dependency>
+			<dependency>
+				<groupId>gov.nasa</groupId>
+				<artifactId>worldwind</artifactId>
+				<version>${wwj.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>gov.nasa</groupId>
+				<artifactId>worldwindx</artifactId>
+				<version>${wwj.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jogamp.gluegen</groupId>
+				<artifactId>gluegen-rt</artifactId>
+				<version>${jogl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jogamp.gluegen</groupId>
+				<artifactId>gluegen-rt</artifactId>
+				<version>${jogl.version}</version>
+				<classifier>${jogl-all.classifier}</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.jogamp.jogl</groupId>
+				<artifactId>jogl-all</artifactId>
+				<version>${jogl.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jogamp.jogl</groupId>
+				<artifactId>jogl-all</artifactId>
+				<version>${jogl.version}</version>
+				<classifier>${jogl-all.classifier}</classifier>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
