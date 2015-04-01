@@ -1,15 +1,23 @@
 package de.tucottbus.kt.lcars.net;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import de.tucottbus.kt.lcars.IPanel;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelData;
+import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
+import de.tucottbus.kt.lcars.elements.EElement;
+import de.tucottbus.kt.lcars.elements.ELabel;
+import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcars.util.ObjectSize;
@@ -168,6 +176,54 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
     screen.exit();
   }
 
+  
+  // -- Error Screens --
+ 
+  public void showRmiErrors()
+  {    
+    Rectangle rect = screen.getArea().getBounds();
+    int screenWidth = rect.width;
+    int screenHeight = rect.height;
+        
+    final int w = 500;
+    final int h =  200;
+    int x = (screenWidth-w)/2;
+    int y = (screenHeight-h)/2;
+    int style = LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT;
+    
+    PanelData data = new PanelData();
+    data.panelState = new PanelState(new Dimension(screenWidth, screenHeight));
+    data.elementData = new Vector<ElementData>();
+    Vector<ElementData> elData = data.elementData;
+    
+    TimerTask timerTask = new TimerTask()
+    {
+      private String lastMsg = "";
+      
+      @Override
+      public void run()
+      {
+        String newMsg = getServerMsg();
+        
+        if ((lastMsg == null && newMsg != null) || (lastMsg != null && !lastMsg.equals(newMsg))) {
+          EElement el = new ELabel(null, x, y, w, h, style, newMsg);
+
+          elData.clear();
+          elData.addElement(el.getUpdateData(false));
+
+          lastMsg = newMsg;
+        }
+        
+        screen.update(data, false);
+        
+        
+      }
+    };
+    
+    Timer timer = new Timer(true);
+    timer.scheduleAtFixedRate(timerTask, 0, 1000/25);  
+  }
+  
 }
 
 // EOF
