@@ -1,11 +1,13 @@
 <dependency>
   <groupId>de.tucottbus.kt.lcars</groupId>
   <artifactId>lcarswt</artifactId>
+  <version>2.0.0-rc.2-SNAPSHOT</version>
 </dependency>
 <repository>
   <id>LcarswtGithub</id>
   <url>https://raw.githubusercontent.com/matthias-wolff/LCARSWT/mvn-repo/</url>
   <snapshots>
     <enabled>true</enabled>
+    <updatePolicy>always</updatePolicy>
   </snapshots>
 </repository>
