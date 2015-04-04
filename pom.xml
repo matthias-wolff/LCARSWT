@@ -17,8 +17,8 @@
 	<!-- LICENSES -->
 	<licenses>
 		<license>
-			<name>GNU Library or Lesser General Public License (LGPL)</name>
-			<url>http://www.gnu.org/licenses/lgpl.html</url>
+			<name>MIT License</name>
+			<url>http://opensource.org/licenses/MIT</url>
 		</license>
 	</licenses>
 
@@ -194,18 +194,40 @@
 				</configuration>
 			</plugin>
 
-			<!-- Generates a API webpage of this project (automatically) -->
-			<plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<executions> <execution> <id>attach-javadocs</id> <goals> <goal>jar</goal> 
-				</goals> <configuration> <additionalparam>-Xdoclint:none</additionalparam> 
-				</configuration> </execution> </executions> </plugin>
+          			<!-- Generates a API webpage of this project (automatically) -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.10.2</version>
+              <executions>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                  <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
 
 			<!-- Creates a JAR with all source files (automatically) -->
-			<plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-source-plugin</artifactId> 
-				<executions> <execution> <id>attach-sources</id> <goals> <goal>jar</goal> 
-				</goals> </execution> </executions> </plugin>
+			<plugin> 
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-source-plugin</artifactId> 
+              <version>2.4</version>
+              <executions> 
+                <execution> 
+                  <id>attach-sources</id> 
+                  <goals> 
+                    <goal>jar</goal> 
+				  </goals>
+                </execution>
+              </executions> 
+            </plugin>
 
-			<!-- Set up java version to the hole project -->
+			<!-- Set up java version to the whole project -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
