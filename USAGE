@@ -1,11 +1,11 @@
-  <dependency>
-    <groupId>de.tucottbus.kt.lcars</groupId>
-    <artifactId>lcarswt</artifactId>
-  </dependency>
-  <repository>
-    <id>LcarswtGithub</id>
-    <url>https://raw.githubusercontent.com/matthias-wolff/LCARSWT/mvn-repo/</url>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-  </repository>
+<dependency>
+  <groupId>de.tucottbus.kt.lcars</groupId>
+  <artifactId>lcarswt</artifactId>
+</dependency>
+<repository>
+  <id>LcarswtGithub</id>
+  <url>https://raw.githubusercontent.com/matthias-wolff/LCARSWT/mvn-repo/</url>
+  <snapshots>
+    <enabled>true</enabled>
+  </snapshots>
+</repository>
