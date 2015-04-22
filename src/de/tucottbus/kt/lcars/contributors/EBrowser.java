@@ -4,6 +4,10 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -46,6 +50,8 @@ public class EBrowser extends ElementContributor
   private Vector<EventListener> browserEventListeners;
   
   private int       style;
+  
+  private File      tmpHtmlFile;
   
   // SWT thread transfer fields
   private Point     tl;
@@ -352,6 +358,9 @@ public class EBrowser extends ElementContributor
   /**
    * Renders HTML
    * 
+   * @param text
+   *          The HTML text.
+   * @see #setTextViaTmpFile(String)
    * @see Browser#setText(String)
    * @param text the HTML content to be rendered
    * @return true if the operation was successful and false otherwise.
@@ -373,6 +382,55 @@ public class EBrowser extends ElementContributor
     return this.setText_;
   }
 
+  /**
+   * Renders HTML by writing and displaying a temporary file.
+   * 
+   * @param text
+   *          The HTML text.
+   * @see #setText(String)
+   * @param text the HTML content to be rendered
+   * @return true if the operation was successful and false otherwise.
+   */
+  public void setTextViaTmpFile(final String text)
+  {
+    if (browser==null       ) return;
+    if (browser.isDisposed()) return;
+    if (text==null          ) return;
+
+    try
+    {
+      if (tmpHtmlFile==null)
+      {
+        tmpHtmlFile = File.createTempFile("Lcarswt",null);
+        tmpHtmlFile.deleteOnExit();
+      }
+  
+      FileOutputStream fos = new FileOutputStream(tmpHtmlFile);
+      fos.write(text.getBytes());
+      fos.flush();
+      fos.close();
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+    }
+    screen.getSwtDisplay().asyncExec(new Runnable()
+    {
+      public void run()
+      {
+        //browser.setVisible(false);
+        try
+        {
+          browser.setUrl(tmpHtmlFile.toURI().toURL().toString());
+        }
+        catch (MalformedURLException e)
+        {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
+  
   /**
    * Loads a URL.
    *
