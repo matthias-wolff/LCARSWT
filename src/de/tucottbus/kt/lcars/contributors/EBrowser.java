@@ -243,6 +243,31 @@ public class EBrowser extends ElementContributor
   }
 
   /**
+   * Shows or hides this browser contributor. This method may be used instead
+   * of {@link #addToPanel(Panel)} or {@link #removeFromPanel()} if the browser 
+   * content is to be conserved for re-display. Note, however, that at least
+   * when closing the panel {@link #removeFromPanel()} must be invoked in order
+   * to release the browser widget.
+   * 
+   * @see #isVisible()
+   */
+  public void setVisible(boolean visible)
+  {
+    canvas.setVisible(visible);
+  }
+  
+  /**
+   * Determines if this browser contributor is visible.
+   * 
+   * @see #setVisible(boolean)
+   */
+  public boolean isVisible()
+  {
+    if (canvas==null) return false;
+    return canvas.isVisible();
+  }
+  
+  /**
    * Returns the LCARS cascading style sheet (CSS).
    * 
    * @return the style sheet in the W3C CSS format.
