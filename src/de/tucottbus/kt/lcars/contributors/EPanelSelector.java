@@ -125,7 +125,6 @@ public class EPanelSelector extends EMessageBox
     panel.dim(0.3f);
     panel.setModal(true);
     addToPanel(panel);
-    System.out.println(panel.getClass().getCanonicalName());
     eDismiss.setDisabled(panel!=null?Panel.class.equals(panel.getClass()):true);
   }
 

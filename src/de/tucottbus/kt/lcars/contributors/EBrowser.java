@@ -4,6 +4,10 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -46,6 +50,8 @@ public class EBrowser extends ElementContributor
   private Vector<EventListener> browserEventListeners;
   
   private int       style;
+  
+  private File      tmpHtmlFile;
   
   // SWT thread transfer fields
   private Point     tl;
@@ -237,6 +243,31 @@ public class EBrowser extends ElementContributor
   }
 
   /**
+   * Shows or hides this browser contributor. This method may be used instead
+   * of {@link #addToPanel(Panel)} or {@link #removeFromPanel()} if the browser 
+   * content is to be conserved for re-display. Note, however, that at least
+   * when closing the panel {@link #removeFromPanel()} must be invoked in order
+   * to release the browser widget.
+   * 
+   * @see #isVisible()
+   */
+  public void setVisible(boolean visible)
+  {
+    canvas.setVisible(visible);
+  }
+  
+  /**
+   * Determines if this browser contributor is visible.
+   * 
+   * @see #setVisible(boolean)
+   */
+  public boolean isVisible()
+  {
+    if (canvas==null) return false;
+    return canvas.isVisible();
+  }
+  
+  /**
    * Returns the LCARS cascading style sheet (CSS).
    * 
    * @return the style sheet in the W3C CSS format.
@@ -352,6 +383,9 @@ public class EBrowser extends ElementContributor
   /**
    * Renders HTML
    * 
+   * @param text
+   *          The HTML text.
+   * @see #setTextViaTmpFile(String)
    * @see Browser#setText(String)
    * @param text the HTML content to be rendered
    * @return true if the operation was successful and false otherwise.
@@ -373,6 +407,55 @@ public class EBrowser extends ElementContributor
     return this.setText_;
   }
 
+  /**
+   * Renders HTML by writing and displaying a temporary file.
+   * 
+   * @param text
+   *          The HTML text.
+   * @see #setText(String)
+   * @param text the HTML content to be rendered
+   * @return true if the operation was successful and false otherwise.
+   */
+  public void setTextViaTmpFile(final String text)
+  {
+    if (browser==null       ) return;
+    if (browser.isDisposed()) return;
+    if (text==null          ) return;
+
+    try
+    {
+      if (tmpHtmlFile==null)
+      {
+        tmpHtmlFile = File.createTempFile("Lcarswt",null);
+        tmpHtmlFile.deleteOnExit();
+      }
+  
+      FileOutputStream fos = new FileOutputStream(tmpHtmlFile);
+      fos.write(text.getBytes());
+      fos.flush();
+      fos.close();
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+    }
+    screen.getSwtDisplay().asyncExec(new Runnable()
+    {
+      public void run()
+      {
+        //browser.setVisible(false);
+        try
+        {
+          browser.setUrl(tmpHtmlFile.toURI().toURL().toString());
+        }
+        catch (MalformedURLException e)
+        {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
+  
   /**
    * Loads a URL.
    *
