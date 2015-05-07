@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.io.Serializable;
 
+import de.tucottbus.kt.lcars.ScreenGraphics2D;
 import de.tucottbus.kt.lcars.elements.EElement;
 
 /**
@@ -57,7 +58,7 @@ public abstract class Geometry implements Serializable
    * @param g2d
    *          The graphics context.
    */
-  public abstract void paint2D(Graphics2D g2d); 
+  public abstract void paint2D(ScreenGraphics2D g2d); 
 
 }
 

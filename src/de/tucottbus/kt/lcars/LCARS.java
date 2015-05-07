@@ -1470,6 +1470,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
       System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
       System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [5]");
+      System.out.print("\n  --selectiveRendering                 - Selective Screen repaints only on dirty areas (areas with changes)");
       System.out.print("\n  --server                             - Serve remote panels [1]");
       System.out.print("\n  --wallpaper=filename                 - Use wall paper (slower!)");
       System.out.print("\n  --xpos=n                             - Horizontal position of window [6]");
@@ -1502,7 +1503,11 @@ public class LCARS implements ILcarsRemote
         LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
       boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
-        iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
+      {
+        Screen scr = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
+        scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
+        iscreen = scr;
+      }
       else
         log("LCARS","Command line mode (no GUI)");
 

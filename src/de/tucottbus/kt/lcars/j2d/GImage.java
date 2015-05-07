@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -13,6 +12,7 @@ import java.util.HashSet;
 import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.ScreenGraphics2D;
 
 /**
  * An image geometry.
@@ -25,6 +25,8 @@ public class GImage extends Geometry
   private String                  resourceName;
   private transient ImageObserver imageObserver;
   private Point                   pos;
+  private Image                   cachedImg;
+  private boolean                 resNotFound = false;
   
   /**
    * Creates a new image geometry.
@@ -44,14 +46,28 @@ public class GImage extends Geometry
   @Override
   public Area getArea()
   {
-    Image image = GImage.getImage(this.resourceName);
+    Image image = getImage();
+    if(image == null)
+      return new Area();
+    
     int   w     = image.getWidth(this.imageObserver);
     int   h     = image.getHeight(this.imageObserver);
     return new Area(new Rectangle(pos.x,pos.y,w,h));
   }
   
+  
+  public Image getImage()
+  {
+    if(cachedImg == null && !resNotFound)
+    {
+      cachedImg = GImage.getImage(this.resourceName);
+      resNotFound = cachedImg == null;
+    }
+    return cachedImg;
+  }
+  
   @Override
-  public void paint2D(Graphics2D g2d)
+  public void paint2D(ScreenGraphics2D g2d)
   {
     Image image = GImage.getImage(this.resourceName);
     if(image == null)

@@ -844,8 +844,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     screenInvalid = false;
     
     // Decide on incremental update
-    boolean incremental = true;
-    if (getScreen() instanceof Screen) incremental = false;
+        
+    boolean incremental = true;//!(getScreen() instanceof Screen);
     long time = System.nanoTime();
     if (time-fullUpdateTime>1E9)
     {

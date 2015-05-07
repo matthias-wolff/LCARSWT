@@ -6,6 +6,8 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.io.Serializable;
 
+import de.tucottbus.kt.lcars.ScreenGraphics2D;
+
 /**
  * A geometry representing a {@link Shape}.
  * 
@@ -49,7 +51,7 @@ public class GArea extends Geometry implements Serializable
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
    */
   @Override
-  public void paint2D(Graphics2D g2d)
+  public void paint2D(ScreenGraphics2D g2d)
   {
     if (outline)
       g2d.draw(shape);

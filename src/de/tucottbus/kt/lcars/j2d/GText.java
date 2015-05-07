@@ -1,30 +1,27 @@
 package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+
+import de.tucottbus.kt.lcars.ScreenGraphics2D;
 
 /**
  * A geometry representing a text.
  * 
  * @author Matthias Wolff
  */
-public class GText extends Geometry {
+public class GText extends Geometry
+{
   private static final long serialVersionUID = 1L;
   protected Font font;
   protected Point2D.Float pos;
   protected GeneralPath shape;
   protected String text;
   protected float descent;
-  protected Shape textShape;
-  protected TextLayout textLayout;
-
+  
   /**
    * Creates a new text geometry. A text geometry provides information and
    * 2D-rendering for a single line of text
@@ -44,7 +41,8 @@ public class GText extends Geometry {
    *          foreground/background flag
    */
   public GText(String text, Point2D.Float pos, Rectangle shape, Font font,
-      boolean foreground) {
+      boolean foreground)
+  {
     super(foreground);
     this.text = text;
     this.font = font;
@@ -52,28 +50,34 @@ public class GText extends Geometry {
     this.shape = new GeneralPath(shape);
   }
 
-  public Font getFont() {
+  public Font getFont()
+  {
     return this.font;
   }
 
-  public Point2D.Float getPos() {
+  public Point2D.Float getPos()
+  {
     return this.pos;
   }
 
   @Override
-  public Area getArea() {
+  public Area getArea()
+  {
     return new Area(shape);
   }
 
-  public String getText() {
+  public String getText()
+  {
     return this.text;
   }
 
-  public float getDescent() {
+  public float getDescent()
+  {
     return this.descent;
   }
 
-  public void setDescent(float ascent) {
+  public void setDescent(float ascent)
+  {
     this.descent = ascent;
   }
 
@@ -83,21 +87,25 @@ public class GText extends Geometry {
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
    */
   @Override
-  public void paint2D(Graphics2D g2d) {
-    if (textLayout == null) 
-      synchronized (this) {
-        if (textLayout == null) {
-          FontRenderContext frc = g2d.getFontRenderContext();
-          textLayout = new TextLayout(this.text, this.font, frc);
-        }
-      }
-    
-    textLayout.draw(g2d, pos.x, pos.y);
+  public void paint2D(ScreenGraphics2D g2d)
+  {
+//    if (textShape == null)
+//      synchronized (this)
+//      {
+//        if (textShape == null)
+//        {
+//          FontRenderContext frc = g2d.getFontRenderContext();
+//          textLayout = new TextLayout(this.text, this.font, frc);
+//          textShape = font.createGlyphVector(frc, text).getOutline(pos.x, pos.y);
+//        }
+//      }
+//
+//    g2d.fill(textShape);
+    //textLayout.draw(g2d, pos.x, pos.y);
 
-    // g2d.setFont(this.font);
-    // g2d.drawString(this.text, pos.x, pos.y);
+    g2d.setFont(this.font);
+    g2d.drawString(this.text, pos.x, pos.y);
   }
-
 }
 
 // EOF
