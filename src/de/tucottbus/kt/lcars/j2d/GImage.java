@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
-import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.ScreenGraphics2D;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * An image geometry.
@@ -157,7 +157,7 @@ public class GImage extends Geometry
     if (resource!=null)
       image = Toolkit.getDefaultToolkit().createImage(resource.getFile());
     else
-      LCARS.log("LCARS","ERROR: Cannot find image file \""+resourceName+"\"");
+      Log.warn("LCARS","ERROR: Cannot find image file \""+resourceName+"\"");
     return image;
   }
   

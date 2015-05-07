@@ -2,6 +2,7 @@ package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -21,6 +22,7 @@ public class GText extends Geometry
   protected GeneralPath shape;
   protected String text;
   protected float descent;
+  protected Shape cachedTextShape;
   
   /**
    * Creates a new text geometry. A text geometry provides information and
@@ -103,8 +105,12 @@ public class GText extends Geometry
 //    g2d.fill(textShape);
     //textLayout.draw(g2d, pos.x, pos.y);
 
-    g2d.setFont(this.font);
-    g2d.drawString(this.text, pos.x, pos.y);
+    if (cachedTextShape == null) {
+      g2d.setFont(this.font);
+      g2d.drawString(this.text, pos.x, pos.y);
+    }
+    else
+      g2d.draw(cachedTextShape);    
   }
 }
 

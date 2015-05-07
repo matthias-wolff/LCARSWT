@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;

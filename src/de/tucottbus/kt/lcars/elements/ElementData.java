@@ -7,12 +7,12 @@ import java.awt.geom.Area;
 import java.io.Serializable;
 import java.util.Vector;
 
-import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.ScreenGraphics2D;
 import de.tucottbus.kt.lcars.j2d.ElementState;
 import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * The serializable data of an {@linkplain EElement LCARS GUI element}. An
@@ -180,7 +180,7 @@ public final class ElementData implements Serializable
       {
         // TODO: synchronization problem, exception should never occur
         other.geometry = new Vector<Geometry>();
-        LCARS.err(
+        Log.err(
             "INT",
             "Caught exception " + e.toString() + " at "
                 + e.getStackTrace()[0].toString());
@@ -249,7 +249,7 @@ public final class ElementData implements Serializable
   {
     // if (geometry==null) return;
     if (state == null)
-      LCARS.err("ELD", "Invalid state #" + serialNo);
+      Log.err("ELD", "Invalid state #" + serialNo);
     if (!state.isVisible())
       return;
 

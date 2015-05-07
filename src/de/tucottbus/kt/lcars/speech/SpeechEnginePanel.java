@@ -17,6 +17,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.events.LevelEvent;
 import de.tucottbus.kt.lcars.speech.events.PostprocEvent;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
@@ -358,7 +359,7 @@ public class SpeechEnginePanel extends Panel
     {
       PostprocEvent pe = (PostprocEvent)event;
       cSpeechPostproc.setPostprocResult(pe);
-      LCARS.log("SEP","Post-processing event ("+pe.frames.size()+" frames)");
+      Log.log("SEP","Post-processing event ("+pe.frames.size()+" frames)");
     }
   }
 

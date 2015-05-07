@@ -12,6 +12,11 @@ import java.awt.image.ImageObserver;
 
 import de.tucottbus.kt.lcars.j2d.caching.GTextCache;
 
+/**
+ * Represents a graphics wrapper class which provides caching.
+ * @author borck
+ *
+ */
 public class ScreenGraphics2D
 {
   private Graphics2D g;  
@@ -75,12 +80,24 @@ public class ScreenGraphics2D
     g.drawImage(image, x, y, obs);    
   }
 
-  public void drawString(String text, int x, int y) {
-    g.fill(cache.getGlyphVector(frc, g.getFont(), text).getOutline(x, y));
+  /**
+   * Generates a text shape and renders this 
+   * @param font
+   * @param text
+   * @param x
+   * @param y
+   * @return
+   */
+  public Shape drawString(String text, int x, int y) {
+    Shape textShape = cache.getGlyphVector(frc, g.getFont(), text).getOutline(x, y);
+    g.fill(textShape);
+    return textShape;
   }
   
-  public void drawString(String text, float x, float y) {
-    g.fill(cache.getGlyphVector(frc, g.getFont(), text).getOutline(x, y));
+  public Shape drawString(String text, float x, float y) {
+    Shape textShape = cache.getGlyphVector(frc, g.getFont(), text).getOutline(x, y);    
+    g.fill(textShape);
+    return textShape;
   }
 
   public void setFont(Font font)

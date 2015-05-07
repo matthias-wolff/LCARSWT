@@ -6,8 +6,6 @@ import java.awt.font.GlyphVector;
 
 import org.apache.commons.collections4.map.LRUMap;
 
-import de.tucottbus.kt.lcars.LCARS;
-
 public class GTextCache
 {
   private LRUMap<Key, GlyphVector> hashmap;

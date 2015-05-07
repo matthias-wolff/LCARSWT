@@ -16,6 +16,7 @@ import java.util.concurrent.Semaphore;
 import java.util.function.BiFunction;
 
 import de.tucottbus.kt.lcars.elements.ElementData;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.BlockingBoundedBuffer;
 
 /**
@@ -93,7 +94,7 @@ class ScreenRepainter
             {
               if (count > 1)
               {
-                LCARS.log(CLASSKEY, (count - 1) + " Frames skipped");
+                Log.log(CLASSKEY, (count - 1) + " Frames skipped");
 
                 // collapse with previous contexts
                 ArrayList<FrameData> skipped = new ArrayList<FrameData>(
@@ -131,9 +132,7 @@ class ScreenRepainter
             semaPaint.release();
           } catch (InterruptedException e)
           {
-            LCARS.err(CLASSKEY,
-                "Sychronisation error while reading panel data buffer.");
-            e.printStackTrace();
+            Log.err(CLASSKEY, "Sychronisation error while reading panel data buffer.", e);
           }
         }
       }
@@ -153,7 +152,7 @@ class ScreenRepainter
       // (data.elementData.size() + " elements")) +".");
     } catch (InterruptedException e)
     {
-      LCARS.err(CLASSKEY, "Sychronisation error while update panel data.");
+      Log.err(CLASSKEY, "Sychronisation error while update panel data.", e);
     }
   }
 
@@ -172,10 +171,9 @@ class ScreenRepainter
       semaPaint.acquire();
       context = this.context;
       semaContext.release();
-    } catch (InterruptedException e1)
+    } catch (InterruptedException e)
     {
-      LCARS.err(CLASSKEY, "Synchronization error while painting on sreen.");
-      e1.printStackTrace();
+      Log.err(CLASSKEY, "Synchronization error while painting on sreen.", e);
       return;
     }
 
@@ -214,9 +212,7 @@ class ScreenRepainter
       // " elements are rendered");
     } catch (Throwable e)
     {
-      LCARS.err("SCR", "error drawing elements to the screen");
-      System.out.println();
-      e.printStackTrace();
+      Log.err("SCR", "error drawing elements to the screen", e);
     }
     // GImage.endCacheRun();
 
@@ -257,7 +253,7 @@ class ScreenRepainter
       buffer.put(null);
     } catch (InterruptedException e)
     {
-      LCARS.err(CLASSKEY, "Synchronization error while resetting screen.");
+      Log.err(CLASSKEY, "Synchronization error while resetting screen.", e);
     }
   }
 
@@ -331,7 +327,7 @@ class ScreenRepainter
       }
 
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-      LCARS.log("SCR", "background=" + thisRes);
+      Log.log("SCR", "background=" + thisRes);
       URL resource = classLoader.getResource(thisRes);
       if (resource == null)
       {
@@ -406,7 +402,7 @@ class ScreenRepainter
               applyUpdate.apply(edu, edp);
           } catch (Exception e)
           {
-            LCARS.err("SCR", "Update failed on element #" + edu.serialNo + ": "
+            Log.err("SCR", "Update failed on element #" + edu.serialNo + ": "
                 + e.getMessage());
           }
 
@@ -434,7 +430,7 @@ class ScreenRepainter
             elementsToPaint.addElement(edu);
           } catch (Exception e)
           {
-            LCARS.err("SCR", "Update failed on element #" + edu.serialNo + ": "
+            Log.err("SCR", "Update failed on element #" + edu.serialNo + ": "
                 + e.getMessage());
           }
         // Add removed elements to the dirtyArea

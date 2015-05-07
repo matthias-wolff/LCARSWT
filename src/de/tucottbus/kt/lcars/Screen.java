@@ -46,6 +46,7 @@ import agile2d.AgileGraphics2D;
 import agile2d.AgileRenderingHints;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -301,7 +302,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       }
     };
     setContentPane(component);
-    LCARS.log(CLASSKEY, "Rendering on CPU");
+    Log.debug(CLASSKEY, "Rendering on CPU");
     return true;
   }
   
@@ -359,7 +360,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     });
     
     setContentPane(gljPanel);
-    LCARS.log(CLASSKEY, "Rendering on GPU");
+    Log.log(CLASSKEY, "Rendering on graphics card");
     return true;
   }
   
@@ -526,14 +527,13 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     if (this.panel!=null)
       try
       {
-        LCARS.log(CLASSKEY,"Starting panel "+this.panel.getClass().getSimpleName()+"...");
+        Log.log(CLASSKEY,"Starting panel "+this.panel.getClass().getSimpleName()+"...");
         this.panel.start();
-        LCARS.log(CLASSKEY,"...Panel started");
+        Log.log(CLASSKEY,"...Panel started");
       }
       catch (RemoteException e)
       {
-        LCARS.err(CLASSKEY,"...Panel start FAILED");
-        e.printStackTrace();
+        Log.err(CLASSKEY,"...Panel start FAILED", e);
       }
   }
   
@@ -724,9 +724,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
         }
         catch (Exception e)
         {
-          LCARS.err(CLASSKEY, "Error in timer while do a \"every second\" update.");
-          System.out.println();
-          e.printStackTrace();
+          Log.err(CLASSKEY, "Error in timer while do a \"every second\" update.", e);
         }
         
       ctr++;

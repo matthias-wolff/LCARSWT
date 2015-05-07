@@ -119,7 +119,7 @@
 			<id>MacOSX86</id>
 			<activation>
 				<os>
-					<family>MacosX</family>
+					<family>mac</family>
 					<arch>x86</arch>
 				</os>
 			</activation>
@@ -133,7 +133,7 @@
 			<id>MacOSX64</id>
 			<activation>
 				<os>
-					<family>MacosX</family>
+					<family>mac</family>
 					<arch>amd64</arch>
 				</os>
 			</activation>
@@ -194,38 +194,38 @@
 				</configuration>
 			</plugin>
 
-          			<!-- Generates a API webpage of this project (automatically) -->
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.10.2</version>
-              <executions>
-                <execution>
-                  <id>attach-javadocs</id>
-                  <goals>
-                    <goal>jar</goal>
-                  </goals>
-                  <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                  </configuration>
-                </execution>
-              </executions>
-            </plugin>
+			<!-- Generates a API webpage of this project (automatically) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.2</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<!-- Creates a JAR with all source files (automatically) -->
-			<plugin> 
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-source-plugin</artifactId> 
-              <version>2.4</version>
-              <executions> 
-                <execution> 
-                  <id>attach-sources</id> 
-                  <goals> 
-                    <goal>jar</goal> 
-				  </goals>
-                </execution>
-              </executions> 
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 			<!-- Set up java version to the whole project -->
 			<plugin>
@@ -266,7 +266,7 @@
 					<performRelease>true</performRelease>
 				</configuration>
 			</plugin>
-			
+
 			<!-- download source files automatically -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -297,6 +297,10 @@
 				<exclusion>
 					<groupId>org.jogamp.gluegen</groupId>
 					<artifactId>gluegen-rt</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -335,6 +339,10 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -408,6 +416,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
 				<version>4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.7.10</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

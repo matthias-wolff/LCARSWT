@@ -20,6 +20,7 @@ import java.util.Date;
 import javax.imageio.ImageIO;
 
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.logging.Log;
 
 public class CityLightsLayer extends RenderableLayer
 {
@@ -99,13 +100,13 @@ public class CityLightsLayer extends RenderableLayer
     if (now-lastUpdate<60e3) return;
     lastUpdate = now;
 
-    LCARS.log("WWJ","CityLightsLayer - Starting update thread");
+    Log.log("WWJ","CityLightsLayer - Starting update thread");
     (new Thread()
     {
       @Override
       public void run()
       {
-        LCARS.log("WWJ","CityLightsLayer - Update alpha shade");
+        Log.log("WWJ","CityLightsLayer - Update alpha shade");
         int w = CityLightsLayer.this.bi.getWidth();
         int h = CityLightsLayer.this.bi.getHeight();
         BufferedImage imgAlpha = getAlpha(subsolarPoint,w,h);
