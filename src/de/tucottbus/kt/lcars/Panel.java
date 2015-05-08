@@ -24,6 +24,7 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 import de.tucottbus.kt.lcars.speech.ISpeechEventListener;
 import de.tucottbus.kt.lcars.speech.events.SpeechEvent;
@@ -308,19 +309,19 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       speechEngineSearched = true;
       if (LCARS.getArg("--nospeech")!=null) return null;
-      LCARS.log("PNL","Looking for a speech engine");
+      Log.log("PNL","Looking for a speech engine");
       
       // List available speech engine implementations
       Vector<Class<?>> cEngines = LCARS.getSpeechEngines();
       if (cEngines.size()==0)
       {
-        LCARS.err("PNL","No speech engines found");
+        Log.warn("PNL","No speech engines found");
         return null;
       }
 
       // HACK: Just get the first one...
       Class<?> cEngine = cEngines.get(0);
-      LCARS.log("PNL","ISpeechEngine = "+cEngine.getCanonicalName());
+      Log.log("PNL","ISpeechEngine = "+cEngine.getCanonicalName());
       try
       {
         Method mGetInstance = cEngine.getMethod("getInstance");
@@ -331,7 +332,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         // TODO: Auto-generated catch block
         e.printStackTrace();
       }
-      LCARS.log("PNL","Speech engine found.");
+      Log.log("PNL","Speech engine found.");
     }
     return speechEngine;
   }
@@ -844,8 +845,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     screenInvalid = false;
     
     // Decide on incremental update
-    boolean incremental = true;
-    if (getScreen() instanceof Screen) incremental = false;
+        
+    boolean incremental = true;//!(getScreen() instanceof Screen);
     long time = System.nanoTime();
     if (time-fullUpdateTime>1E9)
     {
@@ -876,7 +877,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
     catch (RemoteException e)
     {
-      LCARS.err("PNL", "Error while sending update to screen. Reason: " + e.getMessage());
+      Log.err("PNL", "Error while sending update to screen.", e);
     }
     time = System.nanoTime()-time;
     loadStat.add((int)(time/400000));

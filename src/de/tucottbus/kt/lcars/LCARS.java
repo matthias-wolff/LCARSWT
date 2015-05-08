@@ -70,6 +70,8 @@ import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.j2d.GText;
 import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.logging.ILogObserver;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.net.ILcarsRemote;
 import de.tucottbus.kt.lcars.net.RmiAdapter;
 import de.tucottbus.kt.lcars.net.RmiPanelAdapter;
@@ -90,6 +92,8 @@ import de.tucottbus.kt.lcars.speech.ISpeechEngine;
  */
 public class LCARS implements ILcarsRemote
 {
+  public static final String CLASSKEY = "LCARS";
+  
   // ES_XXX - Element styles
   public static final int ES_SHAPE      = 0x0000000F;   // Mask for ES_SHAPE_XXX styles
   public static final int ES_LABEL      = 0x000000F0;   // Mask for ES_LABEL_XXX styles
@@ -1259,7 +1263,7 @@ public class LCARS implements ILcarsRemote
       {
         LCARS.rmiRegistry = LocateRegistry.getRegistry(getRmiPort());
       }
-      LCARS.log("NET","RMI registry: "+LCARS.rmiRegistry);
+      Log.log("NET","RMI registry: "+LCARS.rmiRegistry);
     }
     return LCARS.rmiRegistry;
   }
@@ -1278,8 +1282,8 @@ public class LCARS implements ILcarsRemote
   }
   
   // -- Logging --
-  
   /**
+   * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::log' instead
    * Prints a log message.
    * 
    * @param pfx
@@ -1287,28 +1291,48 @@ public class LCARS implements ILcarsRemote
    * @param msg
    *          The message.
    */
+  @Deprecated
    public static void log(String pfx, String msg)
-  {
-    System.out.print(String.format("\n[%s: %s]",pfx,msg));
-    if ("LCARS".equals(pfx) || "NET".equals(pfx))
-      ServerPanel.logMsg(pfx,msg,false);
-  }
+   {
+     System.out.print(String.format("\n[%s: %s]",pfx,msg));
+     if ("LCARS".equals(pfx) || "NET".equals(pfx))
+       ServerPanel.logMsg(pfx,msg,false);
+   }
   
-  /**
-   * Prints an error message.
-   * 
-   * @param pfx
-   *          The message prefix (used for message filtering).
-   * @param msg
-   *          The message.
-   */
-  public static void err(String pfx, String msg)
-  {
-    System.err.print(String.format("\n[%s: %s]",pfx,msg));
-    if ("LCARS".equals(pfx) || "NET".equals(pfx))
-      ServerPanel.logMsg(pfx,msg,true);
-  }
-  
+   /**
+    * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::err' instead
+    * Prints an error message.
+    * 
+    * @param pfx
+    *          The message prefix (used for message filtering).
+    * @param msg
+    *          The message.
+    */
+   @Deprecated
+   public static void err(String pfx, String msg)
+   {
+     System.err.print(String.format("\n[%s: %s]",pfx,msg));
+     if ("LCARS".equals(pfx) || "NET".equals(pfx))
+       ServerPanel.logMsg(pfx,msg,true);
+   }
+   
+   /**
+    * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::debug' instead
+    * Prints a debug message.
+    * 
+    * @param pfx
+    *          The message prefix (used for message filtering).
+    * @param msg
+    *          The message.
+    */
+   @Deprecated
+   public static void debug(String pfx, String msg)
+   {
+     System.err.print(String.format("\n[%s: %s]",pfx,msg));
+     if ("LCARS".equals(pfx) || "NET".equals(pfx))
+       ServerPanel.logMsg(pfx,msg,false);
+   }
+   
   // -- Implementation of the ILcarsRemote interface --
   
   @Override
@@ -1322,7 +1346,7 @@ public class LCARS implements ILcarsRemote
     try
     {
       String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-      log("NET","LCARS.server: Connection request from "+screenUrl);
+      Log.log("NET","LCARS.server: Connection request from "+screenUrl);
       RmiPanelAdapter rpa = new RmiPanelAdapter(panelClassName,screenHostName);
       rmiPanelAdapters.put(screenHostName+"."+screenID,rpa);
       return true;
@@ -1339,7 +1363,7 @@ public class LCARS implements ILcarsRemote
   {
     String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
     String key = screenHostName+"."+screenID;
-    log("NET","LCARS.server: Disconnection request from "+screenUrl);
+    Log.log("NET","LCARS.server: Disconnection request from "+screenUrl);
     
     RmiPanelAdapter rpa = rmiPanelAdapters.remove(key);
     if (rpa!=null) rpa.shutDown();
@@ -1457,6 +1481,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n\nUsage");
       System.out.print("\n\n  java -cp \"./bin;./lib/swt.jar\" de.tucottbus.kt.lcars.LCARS [options]");
       System.out.print("\n\nCommand line options");
+      System.out.print("\n  --asyncRenderer                      - Uses an asychronous renderer.");
       System.out.print("\n  --clientof=hostname                  - Serve a remote screen [1]");
       System.out.print("\n  --debug                              - Print debug messages");
       System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
@@ -1470,6 +1495,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
       System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
       System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [5]");
+      System.out.print("\n  --selectiveRendering                 - Selective Screen repaints only on dirty areas (areas with changes)");
       System.out.print("\n  --server                             - Serve remote panels [1]");
       System.out.print("\n  --wallpaper=filename                 - Use wall paper (slower!)");
       System.out.print("\n  --xpos=n                             - Horizontal position of window [6]");
@@ -1484,6 +1510,46 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n\n");
       return;
     }
+    
+    Log.DebugMode = getArg("--debug") != null;
+    Log.addObserver(new ILogObserver()
+    {
+      private void doLog(String pfx, String msg, Boolean err) {
+        if ("LCARS".equals(pfx) || "NET".equals(pfx))
+          ServerPanel.logMsg(pfx,msg,err);       
+      }
+      
+      @Override
+      public void log(String pfx, String msg)
+      {
+        doLog(pfx, msg, false);
+      }
+
+      @Override
+      public void warn(String pfx, String msg)
+      {
+        doLog(pfx, msg, false);
+      }
+      
+      
+      @Override
+      public void err(String pfx, String msg, Throwable e)
+      {
+        doLog(pfx, msg, true);
+      }
+      
+      @Override
+      public void err(String pfx, String msg)
+      {
+        doLog(pfx, msg, true);
+      }
+      
+      @Override
+      public void debug(String pfx, String msg)
+      {
+        doLog(pfx, msg, false);
+      }
+    });
     
     try
     {
@@ -1502,16 +1568,21 @@ public class LCARS implements ILcarsRemote
         LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
       boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
-        iscreen = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
+      {
+        Screen scr = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
+        scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
+        scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
+        iscreen = scr;
+      }
       else
-        log("LCARS","Command line mode (no GUI)");
+        Log.log(CLASSKEY,"Command line mode (no GUI)");
 
       // Install shut-down hook
       Runtime.getRuntime().addShutdownHook(new Thread()
       {
         public void run()
         {
-          log("LCARS","Shutting down ...");
+          Log.log(CLASSKEY,"Shutting down ...");
 
           // Shut-down panel
           if (iscreen!=null)
@@ -1551,15 +1622,15 @@ public class LCARS implements ILcarsRemote
           // Shut-down speech engine
           Panel.disposeSpeechEngine();
 
-          log("LCARS","... shut-down");  
+          Log.log(CLASSKEY,"... shut-down");  
         }
       });
       
       // Check network command line options
       if (getArg("--server")!=null && getArg("--clientof")!=null)
       {
-        err("LCARS","FATAL ERROR cannot be client and server at the same time");
-        err("LCARS","Use either \"--clientof\" or \"--server\"!");
+        Log.err(CLASSKEY,"FATAL ERROR cannot be client and server at the same time");
+        Log.err(CLASSKEY,"Use either \"--clientof\" or \"--server\"!");
         System.exit(-1);
       }
       
@@ -1567,7 +1638,7 @@ public class LCARS implements ILcarsRemote
       if (getArg("--server")!=null)
       {
         LCARS.getRmiRegistry();
-        log("LCARS","server at "+getHostName());
+        Log.log(CLASSKEY,"server at "+getHostName());
         server = new LCARS();
         try
         {
@@ -1576,7 +1647,7 @@ public class LCARS implements ILcarsRemote
         }
         catch (Exception e)
         {
-          err("LCARS","FATAL ERROR: RMI binding failed.");
+          Log.err(CLASSKEY,"FATAL ERROR: RMI binding failed.");
           e.printStackTrace();
           System.exit(-1);
         }
@@ -1586,7 +1657,7 @@ public class LCARS implements ILcarsRemote
       String clientOf = getArg("--clientof=");
       if (clientOf!=null)
       {
-        log("[LCARS","client of "+clientOf+" at "+getHostName());
+        Log.log("["+CLASSKEY,"client of "+clientOf+" at "+getHostName());
         LCARS.getRmiRegistry();
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }

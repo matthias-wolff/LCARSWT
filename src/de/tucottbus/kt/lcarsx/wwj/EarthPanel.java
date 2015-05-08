@@ -23,6 +23,7 @@ import java.util.Date;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcarsx.wwj.layers.CloudLayer;
 import de.tucottbus.kt.lcarsx.wwj.layers.LayerSet;
 import de.tucottbus.kt.lcarsx.wwj.layers.LcarsGraticuleLayer;
@@ -116,9 +117,9 @@ public class EarthPanel extends WorldWindPanel
       getLayerSets();
       
       // Protocol
-      LCARS.log("WWJ","LAYERS:");
+      Log.log("WWJ","LAYERS:");
       for (Layer layer : this.model.getLayers())
-        LCARS.log("WWJ","- "+layer.getClass().getSimpleName()+" "+
+        Log.log("WWJ","- "+layer.getClass().getSimpleName()+" "+
           layer.getName()+(layer.isEnabled()?" (on)":" (off)"));
     }
     return this.model;

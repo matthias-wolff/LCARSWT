@@ -30,6 +30,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -39,6 +40,8 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  */
 public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventListener
 {
+   public static final String CLASSKEY = "AUDLIB"; 
+  
    private EValue eTitle;
    private EValue eTimecode;
    private ERect  eAuthor;
@@ -423,7 +426,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       setMode(0);
       break;
     }
-    LCARS.log("ALP",event.toString());
+    Log.log("ALP",event.toString());
   }
   
   // -- Operations --
@@ -434,7 +437,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       return new File(LCARS.getArg("--musiclib="));
     
     // Fake a music library
-    LCARS.err("ALP","Warning: Command line option --musiclib=<music-dir> not specified, entering demo mode");
+    Log.warn("ALP","Command line option --musiclib=<music-dir> not specified, entering demo mode");
     String tmpDir = System.getProperty("java.io.tmpdir");
     try
     {
@@ -455,7 +458,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err(CLASSKEY, "Error while getting music directory.", e);
     }
     return new File(tmpDir+"/lcars-wt-music");
     

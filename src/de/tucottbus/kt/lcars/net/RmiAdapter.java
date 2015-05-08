@@ -10,6 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * Subclasses keep a connection to a peer adapter on a remote machine. Instances of the
@@ -91,7 +92,7 @@ public abstract class RmiAdapter implements Remote
    */
   protected void log(String msg)
   {
-    LCARS.log("NET",getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
+    Log.log("NET",getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
   }
   
   /**
@@ -102,7 +103,7 @@ public abstract class RmiAdapter implements Remote
    */
   protected void err(String msg)
   {
-    LCARS.err("NET",getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
+    Log.err("NET",getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
   }
 
   /**
