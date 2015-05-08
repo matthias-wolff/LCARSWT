@@ -46,6 +46,9 @@ import agile2d.AgileGraphics2D;
 import agile2d.AgileRenderingHints;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
+import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import de.tucottbus.kt.lcars.j2d.rendering.AsyncRenderer;
+import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -103,12 +106,12 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   /**
    * Manages the repaint with optimizations
    */
-  protected ScreenRepainter painter;
+  protected Renderer renderer;
   
   /**
    * 
    */
-  protected ScreenGraphics2D g2dWrapper;
+  protected AdvGraphics2D g2dWrapper;
   
   
   // -- Rendering parameters
@@ -156,8 +159,8 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
     // Screen repainter
-    painter = new ScreenRepainter(this.getSize());
-    g2dWrapper = new ScreenGraphics2D(DEFAULT_TEXT_CACHE_SIZE);
+    renderer = new Renderer(this.getSize());
+    g2dWrapper = new AdvGraphics2D(DEFAULT_TEXT_CACHE_SIZE);
     
 
     if(!(openGl && initGpuContentPane()))
@@ -328,7 +331,9 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       private AgileGraphics2D g2d;
          
       @Override
-      public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {}
+      public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {
+        // TODO: size = new Dimension(w,h);
+      }
       
       @Override
       public void init(GLAutoDrawable drawable)
@@ -417,7 +422,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     if (this.renderingTransform!=null)
       return this.renderingTransform;
     
-    Dimension dp = painter.getDimension();
+    Dimension dp = renderer.getDimension();
     if (dp == null)
       return new AffineTransform();
     
@@ -496,7 +501,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     }
     
     g2dWrapper.setGraphics(g2d);
-    painter.paint2D(g2dWrapper);
+    renderer.paint2D(g2dWrapper);
   }
     
   // -- Getters and setters --
@@ -522,7 +527,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
 
     // Set and start new panel  
     this.panel = ipanel;
-    this.painter.reset();
+    this.renderer.reset();
     
     if (this.panel!=null)
       try
@@ -572,14 +577,34 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    */
   public void setSelectiveRenderingHint(boolean selectiveRepaint)
   {
-    this.painter.setSelectiveRenderingHint(selectiveRepaint);
+    this.renderer.setSelectiveRenderingHint(selectiveRepaint);
+  }
+
+  
+  /**
+   * Sets a hint for selective repaints where only dirty areas on the screen will be repainted.
+   * Dirty areas are defined by elements that has been added, remove or changed. 
+   * @param selectiveRepaint
+   */
+  public void setAsyncRenderingHint(boolean async)
+  {
+    if(async) {
+      if(!(renderer instanceof AsyncRenderer))
+        renderer = new AsyncRenderer(renderer);
+    } else {
+      if(!(renderer instanceof Renderer)) {
+        if((renderer instanceof AsyncRenderer))
+          ((AsyncRenderer)renderer).shutdown();
+        renderer = new Renderer(renderer);
+      }    
+    }
   }
 
   
   @Override
   public void update(PanelData data, boolean incremental)
   {
-    painter.update(data, incremental);    
+    renderer.update(data, incremental);    
     invalidateScreen();
   }
   

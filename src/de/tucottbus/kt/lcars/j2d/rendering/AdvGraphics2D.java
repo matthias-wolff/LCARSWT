@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars;
+package de.tucottbus.kt.lcars.j2d.rendering;
 
 import java.awt.Color;
 import java.awt.Composite;
@@ -17,7 +17,7 @@ import de.tucottbus.kt.lcars.j2d.caching.GTextCache;
  * @author borck
  *
  */
-public class ScreenGraphics2D
+public class AdvGraphics2D
 {
   private Graphics2D g;  
   
@@ -25,7 +25,7 @@ public class ScreenGraphics2D
   
   private GTextCache cache;
 
-  public ScreenGraphics2D(int textCacheSize)
+  public AdvGraphics2D(int textCacheSize)
   {
     cache = new GTextCache(textCacheSize);
   }
@@ -53,6 +53,11 @@ public class ScreenGraphics2D
   public void setClip(Shape clip)
   {
     g.setClip(clip);
+  }
+
+  public void setClip(int x, int y, int width, int height)
+  {
+    g.setClip(x, y, width, height);
   }
 
   public void fill(Shape s)

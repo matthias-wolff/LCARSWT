@@ -1,7 +1,6 @@
 package de.tucottbus.kt.lcars.elements;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.io.Serializable;
@@ -9,9 +8,9 @@ import java.util.Vector;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
-import de.tucottbus.kt.lcars.ScreenGraphics2D;
 import de.tucottbus.kt.lcars.j2d.ElementState;
 import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -164,8 +163,7 @@ public final class ElementData implements Serializable
    *          Include {@link #geometry geometry} in the update (always included
    *          if <code>incremental</code> is <code>false</code>).
    */
-  public ElementData getUpdate(boolean incremental,
-      boolean updateGeometry)
+  public ElementData getUpdate(boolean incremental, boolean updateGeometry)
   {
     ElementData other = new ElementData(serialNo);
 
@@ -245,7 +243,7 @@ public final class ElementData implements Serializable
    * @param panelState
    *          The panel state.
    */
-  public void render2D(ScreenGraphics2D g2d, PanelState panelState)
+  public void render2D(AdvGraphics2D g2d, PanelState panelState)
   {
     // if (geometry==null) return;
     if (state == null)
@@ -253,43 +251,28 @@ public final class ElementData implements Serializable
     if (!state.isVisible())
       return;
 
-    float fgAlpha = state.getFgAlpha();
-    float bgAlpha = state.getBgAlpha(panelState);
-    AlphaComposite fgAlphaComposite = AlphaComposite.getInstance(
-        AlphaComposite.SRC_OVER, fgAlpha);
-    AlphaComposite bgAlphaComposite = AlphaComposite.getInstance(
-        AlphaComposite.SRC_OVER, bgAlpha);
-    Color fgColor = state.getFgColor();
-    Color bgColor = state.getBgColor(panelState);
-
-    g2d.setComposite(bgAlphaComposite);
-    g2d.setColor(bgColor);
-
     int i = 0;
     int l = geometry.capacity();
 
-    if(l <= 0)
+    if (l <= 0)
       return;
     
     // render all background elements
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+        state.getBgAlpha(panelState)));
+    g2d.setColor(state.getBgColor(panelState));
     for (; i < l; i++)
     {
       Geometry gi = geometry.get(i);
-
       if (gi.isForeground())
-      {
-        g2d.setComposite(fgAlphaComposite);
-        g2d.setColor(fgColor);
-        gi.paint2D(g2d);
-
-        i++;
         break;
-      }
-
       gi.paint2D(g2d);
     }
 
     // render all foreground elements
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+        state.getFgAlpha()));
+    g2d.setColor(state.getFgColor());
     for (; i < l; i++)
     {
       Geometry gi = geometry.get(i);
@@ -298,7 +281,8 @@ public final class ElementData implements Serializable
   }
 
   /**
-   * Returns the 
+   * Returns the
+   * 
    * @return
    */
   public Rectangle getBounds()
@@ -308,7 +292,7 @@ public final class ElementData implements Serializable
       Area area = new Area();
       for (Geometry gi : geometry)
         area.add(new Area(gi.getArea()));
-      cachedBounds = area.getBounds();      
+      cachedBounds = area.getBounds();
     }
 
     return new Rectangle(cachedBounds);

@@ -16,6 +16,7 @@
 		<param name="DatePattern" value="'.'yyyy-MM-dd" />
 		<param name="append" value="false" />
 		<param name="encoding" value="UTF-8" />
+		
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p - %m%n" />
 		</layout>
@@ -23,7 +24,7 @@
 
 	<root>
 		<!--LogLevel: ALL > TRACE > DEBUG > INFO > WARN > ERROR > FATAL > OFF -->
-		<level value="INFO" />
+		<level value="DEBUG" />
 		<appender-ref ref="console" />
 		<appender-ref ref="file" />
 	</root>

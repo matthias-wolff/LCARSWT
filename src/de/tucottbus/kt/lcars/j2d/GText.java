@@ -7,7 +7,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
-import de.tucottbus.kt.lcars.ScreenGraphics2D;
+import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 
 /**
  * A geometry representing a text.
@@ -89,7 +89,7 @@ public class GText extends Geometry
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
    */
   @Override
-  public void paint2D(ScreenGraphics2D g2d)
+  public void paint2D(AdvGraphics2D g2d)
   {
 //    if (textShape == null)
 //      synchronized (this)

@@ -1481,6 +1481,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n\nUsage");
       System.out.print("\n\n  java -cp \"./bin;./lib/swt.jar\" de.tucottbus.kt.lcars.LCARS [options]");
       System.out.print("\n\nCommand line options");
+      System.out.print("\n  --asyncRenderer                      - Uses an asychronous renderer.");
       System.out.print("\n  --clientof=hostname                  - Serve a remote screen [1]");
       System.out.print("\n  --debug                              - Print debug messages");
       System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
@@ -1570,6 +1571,7 @@ public class LCARS implements ILcarsRemote
       {
         Screen scr = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
         scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
+        scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
         iscreen = scr;
       }
       else

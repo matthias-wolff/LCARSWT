@@ -315,7 +315,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       Vector<Class<?>> cEngines = LCARS.getSpeechEngines();
       if (cEngines.size()==0)
       {
-        Log.err("PNL","No speech engines found");
+        Log.warn("PNL","No speech engines found");
         return null;
       }
 

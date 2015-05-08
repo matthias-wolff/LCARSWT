@@ -5,8 +5,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.io.Serializable;
 
-import de.tucottbus.kt.lcars.ScreenGraphics2D;
 import de.tucottbus.kt.lcars.elements.EElement;
+import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 
 /**
  * A 2D geometric shape. The graphical representation of an {@linkplain EElement LCARS GUI element}
@@ -58,7 +58,7 @@ public abstract class Geometry implements Serializable
    * @param g2d
    *          The graphics context.
    */
-  public abstract void paint2D(ScreenGraphics2D g2d); 
+  public abstract void paint2D(AdvGraphics2D g2d); 
 
 }
 

@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
-import de.tucottbus.kt.lcars.ScreenGraphics2D;
+import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -67,7 +67,7 @@ public class GImage extends Geometry
   }
   
   @Override
-  public void paint2D(ScreenGraphics2D g2d)
+  public void paint2D(AdvGraphics2D g2d)
   {
     Image image = GImage.getImage(this.resourceName);
     if(image == null)
