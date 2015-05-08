@@ -15,7 +15,7 @@ import de.tucottbus.kt.lcars.util.BlockingBoundedBuffer;
  * @author Christian Borck
  *
  */
-public class AsyncRenderer extends Renderer
+public class AsyncRenderer extends ARenderer
 {
 
   // -- CONSTANTS --
@@ -70,7 +70,7 @@ public class AsyncRenderer extends Renderer
    * Creates an asynchronous renderer with the given render size. Background worker will be started instantly.
    * @param initialSize
    */
-  public AsyncRenderer(Renderer renderer)
+  public AsyncRenderer(ARenderer renderer)
   {
     super(renderer);
     initWorker();
@@ -86,7 +86,7 @@ public class AsyncRenderer extends Renderer
       }
     });
 
-    this.worker.setName("ScreenRepainter worker");
+    this.worker.setName("async rendering worker");
     this.worker.start();
   }
   
@@ -143,6 +143,7 @@ public class AsyncRenderer extends Renderer
     workerShutdown.release();
   }
   
+  @Override
   public void update(PanelData data, boolean incremental)
   {
     try

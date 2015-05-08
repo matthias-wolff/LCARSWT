@@ -7,27 +7,41 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Shape;
 import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 
-import de.tucottbus.kt.lcars.j2d.caching.GTextCache;
+import org.apache.commons.collections4.map.LRUMap;
 
 /**
  * Represents a graphics wrapper class which provides caching.
- * @author borck
+ * @author Christian Borck
  *
  */
 public class AdvGraphics2D
 {
+  // -- Field --
+  
+  /**
+   * Graphics to draw on
+   */
   private Graphics2D g;  
   
+  /**
+   * Cached font render context of Graphics
+   */
   private FontRenderContext frc;
   
-  private GTextCache cache;
+  /**
+   * Glyph cache
+   */
+  private LRUMap<TextKey, GlyphVector> glyphCache;
 
+  // -- Constructors
+  
   public AdvGraphics2D(int textCacheSize)
   {
-    cache = new GTextCache(textCacheSize);
+    glyphCache = new LRUMap<TextKey, GlyphVector>(textCacheSize);
   }
 
   public void setGraphics(Graphics2D g2d)
@@ -36,9 +50,7 @@ public class AdvGraphics2D
     frc = g2d.getFontRenderContext();
   }
 
-  public Graphics2D getGraphics() {
-    return g;
-  }
+  // -- Graphics methods --
   
   public void setComposite(Composite comp)
   {
@@ -94,13 +106,13 @@ public class AdvGraphics2D
    * @return
    */
   public Shape drawString(String text, int x, int y) {
-    Shape textShape = cache.getGlyphVector(frc, g.getFont(), text).getOutline(x, y);
+    Shape textShape = getGlyphVector(frc, g.getFont(), text).getOutline(x, y);
     g.fill(textShape);
     return textShape;
   }
   
   public Shape drawString(String text, float x, float y) {
-    Shape textShape = cache.getGlyphVector(frc, g.getFont(), text).getOutline(x, y);    
+    Shape textShape = getGlyphVector(frc, g.getFont(), text).getOutline(x, y);    
     g.fill(textShape);
     return textShape;
   }
@@ -109,4 +121,54 @@ public class AdvGraphics2D
   {
     this.g.setFont(font);
   }
+  
+  
+  // -- Fonts and Glyphs
+  
+  private GlyphVector getGlyphVector(FontRenderContext frc, Font font, String text) {
+    TextKey key = new TextKey(/*frc,*/ font, text);
+    GlyphVector gv = glyphCache.get(key);
+    if(gv == null) {
+      gv = createGlyphVector(frc, font, text);
+      glyphCache.put(key, gv);
+    }
+    
+    return gv;    
+  }
+  
+  private static GlyphVector createGlyphVector (FontRenderContext frc, Font font, String text) {
+    // TODO: check for capacity
+    return font.createGlyphVector(frc, text);
+  }
+  
+  // -- Nested Class
+  
+  private class TextKey {
+    /*public FontRenderContext frc;*/
+    public Font font;
+    public String text;
+    
+    public TextKey(/*FontRenderContext frc,*/ Font font, String text) {
+      /*this.frc = frc;*/
+      this.font = font;
+      this.text = text;
+      this.equals(this);
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+      return object instanceof TextKey && equals((TextKey)object);
+    }
+    
+    public boolean equals(TextKey key) {
+      return /*frc.equals(key.frc) &&*/ font.equals(key.font) && text.equals(key.text);
+    }
+    
+    @Override
+    public int hashCode() {
+      return /*frc.hashCode() ^*/ font.hashCode() ^ text.hashCode();
+    }
+    
+  }
+
 }

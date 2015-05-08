@@ -48,6 +48,7 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 import de.tucottbus.kt.lcars.j2d.rendering.AsyncRenderer;
+import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
 import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
@@ -106,7 +107,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   /**
    * Manages the repaint with optimizations
    */
-  protected Renderer renderer;
+  protected ARenderer renderer;
   
   /**
    * 
@@ -116,7 +117,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   
   // -- Rendering parameters
   
-  private static final int DEFAULT_TEXT_CACHE_SIZE = 5000;
+  private static final int DEFAULT_TEXT_CACHE_SIZE = 500;
 
   /**
    * The quality of text rendering in OpenGL (default is rough).
@@ -592,7 +593,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       if(!(renderer instanceof AsyncRenderer))
         renderer = new AsyncRenderer(renderer);
     } else {
-      if(!(renderer instanceof Renderer)) {
+      if(!(renderer instanceof ARenderer)) {
         if((renderer instanceof AsyncRenderer))
           ((AsyncRenderer)renderer).shutdown();
         renderer = new Renderer(renderer);
