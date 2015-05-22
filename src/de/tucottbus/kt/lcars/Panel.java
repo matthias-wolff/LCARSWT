@@ -309,7 +309,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       speechEngineSearched = true;
       if (LCARS.getArg("--nospeech")!=null) return null;
-      Log.log("PNL","Looking for a speech engine");
+      Log.info("PNL","Looking for a speech engine");
       
       // List available speech engine implementations
       Vector<Class<?>> cEngines = LCARS.getSpeechEngines();
@@ -321,7 +321,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
       // HACK: Just get the first one...
       Class<?> cEngine = cEngines.get(0);
-      Log.log("PNL","ISpeechEngine = "+cEngine.getCanonicalName());
+      Log.info("PNL","ISpeechEngine = "+cEngine.getCanonicalName());
       try
       {
         Method mGetInstance = cEngine.getMethod("getInstance");
@@ -332,7 +332,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         // TODO: Auto-generated catch block
         e.printStackTrace();
       }
-      Log.log("PNL","Speech engine found.");
+      Log.info("PNL","Speech engine found.");
     }
     return speechEngine;
   }

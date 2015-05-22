@@ -1263,7 +1263,7 @@ public class LCARS implements ILcarsRemote
       {
         LCARS.rmiRegistry = LocateRegistry.getRegistry(getRmiPort());
       }
-      Log.log("NET","RMI registry: "+LCARS.rmiRegistry);
+      Log.info("NET","RMI registry: "+LCARS.rmiRegistry);
     }
     return LCARS.rmiRegistry;
   }
@@ -1346,7 +1346,7 @@ public class LCARS implements ILcarsRemote
     try
     {
       String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-      Log.log("NET","LCARS.server: Connection request from "+screenUrl);
+      Log.info("NET","LCARS.server: Connection request from "+screenUrl);
       RmiPanelAdapter rpa = new RmiPanelAdapter(panelClassName,screenHostName);
       rmiPanelAdapters.put(screenHostName+"."+screenID,rpa);
       return true;
@@ -1363,7 +1363,7 @@ public class LCARS implements ILcarsRemote
   {
     String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
     String key = screenHostName+"."+screenID;
-    Log.log("NET","LCARS.server: Disconnection request from "+screenUrl);
+    Log.info("NET","LCARS.server: Disconnection request from "+screenUrl);
     
     RmiPanelAdapter rpa = rmiPanelAdapters.remove(key);
     if (rpa!=null) rpa.shutDown();
@@ -1575,14 +1575,14 @@ public class LCARS implements ILcarsRemote
         iscreen = scr;
       }
       else
-        Log.log(CLASSKEY,"Command line mode (no GUI)");
+        Log.info(CLASSKEY,"Command line mode (no GUI)");
 
       // Install shut-down hook
       Runtime.getRuntime().addShutdownHook(new Thread()
       {
         public void run()
         {
-          Log.log(CLASSKEY,"Shutting down ...");
+          Log.info(CLASSKEY,"Shutting down ...");
 
           // Shut-down panel
           if (iscreen!=null)
@@ -1622,7 +1622,7 @@ public class LCARS implements ILcarsRemote
           // Shut-down speech engine
           Panel.disposeSpeechEngine();
 
-          Log.log(CLASSKEY,"... shut-down");  
+          Log.info(CLASSKEY,"... shut-down");  
         }
       });
       
@@ -1638,7 +1638,7 @@ public class LCARS implements ILcarsRemote
       if (getArg("--server")!=null)
       {
         LCARS.getRmiRegistry();
-        Log.log(CLASSKEY,"server at "+getHostName());
+        Log.info(CLASSKEY,"server at "+getHostName());
         server = new LCARS();
         try
         {
@@ -1657,7 +1657,7 @@ public class LCARS implements ILcarsRemote
       String clientOf = getArg("--clientof=");
       if (clientOf!=null)
       {
-        Log.log("["+CLASSKEY,"client of "+clientOf+" at "+getHostName());
+        Log.info("["+CLASSKEY,"client of "+clientOf+" at "+getHostName());
         LCARS.getRmiRegistry();
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }

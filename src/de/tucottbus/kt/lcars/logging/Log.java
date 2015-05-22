@@ -9,14 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class provides logging methods and supports debug messages. In addition observers can be registered that gets logs too.
+ * Class provides logging methods and supports debug messages. In addition observers can be registered that gets the logs too.
+ * Hint: to colorize the logs in the eclipse console  
  * @author Christian Borck
  *
  */
 public class Log {
   public static final String CLASSKEY = "LOGGER";
   
-  private static final Logger LOG = LoggerFactory.getLogger(Thread.currentThread().getStackTrace()[2].getClassName());
+  private static final Logger LOG;
   private static final String FORMAT = "[%s: %s]";
   private static final Set<ILogObserver> OBSERVERS = new HashSet<ILogObserver>();
   
@@ -35,7 +36,9 @@ public class Log {
   public static Boolean DebugMode = false;
   
   static {
-    logWorker.start();
+    StackTraceElement[] els = Thread.currentThread().getStackTrace();
+    LOG = LoggerFactory.getLogger(els.length > 2? els[2].getClass() : Log.class);
+    logWorker.start();   
   }
   
   // hide constructor
@@ -46,7 +49,7 @@ public class Log {
    * @param src
    * @param message
    */
-  public static void log(String pfx, String msg) {
+  public static void info(String pfx, String msg) {
     try {
       logBuffer.put(() -> {
         LOG.info(String.format(FORMAT,pfx,msg));
@@ -114,7 +117,7 @@ public class Log {
   public static void err(String pfx, String msg, Throwable e) {
     try {
       logBuffer.put(() -> {
-        LOG.error(String.format(FORMAT,pfx,msg));
+        LOG.error(String.format(FORMAT,pfx,msg), e);
         for (ILogObserver obs : OBSERVERS)
           obs.err(pfx, msg);      
       });
@@ -180,6 +183,7 @@ public class Log {
    */
   private static void logIfInterrupted(String pfx, String msg, Throwable e) {
     System.out.println(String.format(FORMAT,CLASSKEY,"log interrupted"));
-    System.out.println(String.format(FORMAT,pfx,msg + "\n" + e));
-  }
+    System.out.println(String.format(FORMAT,pfx,msg));
+    e.printStackTrace();
+  }  
 }

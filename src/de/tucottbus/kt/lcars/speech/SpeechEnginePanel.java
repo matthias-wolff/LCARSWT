@@ -359,7 +359,7 @@ public class SpeechEnginePanel extends Panel
     {
       PostprocEvent pe = (PostprocEvent)event;
       cSpeechPostproc.setPostprocResult(pe);
-      Log.log("SEP","Post-processing event ("+pe.frames.size()+" frames)");
+      Log.info("SEP","Post-processing event ("+pe.frames.size()+" frames)");
     }
   }
 

@@ -100,13 +100,13 @@ public class CityLightsLayer extends RenderableLayer
     if (now-lastUpdate<60e3) return;
     lastUpdate = now;
 
-    Log.log("WWJ","CityLightsLayer - Starting update thread");
+    Log.info("WWJ","CityLightsLayer - Starting update thread");
     (new Thread()
     {
       @Override
       public void run()
       {
-        Log.log("WWJ","CityLightsLayer - Update alpha shade");
+        Log.info("WWJ","CityLightsLayer - Update alpha shade");
         int w = CityLightsLayer.this.bi.getWidth();
         int h = CityLightsLayer.this.bi.getHeight();
         BufferedImage imgAlpha = getAlpha(subsolarPoint,w,h);

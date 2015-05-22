@@ -24,6 +24,7 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
 import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 
@@ -37,6 +38,8 @@ import de.tucottbus.kt.lcarsx.wwj.places.Camera;
  */
 public class EWorldWind extends ElementContributor implements RenderingListener
 {
+  public static final String CLASSKEY = "EWW";
+  
   /**
    * The LCARS screen this World Wind wrapper is on.
    */
@@ -136,8 +139,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
         }
         catch (ClassCastException e)
         {
-          System.err.println("LCARS: Function not supported on remote screens.");
-          e.printStackTrace();
+          Log.err(CLASSKEY, "LCARS: Function not supported on remote screens.", e);
         }
 //      }
 //    });

@@ -426,7 +426,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       setMode(0);
       break;
     }
-    Log.log("ALP",event.toString());
+    Log.info("ALP",event.toString());
   }
   
   // -- Operations --

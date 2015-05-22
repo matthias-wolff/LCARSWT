@@ -366,7 +366,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     });
     
     setContentPane(gljPanel);
-    Log.log(CLASSKEY, "Rendering on graphics card");
+    Log.info(CLASSKEY, "Rendering on graphics card");
     return true;
   }
   
@@ -533,9 +533,9 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     if (this.panel!=null)
       try
       {
-        Log.log(CLASSKEY,"Starting panel "+this.panel.getClass().getSimpleName()+"...");
+        Log.info(CLASSKEY,"Starting panel "+this.panel.getClass().getSimpleName()+"...");
         this.panel.start();
-        Log.log(CLASSKEY,"...Panel started");
+        Log.info(CLASSKEY,"...Panel started");
       }
       catch (RemoteException e)
       {
