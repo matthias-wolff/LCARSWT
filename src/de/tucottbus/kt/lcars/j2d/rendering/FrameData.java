@@ -87,7 +87,7 @@ class FrameData
     }
 
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    Log.log("SCR", "background=" + thisRes);
+    Log.info("SCR", "background=" + thisRes);
     URL resource = classLoader.getResource(thisRes);
     if (resource == null)
     {

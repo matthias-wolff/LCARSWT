@@ -25,6 +25,8 @@ import de.tucottbus.kt.lcars.logging.Log;
 public final class ElementData implements Serializable
 {
   // -- Constants
+  
+  public static final String CLASSKEY = "ELD";
 
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
@@ -230,7 +232,6 @@ public final class ElementData implements Serializable
       }
     } else
       ret |= GEOMETRY_FLAG;
-
     return ret;
   }
 
@@ -246,8 +247,10 @@ public final class ElementData implements Serializable
   public void render2D(AdvGraphics2D g2d, PanelState panelState)
   {
     // if (geometry==null) return;
-    if (state == null)
-      Log.err("ELD", "Invalid state #" + serialNo);
+    if (state == null) {
+      Log.err("ELD", "Missing state @ element #" + serialNo);
+      return;
+    }
     if (!state.isVisible())
       return;
 
