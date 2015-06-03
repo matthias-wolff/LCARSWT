@@ -14,7 +14,7 @@ import java.awt.image.ImageObserver;
 import org.apache.commons.collections4.map.LRUMap;
 
 /**
- * Represents a graphics wrapper class which provides caching.
+ * Wrapper class for {@link java.awt.Graphics2D} contains caching strategies.
  * @author Christian Borck
  *
  */
@@ -44,66 +44,92 @@ public class AdvGraphics2D
     glyphCache = new LRUMap<TextKey, GlyphVector>(textCacheSize);
   }
 
+  // -- Graphics methods --
+  
   public void setGraphics(Graphics2D g2d)
   {
     g = g2d;
+    FontRenderContext nextFrc = g2d.getFontRenderContext();
+    if(frc!=null && !frc.equals(nextFrc))
+      glyphCache.clear();
+    
     frc = g2d.getFontRenderContext();
   }
 
-  // -- Graphics methods --
-  
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#setComposite(java.awt.Composite)
+   */
   public void setComposite(Composite comp)
   {
     g.setComposite(comp);
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#setColor(java.awt.Color)
+   */
   public void setColor(Color c)
   {
     g.setColor(c);
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#setClip(java.awt.Shape)
+   */
   public void setClip(Shape clip)
   {
     g.setClip(clip);
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#setClip(int, int, int, int)
+   */
   public void setClip(int x, int y, int width, int height)
   {
     g.setClip(x, y, width, height);
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#fill(java.awt.Shape)
+   */
   public void fill(Shape s)
   {
     g.fill(s);
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#getTransform()
+   */
   public AffineTransform getTransform()
   {
     return g.getTransform();
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#draw(java.awt.Shape)
+   */
   public void draw(Shape s)
   {
     g.draw(s);
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#drawImage(java.awt.Image, java.awt.geom.AffineTransform, java.awt.image.ImageObserver)
+   */
   public void drawImage(Image img, AffineTransform xform, ImageObserver obs)
   {
     g.drawImage(img, xform, obs);
   }
   
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#drawImage(java.awt.Image, int, int, java.awt.image.ImageObserver)
+   */
   public void drawImage(Image image, int x, int y, ImageObserver obs)
   {
     g.drawImage(image, x, y, obs);    
   }
 
-  /**
-   * Generates a text shape and renders this 
-   * @param font
-   * @param text
-   * @param x
-   * @param y
-   * @return
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#drawString(java.lang.String, int, int)
    */
   public Shape drawString(String text, int x, int y) {
     Shape textShape = getGlyphVector(frc, g.getFont(), text).getOutline(x, y);
@@ -111,12 +137,18 @@ public class AdvGraphics2D
     return textShape;
   }
   
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#drawString(java.lang.String, float, float)
+   */
   public Shape drawString(String text, float x, float y) {
     Shape textShape = getGlyphVector(frc, g.getFont(), text).getOutline(x, y);    
     g.fill(textShape);
     return textShape;
   }
 
+  /* (non-Javadoc)
+   * @see java.awt.Graphics2D#setFont(java.awt.Font)
+   */
   public void setFont(Font font)
   {
     this.g.setFont(font);

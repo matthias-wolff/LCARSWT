@@ -19,7 +19,7 @@
   -->
 <configuration>
   <properties>
-     <property name="maven.logging.root.level">INFO</property>
+     <property name="maven.logging.root.level">DEBUG</property>
   </properties>
   <appenders>
     <Console name="console" target="SYSTEM_OUT">
@@ -35,7 +35,7 @@
   <loggers>
     <root level="${sys:maven.logging.root.level}">
       <appender-ref ref="console"/>
-      <appender-ref ref="file" />
+      <!-- <appender-ref ref="file" /> -->
     </root>
   </loggers>
 </configuration>

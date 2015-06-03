@@ -1452,7 +1452,6 @@ public class LCARS implements ILcarsRemote
    *  --nogui                              - Do not display a screen [3]
    *  --nomouse                            - Hide mouse cursor
    *  --nospeech                           - Disable speech I/O
-   *  --opengl                             - Use openGL rendering
    *  --PADD                               - Running on a PADD
    *  --panel=classname                    - LCARS panel to display at start-up 
    *  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]
@@ -1490,7 +1489,6 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n  --nogui                              - Do not display a screen [3]");
       System.out.print("\n  --nomouse                            - Hide mouse cursor");
       System.out.print("\n  --nospeech                           - Disable speech I/O");
-      System.out.print("\n  --opengl                             - Use openGL rendering");
       System.out.print("\n  --PADD                               - Running on a PADD");
       System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
       System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
@@ -1569,7 +1567,7 @@ public class LCARS implements ILcarsRemote
       boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
       {
-        Screen scr = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen, getArg("--opengl")!=null);
+        Screen scr = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen);
         scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
         scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
         iscreen = scr;

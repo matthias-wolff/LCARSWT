@@ -287,24 +287,6 @@
 			<artifactId>${swt.artifactId}</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>agile2d</groupId>
-			<artifactId>agile2d</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jogamp.jogl</groupId>
-					<artifactId>jogl-all</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jogamp.gluegen</groupId>
-					<artifactId>gluegen-rt</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-simple</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>mp3spi</artifactId>
 		</dependency>
@@ -381,11 +363,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>agile2d</groupId>
-				<artifactId>agile2d</artifactId>
-				<version>3.0.1</version>
-			</dependency>
 			<dependency>
 				<groupId>com.googlecode.soundlibs</groupId>
 				<artifactId>mp3spi</artifactId>

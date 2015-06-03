@@ -247,40 +247,46 @@ public final class ElementData implements Serializable
   public void render2D(AdvGraphics2D g2d, PanelState panelState)
   {
     // if (geometry==null) return;
-    if (state == null) {
-      Log.err("ELD", "Missing state @ element #" + serialNo);
+    if (state==null) {
+      Log.err(CLASSKEY,"Missing state #"+serialNo);
       return;
     }
     if (!state.isVisible())
       return;
 
     int i = 0;
-    int l = geometry.capacity();
+    int l = geometry.size();
 
     if (l <= 0)
       return;
     
-    // render all background elements
-    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-        state.getBgAlpha(panelState)));
-    g2d.setColor(state.getBgColor(panelState));
-    for (; i < l; i++)
+    Geometry gi = geometry.get(i++);
+    if (!gi.isForeground())
     {
-      Geometry gi = geometry.get(i);
-      if (gi.isForeground())
-        break;
-      gi.paint2D(g2d);
+      //render background elements
+      g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+          state.getBgAlpha(panelState)));
+      g2d.setColor(state.getBgColor(panelState));
+      while(true) {
+        gi.paint2D(g2d);
+        if(i==l)
+          return;
+        gi = geometry.get(i++);
+        if(gi.isForeground())
+          break;
+      }
     }
-
-    // render all foreground elements
+    
+    // render foreground elements
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
         state.getFgAlpha()));
     g2d.setColor(state.getFgColor());
-    for (; i < l; i++)
-    {
-      Geometry gi = geometry.get(i);
+    while(true) {
       gi.paint2D(g2d);
-    }
+      if(i==l)
+        return;
+      gi = geometry.get(i++);
+    }    
   }
 
   /**

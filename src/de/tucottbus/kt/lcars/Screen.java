@@ -34,16 +34,6 @@ import javax.swing.event.MouseInputListener;
 
 import org.eclipse.swt.widgets.Display;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLJPanel;
-
-import agile2d.AgileGraphics2D;
-import agile2d.AgileRenderingHints;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
@@ -65,6 +55,8 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  */
 public class Screen extends JFrame implements IScreen, MouseInputListener, KeyListener
 { 
+  // -- Constants --
+  
   public static final String CLASSKEY = "SCR";
 
   /**
@@ -72,6 +64,12 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    */
   private static final long serialVersionUID = 1L;
     
+  
+  /**
+   * Creates a copy Graphics before painting on it.
+   */
+  private final boolean useGraphicsCopy = false;
+
   // -- Fields --
 
   /**
@@ -118,16 +116,6 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   // -- Rendering parameters
   
   private static final int DEFAULT_TEXT_CACHE_SIZE = 500;
-
-  /**
-   * The quality of text rendering in OpenGL (default is rough).
-   */
-  public final static int TEXT_RENDERING_STRATEGY = AgileGraphics2D.ROUGH_TEXT_RENDERING_STRATEGY;
-
-  /**
-   * The number of samples for multisample in OpenGL used for antialiasing (MSAA). 16 is max and zero deactivates MSAA.
-   */
-  public final static int NUM_SAMPLES_FOR_MULTISAMPLE = 16;
  
   // -- Constructors --
   
@@ -148,8 +136,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
   (
     GraphicsDevice device,
     String         panelClass,
-    boolean        fullScreen,
-    boolean        openGl
+    boolean        fullScreen
   ) throws ClassNotFoundException
   {
     super(device.getDefaultConfiguration());
@@ -163,9 +150,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     renderer = new Renderer(this.getSize());
     g2dWrapper = new AdvGraphics2D(DEFAULT_TEXT_CACHE_SIZE);
     
-
-    if(!(openGl && initGpuContentPane()))
-      initCpuContentPane();
+    initContentPane();
 
     setPanel(panelClass);
     fullScreenMode = fullScreen && device.isFullScreenSupported();
@@ -227,27 +212,13 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       }
     });
     addWindowListener(new WindowListener(){
-      public void windowActivated(WindowEvent e)
-      {
-      }
-      public void windowClosed(WindowEvent e)
-      {
-      }
-      public void windowClosing(WindowEvent e)
-      {
-      }
-      public void windowDeactivated(WindowEvent e)
-      {
-      }
-      public void windowDeiconified(WindowEvent e)
-      {
-      }
-      public void windowIconified(WindowEvent e)
-      {
-      }
-      public void windowOpened(WindowEvent e)
-      {
-      }   
+      public void windowActivated(WindowEvent e){}
+      public void windowClosed(WindowEvent e){}
+      public void windowClosing(WindowEvent e){}
+      public void windowDeactivated(WindowEvent e){}
+      public void windowDeiconified(WindowEvent e){}
+      public void windowIconified(WindowEvent e){}
+      public void windowOpened(WindowEvent e){}
     });
     addComponentListener(new ComponentListener()
     {
@@ -264,14 +235,10 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
       }
       
       @Override
-      public void componentMoved(ComponentEvent e)
-      {
-      }
+      public void componentMoved(ComponentEvent e){}
       
       @Override
-      public void componentHidden(ComponentEvent e)
-      {
-      }
+      public void componentHidden(ComponentEvent e){}
     });
 
     // Mouse handlers
@@ -288,88 +255,43 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
    * on the cpu.
    * @return Always true
    */
-  private boolean initCpuContentPane()
+  private boolean initContentPane()
   {
-    JComponent component = new JComponent()
-    {
-      private static final long serialVersionUID = 1L;
-
-      @Override
-      public void paintComponent(Graphics g)
-      {
-        long time = System.nanoTime();
-        
-        super.paintComponent(g);
-        paint2D((Graphics2D)g);
-        
-        loadStat.add((int)((System.nanoTime()-time)/400000));
-      }
-    };
+    JComponent component = useGraphicsCopy
+        ? new JComponent()
+        {
+          private static final long serialVersionUID = 1L;
+          @Override
+          public void paintComponent(Graphics g)
+          {
+            long time = System.nanoTime();
+            Graphics gCopy = g.create();
+            super.paintComponent(gCopy);
+            paint2D((Graphics2D)gCopy);
+            g.dispose();
+            
+            loadStat.add((int)((System.nanoTime()-time)/400000));
+          }
+        }
+        : new JComponent()
+        {
+          private static final long serialVersionUID = 1L;
+          @Override
+          public void paintComponent(Graphics g)
+          {
+            long time = System.nanoTime();
+            super.paintComponent(g);
+            paint2D((Graphics2D)g);
+            g.dispose();
+            
+            loadStat.add((int)((System.nanoTime()-time)/400000));
+          }
+        };
     setContentPane(component);
     Log.debug(CLASSKEY, "Rendering on CPU");
     return true;
   }
-  
-  /**
-   * Initialize the ContentPane with the OpenGL component {@link javax.media.opengl.awt.GLJPanel}.
-   * Rendering will be performed on the gpu. 
-   * @return Return true if OpenGL [1.0 ... 3.0] is available, otherwise false
-   */
-  private boolean initGpuContentPane()
-  {
-    // check, if openGL is available
-    if(!GLProfile.getDefault().isGL2())
-      return false;
-       
-    GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
-    //caps.setDoubleBuffered(false);// request double buffer display mode
-    caps.setSampleBuffers(NUM_SAMPLES_FOR_MULTISAMPLE > 0);
-    caps.setNumSamples(NUM_SAMPLES_FOR_MULTISAMPLE);
     
-    GLJPanel gljPanel = new GLJPanel(caps);
-    gljPanel.addGLEventListener(new GLEventListener()
-    { 
-      private AgileGraphics2D g2d;
-         
-      @Override
-      public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {
-        // TODO: size = new Dimension(w,h);
-      }
-      
-      @Override
-      public void init(GLAutoDrawable drawable)
-      {   
-        AgileGraphics2D.destroyInstance();
-        g2d = AgileGraphics2D.getInstance(drawable);           
-        g2d.setFontRenderingStrategy(TEXT_RENDERING_STRATEGY);        
-
-        GL2 gl = drawable.getGL().getGL2();
-
-        // Disable depth test
-        gl.glDisable(GL.GL_DEPTH_TEST);        
-      }
-      
-      @Override
-      public void dispose(GLAutoDrawable drawable)
-      {}
-      
-      @Override
-      public void display(GLAutoDrawable drawable)
-      {
-        
-        long time = System.nanoTime();
-        g2d.resetAll(drawable);
-        paint2D(g2d);
-        
-        loadStat.add((int)((System.nanoTime()-time)/400000));
-      }
-    });
-    
-    setContentPane(gljPanel);
-    Log.info(CLASSKEY, "Rendering on graphics card");
-    return true;
-  }
-  
   // -- Getters and setters --
     
   /**
@@ -493,13 +415,6 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
     g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_NORMALIZE);
     g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,1.0f));
-    if (g2d instanceof AgileGraphics2D)
-    {
-      g2d.setRenderingHint(AgileRenderingHints.KEY_USING_GL_HINT,true);
-      g2d.setRenderingHint(AgileRenderingHints.KEY_IMMUTABLE_IMAGE_HINT,true);
-      g2d.setRenderingHint(AgileRenderingHints.KEY_IMMUTABLE_SHAPE_HINT,true);
-      g2d.setRenderingHint(AgileRenderingHints.KEY_INCREMENTAL_FONT_RENDERER_HINT,true);      
-    }
     
     g2dWrapper.setGraphics(g2d);
     renderer.paint2D(g2dWrapper);
@@ -751,8 +666,7 @@ public class Screen extends JFrame implements IScreen, MouseInputListener, KeyLi
         catch (Exception e)
         {
           Log.err(CLASSKEY, "Error in timer while do a \"every second\" update.", e);
-        }
-        
+        }        
       ctr++;
     }
   }
