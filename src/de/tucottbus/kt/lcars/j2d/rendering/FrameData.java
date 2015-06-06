@@ -26,6 +26,8 @@ import de.tucottbus.kt.lcars.logging.Log;
  */
 class FrameData
 {
+  public static final String CLASSKEY = "FrmDt";
+  
   private boolean selectiveRepaint;
   private boolean incremental;
   private PanelState panelState;
@@ -133,11 +135,11 @@ class FrameData
       updateBgImage(null);
       return;
     }
-
+    
     this.fullRepaint = updateBgImage(pred)
         || !panelState.equals(pred.panelState) || !incremental
         || !selectiveRepaint;
-    // fullRepaint = true;
+    //fullRepaint = true;
 
     int elCount = elements.size();
     this.dirtyArea = new Rectangle(panelState.dimension);
@@ -213,6 +215,8 @@ class FrameData
         if (dirtyArea.intersects(edu.getBounds()))
           elementsToPaint.add(edu);
     }
+//    if(elements.size() !=elementsToPaint.size())
+//      Log.warn(CLASSKEY, "Element difference " + elements.size() + ":" + elementsToPaint.size());
   }
 
   /**

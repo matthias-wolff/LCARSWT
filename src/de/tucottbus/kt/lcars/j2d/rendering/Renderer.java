@@ -12,7 +12,7 @@ public class Renderer extends ARenderer
    * Context for the next repaint. Contains all element and the region of the
    * screen that has to be updated.
    */
-  private FrameData newContext;
+  private FrameData nextContext;
 
   private Semaphore mutex = new Semaphore(1);
   
@@ -32,13 +32,12 @@ public class Renderer extends ARenderer
    * @see #elements
    */
   public void paint2D(AdvGraphics2D g2d) {
-    if(newContext != null)
-      newContext.apply(getContext());
-    setContext(newContext);
+    if(nextContext != null)
+      nextContext.apply(getContext());
+    setContext(nextContext);
     super.paint2D(g2d);
   }
 
-  
   /**
    * Updates the data for rendering.
    * @param data
@@ -60,9 +59,9 @@ public class Renderer extends ARenderer
   }
 
   private void doUpdate(PanelData data, boolean incremental) {
-    FrameData newContext = FrameData.create(data, incremental, this.selectiveRepaint);
-    newContext.apply(this.newContext);
-    this.newContext = newContext;
+    FrameData nextContext = FrameData.create(data, incremental, this.selectiveRepaint);
+    nextContext.apply(this.nextContext);
+    this.nextContext = nextContext;
     onUpdate();
   }
   

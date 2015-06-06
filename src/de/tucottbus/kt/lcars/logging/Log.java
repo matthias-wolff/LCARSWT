@@ -38,6 +38,7 @@ public class Log {
   static {
     StackTraceElement[] els = Thread.currentThread().getStackTrace();
     LOG = LoggerFactory.getLogger(els.length > 2? els[2].getClass() : Log.class);
+    logWorker.setName("Log:Worker");
     logWorker.start();   
   }
   
