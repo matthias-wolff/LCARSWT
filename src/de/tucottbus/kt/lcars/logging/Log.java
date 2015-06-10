@@ -18,7 +18,7 @@ public class Log {
   public static final String CLASSKEY = "LOGGER";
   
   private static final Logger LOG;
-  private static final String FORMAT = "[%s: %s]";
+  private static final String FORMAT = "[%s%c %s]";
   private static final Set<ILogObserver> OBSERVERS = new HashSet<ILogObserver>();
   
   private static final BlockingQueue<Runnable> logBuffer = new ArrayBlockingQueue<Runnable>(5);
@@ -46,14 +46,36 @@ public class Log {
   private Log(){}
   
   /**
+   * Log a message at the INFO level. Equivalent to {@link #info(char, String, 
+   * String) info}<code>(':',pfx,msg)</code>.
    * 
-   * @param src
-   * @param message
+   * @param pfx
+   *          Prefix string, typically a string of three characters identifying
+   *          the object writing to the log.
+   * @param msg
+   *          The log message.
    */
   public static void info(String pfx, String msg) {
+    info(':',pfx,msg);
+  }
+  
+  /**
+   * Log a message at the INFO level.
+   * 
+   * @param type
+   *          <code>':'</code> for info messages, <code>'>'</code> for echos of
+   *          output to external programs or hardware, or <code>'>'</code> for 
+   *          echos of input from external programs or hardware.
+   * @param pfx
+   *          Prefix string, typically a string of three characters identifying
+   *          the object writing to the log. Used for message filtering.
+   * @param msg
+   *          The log message.
+   */
+  public static void info(char type, String pfx, String msg) {
     try {
       logBuffer.put(() -> {
-        LOG.info(String.format(FORMAT,pfx,msg));
+        LOG.info(String.format(FORMAT,pfx,type,msg));
         for (ILogObserver obs : OBSERVERS)
           obs.log(pfx, msg);      
       });
@@ -63,16 +85,20 @@ public class Log {
       logIfInterrupted(pfx, msg);
     }
   }
-  
+
   /**
+   * Log a message at the WARN level.
    * 
-   * @param src
-   * @param message
+   * @param pfx
+   *          Prefix string, typically a string of three characters identifying
+   *          the object writing to the log. Used for message filtering.
+   * @param msg
+   *          The log message.
    */
   public static void warn(String pfx, String msg) {
     try {
       logBuffer.put(() -> {
-        LOG.warn(String.format(FORMAT,pfx,msg));
+        LOG.warn(String.format(FORMAT,pfx,'!',msg));
         for (ILogObserver obs : OBSERVERS)
           obs.warn(pfx, msg);      
       });
@@ -84,17 +110,18 @@ public class Log {
   }
   
   /**
-   * Prints an error message.
+   * Log a message at the ERROR level.
    * 
    * @param pfx
-   *          The message prefix (used for message filtering).
+   *          Prefix string, typically a string of three characters identifying
+   *          the object writing to the log. Used for message filtering.
    * @param msg
-   *          The message.
+   *          The log message.
    */
   public static void err(String pfx, String msg) {
     try {
       logBuffer.put(() -> {
-        LOG.error(String.format(FORMAT,pfx,msg));
+        LOG.error(String.format(FORMAT,pfx,'!',msg));
         for (ILogObserver obs : OBSERVERS)
           obs.err(pfx, msg);      
       });
@@ -106,19 +133,20 @@ public class Log {
   }
   
   /**
-   * Prints an error message.
+   * Log a message at the ERROR level.
    * 
    * @param pfx
-   *          The message prefix (used for message filtering).
+   *          Prefix string, typically a string of three characters identifying
+   *          the object writing to the log. Used for message filtering.
    * @param msg
-   *          The message.
+   *          The log message.
    * @param e
-   *          The Exception.
+   *          The {@link Throwable} causing the error.
    */
   public static void err(String pfx, String msg, Throwable e) {
     try {
       logBuffer.put(() -> {
-        LOG.error(String.format(FORMAT,pfx,msg), e);
+        LOG.error(String.format(FORMAT,pfx,'!',msg), e);
         for (ILogObserver obs : OBSERVERS)
           obs.err(pfx, msg);      
       });
@@ -130,12 +158,15 @@ public class Log {
   }
   
   /**
-   * Prints a debug message.
+   * Log a message at the DEBUG level.
    * 
    * @param pfx
-   *          The message prefix (used for message filtering).
+   *          Prefix string, typically a string of three characters identifying
+   *          the object writing to the log. Used for message filtering.
    * @param msg
-   *          The message.
+   *          The log message.
+   * @param e
+   *          The {@link Throwable} causing the error.
    */
   public static void debug(String pfx, String msg) {
     if(!DebugMode)
@@ -143,7 +174,7 @@ public class Log {
     
     try {
       logBuffer.put(() -> {
-        LOG.debug(String.format(FORMAT,pfx,msg));
+        LOG.debug(String.format(FORMAT,pfx,':',msg));
         for (ILogObserver obs : OBSERVERS)
           obs.debug(pfx, msg);      
       });
@@ -175,16 +206,16 @@ public class Log {
    * 
    */
   private static void logIfInterrupted(String pfx, String msg) {
-    System.out.println(String.format(FORMAT,CLASSKEY,"log interrupted"));
-    System.out.println(String.format(FORMAT,pfx,msg));
+    System.out.println(String.format(FORMAT,CLASSKEY,':',"log interrupted"));
+    System.out.println(String.format(FORMAT,pfx,':',msg));
   }
   
   /**
    * 
    */
   private static void logIfInterrupted(String pfx, String msg, Throwable e) {
-    System.out.println(String.format(FORMAT,CLASSKEY,"log interrupted"));
-    System.out.println(String.format(FORMAT,pfx,msg));
+    System.out.println(String.format(FORMAT,CLASSKEY,':',"log interrupted"));
+    System.out.println(String.format(FORMAT,pfx,':',msg));
     e.printStackTrace();
   }  
 }
