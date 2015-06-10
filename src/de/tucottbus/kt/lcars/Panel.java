@@ -455,6 +455,94 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     this.state.alpha = alpha;
     invalidate();
   }
+
+  /**
+   * Determines if this panel is locked.
+   * 
+   * @see #setLocked(boolean,int)
+   */
+  public boolean isLocked()
+  {
+    return this.state.locked;
+  }
+
+  /**
+   * Locks or unlocks this panel. In the locked state only {@linkplain EElement GUI elements}
+   * which have the {@link LCARS#ES_NOLOCK} style process user input. If the argument is 
+   * <code>false</code> and {@link #setAutoRelockTime(int)} has been called to with a non-negative 
+   * argument before, the panel will automatically re-enter the locked state when a specified 
+   * GUI idle time has passed. 
+   * 
+   * <p><b>Caution:</b> Make sure you set the {@link LCARS#ES_NOLOCK} style on a panel 
+   * lock/unlock button! Otherwise users will not be able to unlock the panel.</p>
+   * 
+   * @param locked
+   *          The new modal mode.
+   * @see #isLocked()
+   * @see #setAutoRelockTime(int)
+   */
+  public void setLocked(boolean locked)
+  {
+    for (int i=0; i<elements.size(); i++)
+      elements.get(i).clearTouch();
+    this.state.locked = locked;
+    if (locked && this.state.autoRelockTime>0)
+      this.state.autoRelock = this.state.autoRelockTime; 
+  }
+
+  /**
+   * Enables or disabled automatic re-locking after unlocking a panel.
+   * 
+   * @param time
+   *          The GUI idle time in seconds after which the panel will automatically re-enter the locked 
+   *          state. The GUI idle time is the interval that passed after the last user input. If the argument
+   *          is &le; 0, the panel will remain unlocked until {@link #setLocked(boolean, int) 
+   *          setLocked}<code>(true)</code> is invoked.
+   * @see #getAutoRelockTime()
+   * @see #getAutoRelock()
+   * @see #setLocked(boolean)
+   */
+  public void setAutoRelockTime(int time)
+  {
+    this.state.autoRelockTime = time;
+    if (!isLocked())
+      this.state.autoRelock = time;
+  }
+  
+  /**
+   * Returns the GUI idle time in seconds after which the panel will automatically re-locked. A 
+   * return value &le;0 indicates that the panel will not automatically re-lock.
+   * 
+   * @see #setAutoRelockTime(int)
+   * @see #getAutoRelock()
+   */
+  public int getAutoRelockTime()
+  {
+    return this.state.autoRelockTime;
+  }
+  
+  /**
+   * Returns the remaining GUI idle time until the panel will automatically re-lock.
+   * 
+   * @return The remaning time. Return value is meaningless if {@link #isLocked()} returns <code>true</code>
+   * <em>or</em> {@link #getAutoRelockTime()} returns a value &le;0.
+   */
+  public int getAutoRelock()
+  {
+    return this.state.autoRelock;
+  }
+  
+  /**
+   * Internal use only! Breaks the auto re-lock countdown.
+   * 
+   * @see #setAutoRelockTime(int)
+   */
+  public void breakAutoRelock()
+  {
+    if (isLocked()) return;
+    if (getAutoRelockTime()<=0) return;
+    this.state.autoRelock = getAutoRelockTime(); 
+  }
   
   /**
    * Determines if this panel is running in the modal mode.
@@ -747,6 +835,14 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           }
           catch (Exception e) {}
         }
+      }
+      
+      // Automatic re-locking
+      if (runc%50==0 && !isLocked() && state.autoRelock>0)
+      {
+        state.autoRelock--;
+        if (state.autoRelock==0)
+          setLocked(true);
       }
       
       // UI reflections

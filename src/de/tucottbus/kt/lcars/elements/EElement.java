@@ -578,16 +578,19 @@ public abstract class EElement
     if (isDisabled()) return fbt;
     if (isStatic  ()) return fbt;
     if (!isVisible()) return fbt;
-    if
-    (
-      panel!=null &&
-      panel.isModal() &&
-      data.state.getStyle(LCARS.ES_MODAL)==0
-    )
-    {
-      return fbt;
-    }
 
+    // Modal mode
+    if (panel!=null && panel.isModal() && data.state.getStyle(LCARS.ES_MODAL)==0)
+      return fbt;
+
+    // Locked state
+    if (panel!=null)
+    {
+      if (panel.isLocked() && data.state.getStyle(LCARS.ES_MODAL|LCARS.ES_NOLOCK)==0)
+        return fbt;
+      panel.breakAutoRelock();
+    }
+    
     // Highlight and hold control
     switch (ee.id)
     {

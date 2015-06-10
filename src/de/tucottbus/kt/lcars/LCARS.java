@@ -100,7 +100,8 @@ public class LCARS implements ILcarsRemote
   public static final int ES_STYLE      = 0x0000FC00;   // Mask for color style
   public static final int ES_COLOR      = 0x0000FF00;   // Mask for EC_XXX styles
   public static final int ES_FONT       = 0x000F0000;   // Mask for EF_XXX styles
-  public static final int ES_BEHAVIOR   = 0x0F000000;   // Mask for EB_XXX styles
+  public static final int ES_STATE      = 0x0CF00000;   // Mask for EB_XXX styles
+  public static final int ES_BEHAVIOR   = 0x03000000;   // Mask for EB_XXX styles
   public static final int ES_CLASS      = 0xF0000000;   // Mask for class specific styles
   public static final int ES_SELECTED   = 0x00000100;   // Element selected
   public static final int ES_DISABLED   = 0x00000200;   // Element disabled
@@ -109,6 +110,7 @@ public class LCARS implements ILcarsRemote
   public static final int ES_BLINKING   = 0x00200000;   // Element blinks
   public static final int ES_MODAL      = 0x00400000;   // Element is always opaque
   public static final int ES_SILENT     = 0x00800000;   // Element does not play an earcon
+  public static final int ES_NOLOCK     = 0x04000000;   // Element is does no lock with panel
   public static final int ES_NONE       = 0x00000000;   // Element does not have a style
   
   // ES_SHAPE_XXX - Element shape orientation

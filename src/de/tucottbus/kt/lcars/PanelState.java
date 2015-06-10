@@ -41,6 +41,23 @@ public class PanelState implements Serializable
   public boolean silent = false;
 
   /**
+   * The locked state.
+   */
+  public boolean locked = false;
+
+  /**
+   * Interval of GUI idle time after which an unlocked panel will be re-locked
+   * automatically. Values &le;0 are ineffective, i.&nbsp;e. the panel will not 
+   * automatically re-lock.
+   */
+  public transient int autoRelockTime = 0;
+  
+  /**
+   * Remaining GUI idle time until automatic re-locking.
+   */
+  public transient int autoRelock = 0;
+  
+  /**
    * The master opacity.
    */
   public float alpha = 1.f;
@@ -80,7 +97,7 @@ public class PanelState implements Serializable
 
     return colorScheme == other.colorScheme && blink == other.blink
         && modal == other.modal && silent == other.silent
-        && alpha == other.alpha;
+        && alpha == other.alpha && locked == other.locked;
   }
 
 }
