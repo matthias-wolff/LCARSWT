@@ -1446,6 +1446,7 @@ public class LCARS implements ILcarsRemote
    * 
    * @param args
    *  Command line options<pre>
+   *  --asyncRenderer                      - Uses an asynchronous renderer
    *  --clientof=hostname                  - Serve a remote screen [1]
    *  --debug                              - Print debug messages
    *  --device=devicename                  - Name of host device, e.g. wetab [2]
@@ -1458,6 +1459,7 @@ public class LCARS implements ILcarsRemote
    *  --panel=classname                    - LCARS panel to display at start-up 
    *  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]
    *  --screen=n                           - Use n-th screen (default: 1) [5]
+   *  --selectiveRendering                 - Re-paint changes only
    *  --server                             - Serve remote panels [1]
    *  --wallpaper=filename                 - Use wall paper (slower!)
    *  --xpos=n                             - Horizontal position of window [6]
@@ -1482,12 +1484,13 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n\nUsage");
       System.out.print("\n\n  java -cp \"./bin;./lib/swt.jar\" de.tucottbus.kt.lcars.LCARS [options]");
       System.out.print("\n\nCommand line options");
-      System.out.print("\n  --asyncRenderer                      - Uses an asychronous renderer.");
+      System.out.print("\n  --asyncRenderer                      - Uses an asynchronous renderer");
       System.out.print("\n  --clientof=hostname                  - Serve a remote screen [1]");
       System.out.print("\n  --debug                              - Print debug messages");
       System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
       System.out.print("\n  --help, -h, ?                        - Print help and exit");
       System.out.print("\n  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)");
+      System.out.print("\n  --musiclib=<music-dir>               - Audio library folder");
       System.out.print("\n  --nogui                              - Do not display a screen [3]");
       System.out.print("\n  --nomouse                            - Hide mouse cursor");
       System.out.print("\n  --nospeech                           - Disable speech I/O");
@@ -1495,7 +1498,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
       System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
       System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [5]");
-      System.out.print("\n  --selectiveRendering                 - Selective Screen repaints only on dirty areas (areas with changes)");
+      System.out.print("\n  --selectiveRendering                 - Re-paint changes only");
       System.out.print("\n  --server                             - Serve remote panels [1]");
       System.out.print("\n  --wallpaper=filename                 - Use wall paper (slower!)");
       System.out.print("\n  --xpos=n                             - Horizontal position of window [6]");

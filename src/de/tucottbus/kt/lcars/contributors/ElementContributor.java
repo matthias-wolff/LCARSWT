@@ -15,6 +15,8 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 /**
  * Contributes elements to an LCARS {@link Panel}.
  * 
+ * <p><b>TODO:</b><br>Rename to <code>ElementGroup</code>!</p>
+ * 
  * @author Matthias Wolff
  */
 public abstract class ElementContributor implements EEventListener
