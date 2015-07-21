@@ -341,6 +341,7 @@ public class ETopography extends ElementContributor
    */
   public synchronized void setCursorPos(float x, float y, String label)
   {
+    if(cursor==null) return;
     Point     p  = pToL(x,y);
     Rectangle r  = cursor.get(0).getBounds();
     int       cx = r.x;
