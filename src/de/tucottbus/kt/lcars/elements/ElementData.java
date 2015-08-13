@@ -26,7 +26,7 @@ public final class ElementData implements Serializable
 {
   // -- Constants
   
-  public static final String CLASSKEY = "ELD";
+  public static final String CLASSKEY = "ElementData";
 
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
@@ -181,7 +181,7 @@ public final class ElementData implements Serializable
         // TODO: synchronization problem, exception should never occur
         other.geometry = new Vector<Geometry>();
         Log.err(
-            "INT",
+            CLASSKEY,
             "Caught exception " + e.toString() + " at "
                 + e.getStackTrace()[0].toString());
       }
