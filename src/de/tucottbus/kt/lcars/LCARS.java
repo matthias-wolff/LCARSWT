@@ -145,7 +145,7 @@ public class LCARS implements ILcarsRemote
   // ES_VALUE_XXX - Value element styles
   public static final int ES_VALUE_W    = 0x40000000;   // Value left aligned (default is right aligned)
   
-  // ES_BROWSER_XXX - Browser element constributor styles
+  // ES_BROWSER_XXX - Browser element contributor styles
   public static final int ES_BROWSER_NORESTYLEHTML = 0x10000000; // Do not re-style HMTL in LCARS look
   
   // CS_XXX - Color schemes

@@ -59,7 +59,10 @@ public class EValue extends ERect
     int       w = this.vw;
     Shape     t = LCARS.getTextShape(getValueFont(),value);
     if (w<=0) w = (t!=null?t.getBounds().width:0)+6;
-    return new Rectangle(r.x+(r.width-w-m),r.y,w,r.height);
+    if ((getStyle()&LCARS.ES_VALUE_W)!=0)
+      return new Rectangle(r.x+m,r.y,w,r.height);
+    else
+      return new Rectangle(r.x+(r.width-w-m),r.y,w,r.height);
   }
   
   private int computeValueMargin()
