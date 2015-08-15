@@ -3,11 +3,14 @@ package de.tucottbus.kt.lcars.contributors;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.rmi.RemoteException;
-import java.util.List;
+import java.util.AbstractList;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.MainPanel;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
@@ -16,7 +19,14 @@ import de.tucottbus.kt.lcars.elements.EValue;
 
 public class EPanelSelector extends EMessageBox
 {
+  private static final int style1 = LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_MODAL; 
+  private static final int style2 = LCARS.EC_SECONDARY|LCARS.ES_MODAL; 
+  
+  private AbstractList<Class<? extends Panel>> panelList;
+  
   private ERect eDismiss;
+  
+  private ArrayList<EElement> veList = new ArrayList<EElement>();
 	
   public EPanelSelector(int x, int y, int w, int h)
   {
@@ -26,9 +36,7 @@ public class EPanelSelector extends EMessageBox
   @Override
   protected void init()
   {
-    int       style1 = LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_MODAL; 
-    int       style2 = LCARS.EC_SECONDARY|LCARS.ES_MODAL; 
-    Dimension d      = getDimension();
+    Dimension d = getDimension();
     
     EValue eTit = new EValue(null,0,0,d.width,53,style1|LCARS.ES_RECT_RND,null);
     eTit.setValue("PANEL SELECT");
@@ -40,25 +48,37 @@ public class EPanelSelector extends EMessageBox
     add(e);
     add(new ELabel(null,0,d.height+3,d.width-10,14,style1|LCARS.ES_LABEL_SE|LCARS.EF_TINY,"LCARS DIALOG"));
 
-    // Add the panel buttons
-    List<Class<?>> l = LCARS.getMainPanelClasses();
-    if (LCARS.getArg("--server")!=null)
-      try
+    // Add the dismiss and exit buttons
+    eDismiss = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");
+    eDismiss.addEEventListener(new EEventListenerAdapter() 
+    {
+      public void touchDown(EEvent ee)
       {
-        l.add(Class.forName("de.tucottbus.kt.lcars.net.ServerPanel"));
+        close();
       }
-      catch (ClassNotFoundException e1)
-      {
-      }
-    if (Panel.getSpeechEngine()!=null)
-      try
-      {
-        l.add(Class.forName("de.tucottbus.kt.lcars.speech.SpeechEnginePanel"));
-      }
-      catch (ClassNotFoundException e1)
-      {
-      }
+    });
+    add(eDismiss);
 
+    ERect btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
+    btn.addEEventListener(new EEventListenerAdapter()
+    {
+      public void touchDown(EEvent ee)
+      {
+        try { panel.getScreen().exit(); } catch (RemoteException e) {}
+        removeFromPanel();
+      }
+    });
+    add(btn);
+    add(new ERect (null,250,d.height+43,90,3,style2|LCARS.ES_STATIC,null));
+    add(new ELabel(null,340,d.height+16,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,"EXIT LCARS"));
+  }
+
+  public void open(Panel panel)
+  {
+    if (panel==null) return;
+
+    // Add the panel buttons
+    AbstractList<Class<? extends Panel>> l = getPanelList();
     for (int i=0; i<l.size(); i++)
     {
       String label = Panel.guessName(l.get(i)).toUpperCase();
@@ -88,40 +108,16 @@ public class EPanelSelector extends EMessageBox
           catch (RemoteException e){}
         }
       });
-      add(btn);
-      add(new ERect (null,250,93+i*56,90,3,style2|LCARS.ES_STATIC,null));
+      add(btn); veList.add(btn);
+      
+      EElement e = new ERect (null,250,93+i*56,90,3,style2|LCARS.ES_STATIC,null);
+      add(e); veList.add(e);
+
       String s = l.get(i).getPackage().getName().toUpperCase();
-      add(new ELabel(null,340,66+i*56,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s));
+      e = new ELabel(null,340,66+i*56,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s);
+      add(e); veList.add(e);
     }
     
-    // Add the dismiss and exit buttons
-    eDismiss = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");
-    eDismiss.addEEventListener(new EEventListenerAdapter()
-    {
-      public void touchDown(EEvent ee)
-      {
-        close();
-      }
-    });
-    add(eDismiss);
-
-    ERect btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
-    btn.addEEventListener(new EEventListenerAdapter()
-    {
-      public void touchDown(EEvent ee)
-      {
-        try { panel.getScreen().exit(); } catch (RemoteException e) {}
-        removeFromPanel();
-      }
-    });
-    add(btn);
-    add(new ERect (null,250,d.height+43,90,3,style2|LCARS.ES_STATIC,null));
-    add(new ELabel(null,340,d.height+16,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,"EXIT LCARS"));
-  }
-
-  public void open(Panel panel)
-  {
-    if (panel==null) return;
     panel.dim(0.3f);
     panel.setModal(true);
     addToPanel(panel);
@@ -131,9 +127,55 @@ public class EPanelSelector extends EMessageBox
   public void close()
   {
     if (panel==null) return;
+    for (EElement el : veList)
+    {
+      el.removeAllEEventListeners();
+      panel.remove(el);
+    }
+    veList.clear();
     panel.dim(1f);
     panel.setModal(false);
     removeFromPanel();
   }
   
+  /**
+   * Sets the list of classes to be displayed on the {@linkplain EPanelSelector
+   * panel selector}. 
+   * 
+   * @param list
+   *          A list of panel classes, can be <code>null</code> in which case
+   *          the list of {@link MainPanel}s is displayed.
+   */
+  public void setPanelList(AbstractList<Class<? extends Panel>> list)
+  {
+    this.panelList = list;
+  }
+  
+  /**
+   * Retrieves the list of panel classes being displayed on the panel selector.
+   */
+  public AbstractList<Class<? extends Panel>> getPanelList()
+  {
+    if (this.panelList!=null)
+      return this.panelList;
+    
+    AbstractList<Class<? extends Panel>> list = LCARS.getMainPanelClasses();
+    if (LCARS.getArg("--server")!=null)
+      try
+      {
+        list.add(Class.forName("de.tucottbus.kt.lcars.net.ServerPanel").asSubclass(Panel.class));
+      }
+      catch (Exception e)
+      {
+      }
+    if (Panel.getSpeechEngine()!=null)
+      try
+      {
+        list.add(Class.forName("de.tucottbus.kt.lcars.speech.SpeechEnginePanel").asSubclass(Panel.class));
+      }
+      catch (Exception e)
+      {
+      }
+    return list;
+  }
 }
