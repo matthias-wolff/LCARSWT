@@ -10,6 +10,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -644,6 +645,19 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public LoadStatistics getLoadStatistics()
   {
     return loadStat;
+  }
+  
+  /**
+   * Sets the list of classes to be displayed on the {@linkplain EPanelSelector
+   * panel selector dialog}. 
+   * 
+   * @param list
+   *          A list of panel classes, can be <code>null</code> in which case
+   *          the list of {@link MainPanel}s is displayed.
+   */
+  public void setPanelSelectorList(AbstractList<Class<? extends Panel>> list)
+  {
+    ePnlSel.setPanelList(list);
   }
   
   // -- GUI element management --

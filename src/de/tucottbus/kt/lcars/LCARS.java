@@ -53,6 +53,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -763,16 +764,16 @@ public class LCARS implements ILcarsRemote
   /**
    * Returns a list of all loadable LCARS main panels.
    */
-  public static Vector<Class<?>> getMainPanelClasses()
+  public static AbstractList<Class<? extends Panel>> getMainPanelClasses()
   {
-    Vector<Class<?>> l = new Vector<Class<?>>();
+    ArrayList<Class<? extends Panel>> l = new ArrayList<Class<? extends Panel>>();
     try
     {
       Class<?>[] cls = getClassesInPackage("",null);
       for (int i=0; i<cls.length; i++)
         try
         {
-          Class<?> clazz = cls[i].asSubclass(MainPanel.class);
+          Class<? extends Panel> clazz = cls[i].asSubclass(MainPanel.class);
           if (onPADD()) clazz = cls[i].asSubclass(PaddMainPanel.class);
           if (clazz.equals(Panel.class)) continue;
           if (Modifier.isAbstract(clazz.getModifiers())) continue;
