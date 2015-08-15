@@ -322,7 +322,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
       // HACK: Just get the first one...
       Class<?> cEngine = cEngines.get(0);
-      Log.info("PNL","ISpeechEngine = "+cEngine.getCanonicalName());
+      Log.info("PNL","ISpeechEngine = "+cEngine.getName());
       try
       {
         Method mGetInstance = cEngine.getMethod("getInstance");

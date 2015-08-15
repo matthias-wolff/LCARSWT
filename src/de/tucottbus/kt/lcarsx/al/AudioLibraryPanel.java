@@ -871,7 +871,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
    */
   public static void main(String[] args)
   {
-    args = LCARS.setArg(args,"--panel=",AudioLibraryPanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--panel=",AudioLibraryPanel.class.getName());
     LCARS.main(args);
   }
 

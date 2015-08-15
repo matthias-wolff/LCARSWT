@@ -83,7 +83,7 @@ public class EPanelSelector extends EMessageBox
     {
       String label = Panel.guessName(l.get(i)).toUpperCase();
       ERect btn = new ERect(null,0,66+i*56,250,53,style2|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E,label);
-      btn.setData(l.get(i).getCanonicalName());
+      btn.setData(l.get(i).getName());
       btn.addEEventListener(new EEventListenerAdapter()
       {
         public void touchDown(EEvent ee)

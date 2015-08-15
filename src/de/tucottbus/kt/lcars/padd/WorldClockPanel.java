@@ -315,7 +315,7 @@ public class WorldClockPanel extends PaddMainPanel
    */
   public static void main(String[] args)
   {
-    args = LCARS.setArg(args,"--panel=",WorldClockPanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--panel=",WorldClockPanel.class.getName());
     args = LCARS.setArg(args,"--PADD",null);
     LCARS.main(args);
   }

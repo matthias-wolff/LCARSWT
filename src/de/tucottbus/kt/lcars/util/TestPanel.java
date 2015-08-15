@@ -73,7 +73,7 @@ public class TestPanel extends Panel
    */
   public static void main(String[] args)
   {
-    args = LCARS.setArg(args,"--panel=",TestPanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--panel=",TestPanel.class.getName());
     LCARS.main(args);
   }
 

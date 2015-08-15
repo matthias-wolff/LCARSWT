@@ -519,7 +519,7 @@ public class SpeechEnginePanel extends Panel
    */
   public static void main(String[] args)
   {
-    args = LCARS.setArg(args,"--panel=",SpeechEnginePanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--panel=",SpeechEnginePanel.class.getName());
     LCARS.main(args);
   }
 

@@ -202,7 +202,7 @@ public class EarthPanel extends WorldWindPanel
    */
   public static void main(String[] args)
   {
-    args = LCARS.setArg(args,"--panel=",EarthPanel.class.getCanonicalName());
+    args = LCARS.setArg(args,"--panel=",EarthPanel.class.getName());
     LCARS.main(args);
   }
 
