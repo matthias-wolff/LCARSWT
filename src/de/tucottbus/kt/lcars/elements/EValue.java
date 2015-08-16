@@ -76,13 +76,22 @@ public class EValue extends ERect
   protected Point computeLabelInsets()
   {
     int x = 10;
-    switch (this.getStyle()&LCARS.ES_LABEL)
-    {
-    case LCARS.ES_LABEL_NE:
-    case LCARS.ES_LABEL_E:
-    case LCARS.ES_LABEL_SE:
-      x += computeValueRect().width+computeValueMargin();
-    }
+    if ((getStyle()&LCARS.ES_VALUE_W)==0)
+      switch (this.getStyle()&LCARS.ES_LABEL)
+      {
+      case LCARS.ES_LABEL_NE:
+      case LCARS.ES_LABEL_E:
+      case LCARS.ES_LABEL_SE:
+        x += computeValueRect().width+computeValueMargin();
+      }
+    else
+      switch (this.getStyle()&LCARS.ES_LABEL)
+      {
+      case LCARS.ES_LABEL_NW:
+      case LCARS.ES_LABEL_W:
+      case LCARS.ES_LABEL_SW:
+        x += computeValueRect().width+computeValueMargin();
+      }
     return new Point(x,10);
   }
   

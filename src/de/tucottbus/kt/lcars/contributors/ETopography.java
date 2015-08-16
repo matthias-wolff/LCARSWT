@@ -746,6 +746,7 @@ public class ETopography extends ElementContributor
     @Override
     public void run()
     {
+      if (!hasCursor()) return;
       if (steps>0)
       {
         float x  = cursorPos.x+(target.x-cursorPos.x)/steps;

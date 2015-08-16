@@ -69,7 +69,7 @@ public class EGainSlider extends EPositioner
   {
     if (level<minGain) level = minGain;
     if (level>maxGain) level = maxGain;
-    setTargetPos(new Point2D.Float(level,0),true);
+    setTargetPos(new Point2D.Float(level,0),true,true);
   }
 
   // -- Overrides --

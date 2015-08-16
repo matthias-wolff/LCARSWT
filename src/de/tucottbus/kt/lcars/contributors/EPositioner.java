@@ -14,7 +14,7 @@ import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 
 /**
- * A {@linkplain ETopography topographioc map} with one movable point.
+ * A {@linkplain ETopography topographic map} with one movable point.
  * 
  * @author Matthias Wolff
  */
@@ -154,11 +154,13 @@ public class EPositioner extends ETopography
    * 
    * @param targetPos
    *          The new target position in physical units.
+   * @param forceCursor
+   *          Forces the cursor to be displayed. 
    * @param slide
    *          Slides the cursor indicating the target position if <code>true</code>, otherwise
    *          the cursor will be moved instantaneously.
    */
-  public void setTargetPos(Point2D targetPos, boolean slide)
+  public void setTargetPos(Point2D targetPos, boolean forceCursor, boolean slide)
   {
     this.targetPos = applyConstraints(targetPos);
     if (this.targetPos==null || isLocked())
@@ -166,7 +168,7 @@ public class EPositioner extends ETopography
       removeCursor(true);
       return;
     }
-    if (!hasCursor())
+    if (!hasCursor() && forceCursor)
       setCursor(60,3,LCARS.EF_SMALL|LCARS.ES_LABEL_W,true);
     String label = makeCursorLabel();
     if (slide)
@@ -221,7 +223,7 @@ public class EPositioner extends ETopography
     }
     else
     {
-      setTargetPos(this.targetPos,false); // Re-display cursor
+      setTargetPos(this.targetPos,true,false); // Re-display cursor
       if (eTouchArea!=null) eTouchArea.setStatic(false);
     }
     if (eLock!=null) eLock.setBlinking(lock);
@@ -266,7 +268,7 @@ public class EPositioner extends ETopography
       eValue.addEEventListener(this);
     }
     eTouchArea.setStatic(this.lock);
-    setTargetPos(this.targetPos,false);
+    setTargetPos(this.targetPos,false,false);
     setActualPos(this.actualPos);
   }
 
@@ -287,7 +289,7 @@ public class EPositioner extends ETopography
   {
     if (ee.el==eTouchArea && !lock)
     {
-      setTargetPos(lToP(ee.pt),true);
+      setTargetPos(lToP(ee.pt),false,true);
       fireTargetChanged(false);
     }
     else if (ee.el==eLock)
@@ -308,7 +310,7 @@ public class EPositioner extends ETopography
   {
     if (ee.el==eTouchArea && !lock)
     {
-      setTargetPos(lToP(ee.pt),false);
+      setTargetPos(lToP(ee.pt),false,false);
       fireTargetChanged(true);
     }
     // Do not dispatch any events to parent
