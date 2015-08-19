@@ -4,7 +4,6 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicLong;
 
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;

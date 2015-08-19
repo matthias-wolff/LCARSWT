@@ -1,32 +1,44 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.awt.geom.Area;
-import java.lang.invoke.ConstantCallSite;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import de.tucottbus.kt.lcars.j2d.rendering.AHeavyRenderWorker;
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import de.tucottbus.kt.lcars.j2d.rendering.HeavyRenderWorker;
 
 public abstract class AHeavyGeometry extends Geometry
 {
   private static final long serialVersionUID = 5157875180660436224L;
 
-  private static final HashMap<Long, AHeavyRenderWorker> workerList = new HashMap<Long, AHeavyRenderWorker>();
+  private static final HashMap<Long, HeavyRenderWorker> workerList = new HashMap<Long, HeavyRenderWorker>();
 
   private static final AtomicLong currentSerialNo = new AtomicLong();
-    
+
   public final long serialNo;
-  
-  public AHeavyGeometry(boolean foreground)
+
+  private int _x;
+  private int _y;
+  private int _width;
+  private int _height;
+
+  public AHeavyGeometry(Point position, Dimension size, boolean foreground)
   {
     super(foreground);
     this.serialNo = currentSerialNo.incrementAndGet();
   }
 
   public void onAddToScreen()
-  {    
-    workerList.put(serialNo,createWorker());
+  {
+    if(workerList.containsKey(serialNo))
+      return;
+        
+    // create worker and add to worker list
+    workerList.put(serialNo,
+        new HeavyRenderWorker(new Dimension(_width, _height),
+            (input, img) -> paintAsync(input, img)));
   }
 
   public void onRemoveFromScreen()
@@ -34,17 +46,38 @@ public abstract class AHeavyGeometry extends Geometry
     workerList.remove(serialNo);
   }
 
-  protected final AHeavyRenderWorker getWorker() {
-    return workerList.get(serialNo);
-  } 
-  
-  protected abstract AHeavyRenderWorker createWorker();
-  
+  protected abstract void paintAsync(Object input, BufferedImage image);
+
   @Override
   public void paint2D(AdvGraphics2D g2d)
   {
-    // TODO Auto-generated method stub
-
+    HeavyRenderWorker worker = workerList.get(serialNo);
+    if (worker == null)
+      throw new NullPointerException("missing worker in worker list");
+    g2d.drawImage(worker.GetImage(), _x, _y, null); // TODO: ImageObserver?
   }
 
+  public void setX(int x)
+  {
+    _x = x;
+  }
+
+  public void setY(int y)
+  {
+    _y = y;
+  }
+
+  public void setWidth(int width)
+  {
+    if (width < 0)
+      throw new IllegalArgumentException("width");
+    _width = width;
+  }
+
+  public void setHeight(int height)
+  {
+    if (height < 0)
+      throw new IllegalArgumentException("height");
+    _height = height;
+  }
 }
