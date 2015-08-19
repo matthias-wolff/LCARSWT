@@ -4,6 +4,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
 
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
@@ -14,11 +15,12 @@ import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
  * 
  * @author Matthias Wolff
  */
+// TODO: rename to AGeometry
 public abstract class Geometry implements Serializable
 {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -6704273422742875854L;
   protected boolean         foreground;
-
+  
   /**
    * Creates a new geometry.
    * 
