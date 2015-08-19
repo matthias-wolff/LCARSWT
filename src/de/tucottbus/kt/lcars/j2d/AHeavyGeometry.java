@@ -38,7 +38,7 @@ public abstract class AHeavyGeometry extends Geometry
     // create worker and add to worker list
     workerList.put(serialNo,
         new HeavyRenderWorker(new Dimension(_width, _height),
-            (input, img) -> paintAsync(input, img)));
+            (input, img) -> paint2DAsync(input, img)));
   }
 
   public void onRemoveFromScreen()
@@ -46,7 +46,12 @@ public abstract class AHeavyGeometry extends Geometry
     workerList.remove(serialNo);
   }
 
-  protected abstract void paintAsync(Object input, BufferedImage image);
+  /**
+   * Implement this method to render asynchronous on a background worker
+   * @param input
+   * @param image
+   */
+  protected abstract void paint2DAsync(Object input, BufferedImage image);
 
   @Override
   public void paint2D(AdvGraphics2D g2d)
