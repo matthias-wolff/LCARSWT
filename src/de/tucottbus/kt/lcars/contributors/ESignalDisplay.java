@@ -38,6 +38,7 @@ public class ESignalDisplay extends ElementContributor
   private ERect           cursor;
   private ELabel          cursorLab;
   private EElbo[]         eFrame;
+  private int             frameStyle = LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC;
 
   private float displayToSeconds(int pos)
   {
@@ -60,6 +61,17 @@ public class ESignalDisplay extends ElementContributor
     return -amp*this.height/65535;
   }
   
+  /**
+   * 
+   * @param x
+   * @param y
+   * @param sampleCount
+   * @param sampleWidth
+   * @param sampleTime
+   *          Time increment per sample in milliseconds.
+   * @param height
+   * @param mode
+   */
   public ESignalDisplay(int x, int y, int sampleCount, int sampleWidth, float sampleTime, int height, int mode)
   {
     super(x,y);
@@ -147,7 +159,7 @@ public class ESignalDisplay extends ElementContributor
     
     // The frame
     eFrame = new EElbo[4]; 
-    style = LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC;
+    style = frameStyle;
     eFrame[0] = new EElbo(null,-12,-hh,10,hh,style|LCARS.ES_SHAPE_NW,null);
     eFrame[0].setArmWidths(4,18); eFrame[0].setArcWidths(10,5); add(eFrame[0]);
     eFrame[1] = new EElbo(null,-12,0,10,hh+14,style|LCARS.ES_SHAPE_SW,null);
@@ -171,6 +183,11 @@ public class ESignalDisplay extends ElementContributor
     this.timeGridMajor = major;
     this.timeGridMinor = minor;
     if (layout) layout();
+  }
+  
+  public void setFrameStyle(int frameStyle)
+  {
+    this.frameStyle = frameStyle|LCARS.ES_STATIC;
   }
   
   public boolean getLocked()
