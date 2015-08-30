@@ -234,7 +234,11 @@ public class EBrowser extends ElementContributor
       {
         public void run()
         {
-          browser.dispose();
+          try
+          {
+            browser.dispose();
+          }
+          catch (Exception e){}
           browser = null;
         }
       });
