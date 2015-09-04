@@ -23,7 +23,7 @@
   </properties>
   <appenders>
     <Console name="console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level - %msg%n%throwable" />
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} %msg%n%throwable" />
     </Console>
     <File name="file" fileName="logs/lcarswt.log">
       <PatternLayout>
