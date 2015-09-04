@@ -3,7 +3,7 @@ package de.tucottbus.kt.lcars.elements;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.ImageObserver;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.j2d.GImage;
@@ -25,7 +25,7 @@ public class EImage extends EElement implements ImageObserver
   }
 
   @Override
-  public Vector<Geometry> createGeometriesInt()
+  public ArrayList<Geometry> createGeometriesInt()
   {
     int x = getBounds().x;
     int y = getBounds().y;
@@ -36,7 +36,7 @@ public class EImage extends EElement implements ImageObserver
       getImage().getWidth(this);
       getImage().getHeight(this);
     }
-    Vector<Geometry> geos = new Vector<Geometry>();
+    ArrayList<Geometry> geos = new ArrayList<Geometry>();
     geos.add(new GImage(resourceName,new Point(x,y),this));
     return geos;
   }

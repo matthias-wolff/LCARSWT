@@ -163,25 +163,27 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   throws ClassNotFoundException
   {
     Panel panel;
-    Class<?> panelClass = Panel.class;
-    if (className!=null) panelClass = Class.forName(className);
-    try
-    {
-      Object[] args = { iscreen };
-      panel = (Panel)panelClass.getConstructors()[0].newInstance(args);
-      LCARS.setPanelDimension(panel.getDimension());
-      panel.start();
-      if (className==null)
+    if(className == null || className == Panel.class.getName()) {
+      panel = new Panel(iscreen);
+      panel.panelSelectionDialog();
+    } else {
+      Class<?> panelClass = Panel.class;
+      if (className!=null) panelClass = Class.forName(className);
+      try
       {
-        panel.panelSelectionDialog();
+        Object[] args = { iscreen };
+        panel = (Panel)panelClass.getConstructors()[0].newInstance(args);
+        LCARS.setPanelDimension(panel.getDimension());
       }
-      return panel;
+      catch (Exception e)
+      {
+        Log.err("Could not create panel.", e);
+        return null;
+      }      
     }
-    catch (Throwable e)
-    {
-      e.printStackTrace();
-      return null;
-    }
+    LCARS.setPanelDimension(panel.getDimension());
+    panel.start();
+    return panel;
   }
   
   // -- Overrides --
@@ -310,19 +312,19 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       speechEngineSearched = true;
       if (LCARS.getArg("--nospeech")!=null) return null;
-      Log.info("PNL","Looking for a speech engine");
+      Log.info("Looking for a speech engine");
       
       // List available speech engine implementations
       Vector<Class<?>> cEngines = LCARS.getSpeechEngines();
       if (cEngines.size()==0)
       {
-        Log.warn("PNL","No speech engines found");
+        Log.warn("No speech engines found");
         return null;
       }
 
       // HACK: Just get the first one...
       Class<?> cEngine = cEngines.get(0);
-      Log.info("PNL","ISpeechEngine = "+cEngine.getName());
+      Log.info("ISpeechEngine = "+cEngine.getName());
       try
       {
         Method mGetInstance = cEngine.getMethod("getInstance");
@@ -333,7 +335,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         // TODO: Auto-generated catch block
         e.printStackTrace();
       }
-      Log.info("PNL","Speech engine found.");
+      Log.info("Speech engine found.");
     }
     return speechEngine;
   }
@@ -971,7 +973,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       data.panelState = state; // TODO: better make a copy?
 
       //GImage.beginCacheRun();
-      data.elementData = new Vector<ElementData>(elements.size());
+      data.elementData = new ArrayList<ElementData>(elements.size());
       for (EElement element : elements)
       {
         ElementData ed = element.getUpdateData(incremental);
@@ -987,7 +989,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
     catch (RemoteException e)
     {
-      Log.err("PNL", "Error while sending update to screen.", e);
+      Log.err("Error while sending update to screen.", e);
     }
     time = System.nanoTime()-time;
     loadStat.add((int)(time/400000));

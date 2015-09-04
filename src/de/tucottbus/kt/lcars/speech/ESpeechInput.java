@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -363,9 +362,9 @@ public class ESpeechInput extends ElementContributor
     }
     
     @Override
-    protected Vector<Geometry> createGeometriesInt()
+    protected ArrayList<Geometry> createGeometriesInt()
     {
-      Vector<Geometry> geos = new Vector<Geometry>();
+      ArrayList<Geometry> geos = new ArrayList<Geometry>();
       Rectangle        bnds = getBounds();
       Font             font = getFont();
       String           fvrs = label==null?"":label;

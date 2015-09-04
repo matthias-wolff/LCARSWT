@@ -5,7 +5,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
 
@@ -115,7 +115,7 @@ public class EPerspective implements EGeometryModifier
   // -- Implementation of the EGeometryModifier interface --
   
   @Override
-  public void modify(Vector<Geometry> geos)
+  public void modify(ArrayList<Geometry> geos)
   {
     for (Geometry geo : geos)
       if (geo instanceof GArea)

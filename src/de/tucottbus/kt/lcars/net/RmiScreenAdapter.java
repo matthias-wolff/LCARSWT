@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -193,8 +194,8 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
     
     PanelData data = new PanelData();
     data.panelState = new PanelState(new Dimension(screenWidth, screenHeight));
-    data.elementData = new Vector<ElementData>();
-    Vector<ElementData> elData = data.elementData;
+    data.elementData = new ArrayList<ElementData>();
+    ArrayList<ElementData> elData = data.elementData;
     
     TimerTask timerTask = new TimerTask()
     {
@@ -209,7 +210,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
           EElement el = new ELabel(null, x, y, w, h, style, newMsg);
 
           elData.clear();
-          elData.addElement(el.getUpdateData(false));
+          elData.add(el.getUpdateData(false));
 
           lastMsg = newMsg;
         }

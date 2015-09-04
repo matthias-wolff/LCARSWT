@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
@@ -68,7 +69,7 @@ public abstract class EElement
     this.label         = label;
     this.data          = new ElementData(EElement.serialNumber++);
     this.data.state    = new ElementState(new Rectangle(x,y,w,h),style);
-    this.data.geometry = null;
+    //this.data.geometry = null;
   }
   
   // -- Geometry getters and setters --
@@ -716,7 +717,8 @@ public abstract class EElement
    * 
    * @return The geometries.
    */
-  protected abstract Vector<Geometry> createGeometriesInt();
+  //TODO: replace Vector with ArrayList 
+  protected abstract ArrayList<Geometry> createGeometriesInt();
     
   /**
    * Marks the GUI representation of element invalid. 
@@ -743,14 +745,14 @@ public abstract class EElement
   public synchronized final void validateGeometry()
   {
     if (data.geometry!=null) return; // Unnecessary!
-      
-    Vector<Geometry> geos = createGeometriesInt();
+    
+    ArrayList<Geometry> geos = createGeometriesInt();
     for (Geometry geo : geos)
       if (geo instanceof GArea)
         ((GArea)geo).setOutline(isOutline());
     for (EGeometryModifier gm : modifiers)
       gm.modify(geos);
-    data.geometry = geos;
+    data.geometry = new ArrayList<Geometry>(geos);
   }
   
   // -- Deprecation candidates --

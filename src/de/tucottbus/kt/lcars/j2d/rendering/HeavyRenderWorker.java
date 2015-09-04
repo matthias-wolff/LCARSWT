@@ -1,10 +1,10 @@
 package de.tucottbus.kt.lcars.j2d.rendering;
 
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.BiConsumer;
+
+import de.tucottbus.kt.lcars.j2d.AHeavyGeometry;
 
 public class HeavyRenderWorker
 {
@@ -15,36 +15,34 @@ public class HeavyRenderWorker
   
   private boolean _readToggle;
     
-  private Object _input = null;
-  
-  private final BiConsumer<Object,BufferedImage> _paintMethod;
-  
-  public HeavyRenderWorker(Dimension size, int imageType, BiConsumer<Object,BufferedImage> paintMethod) {
-    if (paintMethod == null)
-      throw new NullPointerException("paintMethod");
+  private AHeavyGeometry _geom;
     
-    _buffer0 = new BufferedImage(size.width, size.height, imageType);
-    _buffer1 = new BufferedImage(size.width, size.height, imageType);
-    _paintMethod = paintMethod;
+  public HeavyRenderWorker(AHeavyGeometry geom, int imageType) {
+    if (geom == null)
+      throw new NullPointerException("geom");
+    
+    _buffer0 = new BufferedImage(geom.getWidth(), geom.getHeight(), imageType);
+    _buffer1 = new BufferedImage(geom.getWidth(), geom.getHeight(), imageType);
+    _geom = geom;
   }
   
-  public HeavyRenderWorker(Dimension size, BiConsumer<Object,BufferedImage> paintMethod) {
-    this(size, BufferedImage.TYPE_3BYTE_BGR, paintMethod);
+  public HeavyRenderWorker(AHeavyGeometry geom) {
+    this(geom, BufferedImage.TYPE_3BYTE_BGR);
   }
   
-  public void Invalidate(Object newInput) {
-    if(newInput == null)
+  public void Invalidate(AHeavyGeometry newGeom) {
+    if(newGeom == null)
       throw new NullPointerException("newInput");
     
     synchronized (_buffer0)
     {
-      if (_input != null) {
+      if (_geom != null) {
         // do not run, only update input, worker is currently running
-        _input = newInput;
+        _geom = newGeom;
         return;
       }
       
-      _input = newInput;      
+      _geom = newGeom;      
       _readToggle = !_readToggle; // swap
       
       es.execute(() -> {
@@ -52,22 +50,20 @@ public class HeavyRenderWorker
         // exclusive execution of paint task
         synchronized (_buffer1)
         {
-          Object input;
+          AHeavyGeometry geom;
           BufferedImage image;
           
           // synchronize double buffer swap
           synchronized (_buffer0)
           {
-            input = _input;
+            geom = _geom;
             image = _readToggle ? _buffer0 : _buffer1;
-            _input = null;
+            _geom = null;
           }
-          _paintMethod.accept(input, image);         
+          geom.paint2DAsync(image.createGraphics());
         }        
       });
-      
     }
-    
   }
   
   public BufferedImage GetImage() {

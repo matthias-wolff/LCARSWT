@@ -1,6 +1,6 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.elements.EElement;
 
@@ -20,7 +20,7 @@ public interface EGeometryModifier
    * @param geos
    *          The geometries to modify.
    */
-  public void modify(Vector<Geometry> geos);
+  public void modify(ArrayList<Geometry> geos);
 }
 
 // EOF

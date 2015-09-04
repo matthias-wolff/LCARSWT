@@ -23,7 +23,7 @@ public class Log {
   private static final String INFO_PFX = "INFO:";
   private static final String WARN_PFX = "WARN:";
   private static final String ERROR_PFX = "ERRO:";
-  private static final String DEBUG_PFX = "DEBU:";
+  private static final String DEBUG_PFX = "DBUG:";
   
   private static final BlockingQueue<Runnable> logBuffer = new ArrayBlockingQueue<Runnable>(5);
   private static final Thread logWorker = new Thread(() -> {

@@ -9,7 +9,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 import de.tucottbus.kt.lcars.j2d.rendering.HeavyRenderWorker;
+import de.tucottbus.kt.lcars.logging.Log;
 
+/**
+ * 
+ * @author Christian Borck
+ *
+ */
 public abstract class AHeavyGeometry extends Geometry
 {
   private static final long serialVersionUID = 5157875180660436224L;
@@ -25,6 +31,8 @@ public abstract class AHeavyGeometry extends Geometry
   private int _width;
   private int _height;
 
+  private Object _input = null;
+
   public AHeavyGeometry(Point position, Dimension size, boolean foreground)
   {
     super(foreground);
@@ -34,7 +42,7 @@ public abstract class AHeavyGeometry extends Geometry
     _width = size.width;
     _height = size.height;
   }
-  
+
   public AHeavyGeometry(Rectangle bounds, boolean foreground)
   {
     super(foreground);
@@ -47,26 +55,29 @@ public abstract class AHeavyGeometry extends Geometry
 
   public void onAddToScreen()
   {
-    if(workerList.containsKey(_serialNo))
+    // TODO: register in FrameData
+
+    if (workerList.containsKey(_serialNo))
       return;
-        
+
     // create worker and add to worker list
-    workerList.put(_serialNo,
-        new HeavyRenderWorker(new Dimension(_width, _height),
-            (input, img) -> paint2DAsync(input, img.createGraphics())));
+    workerList.put(_serialNo, new HeavyRenderWorker(this));
   }
 
   public void onRemoveFromScreen()
   {
+    // TODO: register in FrameData
+
     workerList.remove(_serialNo);
   }
 
   /**
    * Implement this method to render asynchronous on a background worker
+   * 
    * @param input
    * @param image
    */
-  protected abstract void paint2DAsync(Object input, Graphics2D image);
+  public abstract void paint2DAsync(Graphics2D image);
 
   @Override
   public void paint2D(AdvGraphics2D g2d)
@@ -77,14 +88,29 @@ public abstract class AHeavyGeometry extends Geometry
     g2d.drawImage(worker.GetImage(), _x, _y, null); // TODO: ImageObserver?
   }
 
+  public int getX()
+  {
+    return _x;
+  }
+
   public void setX(int x)
   {
     _x = x;
   }
 
+  public int getY()
+  {
+    return _y;
+  }
+
   public void setY(int y)
   {
     _y = y;
+  }
+
+  public int getWidth()
+  {
+    return _width;
   }
 
   public void setWidth(int width)
@@ -94,10 +120,55 @@ public abstract class AHeavyGeometry extends Geometry
     _width = width;
   }
 
+  public int getHeight()
+  {
+    return _height;
+  }
+
   public void setHeight(int height)
   {
     if (height < 0)
       throw new IllegalArgumentException("height");
     _height = height;
   }
+
+  /**
+   * Invalidates the object by setting new input data.
+   * @param input - data which will be used as input for the rendering worker on the screen.
+   */
+  protected void invalidate(Object input)
+  {
+    if (input == null)
+      throw new NullPointerException("input");
+    _input = input;
+  }
+
+  public AHeavyGeometry getUpdate(boolean incremental)
+  {
+    // TODO: right way to flat (not deep) copy including inheritage?
+    try
+    {
+      AHeavyGeometry result = (AHeavyGeometry) this.clone();
+      if (incremental)
+        _input = null;
+      return result;
+    } catch (CloneNotSupportedException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public void applyUpdate()
+  {
+    HeavyRenderWorker worker = workerList.get(_serialNo);
+    if (worker == null)
+      Log.err(this.getClass().getSimpleName(),
+          "Invalid state: some Geometry update data come up but the worker with the serial number "
+              + _serialNo + " does not exist to process it.");
+    else if (_input != null)
+      worker.Invalidate(this);
+  }
+
 }

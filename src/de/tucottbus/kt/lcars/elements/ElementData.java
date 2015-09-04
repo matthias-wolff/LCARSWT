@@ -4,10 +4,11 @@ import java.awt.AlphaComposite;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.io.Serializable;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
+import de.tucottbus.kt.lcars.j2d.AHeavyGeometry;
 import de.tucottbus.kt.lcars.j2d.ElementState;
 import de.tucottbus.kt.lcars.j2d.Geometry;
 import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
@@ -20,7 +21,7 @@ import de.tucottbus.kt.lcars.logging.Log;
  * information from the {@linkplain Panel LCARS panel} to the
  * {@linkplain Screen screen}.
  * 
- * @author Matthias Wolff
+ * @author Matthias Wolff, Christian Borck
  */
 public final class ElementData implements Serializable
 {
@@ -67,7 +68,7 @@ public final class ElementData implements Serializable
    * The graphical representation of the {@link EElement} described by this
    * instance.
    */
-  public Vector<Geometry> geometry;
+  public ArrayList<Geometry> geometry;
 
   /**
    * Rendering hints for screen
@@ -106,7 +107,7 @@ public final class ElementData implements Serializable
   {
     this.serialNo = element.data.serialNo;
     this.state = new ElementState(element.data.state);
-    this.geometry = new Vector<Geometry>(element.data.geometry);
+    this.geometry = new ArrayList<Geometry>(element.data.geometry);
   }
 
   // -- Getters and setters --
@@ -175,15 +176,16 @@ public final class ElementData implements Serializable
     if (updateGeometry || !incremental)
       try
       {
-        other.geometry = new Vector<Geometry>(this.geometry);
+        other.geometry = new ArrayList<Geometry>(this.geometry.size());
+        for(Geometry geom : this.geometry)
+          other.geometry.add(geom instanceof AHeavyGeometry
+              ? ((AHeavyGeometry)geom).getUpdate(incremental)
+              : geom);
       } catch (Exception e)
       {
         // TODO: synchronization problem, exception should never occur
-        other.geometry = new Vector<Geometry>();
-        Log.err(
-            CLASSKEY,
-            "Caught exception " + e.toString() + " at "
-                + e.getStackTrace()[0].toString());
+        other.geometry = new ArrayList<Geometry>();
+        Log.err("Error while extracting updated data from ElementData with #" + serialNo, e);
       }
 
     state.clearChanged();
@@ -227,7 +229,10 @@ public final class ElementData implements Serializable
     {
       if (other.geometry != null)
       {
-        this.geometry = new Vector<Geometry>(other.geometry);
+        this.geometry = new ArrayList<Geometry>(other.geometry);
+        for(Geometry geom : this.geometry)
+          if (geom instanceof AHeavyGeometry)
+            ((AHeavyGeometry) geom).applyUpdate();        
         this.cachedBounds = other.cachedBounds;
       }
     } else
@@ -248,7 +253,7 @@ public final class ElementData implements Serializable
   {
     // if (geometry==null) return;
     if (state==null) {
-      Log.err(CLASSKEY,"Missing state #"+serialNo);
+      Log.err("Missing state in ElementData #"+serialNo);
       return;
     }
     if (!state.isVisible())
@@ -317,6 +322,19 @@ public final class ElementData implements Serializable
     return (this.state == null ? STATE_FLAG : 0)
         | (this.geometry == null ? GEOMETRY_FLAG : 0);
   }
+  
+  public void onAddToScreen() {
+    for(Geometry g : geometry)
+      if (g instanceof AHeavyGeometry)
+        ((AHeavyGeometry)g).onAddToScreen();
+  }
+  
+  public void onRemoveFromScreen() {
+    for(Geometry g : geometry)
+      if (g instanceof AHeavyGeometry)
+        ((AHeavyGeometry)g).onRemoveFromScreen();
+  }
+  
 }
 
 // EOF

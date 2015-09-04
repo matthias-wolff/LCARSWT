@@ -27,7 +27,7 @@
 		<!-- TODO: only enable next property after all java classes are prepared 
 			to be UTF8 encoded -->
 		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
-		
+
 		<!-- MAIN CLASS -->
 		<mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>
 
@@ -341,6 +341,16 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-ext</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jfree</groupId>
+			<artifactId>jfreechart-swt</artifactId>
+			<version>1.0.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.17</version>
 		</dependency>
 	</dependencies>
 

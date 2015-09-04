@@ -6,7 +6,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.elements.EElement;
@@ -219,7 +219,7 @@ public class EAlphaKeyboard extends EKeyboard
     rect = e.getBounds(); rect.width+=37; e.setBounds(rect);
     e.addGeometryModifier(new EGeometryModifier()
     {
-      public void modify(Vector<Geometry> geos)
+      public void modify(ArrayList<Geometry> geos)
       {
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
@@ -236,7 +236,7 @@ public class EAlphaKeyboard extends EKeyboard
     rect = e.getBounds(); rect.width+=14; e.setBounds(rect);
     e.addGeometryModifier(new EGeometryModifier()
     {
-      public void modify(Vector<Geometry> geos)
+      public void modify(ArrayList<Geometry> geos)
       {
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
@@ -254,7 +254,7 @@ public class EAlphaKeyboard extends EKeyboard
     rect = e.getBounds(); rect.width+=8; e.setBounds(rect);
     e.addGeometryModifier(new EGeometryModifier()
     {
-      public void modify(Vector<Geometry> geos)
+      public void modify(ArrayList<Geometry> geos)
       {
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
@@ -328,7 +328,7 @@ public class EAlphaKeyboard extends EKeyboard
  
   class TrimToRadiusModifier implements EGeometryModifier
   {
-    public void modify(Vector<Geometry> geos)
+    public void modify(ArrayList<Geometry> geos)
     {
       int  cx   = navi.x+x;
       int  cy   = navi.y+y;

@@ -9,7 +9,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -123,9 +123,9 @@ public class ESector extends EElement
   }
   
   @Override
-  protected Vector<Geometry> createGeometriesInt()
+  protected ArrayList<Geometry> createGeometriesInt()
   {
-    Vector<Geometry> geos = new Vector<Geometry>(); 
+    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
 
     // Create sector geometry
     int  cx   = getCenter().x;

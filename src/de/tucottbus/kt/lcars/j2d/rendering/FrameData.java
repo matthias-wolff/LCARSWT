@@ -7,8 +7,8 @@ import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Vector;
 import java.util.function.BiFunction;
 
 import de.tucottbus.kt.lcars.PanelData;
@@ -31,8 +31,8 @@ class FrameData
   private boolean selectiveRepaint;
   private boolean incremental;
   private PanelState panelState;
-  private Vector<ElementData> elements;
-  private Vector<ElementData> elementsToPaint;
+  private ArrayList<ElementData> elements;
+  private ArrayList<ElementData> elementsToPaint;
   private Image bgImg;
   private Shape dirtyArea;
   private boolean fullRepaint;
@@ -43,7 +43,7 @@ class FrameData
     this.incremental = incremental;
     this.selectiveRepaint = selectiveRepaint;
     this.panelState = panelData.panelState;
-    this.elements = panelData.elementData;
+    this.elements = new ArrayList<ElementData>(panelData.elementData);
   }
 
   /**
@@ -89,7 +89,7 @@ class FrameData
     }
 
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    Log.info("SCR", "background=" + thisRes);
+    Log.info("background=" + thisRes);
     URL resource = classLoader.getResource(thisRes);
     if (resource == null)
     {
@@ -136,7 +136,7 @@ class FrameData
       return;
     }
     
-    this.fullRepaint = updateBgImage(pred)
+    fullRepaint = updateBgImage(pred)
         || !panelState.equals(pred.panelState) || !incremental
         || !selectiveRepaint;
     //fullRepaint = true;
@@ -153,57 +153,60 @@ class FrameData
 
     // 2. Complete the received ElementData with the present information
     //
-    if (this.fullRepaint)
+    if (fullRepaint)
     {
       elementsToPaint = elements;
       for (ElementData edu : elements)
         try
         {
           ElementData edp = hPred.get(edu.serialNo);
-          if (edp != null)
-            applyUpdate.apply(edu, edp);
+          if (edp != null) {
+            applyUpdate.apply(edu, edp);   
+            hPred.remove(edu.serialNo);
+          } else
+            edu.onAddToScreen();
         } catch (Exception e)
         {
-          Log.err(
-              "SCR",
-              "Update failed on element #" + edu.serialNo + ": "
-                  + e.getMessage());
+          Log.err("Applying update failed on element #" + edu.serialNo, e);
         }
-
+      
+      // notify element removed
+      hPred.forEach((serialNo, edp) -> edp.onRemoveFromScreen());
     } else
     {
-      elementsToPaint = new Vector<ElementData>(elCount);
-      Vector<ElementData> elsWithoutChanges = new Vector<ElementData>(elCount);
-
+      elementsToPaint = new ArrayList<ElementData>(elCount);
+      ArrayList<ElementData> validElements = new ArrayList<ElementData>(elCount);
       for (ElementData edu : elements)
         try
         {
           ElementData edp = hPred.get(edu.serialNo);
-          if (edp != null)
+          if (edp != null) // update from existing element
           {
             if (applyUpdate.apply(edu, edp) == 0)
             {
-              elsWithoutChanges.addElement(edu);
+              validElements.add(edu);
               continue;
             }
             hPred.remove(edp);
             dirtyArea.add(new Area(edp.getBounds()));
           }
+          else // added element
+            edu.onAddToScreen();
 
           dirtyArea.add(new Area(edu.getBounds()));
-          elementsToPaint.addElement(edu);
+          elementsToPaint.add(edu);
         } catch (Exception e)
         {
-          Log.err(
-              "SCR",
-              "Update failed on element #" + edu.serialNo + ": "
-                  + e.getMessage());
+          Log.err("Applying update failed on element #" + edu.serialNo, e);
         }
       // Add removed elements to the dirtyArea
       try
       {
         hPred
-            .forEach((serialNo, edp) -> dirtyArea.add(new Area(edp.getBounds())));
+            .forEach((serialNo, edp) -> {
+              dirtyArea.add(new Area(edp.getBounds()));
+              edp.onRemoveFromScreen();
+            });
       } catch (Exception e)
       {
         e.printStackTrace();
@@ -211,7 +214,7 @@ class FrameData
       dirtyArea.intersect(new Area(this.dirtyArea));
       this.dirtyArea = dirtyArea;
 
-      for (ElementData edu : elsWithoutChanges)
+      for (ElementData edu : validElements)
         if (dirtyArea.intersects(edu.getBounds()))
           elementsToPaint.add(edu);
     }
@@ -265,7 +268,7 @@ class FrameData
    * @return
    */
   private static HashMap<Long, ElementData> createHashMap(
-      Vector<ElementData> elements)
+      ArrayList<ElementData> elements)
   {
     HashMap<Long, ElementData> result = new HashMap<Long, ElementData>(
         elements.size());
@@ -280,7 +283,7 @@ class FrameData
    * @return
    */
   private static HashMap<Long, ElementData> createHashMapOnlyIncomplete(
-      Vector<ElementData> elements)
+      ArrayList<ElementData> elements)
   {
     HashMap<Long, ElementData> result = new HashMap<Long, ElementData>(
         elements.size());
@@ -305,7 +308,7 @@ class FrameData
     return panelState;
   }
 
-  public Vector<ElementData> getElementsToPaint()
+  public ArrayList<ElementData> getElementsToPaint()
   {
     return elementsToPaint;
   }

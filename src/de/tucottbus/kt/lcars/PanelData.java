@@ -1,7 +1,7 @@
 package de.tucottbus.kt.lcars;
 
 import java.io.Serializable;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ElementData;
@@ -27,7 +27,7 @@ public class PanelData implements Serializable
   /**
    * The rendering data of the {@linkplain EElement LCARS GUI elements} on the panel.
    */
-  public Vector<ElementData> elementData;
+  public ArrayList<ElementData> elementData;
 }
 
 // EOF

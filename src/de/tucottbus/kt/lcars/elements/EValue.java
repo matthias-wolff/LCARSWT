@@ -7,7 +7,7 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -96,9 +96,9 @@ public class EValue extends ERect
   }
   
   @Override
-  public Vector<Geometry> createGeometriesInt()
+  public ArrayList<Geometry> createGeometriesInt()
   {
-    Vector<Geometry> geos = new Vector<Geometry>(); 
+    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
     
     // Create background geometry
     Rectangle bounds = getBounds();

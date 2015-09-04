@@ -26,9 +26,9 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
@@ -315,10 +315,10 @@ public class ShowcasePanel extends Panel
     EElement eElement = new EElement(this,1560,362,0,0,LCARS.EC_SECONDARY,null)
     {
       @Override
-      protected Vector<Geometry> createGeometriesInt()
+      protected ArrayList<Geometry> createGeometriesInt()
       {
         // Create element geometries vector
-        Vector<Geometry> geos = new Vector<Geometry>();
+        ArrayList<Geometry> geos = new ArrayList<Geometry>();
         
         // Create a custom background shape
         // Note: Converted from EPS using pstoedit -f java2 <source>.eps <target>.java
@@ -355,7 +355,7 @@ public class ShowcasePanel extends Panel
     eElbo.addGeometryModifier(new EGeometryModifier()
     {
       @Override
-      public void modify(Vector<Geometry> geos)
+      public void modify(ArrayList<Geometry> geos)
       {
         Area are = new Area(((GArea)geos.get(0)).getArea());
         Rectangle r = are.getBounds();

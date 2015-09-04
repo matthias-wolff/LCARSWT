@@ -3,7 +3,7 @@ package de.tucottbus.kt.lcars.elements;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -24,9 +24,9 @@ public class ELabel extends EElement
   }
 
   @Override
-  public Vector<Geometry> createGeometriesInt()
+  public ArrayList<Geometry> createGeometriesInt()
   {
-    Vector<Geometry> geos = new Vector<Geometry>(); 
+    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
     
     // Create label geometries
     Font      font   = LCARS.getFont(getStyle());
