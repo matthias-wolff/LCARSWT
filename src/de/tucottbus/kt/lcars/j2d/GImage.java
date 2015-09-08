@@ -1,17 +1,17 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.awt.Image;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.geom.Area;
 import java.awt.image.ImageObserver;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -23,7 +23,7 @@ public class GImage extends Geometry
 {
   private static final long       serialVersionUID = 1L;
   private String                  resourceName;
-  private transient ImageObserver imageObserver;
+  //private transient ImageObserver imageObserver;
   private Point                   pos;
   private Image                   cachedImg;
   private boolean                 resNotFound = false;
@@ -39,7 +39,8 @@ public class GImage extends Geometry
   {
     super(false);
     this.resourceName  = resourceName;
-    this.imageObserver = imageObeserver;
+    //TODO check observer
+    //this.imageObserver = imageObeserver;
     this.pos           = pos;
   }
 
@@ -49,10 +50,8 @@ public class GImage extends Geometry
     Image image = getImage();
     if(image == null)
       return new Area();
-    
-    int   w     = image.getWidth(this.imageObserver);
-    int   h     = image.getHeight(this.imageObserver);
-    return new Area(new Rectangle(pos.x,pos.y,w,h));
+    Rectangle rect = image.getBounds();
+    return new Area(new java.awt.Rectangle(pos.x,pos.y,rect.width,rect.height));
   }
   
   
@@ -60,22 +59,23 @@ public class GImage extends Geometry
   {
     if(cachedImg == null && !resNotFound)
     {
-      cachedImg = GImage.getImage(this.resourceName);
+      cachedImg = getImage(this.resourceName);
       resNotFound = cachedImg == null;
     }
     return cachedImg;
   }
   
   @Override
-  public void paint2D(AdvGraphics2D g2d)
+  public void paint2D(GC gc)
   {
-    Image image = GImage.getImage(this.resourceName);
-    if(image == null)
-    {
-      //LCARS.err("GImage", "Image not found at Location: "+ this.resourceName);
+    if (resourceName == null)
       return;
-    }
-    g2d.drawImage(image,this.pos.x,this.pos.y,this.imageObserver);
+    
+    Image image = GImage.getImage(resourceName);
+    if(image != null)
+      gc.drawImage(image, pos.x, pos.y);
+    else
+      Log.debug("Image not found at Location: "+ resourceName);
   }
 
   // -- The image cache --
@@ -109,7 +109,7 @@ public class GImage extends Geometry
       image = GImage.images.get(resourceName);
     else
     {
-      image = loadImageFile(resourceName);
+      image = loadImageFile(resourceName, true);
       GImage.images.put(resourceName,image);
     }
     GImage.used.add(resourceName);
@@ -149,16 +149,19 @@ public class GImage extends Geometry
    *          The image resource file name as used by {@link ClassLoader#getResource(String)}.
    * @return The image or <code>null</code> if the image could not be loaded from the file
    */
-  private static Image loadImageFile(String resourceName)
+  private static Image loadImageFile(String path, boolean inJar)
   {
-    Image image = null;
-    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    URL resource = classLoader.getResource(resourceName);
-    if (resource!=null)
-      image = Toolkit.getDefaultToolkit().createImage(resource.getFile());
-    else
-      Log.warn("LCARS","ERROR: Cannot find image file \""+resourceName+"\"");
-    return image;
+    try
+    {
+      return inJar
+          ? new Image(null, GImage.class.getClassLoader().getResourceAsStream(path))
+          : new Image(null, path);
+    }
+    catch(SWTException ex)
+    {
+      Log.warn("ERROR: Cannot find image file \""+path+"\"");
+      return null;
+    }  
   }
   
 }

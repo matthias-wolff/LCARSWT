@@ -2,10 +2,12 @@ package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
 import java.io.Serializable;
 
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Path;
+
+import de.tucottbus.kt.lcars.j2d.rendering.AwtSwtUtil;
 
 /**
  * A geometry representing a {@link Shape}.
@@ -15,24 +17,25 @@ import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 public class GArea extends Geometry implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  protected GeneralPath     shape;
+  protected Shape           _shape;
+  protected Path            _cachedPath;
   protected boolean         outline;
 
-  public GArea(Area area, boolean foreground)
+  public GArea(Shape shape, boolean foreground)
   {
-    super(foreground);
-    this.shape = new GeneralPath(area);
+    super(foreground);    
+    _shape = new Area(shape);
   }
   
   @Override
   public Area getArea()
   {
-    return new Area(shape);
+    return new Area(_shape);
   }
   
-  public void setShape(Area area)
+  public void setShape(Shape shape)
   {
-    this.shape = new GeneralPath(area);;
+    _shape = new Area(shape);
   }
   
   public boolean isOutline()
@@ -50,12 +53,15 @@ public class GArea extends Geometry implements Serializable
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
    */
   @Override
-  public void paint2D(AdvGraphics2D g2d)
+  public void paint2D(GC gc)
   {
+    if (_cachedPath == null)
+      _cachedPath = AwtSwtUtil.toSwtPath(_shape, gc.getDevice());
+    
     if (outline)
-      g2d.draw(shape);
+      gc.drawPath(_cachedPath);
     else
-      g2d.fill(shape);
+      gc.fillPath(_cachedPath);
   }  
 }
 

@@ -1,13 +1,13 @@
 package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import org.eclipse.swt.graphics.GC;
+
 import de.tucottbus.kt.lcars.j2d.rendering.HeavyRenderWorker;
 import de.tucottbus.kt.lcars.logging.Log;
 
@@ -77,15 +77,15 @@ public abstract class AHeavyGeometry extends Geometry
    * @param input
    * @param image
    */
-  public abstract void paint2DAsync(Graphics2D image);
+  public abstract void paint2DAsync(GC image);
 
   @Override
-  public void paint2D(AdvGraphics2D g2d)
+  public void paint2D(GC gc)
   {
     HeavyRenderWorker worker = workerList.get(_serialNo);
     if (worker == null)
       throw new NullPointerException("missing worker in worker list");
-    g2d.drawImage(worker.GetImage(), _x, _y, null); // TODO: ImageObserver?
+    gc.drawImage(worker.GetImage(), _x, _y); // TODO: ImageObserver?
   }
 
   public int getX()
@@ -164,8 +164,7 @@ public abstract class AHeavyGeometry extends Geometry
   {
     HeavyRenderWorker worker = workerList.get(_serialNo);
     if (worker == null)
-      Log.err(this.getClass().getSimpleName(),
-          "Invalid state: some Geometry update data come up but the worker with the serial number "
+      Log.err("Invalid state: some Geometry update data come up but the worker with the serial number "
               + _serialNo + " does not exist to process it.");
     else if (_input != null)
       worker.Invalidate(this);

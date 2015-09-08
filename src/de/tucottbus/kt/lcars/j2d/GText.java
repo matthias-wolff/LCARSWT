@@ -1,13 +1,14 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.jfree.experimental.swt.SWTUtils;
 
 /**
  * A geometry representing a text.
@@ -17,8 +18,10 @@ import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 public class GText extends Geometry
 {
   private static final long serialVersionUID = 1L;
+  protected java.awt.Font awtFont;
   protected Font font;
-  protected Point2D.Float pos;
+  protected int x;
+  protected int y;
   protected GeneralPath shape;
   protected String text;
   protected float descent;
@@ -42,13 +45,14 @@ public class GText extends Geometry
    * @param foreground
    *          foreground/background flag
    */
-  public GText(String text, Point2D.Float pos, Rectangle shape, Font font,
+  public GText(String text, Point2D.Float pos, Rectangle shape, java.awt.Font font,
       boolean foreground)
   {
     super(foreground);
     this.text = text;
-    this.font = font;
-    this.pos = pos;
+    awtFont = font;
+    x = (int)pos.x;
+    y = (int)pos.y;
     this.shape = new GeneralPath(shape);
   }
 
@@ -59,7 +63,7 @@ public class GText extends Geometry
 
   public Point2D.Float getPos()
   {
-    return this.pos;
+    return new Point2D.Float(x, y);
   }
 
   @Override
@@ -89,7 +93,7 @@ public class GText extends Geometry
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
    */
   @Override
-  public void paint2D(AdvGraphics2D g2d)
+  public void paint2D(GC gc)
   {
 //    if (textShape == null)
 //      synchronized (this)
@@ -105,12 +109,18 @@ public class GText extends Geometry
 //    g2d.fill(textShape);
     //textLayout.draw(g2d, pos.x, pos.y);
 
-    if (cachedTextShape == null) {
-      g2d.setFont(this.font);
-      g2d.drawString(this.text, pos.x, pos.y);
-    }
-    else
-      g2d.draw(cachedTextShape);    
+//    if (cachedTextShape == null) {
+//      gc.setFont(this.font);
+//      gc.drawString(this.text, pos.x, pos.y);
+//    }
+//    else
+//      gc.draw(cachedTextShape);
+    if (font == null)
+      font = new org.eclipse.swt.graphics.Font( 
+              gc.getDevice(), 
+              SWTUtils.toSwtFontData(gc.getDevice(), awtFont, true));    
+    gc.setFont(font);
+    gc.drawText(text, x, y);
   }
 }
 

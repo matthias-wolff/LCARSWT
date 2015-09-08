@@ -121,7 +121,7 @@ public class EPerspective implements EGeometryModifier
       if (geo instanceof GArea)
       {
         GArea are = (GArea)geo;
-        are.setShape(new Area(transform(new Area(are.shape))));
+        are.setShape(new Area(transform(new Area(are._shape))));
       }
   }
   

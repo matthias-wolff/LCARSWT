@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -9,7 +8,6 @@ import java.awt.GraphicsDevice;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -40,8 +38,8 @@ import org.eclipse.swt.widgets.Touch;
 
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 import de.tucottbus.kt.lcars.j2d.rendering.AsyncRenderer;
+import de.tucottbus.kt.lcars.j2d.rendering.AwtSwtUtil;
 import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
 import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
@@ -112,7 +110,7 @@ public class Screen
   /**
    * 
    */
-  protected AdvGraphics2D g2dWrapper;
+  //protected AdvGraphics2D g2dWrapper;
 
   protected Shell shell;
 
@@ -155,9 +153,7 @@ public class Screen
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     // Screen repainter
-    renderer = new Renderer(
-        new Dimension(shell.getSize().x, shell.getSize().y));
-
+    renderer = new Renderer();
     // initContentPane();
 
     setPanel(panelClass);
@@ -217,20 +213,19 @@ public class Screen
       {
         long time = System.nanoTime();
 
-        GC gc = e.gc; // gets the SWT graphics context from the event
+        //GC gc = e.gc; // gets the SWT graphics context from the event
 
         //Log.info("paint");
 
-        g2dWrapper = new AdvGraphics2D(gc, DEFAULT_TEXT_CACHE_SIZE);
+        //g2dWrapper = new AdvGraphics2D(gc, DEFAULT_TEXT_CACHE_SIZE);
         
         //renderer.prepareRendering(gc); // prepares the Graphics2D
         // renderer
 
         //Graphics2D g2d = renderer.getGraphics2D();
 
-        // super.paintComponent((Graphics)g2d);
-        paint2D(g2dWrapper);
-        
+        // super.paintComponent((Graphics)g2d);        
+        paint2D(e.gc);
         
         // g.dispose();
 
@@ -443,21 +438,18 @@ public class Screen
    *          the graphics context
    * @see #elements
    */
-  protected void paint2D(AdvGraphics2D g2d)
+  protected void paint2D(GC gc)
   {
     // Prepare setup
-    g2d.setTransform(getTransform());
-    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-        RenderingHints.VALUE_ANTIALIAS_ON);
-    g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-        RenderingHints.VALUE_RENDER_QUALITY);
-    g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-        RenderingHints.VALUE_STROKE_NORMALIZE);
-    g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
-        RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-
-    renderer.paint2D(g2dWrapper);
+    gc.setTransform(AwtSwtUtil.toSwtTransform(getTransform(), gc.getDevice()));
+    gc.setTextAntialias(SWT.ON);
+    
+    //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+    //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+    //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+    //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+    renderer.setSize(shell.getSize());
+    renderer.paint2D(gc);
   }
 
   // -- Getters and setters --

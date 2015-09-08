@@ -1,8 +1,9 @@
 package de.tucottbus.kt.lcars.j2d.rendering;
 
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.concurrent.Semaphore;
+
+import org.eclipse.swt.graphics.GC;
 
 import de.tucottbus.kt.lcars.PanelData;
 
@@ -16,9 +17,7 @@ public class Renderer extends ARenderer
 
   private Semaphore mutex = new Semaphore(1);
   
-  public Renderer (Dimension initialSize) {
-    super(initialSize);
-  }
+  public Renderer () {}
   
   public Renderer(ARenderer renderer)
   {
@@ -31,11 +30,11 @@ public class Renderer extends ARenderer
    * @param g2d the graphics context
    * @see #elements
    */
-  public void paint2D(AdvGraphics2D g2d) {
+  public void paint2D(GC gc) {
     if(nextContext != null)
       nextContext.apply(getContext());
     setContext(nextContext);
-    super.paint2D(g2d);
+    super.paint2D(gc);
   }
 
   /**

@@ -4,14 +4,17 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+
 import de.tucottbus.kt.lcars.j2d.AHeavyGeometry;
 
 public class HeavyRenderWorker
 {
   private static ExecutorService es = Executors.newWorkStealingPool();  
   
-  private BufferedImage _buffer0;
-  private BufferedImage _buffer1;
+  private Image _buffer0;
+  private Image _buffer1;
   
   private boolean _readToggle;
     
@@ -21,8 +24,10 @@ public class HeavyRenderWorker
     if (geom == null)
       throw new NullPointerException("geom");
     
-    _buffer0 = new BufferedImage(geom.getWidth(), geom.getHeight(), imageType);
-    _buffer1 = new BufferedImage(geom.getWidth(), geom.getHeight(), imageType);
+    _buffer0 = new Image(null, geom.getWidth(), geom.getHeight());
+    _buffer0.type = imageType;
+    _buffer1 = new Image(null, geom.getWidth(), geom.getHeight());
+    _buffer1.type = imageType;
     _geom = geom;
   }
   
@@ -51,7 +56,7 @@ public class HeavyRenderWorker
         synchronized (_buffer1)
         {
           AHeavyGeometry geom;
-          BufferedImage image;
+          Image image;
           
           // synchronize double buffer swap
           synchronized (_buffer0)
@@ -60,13 +65,13 @@ public class HeavyRenderWorker
             image = _readToggle ? _buffer0 : _buffer1;
             _geom = null;
           }
-          geom.paint2DAsync(image.createGraphics());
+          geom.paint2DAsync(new GC(image));
         }        
       });
     }
   }
   
-  public BufferedImage GetImage() {
+  public Image GetImage() {
     return _readToggle ? _buffer1 : _buffer0;
   }
   

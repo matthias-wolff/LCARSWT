@@ -1,11 +1,13 @@
 package de.tucottbus.kt.lcars.j2d.rendering;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Shape;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Region;
 
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
@@ -20,12 +22,10 @@ import de.tucottbus.kt.lcars.logging.Log;
  */
 public abstract class ARenderer
 {
-  public static final String CLASSKEY = "RENDER";
-
   /**
    * The Default background color is black.
    */
-  public static final Color DEFAULT_BG_COLOR = Color.BLACK;
+  public static final int DEFAULT_BG_COLOR = SWT.COLOR_BLACK;
 
   /**
    * Number of updates between two debug logs
@@ -65,13 +65,7 @@ public abstract class ARenderer
    * 
    * @param initialSize
    */
-  public ARenderer(Dimension initialSize)
-  {
-    if (initialSize == null)
-      throw new NullPointerException("initialSize");
-    width = initialSize.width;
-    height = initialSize.height;
-  }
+  public ARenderer() {}
 
   /**
    * 
@@ -109,6 +103,20 @@ public abstract class ARenderer
   }
 
   /**
+   * Returns the dimension defined by the panel data. If panel data is not set,
+   * it returns null.
+   * 
+   * @return
+   */
+  public void setSize(Point size)
+  {
+    if(size == null)
+      return;    
+    width = size.x;
+    height = size.y;
+  }
+
+  /**
    * Updates the data for rendering.
    * 
    * @param data
@@ -119,39 +127,40 @@ public abstract class ARenderer
   /**
    * Paints the panel elements of this screen on a {@link Graphics2D} context.
    * 
-   * @param g2d
+   * @param gc
    *          the graphics context
    * @see #elements
    */
-  public void paint2D(AdvGraphics2D g2d)
+  public void paint2D(GC gc)
   {
     onPaint();
     FrameData context = getContext();
     Dimension size = getSize();
     if (context == null) // null stands for reset
     {
-      g2d.setClip(0, 0, size.width, size.height);
-      Shape scrRect = new Rectangle(size);
-      g2d.setColor(DEFAULT_BG_COLOR);
-      g2d.draw(scrRect);
+      gc.setClipping(0, 0, size.width, size.height);
+      gc.setBackground(gc.getDevice().getSystemColor(DEFAULT_BG_COLOR));
+      gc.drawRectangle(0, 0, size.width, size.height);
       return;
     }
 
     // clipping setup
-    Shape dirtyArea = context.getDirtyArea();
+    Region dirtyArea = context.getDirtyArea();
     if (context.getFullRepaint())
-      g2d.setClip(0, 0, size.width, size.height);
+      gc.setClipping(0, 0, size.width, size.height);
     else
-      g2d.setClip(dirtyArea);
-
+      gc.setClipping(dirtyArea);
+    
     // background setup
     Image bgImg = context.getBackgroundImage();
     if (bgImg == null)
     {
-      g2d.setColor(Color.black);
-      g2d.fill(dirtyArea);
-    } else
-      g2d.drawImage(bgImg, g2d.getTransform(), null);
+      gc.setBackground(gc.getDevice().getSystemColor(DEFAULT_BG_COLOR));
+      gc.fillRectangle(0, 0, size.width, size.height);
+    } else {
+      org.eclipse.swt.graphics.Rectangle bgb = bgImg.getBounds();
+      gc.drawImage(bgImg, bgb.x, bgb.y, bgb.width, bgb.height, 0, 0, size.width, size.height);
+    }
     // TODO possible problem with clipping when drawing
 
     PanelState state = context.getPanelState();
@@ -160,7 +169,7 @@ public abstract class ARenderer
     try
     {
       for (ElementData el : context.getElementsToPaint())
-        el.render2D(g2d, state);
+        el.render2D(gc, state);
 
       // LCARS.log(CLASSKEY, context.getElementsToPaint().size() +
       // " elements are rendered");

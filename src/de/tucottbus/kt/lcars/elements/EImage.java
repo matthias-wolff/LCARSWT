@@ -1,9 +1,11 @@
 package de.tucottbus.kt.lcars.elements;
 
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.j2d.GImage;
@@ -30,12 +32,14 @@ public class EImage extends EElement implements ImageObserver
     int x = getBounds().x;
     int y = getBounds().y;
     
-    Image image = getImage();
-    if (image!=null)
-    {
-      getImage().getWidth(this);
-      getImage().getHeight(this);
-    }
+    //Image image = getImage();
+//    if (image!=null)
+//    {
+//      java.awt.Image im;
+//      im.
+//      getImage().getWidth(this);
+//      getImage().getHeight(this);
+//    }
     ArrayList<Geometry> geos = new ArrayList<Geometry>();
     geos.add(new GImage(resourceName,new Point(x,y),this));
     return geos;
@@ -45,8 +49,9 @@ public class EImage extends EElement implements ImageObserver
   {
     if ((infoflags & (ALLBITS|SOMEBITS)) >0)
     {
-      getBounds().width  = img.getWidth(null);
-      getBounds().height = img.getHeight(null);
+      Rectangle rect = img.getBounds();
+      getBounds().width  = rect.width;
+      getBounds().height = rect.height;
       invalidate(true);
     }
     return true;
@@ -59,6 +64,14 @@ public class EImage extends EElement implements ImageObserver
   public Image getImage()
   {
     return GImage.getImage(this.resourceName);  
+  }
+
+  @Override
+  public boolean imageUpdate(java.awt.Image img, int infoflags, int x, int y,
+      int width, int height)
+  {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 }

@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.j2d.rendering;
 
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
@@ -60,9 +59,8 @@ public class AsyncRenderer extends ARenderer
    * Creates an asynchronous renderer with the given render size. Background worker will be started instantly.
    * @param initialSize
    */
-  public AsyncRenderer(Dimension initialSize)
+  public AsyncRenderer()
   {
-    super(initialSize);
     initWorker();
   }
 
@@ -137,7 +135,7 @@ public class AsyncRenderer extends ARenderer
         semaPaint.release();
       } catch (InterruptedException e)
       {
-        Log.err(CLASSKEY, "Sychronisation error while reading panel data buffer.", e);
+        Log.err("Sychronisation error while reading panel data buffer.", e);
       }
     }
     workerShutdown.release();
@@ -155,7 +153,7 @@ public class AsyncRenderer extends ARenderer
       // (data.elementData.size() + " elements")) +".");
     } catch (InterruptedException e)
     {
-      Log.err(CLASSKEY, "Sychronisation error while update panel data.", e);
+      Log.err("Sychronisation error while update panel data.", e);
     }
   }
 
@@ -168,7 +166,7 @@ public class AsyncRenderer extends ARenderer
       semaContext.release();
     } catch (InterruptedException e)
     {
-      Log.err(CLASSKEY, "Synchronization error while painting on sreen.", e);
+      Log.err("Synchronization error while painting on sreen.", e);
       return null;
     }
     return result;
@@ -186,7 +184,7 @@ public class AsyncRenderer extends ARenderer
       buffer.put(null);
     } catch (InterruptedException e)
     {
-      Log.err(CLASSKEY, "Synchronization error while resetting screen.", e);
+      Log.err("Synchronization error while resetting screen.", e);
     }
   }
 
@@ -208,7 +206,7 @@ public class AsyncRenderer extends ARenderer
       workerShutdown.acquire();
     } catch (Exception e)
     {
-      Log.err(CLASSKEY, "Error while shutting down asynchronious renderer.", e);
+      Log.err("Error while shutting down asynchronious renderer.", e);
     }
   }
 }

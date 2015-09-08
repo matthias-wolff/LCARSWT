@@ -5,8 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.io.Serializable;
 
+import org.eclipse.swt.graphics.GC;
+
 import de.tucottbus.kt.lcars.elements.EElement;
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 
 /**
  * A 2D geometric shape. The graphical representation of an {@linkplain EElement LCARS GUI element}
@@ -17,6 +18,7 @@ import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 // TODO: rename to AGeometry
 public abstract class Geometry implements Serializable
 {
+  
   private static final long serialVersionUID = -6704273422742875854L;
   protected boolean         foreground;
   
@@ -59,8 +61,7 @@ public abstract class Geometry implements Serializable
    * @param g2d
    *          The graphics context.
    */
-  public abstract void paint2D(AdvGraphics2D g2d); 
-
+  public abstract void paint2D(GC gc); 
 }
 
 // EOF

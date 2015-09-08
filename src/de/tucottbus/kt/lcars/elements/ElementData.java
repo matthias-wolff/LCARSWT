@@ -1,17 +1,18 @@
 package de.tucottbus.kt.lcars.elements;
 
-import java.awt.AlphaComposite;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import org.eclipse.swt.graphics.GC;
+import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.j2d.AHeavyGeometry;
 import de.tucottbus.kt.lcars.j2d.ElementState;
 import de.tucottbus.kt.lcars.j2d.Geometry;
-import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -78,7 +79,7 @@ public final class ElementData implements Serializable
   /**
    * Bounds of the area of this element.
    */
-  private Rectangle cachedBounds;
+  private org.eclipse.swt.graphics.Rectangle cachedBounds;
 
   // -- Constructors --
 
@@ -244,12 +245,12 @@ public final class ElementData implements Serializable
    * Renders the graphical representation of the {@link EElement} described by
    * this instance on a 2D graphics context.
    * 
-   * @param g2d
+   * @param gc
    *          The graphics context.
    * @param panelState
    *          The panel state.
    */
-  public void render2D(AdvGraphics2D g2d, PanelState panelState)
+  public void render2D(GC gc, PanelState panelState)
   {
     // if (geometry==null) return;
     if (state==null) {
@@ -268,12 +269,14 @@ public final class ElementData implements Serializable
     Geometry gi = geometry.get(i++);
     if (!gi.isForeground())
     {
+      
+      //TODO: set alpha composite?
       //render background elements
-      g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-          state.getBgAlpha(panelState)));
-      g2d.setColor(state.getBgColor(panelState));
+//      gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+//          state.getBgAlpha(panelState)));
+      gc.setBackground(SWTUtils.toSwtColor(gc.getDevice(), state.getBgColor(panelState)));
       while(true) {
-        gi.paint2D(g2d);
+        gi.paint2D(gc);
         if(i==l)
           return;
         gi = geometry.get(i++);
@@ -282,12 +285,12 @@ public final class ElementData implements Serializable
       }
     }
     
+    //TODO: set alpha composite?
     // render foreground elements
-    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-        state.getFgAlpha()));
-    g2d.setColor(state.getFgColor());
+    // gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, state.getFgAlpha()));
+    gc.setBackground(SWTUtils.toSwtColor(gc.getDevice(), state.getFgColor()));
     while(true) {
-      gi.paint2D(g2d);
+      gi.paint2D(gc);
       if(i==l)
         return;
       gi = geometry.get(i++);
@@ -299,17 +302,19 @@ public final class ElementData implements Serializable
    * 
    * @return
    */
-  public Rectangle getBounds()
+  public org.eclipse.swt.graphics.Rectangle getBounds()
   {
     if (cachedBounds == null)
     {
       Area area = new Area();
       for (Geometry gi : geometry)
         area.add(new Area(gi.getArea()));
-      cachedBounds = area.getBounds();
+      Rectangle rect = area.getBounds();
+      
+      cachedBounds = new org.eclipse.swt.graphics.Rectangle(rect.x, rect.y, rect.width, rect.height);
     }
 
-    return new Rectangle(cachedBounds);
+    return new org.eclipse.swt.graphics.Rectangle(cachedBounds.x, cachedBounds.y, cachedBounds.width, cachedBounds.height); 
   }
 
   /**

@@ -33,7 +33,7 @@ public class Log {
           logBuffer.take().run();        
       }
       catch (Throwable e) {
-        warn("Logger thread interrupter and was restarted.");
+        warn("Logger thread interrupted and was restarted.");
       }
   });
   

@@ -1,20 +1,20 @@
 package de.tucottbus.kt.lcars.j2d.rendering;
 
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Toolkit;
-import java.awt.geom.Area;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiFunction;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Region;
+
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
+import de.tucottbus.kt.lcars.j2d.GImage;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.util.Object;
 
 /**
  * Represents a context containing all data required to render a frame.
@@ -24,7 +24,7 @@ import de.tucottbus.kt.lcars.logging.Log;
  * @author Christian Borck
  *
  */
-class FrameData
+class FrameData //TODO: implements Disposable
 {
   public static final String CLASSKEY = "FrmDt";
   
@@ -34,7 +34,7 @@ class FrameData
   private ArrayList<ElementData> elements;
   private ArrayList<ElementData> elementsToPaint;
   private Image bgImg;
-  private Shape dirtyArea;
+  private Region dirtyArea;
   private boolean fullRepaint;
 
   private FrameData(PanelData panelData, boolean incremental,
@@ -74,31 +74,14 @@ class FrameData
 
     if (pred != null)
     {
-      String predRes = pred.panelState.bgImageRes;
-      if (thisRes == predRes || (thisRes != null && thisRes.equals(predRes)))
+      if (Object.equals(thisRes, pred.panelState.bgImageRes))
       {
         this.bgImg = pred.bgImg;
         return false;
       }
     }
 
-    if (thisRes == null)
-    {
-      bgImg = null;
-      return true;
-    }
-
-    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    Log.info("background=" + thisRes);
-    URL resource = classLoader.getResource(thisRes);
-    if (resource == null)
-    {
-      bgImg = null;
-      return true;
-    }
-    bgImg = Toolkit.getDefaultToolkit().createImage(resource.getFile());
-    // Dimension d = updateData.panelState.dimension;
-    // bgImg.getScaledInstance(d.width,d.height,Image.SCALE_DEFAULT);
+    bgImg = GImage.getImage(thisRes);
     return true;
   }
 
@@ -128,9 +111,13 @@ class FrameData
   private void apply(FrameData pred,
       BiFunction<ElementData, ElementData, Integer> applyUpdate)
   {
+    Dimension size = getRenderSize();
+    Rectangle bounds = new Rectangle(0,0,size.width, size.height);
+    dirtyArea = new Region();
+    dirtyArea.add(bounds);
+
     if (pred == null)
     {
-      dirtyArea = new Rectangle(getRenderSize());
       elementsToPaint = elements;
       updateBgImage(null);
       return;
@@ -142,9 +129,8 @@ class FrameData
     //fullRepaint = true;
 
     int elCount = elements.size();
-    this.dirtyArea = new Rectangle(panelState.dimension);
 
-    Area dirtyArea = new Area();
+    Region dirtyArea = new Region();
     // 1. Create a hash map of the current ElementData
     HashMap<Long, ElementData> hPred = createHashMap(pred.elements);
 
@@ -188,12 +174,12 @@ class FrameData
               continue;
             }
             hPred.remove(edp);
-            dirtyArea.add(new Area(edp.getBounds()));
+            dirtyArea.add(edp.getBounds());
           }
           else // added element
             edu.onAddToScreen();
 
-          dirtyArea.add(new Area(edu.getBounds()));
+          dirtyArea.add(edu.getBounds());
           elementsToPaint.add(edu);
         } catch (Exception e)
         {
@@ -204,14 +190,15 @@ class FrameData
       {
         hPred
             .forEach((serialNo, edp) -> {
-              dirtyArea.add(new Area(edp.getBounds()));
+              dirtyArea.add(edp.getBounds());
               edp.onRemoveFromScreen();
             });
       } catch (Exception e)
       {
         e.printStackTrace();
       }
-      dirtyArea.intersect(new Area(this.dirtyArea));
+      dirtyArea.intersect(bounds);
+      this.dirtyArea.dispose();
       this.dirtyArea = dirtyArea;
 
       for (ElementData edu : validElements)
@@ -293,7 +280,7 @@ class FrameData
     return result;
   }
 
-  public Shape getDirtyArea()
+  public Region getDirtyArea()
   {
     return dirtyArea;
   }
