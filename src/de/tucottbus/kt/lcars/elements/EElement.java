@@ -16,6 +16,8 @@ import de.tucottbus.kt.lcars.j2d.EGeometryModifier;
 import de.tucottbus.kt.lcars.j2d.ElementState;
 import de.tucottbus.kt.lcars.j2d.GArea;
 import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.swt.AwtSwt;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * The base class of all LCARS GUI element (i.e. buttons, elbos, etc.)
@@ -117,11 +119,36 @@ public abstract class EElement
    * @see #getColor()
    * @see #getBgColor()
    */
+  public void setColor(SwtColor color)
+  {
+    if (de.tucottbus.kt.lcars.util.Object.equals(color, data.state.getColor())) return;
+    data.state.setColor(color);
+    invalidate(false);
+  }
+
+  /**
+   * Sets the color of this element. This supersedes the color specified through the style. To
+   * restore the natural color of the element, call this method with <code>color=null</code>.
+   * 
+   * @param color
+   *          The color, can be <code>null</code>.
+   * @see #setColorStyle(int)
+   * @see #getColor()
+   * @see #getBgColor()
+   */
+  @Deprecated
   public void setColor(Color color)
   {
-    if (data.state.getColor()==null && color==null                        ) return;
-    if (data.state.getColor()!=null && data.state.getColor().equals(color)) return;
-    data.state.setColor(color);
+    SwtColor dsc = data.state.getColor();
+    if(color == null) {
+      if (dsc == null) return;
+      data.state.setColor(null);        
+    }
+    else {
+      SwtColor ndsc = AwtSwt.toSwtColor(color);
+      if (ndsc.equals(dsc)) return;
+      data.state.setColor(ndsc);
+    }
     invalidate(false);
   }
 
@@ -137,7 +164,7 @@ public abstract class EElement
    * @see #getColorStyle()
    * @see #setColor(Color)
    */
-  public Color getColor()
+  public SwtColor getColor()
   {
     return data.state.getColor();
   }
@@ -145,7 +172,7 @@ public abstract class EElement
   /**
    * @deprecated 
    */
-  public Color getBgColor()
+  public SwtColor getBgColor()
   {
     return data.state.getBgColor(new PanelState(null));
   }

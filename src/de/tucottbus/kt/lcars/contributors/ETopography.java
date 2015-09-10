@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.contributors;
 
-import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -19,6 +18,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * A simple topographic map with a background image, a sector grid, point shaped
@@ -346,21 +346,33 @@ public class ETopography extends ElementContributor
     Rectangle r  = cursor.get(0).getBounds();
     int       cx = r.x;
     int       cy = r.y;
-    for (int i=0; i<cursor.size(); i++)
-    {
-      EElement e = cursor.get(i);
-      if (cursorPos==null || !equalPos(new Point2D.Float(x,y),cursorPos))
+    
+    final SwtColor transparent = new SwtColor(0, true);    
+    Point2D.Float ncp = new Point2D.Float(x,y);
+    
+    int n = cursor.size();
+    
+    if (cursorPos==null || !equalPos(ncp,cursorPos))
+      for (int i=0; i<n; i++)
       {
+        EElement e = cursor.get(i);
         r = e.getBounds();
         r.x=p.x+(r.x-cx)-cursorSize+this.x;
         r.y=p.y+(r.y-cy)-cursorSize+this.y;
         e.setBounds(r);
+        if (e instanceof ELabel && label!=null)
+          ((ELabel)e).setLabel(label);
       }
-      if (i==4) e.setColor("".equals(label)?new Color(0,true):null);
-      if (e instanceof ELabel && label!=null)
-        ((ELabel)e).setLabel(label);
-    }
-    this.cursorPos = new Point2D.Float(x,y);
+    else
+      for (int i=0; i<n; i++)
+      {
+        EElement e = cursor.get(i);
+        if (e instanceof ELabel && label!=null)
+          ((ELabel)e).setLabel(label);
+      }
+    if (n > 4)
+      cursor.get(4).setColor("".equals(label)?transparent:null);
+    this.cursorPos = ncp;
   }
 
   /**
@@ -527,6 +539,8 @@ public class ETopography extends ElementContributor
     {
     }
     
+    final SwtColor transparent = new SwtColor(0, true);
+    
     // Create points
     for (ERect point : points)
     {
@@ -538,7 +552,7 @@ public class ETopography extends ElementContributor
         int x = (int)Math.round(r.getCenterX());
         int y = (int)Math.round(r.getCenterY());
         ERect e = new ERect(null,x-19,y-19,38,38,0,null);
-        e.setColor(new Color(0,true));
+        e.setColor(transparent);
         e.setData(point);
         e.addEEventListener(new EEventListenerAdapter()
         {
@@ -561,9 +575,7 @@ public class ETopography extends ElementContributor
     if (this.gridStyle!=-1)
       gs = this.gridStyle & (LCARS.ES_COLOR|LCARS.ES_FONT);
       
-    Color color = LCARS.getColor(panel.getColorScheme(),gs);
-    int alpha = (int)(255*gridMajorAlpha);
-    color = new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
+    SwtColor color = new SwtColor(LCARS.getColor(panel.getColorScheme(),gs), (int)(255*gridMajorAlpha));
     ELabel unitLabel = null;
     if (pGridMajor!=null)
     {

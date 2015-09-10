@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.speech;
 
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.rmi.RemoteException;
@@ -22,6 +21,7 @@ import de.tucottbus.kt.lcars.speech.events.LevelEvent;
 import de.tucottbus.kt.lcars.speech.events.PostprocEvent;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
 import de.tucottbus.kt.lcars.speech.events.SpeechEvent;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.Range;
 
 public class SpeechEnginePanel extends Panel
@@ -54,7 +54,7 @@ public class SpeechEnginePanel extends Panel
   // Misc
   private   int             modeU;
   private   int             redAlertCtr;
-  private   Color           cRed = LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED);
+  private   SwtColor           cRed = LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED);
   
   public SpeechEnginePanel(IScreen screen)
   {
@@ -243,7 +243,7 @@ public class SpeechEnginePanel extends Panel
       spe.addUserFeedbackPlayer(new UserFeedbackPlayer(UserFeedbackPlayer.VISUAL)
       {
         @Override
-        public void writeColor(Color color)
+        public void writeColor(SwtColor color)
         {
           eVisFdbkMonitor.setColor(color);
         }
@@ -325,9 +325,12 @@ public class SpeechEnginePanel extends Panel
       if (!eLock.isSelected())
         synchronized (cSpeechSig)
         {
-          Color clr = event.spe.getVoiceActivity()?cRed:null;
-          if (event.spe.getListenMode()<0) clr = Color.GRAY;
-          int   smp = cSpeechSig.addSample(new Range(-amp,amp),clr);
+          int   smp = cSpeechSig.addSample(new Range(-amp,amp),
+              event.spe.getListenMode()<0
+                ? SwtColor.GRAY
+                : (event.spe.getVoiceActivity()
+                    ? cRed
+                    : null));
           cSpeechSig.getSampleElement(smp).setData(new Long(frm));
         }
       
@@ -359,7 +362,7 @@ public class SpeechEnginePanel extends Panel
     {
       PostprocEvent pe = (PostprocEvent)event;
       cSpeechPostproc.setPostprocResult(pe);
-      Log.info("SEP","Post-processing event ("+pe.frames.size()+" frames)");
+      Log.info("Post-processing event ("+pe.frames.size()+" frames)");
     }
   }
 

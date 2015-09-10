@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.elements;
 
-import java.awt.Font;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -134,16 +133,11 @@ public class ESector extends EElement
     geos.add(new GArea(area,false));
 
     // Create label geometries
-    Font      font   = LCARS.getFont(getStyle());
-    Rectangle bounds = area.getBounds();
-    Point     insets = computeLabelInsets();
-    if (labelPos!=null)
-    {
-      bounds = new Rectangle(cx+labelPos.x,cy+labelPos.y,0,0);
-      insets = new Point(0,0);
-    }
-    geos.addAll(LCARS.createTextGeometry2D(font,label,bounds,getStyle(),insets,true));
-    
+    geos.addAll(LCARS.createTextGeometry2D(label,
+                                           labelPos!=null ? new Rectangle(cx+labelPos.x,cy+labelPos.y,0,0) : area.getBounds(),
+                                           getStyle(),
+                                           labelPos!=null ? new Point(0,0) : computeLabelInsets(),
+                                           true));    
     return geos;
   }
 

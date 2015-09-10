@@ -1,6 +1,6 @@
 package de.tucottbus.kt.lcars.feedback;
 
-import java.awt.Color;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * A short sequence of color values used to give visual feedback.
@@ -13,7 +13,7 @@ public class Eyecon
   /**
    * The color sequence.
    */
-  private Color[] samples;
+  private SwtColor[] samples;
   
   // -- Getters and setters --
   
@@ -32,10 +32,10 @@ public class Eyecon
    * 
    * @see #setSamples(Color[])
    */
-  public Color[] getSamples()
+  public SwtColor[] getSamples()
   {
-    if (this.samples==null) return new Color[0];
-    Color[] samples = new Color[this.samples.length];
+    if (this.samples==null) return new SwtColor[0];
+    SwtColor[] samples = new SwtColor[this.samples.length];
     System.arraycopy(this.samples,0,samples,0,this.samples.length);
     return samples;
   }
@@ -47,7 +47,7 @@ public class Eyecon
    *          The new sequence.
    * @see #getSamples()
    */
-  public void setSamples(Color[] samples)
+  public void setSamples(SwtColor[] samples)
   {
     this.samples = samples;
   }

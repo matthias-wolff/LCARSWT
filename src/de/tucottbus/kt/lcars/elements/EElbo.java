@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.elements;
 
-import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -197,9 +196,12 @@ public class EElbo extends EElement
     geos.add(new GArea(area,false));
 
     // Create label geometries
-    Font  font   = LCARS.getFont(getStyle());
-    Point insets = computeLabelInsets();
-    geos.addAll(LCARS.createTextGeometry2D(font,label,bounds,getStyle(),insets,true));
+    geos.addAll(LCARS.createTextGeometry2D(LCARS.getFont(getStyle()),
+                                           label,
+                                           bounds,
+                                           getStyle(),
+                                           computeLabelInsets(),
+                                           true));
     
     // This is it
     return geos;

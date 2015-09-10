@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.contributors;
 
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,6 +10,8 @@ import de.tucottbus.kt.lcars.elements.EElbo;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
+import de.tucottbus.kt.lcars.swt.AwtSwt;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.Range;
 
 public class ESignalDisplay extends ElementContributor
@@ -27,7 +28,7 @@ public class ESignalDisplay extends ElementContributor
   private int             sampleCount;
   private int             sampleWidth;
   private float           sampleTime;
-  private Color           sampleColor   = new Color(0.598f,0.598f,1f,1f);
+  private SwtColor        sampleColor   = new SwtColor(0.598f,0.598f,1f,1f);
   private float           timeGridMajor = 5f;
   private float           timeGridMinor = 1f;
   private long            period;
@@ -107,8 +108,8 @@ public class ESignalDisplay extends ElementContributor
     int   hh    = this.height/2;
     int   width = sampleWidth*sampleCount;
     int   style = LCARS.EC_ELBOLO|LCARS.ES_SELECTED|LCARS.ES_STATIC;
-    Color c1    = new Color(137,101,70);
-    Color c2    = new Color(137,101,70,64);
+    SwtColor c1    = new SwtColor(137,101,70);
+    SwtColor c2    = new SwtColor(137,101,70,64);
     int   aux   = (int)Math.pow(10,-Math.floor(Math.log10(timeGridMinor)));
     if (aux<1) aux=1;
     for (float time=0f; time<displayToSeconds(sampleCount*sampleWidth); time+=timeGridMinor)
@@ -207,7 +208,7 @@ public class ESignalDisplay extends ElementContributor
     this.sampleProvider = sampleProvider;
   }
   
-  public void setSample(int sample, Range value, Color color)
+  public void setSample(int sample, Range value, SwtColor color)
   {
     if (sample<0 || sample>=sampleCount) return;
     if ((mode&MODE_NOSAMPLES)!=0) return;
@@ -257,12 +258,12 @@ public class ESignalDisplay extends ElementContributor
    *          The color of the sample, can be <code>null</code>.
    * @return The running sample index (starts over when display is full)
    */
-  public synchronized int addSample(Range value, Color color)
+  public synchronized int addSample(Range value, SwtColor color)
   {
     curSample++;
     if (curSample>=sampleCount) curSample=0;
 
-    getElements().get(curSample).setColor(new Color(1.f,1.f,1.f,1.f));
+    getElements().get(curSample).setColor(SwtColor.WHITE);
     for (int i=0; i<sampleCount; i++)
     {
       EElement el = getElements().get(i);
@@ -274,9 +275,7 @@ public class ESignalDisplay extends ElementContributor
           for (int j=curSample-1; j>=0 && j>=curSample-6; j--)
           {
             EElement el2 = getElements().get(j);
-            int alpha = el2.getBgColor().getAlpha();
-            Color col2 = new Color(color.getRed(),color.getGreen(),color.getBlue(),alpha);
-            el2.setColor(col2);
+            el2.setColor(new SwtColor(color, el2.getBgColor().getAlpha()));
           }
         setSample(curSample,value,color);
       }
@@ -286,8 +285,8 @@ public class ESignalDisplay extends ElementContributor
         if (i<curSample) alpha = (float)(i+sampleCount-curSample)/(float)sampleCount;
         if (i>curSample) alpha = (float)(i-curSample)/(float)sampleCount;
         alpha = (float)Math.pow(Math.max(alpha-0.1,0.0),0.7);
-        Color c = el.getBgColor();
-        el.setColor(new Color(c.getRed(),c.getGreen(),c.getBlue(),(int)(255*alpha)));
+        SwtColor c = el.getBgColor();
+        el.setColor(new SwtColor(c.getRed(),c.getGreen(),c.getBlue(),(int)(255*alpha)));
       }
     }
     if (cursor!=null)
@@ -317,19 +316,10 @@ public class ESignalDisplay extends ElementContributor
       if ((mode&MODE_ANIMATION)==MODE_STATIC) { cancel(); return; }
       if (locked) return;
 
-      Range smp = new Range(0,0);
-      Color col = null; 
-      if (sampleProvider!=null)
-      {
-        smp = sampleProvider.getSample();
-        col = sampleProvider.getSampleColor();
-      }
-      int i = addSample(smp,col);
+      int i = addSample(sampleProvider!=null ? sampleProvider.getSample() : new Range(0,0),
+                        sampleProvider!=null ? AwtSwt.toSwtColor(sampleProvider.getSampleColor()) : null);
       if (i==sampleCount-1 && (mode&MODE_ANIMATION)==MODE_SINGLE)
-      {
         cancel();
-        return;
-      }
     }
   }
 

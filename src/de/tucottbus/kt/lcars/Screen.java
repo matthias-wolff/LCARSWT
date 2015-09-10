@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -39,10 +38,11 @@ import org.eclipse.swt.widgets.Touch;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.j2d.rendering.AsyncRenderer;
-import de.tucottbus.kt.lcars.j2d.rendering.AwtSwtUtil;
 import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
 import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.AwtSwt;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -63,11 +63,6 @@ public class Screen
 
   private static final int preferedWidth = 950;
   private static final int preferedHeight = 560;
-
-  /**
-   * Creates a copy Graphics before painting on it.
-   */
-  private final boolean useGraphicsCopy = false;
 
   // -- Fields --
 
@@ -119,10 +114,8 @@ public class Screen
   private java.awt.Frame awtFrame;
   
   private int mouseButton = 0;
-
-  // -- Rendering parameters
-
-  private static final int DEFAULT_TEXT_CACHE_SIZE = 500;
+  
+  //private boolean running = true;
 
   // -- Constructors --
 
@@ -193,9 +186,8 @@ public class Screen
       // TODO: createBufferStrategy(2);
     }
 
-    // TODO: if (LCARS.getArg("--nomouse")!=null)
-    // setCursor(LCARS.getBlankCursor());
-
+    if (LCARS.getArg("--nomouse")!=null)
+      canvas.setCursor(LCARS.createBlankCursor(display));
     canvas = new Canvas(shell, SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED);
     canvas.setSize(shell.getSize());
     Composite treeComp = new Composite(canvas, SWT.NO_BACKGROUND | SWT.EMBEDDED);
@@ -203,38 +195,12 @@ public class Screen
     awtFrame.setSize(getSize());
 
     // TODO: check awtFrame is in embedded full screen mode
-
-    //GridData data = new GridData(GridData.FILL_BOTH);
-    //canvas.setLayoutData(data);
-
     canvas.addPaintListener(new PaintListener()
     {
       public void paintControl(PaintEvent e)
       {
         long time = System.nanoTime();
-
-        //GC gc = e.gc; // gets the SWT graphics context from the event
-
-        //Log.info("paint");
-
-        //g2dWrapper = new AdvGraphics2D(gc, DEFAULT_TEXT_CACHE_SIZE);
-        
-        //renderer.prepareRendering(gc); // prepares the Graphics2D
-        // renderer
-
-        //Graphics2D g2d = renderer.getGraphics2D();
-
-        // super.paintComponent((Graphics)g2d);        
         paint2D(e.gc);
-        
-        // g.dispose();
-
-        //renderer.render(gc);
-
-//        gc.setBackground(display.getSystemColor(SWT.COLOR_CYAN));
-//        Dimension size = getSize();
-//        gc.fillOval(0, 0, size.width, size.height);
-
         loadStat.add((int) ((System.nanoTime() - time) / 400000));
       }
     });
@@ -244,11 +210,6 @@ public class Screen
     canvas.addMouseListener(this);
     canvas.addMouseMoveListener(this);
 
-//    shell.setTouchEnabled(true);
-//    shell.addTouchListener(this);
-//    shell.addMouseListener(this);
-//    shell.addMouseMoveListener(this);
-
     // The screen timer
     screenTimer = new Timer(true);
     screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
@@ -257,7 +218,7 @@ public class Screen
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
     {
       @Override
-      public void writeColor(Color color)
+      public void writeColor(SwtColor color)
       {
         // Does not give visual feedback
       }
@@ -308,16 +269,17 @@ public class Screen
 
     // Keyboard event handlers
     // addKeyListener(this);
+    canvas.pack();
+    shell.pack();
     shell.open();
 
-    while (!shell.isDisposed())
-    {
-      if (!display.readAndDispatch())
-        display.sleep();
-    }
-    display.dispose();
+//    while (running)
+//      if (!display.readAndDispatch())
+//        display.sleep();
+//    //display.dispose();
+//    shell.dispose();
     //renderer.dispose();
-    System.exit(0);
+//    System.exit(0);
   }
 
   // -- Getters and setters --
@@ -441,7 +403,7 @@ public class Screen
   protected void paint2D(GC gc)
   {
     // Prepare setup
-    gc.setTransform(AwtSwtUtil.toSwtTransform(getTransform(), gc.getDevice()));
+    gc.setTransform(AwtSwt.toSwtTransform(getTransform(), gc.getDevice()));
     gc.setTextAntialias(SWT.ON);
     
     //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -580,6 +542,7 @@ public class Screen
   @Override
   public void exit()
   {
+    //running = false;
     System.exit(0);
   }
 

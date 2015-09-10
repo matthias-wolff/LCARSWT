@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiFunction;
 
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
@@ -34,7 +35,7 @@ class FrameData //TODO: implements Disposable
   private ArrayList<ElementData> elements;
   private ArrayList<ElementData> elementsToPaint;
   private Image bgImg;
-  private Region dirtyArea;
+  private ArrayList<Rectangle> dirtyArea;
   private boolean fullRepaint;
 
   private FrameData(PanelData panelData, boolean incremental,
@@ -112,9 +113,6 @@ class FrameData //TODO: implements Disposable
       BiFunction<ElementData, ElementData, Integer> applyUpdate)
   {
     Dimension size = getRenderSize();
-    Rectangle bounds = new Rectangle(0,0,size.width, size.height);
-    dirtyArea = new Region();
-    dirtyArea.add(bounds);
 
     if (pred == null)
     {
@@ -130,7 +128,6 @@ class FrameData //TODO: implements Disposable
 
     int elCount = elements.size();
 
-    Region dirtyArea = new Region();
     // 1. Create a hash map of the current ElementData
     HashMap<Long, ElementData> hPred = createHashMap(pred.elements);
 
@@ -141,6 +138,8 @@ class FrameData //TODO: implements Disposable
     //
     if (fullRepaint)
     {
+      dirtyArea = new ArrayList<Rectangle>(1);
+      dirtyArea.add(new Rectangle(0,0,size.width, size.height));
       elementsToPaint = elements;
       for (ElementData edu : elements)
         try
@@ -160,6 +159,7 @@ class FrameData //TODO: implements Disposable
       hPred.forEach((serialNo, edp) -> edp.onRemoveFromScreen());
     } else
     {
+      dirtyArea = new ArrayList<Rectangle>(10);
       elementsToPaint = new ArrayList<ElementData>(elCount);
       ArrayList<ElementData> validElements = new ArrayList<ElementData>(elCount);
       for (ElementData edu : elements)
@@ -197,12 +197,9 @@ class FrameData //TODO: implements Disposable
       {
         e.printStackTrace();
       }
-      dirtyArea.intersect(bounds);
-      this.dirtyArea.dispose();
-      this.dirtyArea = dirtyArea;
 
       for (ElementData edu : validElements)
-        if (dirtyArea.intersects(edu.getBounds()))
+        if (dirtyArea.add(edu.getBounds()))
           elementsToPaint.add(edu);
     }
 //    if(elements.size() !=elementsToPaint.size())
@@ -280,9 +277,12 @@ class FrameData //TODO: implements Disposable
     return result;
   }
 
-  public Region getDirtyArea()
+  public Region getDirtyArea(Device device)
   {
-    return dirtyArea;
+    Region result = new Region(device);
+    for(Rectangle rect : dirtyArea)
+      result.add(rect);    
+    return result;
   }
 
   public Dimension getRenderSize()
@@ -307,5 +307,5 @@ class FrameData //TODO: implements Disposable
   
   public Boolean getFullRepaint() {
     return fullRepaint;
-  }
+  }    
 }

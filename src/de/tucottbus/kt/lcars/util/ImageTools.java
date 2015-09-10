@@ -55,17 +55,13 @@ public class ImageTools
       
       public LcarsColorFilter(int colorScheme, int style)
       {
-        Color c = LCARS.getColor(colorScheme,style);
-        hsbD = Color.RGBtoHSB(c.getRed(),c.getGreen(),c.getBlue(),null);
+        hsbD = LCARS.getColor(colorScheme,style).getHSB();
       }
       
       @Override
       public int filterRGB(int x, int y, int rgb)
       {
-        int r = (rgb>>16)&0xff;
-        int g = (rgb>>8)&0xff;
-        int b = rgb&0xff;
-        hsbS = Color.RGBtoHSB(r,g,b,hsbS);
+        hsbS = Color.RGBtoHSB((rgb>>16)&0xff, (rgb>>8)&0xff, rgb&0xff,hsbS);
         return Color.HSBtoRGB(hsbD[0],hsbS[1],hsbS[2]);
       }
     }

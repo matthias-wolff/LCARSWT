@@ -25,6 +25,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcarsx.wwj.contributors.EArrayControls;
 import de.tucottbus.kt.lcarsx.wwj.contributors.ENavigation;
 import de.tucottbus.kt.lcarsx.wwj.contributors.EPlaceNoMatch;
@@ -345,6 +346,8 @@ public abstract class WorldWindPanel extends MainPanel
   @Override
   protected void fps2()
   {
+    final SwtColor nullColor = null;
+    
     // Show network state
     if (WorldWind.getNetworkStatus().isNetworkUnavailable())
     {
@@ -364,13 +367,13 @@ public abstract class WorldWindPanel extends MainPanel
     else if (WorldWind.getRetrievalService().hasActiveTasks())
     {
       eNetworkState.setVisible(true);
-      eNetworkState.setColor(null);
+      eNetworkState.setColor(nullColor);
       eNetworkState.setValue("DATA TRANSMISSION");
     }
     else
     {
       eNetworkState.setVisible(false);
-      eNetworkState.setColor(null);
+      eNetworkState.setColor(nullColor);
       eNetworkState.setValue("");
     }
   }

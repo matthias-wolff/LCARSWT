@@ -1,31 +1,32 @@
 package de.tucottbus.kt.lcars.j2d;
 
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
-import org.jfree.experimental.swt.SWTUtils;
+import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.graphics.Rectangle;
+
+import de.tucottbus.kt.lcars.LCARS;
 
 /**
  * A geometry representing a text.
  * 
- * @author Matthias Wolff
+ * @author Matthias Wolff, Christian Borck
  */
 public class GText extends Geometry
 {
-  private static final long serialVersionUID = 1L;
-  protected java.awt.Font awtFont;
-  protected Font font;
+  private static final long serialVersionUID = -1724627622898883028L;  
   protected int x;
   protected int y;
-  protected GeneralPath shape;
+  protected Rectangle touchBounds;
   protected String text;
   protected float descent;
-  protected Shape cachedTextShape;
+  protected FontData font;
+  
+  protected transient Path textPath;
   
   /**
    * Creates a new text geometry. A text geometry provides information and
@@ -35,7 +36,7 @@ public class GText extends Geometry
    *          the text
    * @param pos
    *          the position to draw the text on
-   * @param shape
+   * @param touchBounds
    *          the bounding rectangle for touch detection (can be
    *          <code>null</code> for static texts); note that upper left corner
    *          of the bounding rectangle is <em>not</em> identical with the
@@ -45,33 +46,34 @@ public class GText extends Geometry
    * @param foreground
    *          foreground/background flag
    */
-  public GText(String text, Point2D.Float pos, Rectangle shape, java.awt.Font font,
+  public GText(String text, Point2D.Float pos, Rectangle touchBounds, FontData font,
       boolean foreground)
   {
     super(foreground);
     this.text = text;
-    awtFont = font;
     x = (int)pos.x;
     y = (int)pos.y;
-    this.shape = new GeneralPath(shape);
+    this.touchBounds = touchBounds;
+    this.font = font;
   }
-
-  public Font getFont()
-  {
-    return this.font;
-  }
-
+  
   public Point2D.Float getPos()
   {
     return new Point2D.Float(x, y);
   }
 
+  @Deprecated
+  public int getStyle() {
+    return 0;
+  }
+  
   @Override
   public Area getArea()
   {
-    return new Area(shape);
+    final java.awt.Rectangle bounds = new java.awt.Rectangle(touchBounds.x, touchBounds.y, touchBounds.width, touchBounds.height);
+    return new Area(bounds);
   }
-
+  
   public String getText()
   {
     return this.text;
@@ -95,33 +97,13 @@ public class GText extends Geometry
   @Override
   public void paint2D(GC gc)
   {
-//    if (textShape == null)
-//      synchronized (this)
-//      {
-//        if (textShape == null)
-//        {
-//          FontRenderContext frc = g2d.getFontRenderContext();
-//          textLayout = new TextLayout(this.text, this.font, frc);
-//          textShape = font.createGlyphVector(frc, text).getOutline(pos.x, pos.y);
-//        }
-//      }
-//
-//    g2d.fill(textShape);
-    //textLayout.draw(g2d, pos.x, pos.y);
-
-//    if (cachedTextShape == null) {
-//      gc.setFont(this.font);
-//      gc.drawString(this.text, pos.x, pos.y);
-//    }
-//    else
-//      gc.draw(cachedTextShape);
-    if (font == null)
-      font = new org.eclipse.swt.graphics.Font( 
-              gc.getDevice(), 
-              SWTUtils.toSwtFontData(gc.getDevice(), awtFont, true));    
-    gc.setFont(font);
-    gc.drawText(text, x, y);
-  }
+    if(textPath == null) {
+      Font font = new Font(gc.getDevice(), this.font);
+      textPath = LCARS.getTextShape(font, text, x, y);
+      font.dispose();
+    }
+    gc.drawPath(textPath);
+  }  
 }
 
 // EOF

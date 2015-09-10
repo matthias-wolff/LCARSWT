@@ -224,8 +224,8 @@ public class EAlphaKeyboard extends EKeyboard
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
         Area  sh  = ESector.sector(cx,cy,2*naviR,naviR+3,110,129.0f,3);
-        Area  ex  = new Area(ESector.limit(sh,cx,cy,naviR,(int)(1.4*naviR),0));
-        Area  are = new Area(((GArea)geos.get(0)).getArea());
+        Area  ex  = ESector.limit(sh,cx,cy,naviR,(int)(1.4*naviR),0);
+        Area  are = ((GArea)geos.get(0)).getArea();
         are.add(ex);
         ((GArea)geos.get(0)).setShape(are);
       }
@@ -242,7 +242,7 @@ public class EAlphaKeyboard extends EKeyboard
         int   cy  = navi.y+y;
         Area  sh  = ESector.sector(cx,cy,2*naviR,naviR+3,129.0f,148.8f,3);
         Area  ex  = new Area(ESector.limit(sh,cx,cy,naviR,(int)(0.995*naviR),0));
-        Area  are = new Area(((GArea)geos.get(0)).getArea());
+        Area  are = ((GArea)geos.get(0)).getArea();
         are.add(ex);
         ((GArea)geos.get(0)).setShape(are);
       }

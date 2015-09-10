@@ -3,9 +3,8 @@ package de.tucottbus.kt.lcarsx.wwj.layers;
 import gov.nasa.worldwind.layers.GraticuleRenderingParams;
 import gov.nasa.worldwind.layers.LatLonGraticuleLayer;
 
-import java.awt.Color;
-
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 public class LcarsGraticuleLayer extends LatLonGraticuleLayer
 {
@@ -13,10 +12,10 @@ public class LcarsGraticuleLayer extends LatLonGraticuleLayer
   protected void initRenderingParams()
   {
       GraticuleRenderingParams params;
-      Color color;
+      SwtColor color;
       
       // Ten degrees grid
-      color = Color.WHITE;
+      color = SwtColor.WHITE;
       params = new GraticuleRenderingParams();
       params.setValue(GraticuleRenderingParams.KEY_LINE_COLOR, color);
       params.setValue(GraticuleRenderingParams.KEY_LABEL_COLOR, color);

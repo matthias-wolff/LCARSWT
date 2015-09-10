@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.GC;
-import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
@@ -79,7 +78,12 @@ public final class ElementData implements Serializable
   /**
    * Bounds of the area of this element.
    */
-  private org.eclipse.swt.graphics.Rectangle cachedBounds;
+  private transient org.eclipse.swt.graphics.Rectangle bounds;
+  
+  /**
+   * Bounds of the area of this element.
+   */
+  private transient Area area;
 
   // -- Constructors --
 
@@ -139,20 +143,19 @@ public final class ElementData implements Serializable
    */
   public Area getArea()
   {
-    try
-    {
-      Area area = new Area();
-      for (Geometry gi : geometry)
+    if (area == null)
+      try
       {
-        if (gi.isForeground())
-          continue;
-        area.add(new Area(gi.getArea()));
-      }
-      return area;
-    } catch (NullPointerException e)
-    {
-      return new Area(state.getBounds());
-    }
+        Area area = new Area();
+        for (Geometry gi : geometry)
+          if (!gi.isForeground())
+            area.add(gi.getArea());
+        this.area = area;
+      } catch (NullPointerException e)
+      {
+        area = new Area(state.getBounds());
+      }      
+    return area;
   }
 
   // -- Operations --
@@ -234,7 +237,9 @@ public final class ElementData implements Serializable
         for(Geometry geom : this.geometry)
           if (geom instanceof AHeavyGeometry)
             ((AHeavyGeometry) geom).applyUpdate();        
-        this.cachedBounds = other.cachedBounds;
+        this.bounds = other.bounds;
+        this.area = other.area;
+        //TODO: make 
       }
     } else
       ret |= GEOMETRY_FLAG;
@@ -269,12 +274,13 @@ public final class ElementData implements Serializable
     Geometry gi = geometry.get(i++);
     if (!gi.isForeground())
     {
+      state.getBgColor(panelState).applyBackground(gc);
+      gc.setAlpha((int)(state.getBgAlpha(panelState)*255));
       
       //TODO: set alpha composite?
       //render background elements
 //      gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
 //          state.getBgAlpha(panelState)));
-      gc.setBackground(SWTUtils.toSwtColor(gc.getDevice(), state.getBgColor(panelState)));
       while(true) {
         gi.paint2D(gc);
         if(i==l)
@@ -288,7 +294,8 @@ public final class ElementData implements Serializable
     //TODO: set alpha composite?
     // render foreground elements
     // gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, state.getFgAlpha()));
-    gc.setBackground(SWTUtils.toSwtColor(gc.getDevice(), state.getFgColor()));
+    state.getFgColor().applyForeground(gc);
+    gc.setAlpha((int)(state.getFgAlpha()*255));
     while(true) {
       gi.paint2D(gc);
       if(i==l)
@@ -304,17 +311,17 @@ public final class ElementData implements Serializable
    */
   public org.eclipse.swt.graphics.Rectangle getBounds()
   {
-    if (cachedBounds == null)
+    if (bounds == null)
     {
       Area area = new Area();
       for (Geometry gi : geometry)
-        area.add(new Area(gi.getArea()));
+        area.add(gi.getArea());
       Rectangle rect = area.getBounds();
-      
-      cachedBounds = new org.eclipse.swt.graphics.Rectangle(rect.x, rect.y, rect.width, rect.height);
+      area.reset();
+      bounds = new org.eclipse.swt.graphics.Rectangle(rect.x, rect.y, rect.width, rect.height);
     }
 
-    return new org.eclipse.swt.graphics.Rectangle(cachedBounds.x, cachedBounds.y, cachedBounds.width, cachedBounds.height); 
+    return new org.eclipse.swt.graphics.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height); 
   }
 
   /**

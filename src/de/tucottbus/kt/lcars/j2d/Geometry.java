@@ -17,8 +17,7 @@ import de.tucottbus.kt.lcars.elements.EElement;
  */
 // TODO: rename to AGeometry
 public abstract class Geometry implements Serializable
-{
-  
+{  
   private static final long serialVersionUID = -6704273422742875854L;
   protected boolean         foreground;
   

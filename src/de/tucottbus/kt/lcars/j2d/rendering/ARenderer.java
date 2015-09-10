@@ -3,16 +3,18 @@ package de.tucottbus.kt.lcars.j2d.rendering;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Region;
 
+import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * This Class organizes the screen updates to relieve the paint process.
@@ -23,15 +25,13 @@ import de.tucottbus.kt.lcars.logging.Log;
 public abstract class ARenderer
 {
   /**
-   * The Default background color is black.
-   */
-  public static final int DEFAULT_BG_COLOR = SWT.COLOR_BLACK;
-
-  /**
    * Number of updates between two debug logs
    */
   public static final int DEBUG_INTERVAL = 500; // 1500 updates ~ 60 sec
+  
+  private static final SwtColor black = LCARS.BLACK;
 
+  
   /**
    * Current size of the parent screen.
    */
@@ -115,7 +115,7 @@ public abstract class ARenderer
     width = size.x;
     height = size.y;
   }
-
+  
   /**
    * Updates the data for rendering.
    * 
@@ -132,30 +132,34 @@ public abstract class ARenderer
    * @see #elements
    */
   public void paint2D(GC gc)
-  {
+  {    
     onPaint();
     FrameData context = getContext();
+    
     Dimension size = getSize();
     if (context == null) // null stands for reset
     {
       gc.setClipping(0, 0, size.width, size.height);
-      gc.setBackground(gc.getDevice().getSystemColor(DEFAULT_BG_COLOR));
+      black.applyBackground(gc);
       gc.drawRectangle(0, 0, size.width, size.height);
       return;
     }
 
     // clipping setup
-    Region dirtyArea = context.getDirtyArea();
+    Device device = gc.getDevice();
     if (context.getFullRepaint())
       gc.setClipping(0, 0, size.width, size.height);
-    else
+    else {      
+      Region dirtyArea = context.getDirtyArea(device);
       gc.setClipping(dirtyArea);
+      dirtyArea.dispose();
+    }
     
     // background setup
     Image bgImg = context.getBackgroundImage();
     if (bgImg == null)
     {
-      gc.setBackground(gc.getDevice().getSystemColor(DEFAULT_BG_COLOR));
+      black.applyBackground(gc);
       gc.fillRectangle(0, 0, size.width, size.height);
     } else {
       org.eclipse.swt.graphics.Rectangle bgb = bgImg.getBounds();

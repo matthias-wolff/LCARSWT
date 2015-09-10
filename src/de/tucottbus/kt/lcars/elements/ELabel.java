@@ -1,8 +1,6 @@
 package de.tucottbus.kt.lcars.elements;
 
-import java.awt.Font;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
@@ -26,16 +24,7 @@ public class ELabel extends EElement
   @Override
   public ArrayList<Geometry> createGeometriesInt()
   {
-    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
-    
-    // Create label geometries
-    Font      font   = LCARS.getFont(getStyle());
-    Rectangle bounds = getBounds();
-    Point     insets = computeLabelInsets();
-    geos.addAll(LCARS.createTextGeometry2D(font,label,bounds,getStyle(),insets,false));
-    
-    // This is it
-    return geos;
+    return LCARS.createTextGeometry2D(label,getBounds(),getStyle(),computeLabelInsets(),false);
   }
 
 }

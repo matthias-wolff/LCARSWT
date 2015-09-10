@@ -18,21 +18,12 @@
 
 package de.tucottbus.kt.lcars;
 
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Toolkit;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -63,10 +54,22 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.j2d.GText;
@@ -80,6 +83,7 @@ import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
 import de.tucottbus.kt.lcars.net.RmiSecurityManager;
 import de.tucottbus.kt.lcars.net.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * The LCARS main class. Includes the main method, constants, static service methods, and the panel
@@ -122,16 +126,16 @@ public class LCARS implements ILcarsRemote
   public static final int ES_OUTLINE    = 0x00000008;   // Outline
 
   // ES_LABEL_XXX - Element label position
-  public static final int ES_LABEL_NE   = 0x00000000;   // Label in the north-east
-  public static final int ES_LABEL_E    = 0x00000010;   // Label in the east
-  public static final int ES_LABEL_SE   = 0x00000020;   // Label in the south-east
+  public static final int ES_LABEL_NW   = 0x00000000;   // Label in the north-west
+  public static final int ES_LABEL_W    = 0x00000010;   // Label in the west
+  public static final int ES_LABEL_SW   = 0x00000020;   // Label in the south-west
   public static final int ES_LABEL_N    = 0x00000030;   // Label in the north
-  public static final int ES_LABEL_S    = 0x00000040;   // Label in the south
-  public static final int ES_LABEL_SW   = 0x00000050;   // Label in the south-west
-  public static final int ES_LABEL_W    = 0x00000060;   // Label in the west
-  public static final int ES_LABEL_NW   = 0x00000070;   // Label in the north-west
-  public static final int ES_LABEL_C    = 0x00000080;   // Label in the center
-
+  public static final int ES_LABEL_C    = 0x00000040;   // Label in the center
+  public static final int ES_LABEL_S    = 0x00000050;   // Label in the south
+  public static final int ES_LABEL_NE   = 0x00000060;   // Label in the north-east
+  public static final int ES_LABEL_E    = 0x00000070;   // Label in the east
+  public static final int ES_LABEL_SE   = 0x00000080;   // Label in the south-east
+  
   // EB_XXX - Element behavior
   public static final int EB_OVERDRAG   = 0x01000000;   // Over-drag behavior
   
@@ -155,6 +159,8 @@ public class LCARS implements ILcarsRemote
   public static final int CS_SECONDARY  = 2;            // Secondary systems
   public static final int CS_ANCILLARY  = 3;            // Ancillary systems
   public static final int CS_DATABASE   = 4;            // Database systems
+  
+  /** Multi-Display **/
   public static final int CS_MULTIDISP  = 5;            // Multi-Display
   public static final int CS_REDALERT   = 6;            // Red alert
   public static final int CS_MAX        = 6;
@@ -183,9 +189,12 @@ public class LCARS implements ILcarsRemote
   public static final String FN_COMPACTA = "Compacta LT Light";
   public static final String FN_SWISS911 = "Swiss911 UCm BT";
 
+  public static final SwtColor BLACK = new SwtColor(0x000000);
+  public static final SwtColor WHITE = new SwtColor(0xFFFFFF);
   // -- Fields --
   
   protected HashMap<String,RmiPanelAdapter> rmiPanelAdapters;
+  
   
   // -- The server singleton --
 
@@ -220,7 +229,7 @@ public class LCARS implements ILcarsRemote
   }
   
   // -- Color manager --
-  private static HashMap<Integer,Color[]> colorSchemes;
+  private static HashMap<Integer,SwtColor[]> colorSchemes;
 
   /**
    * Returns an LCARS color scheme.
@@ -228,71 +237,71 @@ public class LCARS implements ILcarsRemote
    * @param colorScheme
    *          The color scheme, one of the <code>LCARS.CS_XXX</code> constants.
    */
-  private static Color[] getColors(int colorScheme)
+  private static SwtColor[] getColors(int colorScheme)
   {
-    Color colors[] = new Color[EC_COUNT];
+    SwtColor colors[] = new SwtColor[EC_COUNT];
     
-    Color cElbos    = null; // Elbos
-    Color cElbosS   = null; // Elbos selected
-    Color cUnavail  = null; // Element unavailable
-    Color cPrimary  = null; // Primary element
-    Color cPrimaryS = null; // Primary element selected
-    Color cColor1   = null; // Auxiliary color 1 (secondary element selected)
-    Color cColor2   = null; // Auxiliary color 2 (secondary element)
-    
+    SwtColor cElbos    = null; // Elbos
+    SwtColor cElbosS   = null; // Elbos selected
+    SwtColor cUnavail  = null; // Element unavailable
+    SwtColor cPrimary  = null; // Primary element
+    SwtColor cPrimaryS = null; // Primary element selected
+    SwtColor cColor1   = null; // Auxiliary color 1 (secondary element selected)
+    SwtColor cColor2   = null; // Auxiliary color 2 (secondary element)
     switch (colorScheme)
     {
     case CS_SECONDARY: 
-      cElbos    = new Color(0xFFAAA07C,true);
-      cUnavail  = new Color(0xFF5355DE,true);
-      cPrimary  = new Color(0xFF99AAFF,true);
-      cPrimaryS = new Color(0xFFC9E8FD,true);
-      cColor1   = new Color(0xFFFFCC00,true);
-      cColor2   = new Color(0xFFFFFF99,true);
+      
+      cElbos    = new SwtColor(0xFFAAA07C, true);
+      cUnavail  = new SwtColor(0xFF5355DE, true);
+      cPrimary  = new SwtColor(0xFF99AAFF, true);
+      cPrimaryS = new SwtColor(0xFFC9E8FD, true);
+      cColor1   = new SwtColor(0xFFFFCC00, true);
+      cColor2   = new SwtColor(0xFFFFFF99, true);
       break;
     case CS_ANCILLARY: 
-      cElbos    = new Color(0xFFF1B1AF,true);
-      cUnavail  = new Color(0xFFA27FA5,true);
-      cPrimary  = new Color(0xFFADACD8,true);
-      cColor1   = new Color(0xFFFFFF33,true);
-      cColor2   = new Color(0xFFE6B0D4,true);
+      cElbos    = new SwtColor(0xFFF1B1AF, true);
+      cUnavail  = new SwtColor(0xFFA27FA5, true);
+      cPrimary  = new SwtColor(0xFFADACD8, true);
+      cColor1   = new SwtColor(0xFFFFFF33, true);
+      cColor2   = new SwtColor(0xFFE6B0D4, true);
       break;
     case CS_DATABASE: 
-      cElbos   = new Color(0xFFCC6666,true);
-      cUnavail = new Color(0xFFCCCCFF,true);
-      cPrimary = new Color(0xFF99CCFF,true);
-      cColor1  = new Color(0xFFFF9900,true);
+      cElbos   = new SwtColor(0xFFCC6666, true);
+      cUnavail = new SwtColor(0xFFCCCCFF, true);
+      cPrimary = new SwtColor(0xFF99CCFF, true);
+      cColor1  = new SwtColor(0xFFFF9900, true);
       cColor2  = cElbos;
       // Upper elbo
-      colors[ EC_ELBOUP                >>EC_SHIFT] = new Color(0xCC6666);
-      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new Color(0xFF9999);
-      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new Color(0xCC6666).darker();
-      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new Color(0xFF9999).darker();
+      colors[ EC_ELBOUP                >>EC_SHIFT] = new SwtColor(0xCC6666);
+      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9999);
+      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xCC6666).darker();
+      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9999).darker();
       // Lower elbo
-      colors[ EC_ELBOLO                >>EC_SHIFT] = new Color(0xCC6666);
-      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new Color(0xFF9999);
-      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new Color(0xCC6666).darker();
-      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new Color(0xFF9999).darker();
+      colors[ EC_ELBOLO                >>EC_SHIFT] = new SwtColor(0xCC6666);
+      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9999);
+      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xCC6666).darker();
+      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9999).darker();
       // Primary element
-      colors[ EC_PRIMARY               >>EC_SHIFT] = new Color(0x99CCFF);
-      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new Color(0xCCCCFF);
-      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new Color(0x3399FF);
-      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new Color(0x9999FF);
+      colors[ EC_PRIMARY               >>EC_SHIFT] = new SwtColor(0x99CCFF);
+      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xCCCCFF);
+      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0x3399FF);
+      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0x9999FF);
       // Secondary element
-      colors[ EC_SECONDARY             >>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new Color(0xFFCC33);
-      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new Color(0x996600);
-      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new Color(0x996633);
+      colors[ EC_SECONDARY             >>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFCC33);
+      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SwtColor(0x996600);
+      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SwtColor(0x996633);
       // Text
-      colors[ EC_TEXT                  >>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new Color(0xFFFFFF);
+      colors[ EC_TEXT                  >>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
       // Headline
-      colors[ EC_HEADLINE              >>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new Color(0xFF9900);
+      colors[ EC_HEADLINE              >>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9900);
       // Special case: return!
       return colors;
     case CS_REDALERT: {
@@ -301,76 +310,76 @@ public class LCARS implements ILcarsRemote
       int opaque = 0xFF000000;
       int dimmed = 0x80000000;
       // Upper elbo
-      colors[ EC_ELBOUP                >>EC_SHIFT] = new Color(color2|opaque,true);
-      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new Color(color1|opaque,true);
-      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new Color(color2|opaque,true);
-      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new Color(color1|opaque,true);
+      colors[ EC_ELBOUP                >>EC_SHIFT] = new SwtColor(color2|opaque,true);
+      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
+      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color2|opaque,true);
+      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
       // Lower elbo
-      colors[ EC_ELBOLO                >>EC_SHIFT] = new Color(color1|opaque,true);
-      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new Color(color2|opaque,true);
-      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new Color(color1|opaque,true);
-      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new Color(color2|opaque,true);
+      colors[ EC_ELBOLO                >>EC_SHIFT] = new SwtColor(color1|opaque,true);
+      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color2|opaque,true);
+      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
+      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color2|opaque,true);
       // Primary element
-      colors[ EC_PRIMARY               >>EC_SHIFT] = new Color(color2|opaque,true);
-      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new Color(color1|opaque,true);
-      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new Color(color2|dimmed,true);
-      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new Color(color1|dimmed,true);
+      colors[ EC_PRIMARY               >>EC_SHIFT] = new SwtColor(color2|opaque,true);
+      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
+      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color2|dimmed,true);
+      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|dimmed,true);
       // Secondary element
-      colors[ EC_SECONDARY             >>EC_SHIFT] = new Color(color2|opaque,true);
-      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new Color(color1|opaque,true);
-      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new Color(color2|dimmed,true);
-      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new Color(color1|dimmed,true);
+      colors[ EC_SECONDARY             >>EC_SHIFT] = new SwtColor(color2|opaque,true);
+      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
+      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SwtColor(color2|dimmed,true);
+      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|dimmed,true);
       // Text
-      colors[ EC_TEXT                  >>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new Color(0xFFFFFF);
+      colors[ EC_TEXT                  >>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
       // Headline
-      colors[ EC_HEADLINE              >>EC_SHIFT] = new Color(color1|opaque);
-      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new Color(color1|opaque);
-      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new Color(color1|opaque);
-      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new Color(color1|opaque);
+      colors[ EC_HEADLINE              >>EC_SHIFT] = new SwtColor(color1|opaque);
+      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque);
+      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color1|opaque);
+      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|opaque);
       // Special case: return!
       return colors; }
     case CS_MULTIDISP:
       // Upper elbo
-      colors[ EC_ELBOUP                >>EC_SHIFT] = new Color(0xFF9999FF,true);
-      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new Color(0xFFCC99CC,true);
-      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new Color(0xA09999FF,true);
-      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new Color(0xA0CC99CC,true);
+      colors[ EC_ELBOUP                >>EC_SHIFT] = new SwtColor(0xFF9999FF,true);
+      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFCC99CC,true);
+      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA09999FF,true);
+      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0CC99CC,true);
       // Lower elbo
-      colors[ EC_ELBOLO                >>EC_SHIFT] = new Color(0xFFCC6666,true);
-      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new Color(0xFFFF9900,true);
-      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new Color(0xA0CC6666,true);
-      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new Color(0xA0FF9900,true);
+      colors[ EC_ELBOLO                >>EC_SHIFT] = new SwtColor(0xFFCC6666,true);
+      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFF9900,true);
+      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA0CC6666,true);
+      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0FF9900,true);
       // Primary element
-      colors[ EC_PRIMARY               >>EC_SHIFT] = new Color(0xFFCC6666,true);
-      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new Color(0xFFFF9900,true);
-      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new Color(0xA0CC6666,true);
-      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new Color(0xA0FF9900,true);
+      colors[ EC_PRIMARY               >>EC_SHIFT] = new SwtColor(0xFFCC6666,true);
+      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFF9900,true);
+      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA0CC6666,true);
+      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0FF9900,true);
       // Secondary element
-      colors[ EC_SECONDARY             >>EC_SHIFT] = new Color(0xFFDDB18E,true);
-      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new Color(0xFFEFC66A,true);
-      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new Color(0xA0DDB18E,true);
-      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new Color(0xA0EFC66A,true);
+      colors[ EC_SECONDARY             >>EC_SHIFT] = new SwtColor(0xFFDDB18E,true);
+      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFEFC66A,true);
+      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA0DDB18E,true);
+      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0EFC66A,true);
       // Text
-      colors[ EC_TEXT                  >>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new Color(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new Color(0xFFFFFF);
+      colors[ EC_TEXT                  >>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
       // Headline
-      colors[ EC_HEADLINE              >>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new Color(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new Color(0xFF9900);
+      colors[ EC_HEADLINE              >>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9900);
       // Special case: return!
       return colors;
     default: // CS_PRIMARY
-      cElbos   = new Color(0xFFF1DF6F,true);
-      cUnavail = new Color(0xFF3399FF,true);
-      cPrimary = new Color(0xFF99CCFF,true);
-      cColor1  = new Color(0xFFFFFF33,true);
-      cColor2  = new Color(0xFFFFFFCC,true);
+      cElbos   = new SwtColor(0xFFF1DF6F,true);
+      cUnavail = new SwtColor(0xFF3399FF,true);
+      cPrimary = new SwtColor(0xFF99CCFF,true);
+      cColor1  = new SwtColor(0xFFFFFF33,true);
+      cColor2  = new SwtColor(0xFFFFFFCC,true);
       break;
     }
 
@@ -398,10 +407,10 @@ public class LCARS implements ILcarsRemote
     colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = cElbos.darker();
     colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = cElbos;
     // Text
-    colors[ EC_TEXT                  >>EC_SHIFT] = Color.WHITE;
-    colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = Color.WHITE;
-    colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = Color.WHITE;
-    colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = Color.WHITE;
+    colors[ EC_TEXT                  >>EC_SHIFT] = WHITE;
+    colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = WHITE;
+    colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = WHITE;
+    colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = WHITE;
     // Headline
     colors[ EC_HEADLINE              >>EC_SHIFT] = cColor1;
     colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = cColor1;
@@ -422,22 +431,22 @@ public class LCARS implements ILcarsRemote
    * @return The color (according to the currently selected color scheme) or the black color if
    *         <code>color</code> is invalid.
    */
-  public static Color getColor(int colorScheme, int style)
+  public static SwtColor getColor(int colorScheme, int style)
   {
-    if (colorSchemes==null) colorSchemes=new HashMap<Integer,Color[]>();
-    Color colors[] = colorSchemes.get(new Integer(colorScheme));
+    if (colorSchemes==null) colorSchemes=new HashMap<Integer,SwtColor[]>();
+    SwtColor colors[] = colorSchemes.get(new Integer(colorScheme));
     if (colors==null) 
     {
       colors = getColors(colorScheme);
       colorSchemes.put(new Integer(colorScheme),colors);
     }
     int color = (style & ES_COLOR) >> EC_SHIFT;
-    if (color<0 || color>=colors.length) return Color.black;
+    if (color<0 || color>=colors.length) return BLACK;
     return colors[color];
   }
 
   // -- Font manager --
-  private static Font[] fonts = null;
+  private static FontData[] fonts = null;
   private static Map<String,Boolean> insFnts = new Hashtable<String,Boolean>();
 
   /**
@@ -452,7 +461,7 @@ public class LCARS implements ILcarsRemote
   {
     if (!insFnts.containsKey(name))
     {
-      Font f = new Font(name,Font.PLAIN,24);
+      java.awt.Font f = new java.awt.Font(name,java.awt.Font.PLAIN,24);
       insFnts.put(name,new Boolean(f.getFamily().equals(name)));
     }
     return insFnts.get(name);
@@ -495,34 +504,24 @@ public class LCARS implements ILcarsRemote
    *          and <code>LCARS.EC_XXX</code> constants.
    * @return The font.
    */
-  public static Font getFont(int style)
+  public static FontData getFont(int style)
   {
     if (fonts==null)
     {
       String f = LCARS.getInstalledFont(FN_COMPACTA);
       int    h = 1200;/*LCARS.panelDim.height;*/
-      fonts = new Font[EF_COUNT];
+      fonts = new FontData[EF_COUNT];
+      fonts[EF_LARGE >>EF_SHIFT] = new FontData(f, (int)(h/27.0), SWT.NORMAL); // h/32.0
+      fonts[EF_HEAD1 >>EF_SHIFT] = new FontData(f, (int)(h/10.0), SWT.NORMAL); // h/12.0
+      fonts[EF_HEAD2 >>EF_SHIFT] = new FontData(f, (int)(h/17.0), SWT.NORMAL); // h/25.0
+      
+      /* --> */
       if (f.equals(FN_COMPACTA))
-      {
-        fonts[EF_LARGE >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/27.0));
-        fonts[EF_HEAD1 >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/10.0));
-        fonts[EF_HEAD2 >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/17.0));
-        /* --> */
         f = LCARS.getInstalledFont(FN_SWISS911);
-        fonts[EF_NORMAL>>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/37.5));
-        fonts[EF_SMALL >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/50.0));
-        fonts[EF_TINY  >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/65.0));
-        /* <-- */
-      }
-      else // i.e. f.equals(FN_SWISS911) or f.equals("Sans-Serif");
-      {
-        fonts[EF_NORMAL>>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/37.5));
-        fonts[EF_HEAD1 >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/12.0));
-        fonts[EF_HEAD2 >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/25.0));
-        fonts[EF_LARGE >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/32.0));
-        fonts[EF_SMALL >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/50.0));
-        fonts[EF_TINY  >>EF_SHIFT] = new Font(f,Font.PLAIN,(int)(h/65.0));
-      }
+      
+      fonts[EF_NORMAL >>EF_SHIFT] =  new FontData(f, (int)(h/37.5), SWT.NORMAL);
+      fonts[EF_SMALL >>EF_SHIFT] = new FontData(f, (int)(h/50.0), SWT.NORMAL);
+      fonts[EF_TINY >>EF_SHIFT] = new FontData(f, (int)(h/65.0), SWT.NORMAL);      
     }
     int font = (style & ES_FONT) >> EF_SHIFT;
     if (font<0 || font>=fonts.length) return fonts[0];
@@ -539,24 +538,28 @@ public class LCARS implements ILcarsRemote
    *          The point size of the font.
    * @return The font.
    */
-  public static Font getFont(int style, int size)
+  public static FontData getFont(int style, int size)
   {
-    return new Font(getFont(style).getFontName(),Font.PLAIN,size);
+    FontData next = getFont(style);
+    FontData result = new FontData(next.getName(), next.getHeight(), next.getStyle());
+    result.setLocale(next.getLocale());
+    return result;
   }
 
   // -- Cursor manager --
   
-  private static Cursor blankCursor = null;
-  
   /**
    * Returns a blank cursor.
    */
-  public static Cursor getBlankCursor()
+  public static Cursor createBlankCursor(Display display)
   {
-    if (blankCursor!=null) return blankCursor;
-    BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB); 
-    blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg,new Point(0,0),"blank cursor"); 
-    return blankCursor;
+    ImageData sourceData = new ImageData(16, 16, 1,
+        new PaletteData(new RGB[] {
+            display.getSystemColor(SWT.COLOR_WHITE).getRGB(),
+            display.getSystemColor(SWT.COLOR_BLACK).getRGB()
+        }));
+    sourceData.transparentPixel = 0;
+    return new Cursor(display, sourceData, 0, 0);
   }
 
   // -- Fake Graphics2D --
@@ -589,32 +592,66 @@ public class LCARS implements ILcarsRemote
    *          The text.
    * @return The shape.
    */
-  public static Shape getTextShape(Font fnt, String text)
-  {
-    if (text==null || text.length()==0) return null;
+  public static Path getTextShape(Font font, String text)  
+  {    
+    return getTextShape(font, text, 0, 0);
+  }
 
-    Area              lsh = new Area();
-    FontRenderContext frc = LCARS.getGraphics2D().getFontRenderContext();
-    String            s[] = text.split("\n");
-    TextLayout        tl;
-    AffineTransform   tx = new AffineTransform();
-    int               y   = 0;
-    int               w   = 0;
+  /**
+   * Computes the shape of a text.
+   * 
+   * @param fnt
+   *          The font.
+   * @param text
+   *          The text.
+   * @return The shape.
+   */
+  public static Path getTextShape(Font font, String text, float x, float y)  
+  {    
+    if (text==null || text.length()==0) return null;
+    
+    Display display = Display.getDefault();
+    GC gc = new GC(display);
+    FontMetrics fm = (gc).getFontMetrics();
+    
+    y += fm.getAscent();
+    Path              path = new Path(display);
+    String            s[] = text.split("\n");    
+    float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
     
     for (int i=0; i<s.length; i++)
     {
-      String l = s[i]; if (l==null || l.length()==0) l=" ";
-      tl = new TextLayout(l,fnt,frc);
-      y += tl.getAscent();
-      tx.setToTranslation(-tl.getVisibleAdvance(),y);
-      w = (int)Math.max(w,tl.getVisibleAdvance());
-      lsh.add(new Area(tl.getOutline(tx)));
-      y += tl.getDescent()+tl.getLeading();
+      String l = s[i];      
+      if (l!=null && l.length()!=0)
+        path.addString(l, x, y, font);
+      y+=dy;
     }
-    Rectangle r = lsh.getBounds();
-    tx.setToTranslation(-r.x,-r.y);
-    lsh.transform(tx);
-    return lsh;
+    gc.dispose();
+    return path;
+  }
+
+  /**
+   * Creates the 2D geometry/geometries of a multi-line text.
+   * 
+   * @param text
+   *          The text.
+   * @param bounds
+   *          The bounding box to align the text to.
+   * @param style
+   *          The text position, one of the {@link LCARS}<code>.ES_LABEL_XXX</code> constants.
+   * @param insets
+   *          The margin which the text should keep from the bounding box; may be <code>null</code>.
+   */
+  public static ArrayList<Geometry> createTextGeometry2D
+  (
+    String     text,
+    Rectangle  bounds,
+    int        style,
+    Point      insets,
+    boolean    foreground    
+  )
+  {
+    return createTextGeometry2D(getFont(style), text, bounds, style, insets, foreground);
   }
 
   /**
@@ -631,104 +668,91 @@ public class LCARS implements ILcarsRemote
    * @param insets
    *          The margin which the text should keep from the bounding box; may be <code>null</code>.
    */
-  public static Vector<Geometry> createTextGeometry2D
+  public static ArrayList<Geometry> createTextGeometry2D
   (
-    Font       fnt,
+    FontData       font,
     String     text,
     Rectangle  bounds,
     int        style,
     Point      insets,
-    boolean    foreground
+    boolean    foreground    
   )
   {
-    Vector<Geometry> geos = new Vector<Geometry>(); 
+    //TODO: http://pawlan.com/monica/articles/texttutorial/other.html
+    
+    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
     if (text==null || text.length()==0 || bounds==null) return geos;
     if (insets==null) insets = new Point(0,0);
     
-    FontRenderContext frc = LCARS.getGraphics2D().getFontRenderContext();
     String            s[] = text.split("\n");
     TextLayout        t[] = new TextLayout[s.length];
     Dimension         td  = new Dimension();
-    
     // Measure text lines
-    for (int i=0; i<s.length; i++)
+    int n = s.length;
+    Display display = Display.getDefault();
+    Font thisFont = new Font(display, font);
+    
+    for (int i=0; i<n; i++)
     {
       String l = s[i]; if (l==null || l.length()==0) l=" ";
-      t[i] = new TextLayout(l,fnt,frc);
-      double w = Math.max(td.getWidth(),t[i].getBounds().getWidth());
-      double h = td.getHeight()+t[i].getAscent();
-      if (i<s.length-1) h += (t[i].getDescent()+t[i].getLeading());
+      TextLayout tl = t[i] = new TextLayout(display);
+      tl.setFont(thisFont);
+      tl.setText(l);
+      double w = Math.max(td.getWidth(),t[i].getBounds().width);
+      double h = td.getHeight()+tl.getAscent();
+      
+      if (i<n-1) h += (tl.getDescent()+tl.getSpacing());
       td.setSize(w,h);
     }
+    
+    thisFont.dispose();
     
     // Position the text box
     float tx = bounds.x;
     float ty = bounds.y;
     float w  = bounds.width;
     float h  = bounds.height;
-    switch (style&LCARS.ES_LABEL)
+    
+    int align = (style & ES_LABEL) >> 4;
+    if(align > ES_LABEL_SE)
+      align = ES_LABEL_NW >> 4;
+    int hAlign = align / 3;
+        
+    final BiFunction<Dimension, TextLayout, Float> xFun0 = (d,tl) -> {return 0f;};
+    final BiFunction<Dimension, TextLayout, Float> xFun1 = (d,tl) -> {return (d.width-(float)tl.getBounds().width)/2;};
+    final BiFunction<Dimension, TextLayout, Float> xFun2 = (d,tl) -> {return d.width-tl.getBounds().width-1f;};
+    BiFunction<Dimension, TextLayout, Float> xFun;
+
+    switch (hAlign) // horizontal alignment
     {
-    case LCARS.ES_LABEL_NW:
-    case LCARS.ES_LABEL_W:
-    case LCARS.ES_LABEL_SW:
-      tx = tx+insets.x;
-      break;
-    case LCARS.ES_LABEL_NE:
-    case LCARS.ES_LABEL_E:
-    case LCARS.ES_LABEL_SE:
-      tx = tx+w-td.width-insets.x;
-      break;
-    case LCARS.ES_LABEL_N:
-    case LCARS.ES_LABEL_C:
-    case LCARS.ES_LABEL_S:
-      tx = tx+(w-td.width)/2;
-      break;
+      case 0: xFun = xFun0; tx += insets.x; break; // left
+      case 1: xFun = xFun1; tx += (w-td.width)/2; break; // middle
+      case 2: xFun = xFun2; tx += w-td.width-insets.x; break; // right
+      default: return geos;
     }
-    switch (style&LCARS.ES_LABEL)
+    switch (align % 3) // vertical alignment
     {
-    case LCARS.ES_LABEL_NE:
-    case LCARS.ES_LABEL_N:
-    case LCARS.ES_LABEL_NW:
-      ty = ty+insets.y;
-      break;
-    case LCARS.ES_LABEL_E:
-    case LCARS.ES_LABEL_C:
-    case LCARS.ES_LABEL_W:
-      ty = ty+(h-td.height)/2;
-      break;
-    case LCARS.ES_LABEL_SE:
-    case LCARS.ES_LABEL_S:
-    case LCARS.ES_LABEL_SW:
-      ty = ty+h-td.height-insets.y;
-      break;
+      case 0: ty += insets.y; break;  // top
+      case 1: ty += (h-td.height)/2; break; // middle
+      case 2: ty += h-td.height-insets.y; break; // bottom
+      default: return geos;
     }
 
     // Draw text lines
-    float x = 0;
     float y = -t[0].getDescent()/3;
+    
     for (int i=0; i<s.length; i++)
     {
-      switch (style&LCARS.ES_LABEL)
-      {
-      case LCARS.ES_LABEL_NE:
-      case LCARS.ES_LABEL_E:
-      case LCARS.ES_LABEL_SE:
-        x  = td.width-(float)t[i].getBounds().getWidth()-1;
-        break;
-      case LCARS.ES_LABEL_N:
-      case LCARS.ES_LABEL_C:
-      case LCARS.ES_LABEL_S:
-        x  = (td.width-(float)t[i].getBounds().getWidth())/2;
-        break;
-      }
-      y += t[i].getAscent();
+      TextLayout tl = t[i];
+      float x = xFun.apply(td, tl);                 
+      y += tl.getAscent();
       Point2D.Float pos = new Point2D.Float(tx+x,ty+y);
-      Rectangle shape = new Rectangle((int)(tx+x),(int)(ty+y-t[i].getAscent()),
-          (int)(t[i].getAdvance()),(int)(t[i].getAscent()+t[i].getDescent()));
-      GText e = new GText(s[i],pos,shape,fnt,foreground);
-      e.setDescent(t[i].getDescent());
+      //Rectangle shape = new Rectangle((int)(tx+x),(int)(ty+y-tl.getAscent()),
+      //    (int)(tl.getAdvance()),(int)(tl.getAscent()+tl.getDescent()));
+      GText e = new GText(s[i],pos,tl.getBounds(),font,foreground);
+      e.setDescent(tl.getDescent());
       geos.add(e);
-      y += t[i].getDescent()+t[i].getLeading();
+      y += tl.getDescent()+tl.getSpacing();
     }
     
     return geos;
@@ -742,23 +766,26 @@ public class LCARS implements ILcarsRemote
    * @param value interpolation value; 0 (first color) ... 1 (second color)
    * @return the interpolated color
    */
-  public static Color interpolateColors(Color clr1, Color clr2, float value)
+  public static SwtColor interpolateColors(SwtColor clr1, SwtColor clr2, float value)
   {
     if (value<=0f) return clr1;
     if (value>=1f) return clr2;
-    float red1   = (float)clr1.getRed  ()/255f;
-    float green1 = (float)clr1.getGreen()/255f;
-    float blue1  = (float)clr1.getBlue ()/255f;
-    float alpha1 = (float)clr1.getAlpha()/255f;
-    float red2   = (float)clr2.getRed  ()/255f;
-    float green2 = (float)clr2.getGreen()/255f;
-    float blue2  = (float)clr2.getBlue ()/255f;
-    float alpha2 = (float)clr2.getAlpha()/255f;
-    float red    = (1f-value)*red1  +value*red2  ;
-    float green  = (1f-value)*green1+value*green2;
-    float blue   = (1f-value)*blue1 +value*blue2 ;
-    float alpha  = (1f-value)*alpha1+value*alpha2;
-    return new Color(red,green,blue,alpha);
+    final float norm = 1/255f;
+    float red1   = (float)clr1.getRed  ()*norm;
+    float green1 = (float)clr1.getGreen()*norm;
+    float blue1  = (float)clr1.getBlue ()*norm;
+    float alpha1 = (float)clr1.getAlpha()*norm;
+    float red2   = (float)clr2.getRed  ()*norm;
+    float green2 = (float)clr2.getGreen()*norm;
+    float blue2  = (float)clr2.getBlue ()*norm;
+    float alpha2 = (float)clr2.getAlpha()*norm;
+
+    float val1 = 1f - value;
+    return new SwtColor(
+        val1*red1  +value*red2,
+        val1*green1+value*green2,
+        val1*blue1 +value*blue2,
+        val1*alpha1+value*alpha2);
   }
   
   /**
@@ -1266,7 +1293,7 @@ public class LCARS implements ILcarsRemote
       {
         LCARS.rmiRegistry = LocateRegistry.getRegistry(getRmiPort());
       }
-      Log.info("NET","RMI registry: "+LCARS.rmiRegistry);
+      Log.info("RMI registry: "+LCARS.rmiRegistry);
     }
     return LCARS.rmiRegistry;
   }
@@ -1349,7 +1376,7 @@ public class LCARS implements ILcarsRemote
     try
     {
       String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-      Log.info("NET","LCARS.server: Connection request from "+screenUrl);
+      Log.info("LCARS.server: Connection request from "+screenUrl);
       RmiPanelAdapter rpa = new RmiPanelAdapter(panelClassName,screenHostName);
       rmiPanelAdapters.put(screenHostName+"."+screenID,rpa);
       return true;
@@ -1366,7 +1393,7 @@ public class LCARS implements ILcarsRemote
   {
     String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
     String key = screenHostName+"."+screenID;
-    Log.info("NET","LCARS.server: Disconnection request from "+screenUrl);
+    Log.info("LCARS.server: Disconnection request from "+screenUrl);
     
     RmiPanelAdapter rpa = rmiPanelAdapters.remove(key);
     if (rpa!=null) rpa.shutDown();
