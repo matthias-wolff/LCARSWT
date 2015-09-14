@@ -450,6 +450,7 @@ public class ETopography extends ElementContributor
    * Returns the points in this topography. The returned vector is a copy, modifying it has no effect
    * on the internal data.
    * 
+   * @see #getPointPos(ERect)
    * @see #addPoint(java.awt.geom.Point2D.Float, int, int, boolean)
    * @see #addPoint(java.awt.geom.Point2D.Float, int, int, Object, boolean)
    * @see #movePoint(ERect, java.awt.geom.Point2D.Float)
@@ -457,6 +458,21 @@ public class ETopography extends ElementContributor
   public Vector<ERect> getPoints()
   {
     return new Vector<ERect>(points);
+  }
+
+  /**
+   * Returns the position of a point in physical units.
+   * 
+   * @param ePoint
+   *          The point whose position is to be retrieved.
+   * @return The position.
+   */
+  public Point2D getPointPos(ERect ePoint)
+  {
+    if (points.indexOf(ePoint)<0) return null;
+    int lx = (int)Math.round(ePoint.getBounds().getCenterX())-this.x;
+    int ly = (int)Math.round(ePoint.getBounds().getCenterY())-this.y;
+    return lToP(new Point(lx,ly));
   }
   
   /**
