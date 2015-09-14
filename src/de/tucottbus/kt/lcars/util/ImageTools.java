@@ -81,7 +81,7 @@ public class ImageTools
    */
   public static Image loadImage(String imageFile)
   {
-    ImageData data = GImage.getImage(imageFile).getImageData();
+    ImageData data = GImage.getImage(imageFile);
     ColorModel colorModel = null;
     PaletteData palette = data.palette;
     if (palette.isDirect) {

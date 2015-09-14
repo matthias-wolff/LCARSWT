@@ -4,9 +4,7 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import java.io.Serializable;
 
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Path;
 
 import de.tucottbus.kt.lcars.swt.AwtSwt;
 
@@ -18,24 +16,24 @@ import de.tucottbus.kt.lcars.swt.AwtSwt;
 public class GArea extends Geometry implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  protected Area           _shape;
+  protected Area            area;
   protected boolean         outline;
-
-  public GArea(Shape shape, boolean foreground)
+  
+  public GArea(Area area, boolean foreground)
   {
-    super(foreground);    
-    _shape = new Area(shape);
+    super(foreground);
+    this.area = new Area(area);
   }
   
   @Override
-  public Area getArea()
+  public void getArea(Area area)
   {
-   return new Area(_shape);
+    area.add(this.area);
   }
   
-  public void setShape(Shape shape)
+  public Area getArea()
   {
-    _shape = new Area(shape);
+    return new Area(this.area);
   }
   
   public boolean isOutline()
@@ -48,11 +46,10 @@ public class GArea extends Geometry implements Serializable
     this.outline = outline;
   }
   
-  private Path getPath(Device device) {
-    final Path path = AwtSwt.toSwtPath(_shape, device);
-    return path;
+  public void setShape(Shape shape) {
+    area = new Area(shape);
   }
-  
+    
   /*
    * (non-Javadoc)
    * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
@@ -61,9 +58,9 @@ public class GArea extends Geometry implements Serializable
   public void paint2D(GC gc)
   {
     if (outline)
-      gc.drawPath(getPath(gc.getDevice()));
+      gc.drawPath(AwtSwt.toSwtPath(area, gc.getDevice()));
     else
-      gc.fillPath(getPath(gc.getDevice()));
+      gc.fillPath(AwtSwt.toSwtPath(area, gc.getDevice()));
   }  
 }
 

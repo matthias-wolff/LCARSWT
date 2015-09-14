@@ -20,10 +20,9 @@ package de.tucottbus.kt.lcars;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -71,6 +70,8 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Monitor;
+import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.j2d.GText;
 import de.tucottbus.kt.lcars.j2d.Geometry;
@@ -609,15 +610,19 @@ public class LCARS implements ILcarsRemote
   public static Path getTextShape(Font font, String text, float x, float y)  
   {    
     if (text==null || text.length()==0) return null;
-    
     Display display = Display.getDefault();
-    GC gc = new GC(display);
-    FontMetrics fm = (gc).getFontMetrics();
+    FontMetrics[] fm = new FontMetrics[1];
+    display.syncExec(() -> {
+        GC gc = new GC(display);
+        fm[0] = (gc).getFontMetrics();
+        gc.dispose();
+    });
     
-    y += fm.getAscent();
-    Path              path = new Path(display);
+    
+    y += fm[0].getAscent();
+    Path              path = new Path(font.getDevice());
     String            s[] = text.split("\n");    
-    float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
+    float dy = fm[0].getAscent() + fm[0].getDescent() + fm[0].getLeading();
     
     for (int i=0; i<s.length; i++)
     {
@@ -626,7 +631,6 @@ public class LCARS implements ILcarsRemote
         path.addString(l, x, y, font);
       y+=dy;
     }
-    gc.dispose();
     return path;
   }
 
@@ -1584,25 +1588,23 @@ public class LCARS implements ILcarsRemote
     
     try
     {
-      GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      GraphicsDevice[] screens = env.getScreenDevices();
-      int scrid = 0;
-      try
-      {
-        scrid = Integer.parseInt(getArg("--screen="))-1;
-        if (scrid>=screens.length) scrid=0;
-      }
-      catch (Exception e)
-      {
-      }
+
       if (getArg("--mode=") == null)
         LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
       boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
       {
-        Screen scr = new Screen(screens[scrid],"de.tucottbus.kt.lcars.Panel",fullscreen);
-        scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
-        scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
+        Display display = Display.getDefault();
+        Monitor[] monitors = display.getMonitors();
+       
+        String srcIdArg = getArg("--screen=");
+        int scrid = srcIdArg != null ?
+            Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
+        
+        Screen scr = new Screen(display,"de.tucottbus.kt.lcars.Panel",fullscreen);       
+        scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
+        //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
+        //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
         iscreen = scr;
       }
       else
@@ -1618,19 +1620,18 @@ public class LCARS implements ILcarsRemote
           // Shut-down panel
           if (iscreen!=null)
           {
-	        try
-	        {
-	          if (iscreen.getPanel()!=null)
-	          {
-	            iscreen.getPanel().stop();
-	          }
-	        }
-	        catch (RemoteException e) {}
-	
-	        // Shut-down RMI screen adapter
-	        if (iscreen instanceof RmiScreenAdapter)
-	          ((RmiScreenAdapter)iscreen).shutDown();
-	        iscreen = null;
+  	        try
+  	        {
+  	          IPanel panel = iscreen.getPanel();
+  	          if (panel!=null)
+  	            panel.stop();
+  	        }
+  	        catch (RemoteException e) {}
+  	
+  	        // Shut-down RMI screen adapter
+  	        if (iscreen instanceof RmiScreenAdapter)
+  	          ((RmiScreenAdapter)iscreen).shutDown();
+  	        iscreen = null;
           }
 
           // Shut-down RMI panel adapters
@@ -1652,7 +1653,6 @@ public class LCARS implements ILcarsRemote
 
           // Shut-down speech engine
           Panel.disposeSpeechEngine();
-
           Log.info("... shut-down");  
         }
       });
@@ -1700,32 +1700,31 @@ public class LCARS implements ILcarsRemote
           String pcn = getArg("--panel=");
           if (pcn==null && getArg("--server")!=null)
             pcn = "de.tucottbus.kt.lcars.net.ServerPanel";
-          iscreen.setPanel(pcn);
+          
+          if (pcn != null && pcn != iscreen.getPanel().getClass().getName())
+            iscreen.setPanel(pcn);
         }
-        catch (ClassNotFoundException e)
+        catch (ClassNotFoundException | RemoteException e)
         {
-          e.printStackTrace();
-        }
-        catch (RemoteException e)
-        {
-          e.printStackTrace();
+          Log.err("Error while initiation.", e);
         }
 
       // Run SWT event loop 
       while (true)
         try
         {
-          if (!Display.getDefault().readAndDispatch())
-            Display.getDefault().sleep();
+          while (true)
+            if (!Display.getDefault().readAndDispatch())
+              Display.getDefault().sleep();
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          Log.err("Error in screen execution.", e);
         }
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("", e);
     }
   }
 

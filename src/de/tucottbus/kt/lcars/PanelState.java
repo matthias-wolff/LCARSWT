@@ -3,6 +3,8 @@ package de.tucottbus.kt.lcars;
 import java.awt.Dimension;
 import java.io.Serializable;
 
+import de.tucottbus.kt.lcars.util.Objectt;
+
 /**
  * The state of an {@linkplain Panel LCARS panel}.
  * 
@@ -79,27 +81,24 @@ public class PanelState implements Serializable
   @Override
   public boolean equals(Object o)
   {
-    if (o == null)
-      return false;
-
-    if (!(o instanceof PanelState))
-      return false;
-
-    PanelState other = (PanelState) o;
-
-    if (!((dimension == other.dimension) || ((dimension != null) && dimension
-        .equals(other.dimension))))
-      return false;
-
-    if (!((bgImageRes == other.bgImageRes) || ((bgImageRes != null) && bgImageRes
-        .equals(other.bgImageRes))))
-      return false;
-
-    return colorScheme == other.colorScheme && blink == other.blink
-        && modal == other.modal && silent == other.silent
-        && alpha == other.alpha && locked == other.locked;
+    return o != null
+        && (o instanceof PanelState)
+        && equals((PanelState) o);
   }
 
+  public boolean equals(PanelState other)
+  {
+    return other != null
+        && Objectt.equals(dimension, other.dimension)
+        && Objectt.equals(bgImageRes, other.bgImageRes)
+        && colorScheme == other.colorScheme
+        && blink       == other.blink
+        && modal       == other.modal
+        && silent      == other.silent
+        && alpha       == other.alpha
+        && locked      == other.locked;
+  }
+  
 }
 
 // EOF

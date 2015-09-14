@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.contributors;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.rmi.RemoteException;
 import java.util.AbstractList;
@@ -16,6 +15,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 public class EPanelSelector extends EMessageBox
 {
@@ -42,7 +42,7 @@ public class EPanelSelector extends EMessageBox
     eTit.setValue("PANEL SELECT");
     add(eTit);
     ERect e = new ERect(null,0,64,d.width,d.height-77,LCARS.ES_STATIC|LCARS.ES_MODAL,null);
-    e.setColor(new Color(0x80000000,true));
+    e.setColor(new SwtColor(0x80000000,true));
     add(e);
     e = new ERect(null,0,d.height+3,d.width-75,3,style1,null);
     add(e);

@@ -5,6 +5,7 @@ import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 
 import de.tucottbus.kt.lcars.Panel;
@@ -61,7 +62,7 @@ public class EImage extends EElement implements ImageObserver
    *   
    * @return image
    */
-  public Image getImage()
+  public ImageData getImage()
   {
     return GImage.getImage(this.resourceName);  
   }

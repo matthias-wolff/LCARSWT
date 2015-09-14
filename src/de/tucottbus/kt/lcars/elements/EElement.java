@@ -6,6 +6,9 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.function.Consumer;
+
+import org.jfree.util.Log;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -79,9 +82,9 @@ public abstract class EElement
   /**
    * Returns the {@link Area area} covered by all background geometries.
    */
-  public Area getShape()
+  public void getArea(Area area)
   {
-    return data.getArea();
+    data.getArea(area);
   }
   
   /**
@@ -121,7 +124,7 @@ public abstract class EElement
    */
   public void setColor(SwtColor color)
   {
-    if (de.tucottbus.kt.lcars.util.Object.equals(color, data.state.getColor())) return;
+    if (de.tucottbus.kt.lcars.util.Objectt.equals(color, data.state.getColor())) return;
     data.state.setColor(color);
     invalidate(false);
   }
@@ -813,7 +816,42 @@ public abstract class EElement
     this.panel = panel;
     data.state.setChanged();
     data.geometry = null;
-  }  
+  }
+  
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName()+"#"+data.serialNo + (label != null ? ",label=\""+label + "\"" : "");
+  }
+  
+  public boolean checkValidation() {
+    Boolean[] valid = {true};
+    Consumer<String> invalid = (msg) -> {
+      Log.warn(toString()+": "+msg);
+      valid[0] = false;
+    };
+    
+    if (panel == null)
+      invalid.accept("panel == null");
+    
+    if (data == null)
+      invalid.accept("data == null");
+    else
+      if (data.geometry == null)
+        invalid.accept("data.geometry == null");
+      else {
+        int i = 0;
+        for(Geometry g : data.geometry) {
+          if (g == null)
+            invalid.accept("geometry["+i+"] == null");   
+          i++;
+        }
+        if (data.state == null)
+          invalid.accept("data.state == null");
+      }
+    return valid[0];   
+  }
+  
+
 }
 
 // EOF

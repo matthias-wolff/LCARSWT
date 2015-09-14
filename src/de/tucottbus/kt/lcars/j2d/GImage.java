@@ -10,7 +10,7 @@ import java.util.Vector;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.ImageData;
 
 import de.tucottbus.kt.lcars.logging.Log;
 
@@ -25,8 +25,6 @@ public class GImage extends Geometry
   private String                  resourceName;
   //private transient ImageObserver imageObserver;
   private Point                   pos;
-  private Image                   cachedImg;
-  private boolean                 resNotFound = false;
   
   /**
    * Creates a new image geometry.
@@ -45,24 +43,18 @@ public class GImage extends Geometry
   }
 
   @Override
-  public Area getArea()
+  public void getArea(Area area)
   {
-    Image image = getImage();
-    if(image == null)
-      return new Area();
-    Rectangle rect = image.getBounds();
-    return new Area(new java.awt.Rectangle(pos.x,pos.y,rect.width,rect.height));
+    ImageData image = getImage();    
+    if(image == null) return;
+    area.add(new Area(new java.awt.Rectangle(pos.x,pos.y,image.width,image.height)));
   }
   
   
-  public Image getImage()
+  public ImageData getImage()
   {
-    if(cachedImg == null && !resNotFound)
-    {
-      cachedImg = getImage(this.resourceName);
-      resNotFound = cachedImg == null;
-    }
-    return cachedImg;
+    final ImageData imgData = getImage(this.resourceName);
+    return imgData;
   }
   
   @Override
@@ -71,9 +63,12 @@ public class GImage extends Geometry
     if (resourceName == null)
       return;
     
-    Image image = GImage.getImage(resourceName);
-    if(image != null)
+    ImageData imgData = GImage.getImage(resourceName);
+    if(imgData != null) {
+      Image image = new Image(gc.getDevice(), imgData);
       gc.drawImage(image, pos.x, pos.y);
+      image.dispose();
+    }
     else
       Log.debug("Image not found at Location: "+ resourceName);
   }
@@ -83,7 +78,7 @@ public class GImage extends Geometry
   /**
    * The image cache.
    */
-  private static HashMap<String,Image> images;
+  private static HashMap<String,ImageData> images;
 
   /**
    * The keys (file names) of all images in use. Images in {@link #images} whose keys are not part
@@ -98,13 +93,13 @@ public class GImage extends Geometry
    *          The image file name as used by {@link ClassLoader#getResource(String)}.
    * @return The image or <code>null</code> if the image could not be loaded from the file
    */
-  public static Image getImage(String resourceName)
+  public static ImageData getImage(String resourceName)
   {
     if (resourceName ==null) return null;    
-    if (GImage.images==null) GImage.images = new HashMap<String,Image>();
+    if (GImage.images==null) GImage.images = new HashMap<String,ImageData>();
     if (GImage.used  ==null) GImage.used   = new HashSet<String>();
 
-    Image image = null;
+    ImageData image = null;
     if (GImage.images.containsKey(resourceName))
       image = GImage.images.get(resourceName);
     else
@@ -149,13 +144,13 @@ public class GImage extends Geometry
    *          The image resource file name as used by {@link ClassLoader#getResource(String)}.
    * @return The image or <code>null</code> if the image could not be loaded from the file
    */
-  private static Image loadImageFile(String path, boolean inJar)
+  private static ImageData loadImageFile(String path, boolean inJar)
   {
     try
     {
       return inJar
-          ? new Image(null, GImage.class.getClassLoader().getResourceAsStream(path))
-          : new Image(null, path);
+          ? new ImageData(GImage.class.getClassLoader().getResourceAsStream(path))
+          : new ImageData(path);
     }
     catch(SWTException ex)
     {

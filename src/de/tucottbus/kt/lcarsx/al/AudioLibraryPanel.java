@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcarsx.al;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
@@ -31,6 +30,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -39,9 +39,7 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  * @author Matthias Wolff
  */
 public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventListener
-{
-   public static final String CLASSKEY = "AUDLIB"; 
-  
+{ 
    private EValue eTitle;
    private EValue eTimecode;
    private ERect  eAuthor;
@@ -88,7 +86,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     super.init();
     setColorScheme(LCARS.CS_DATABASE);
     
-    Color  cOutline = new Color(1f,1f,1f,0.25f);
+    SwtColor  cOutline = new SwtColor(1f,1f,1f,0.25f);
     ERect  eRect;
     EElbo  eElbo;
     EElement e;
@@ -184,7 +182,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     add(eElbo);
 
     eRect = new ERect(this,461,991,731,66,LCARS.ES_STATIC,null);
-    eRect.setColor(new Color(0x333333));
+    eRect.setColor(new SwtColor(0x333333));
     add(eRect);
     eGain = new EGainSlider(462,992,731,66);
     eGain.addToPanel(this);
@@ -261,8 +259,8 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     // Elements in mode 1: track info
     eTracks = new ETrackSelector(266,129);
     eDisplay = new ELevelsDisplay(765,515,880,125,25);
-    eDisplay.setBarColor (new Color(0x9999FF));
-    eDisplay.setGridColor(new Color(0xDDB18E));
+    eDisplay.setBarColor (new SwtColor(0x9999FF));
+    eDisplay.setGridColor(new SwtColor(0xDDB18E));
     eInfo = new ETrackInfo(1230,515);
     
     // Initialize
@@ -426,7 +424,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       setMode(0);
       break;
     }
-    Log.info("ALP",event.toString());
+    Log.info(event.toString());
   }
   
   // -- Operations --
@@ -437,7 +435,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       return new File(LCARS.getArg("--musiclib="));
     
     // Fake a music library
-    Log.warn("ALP","Command line option --musiclib=<music-dir> not specified, entering demo mode");
+    Log.warn("Command line option --musiclib=<music-dir> not specified, entering demo mode");
     String tmpDir = System.getProperty("java.io.tmpdir");
     try
     {
@@ -458,7 +456,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     }
     catch (Exception e)
     {
-      Log.err(CLASSKEY, "Error while getting music directory.", e);
+      Log.err("Error while getting music directory.", e);
     }
     return new File(tmpDir+"/lcars-wt-music");
     

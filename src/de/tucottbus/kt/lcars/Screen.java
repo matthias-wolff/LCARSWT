@@ -2,8 +2,6 @@ package de.tucottbus.kt.lcars;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -20,28 +18,23 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.TouchEvent;
 import org.eclipse.swt.events.TouchListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Touch;
 
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
-import de.tucottbus.kt.lcars.j2d.rendering.AsyncRenderer;
-import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
-import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
+import de.tucottbus.kt.lcars.swt.PanelDataComposite;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -96,11 +89,6 @@ public class Screen
    * The screen rendering load statistics.
    */
   protected LoadStatistics loadStat;
-
-  /**
-   * Manages the repaint with optimizations
-   */
-  protected ARenderer renderer;
   
   /**
    * 
@@ -108,8 +96,8 @@ public class Screen
   //protected AdvGraphics2D g2dWrapper;
 
   protected Shell shell;
-
-  protected Canvas canvas;
+  
+  protected PanelDataComposite composite;
 
   private java.awt.Frame awtFrame;
   
@@ -133,10 +121,9 @@ public class Screen
    * @throws ClassNotFoundException
    *           If <code>panelClass</code> is invalid
    */
-  public Screen(GraphicsDevice device, String panelClass, boolean fullScreen)
+  public Screen(Display display, String panelClass, boolean fullScreen)
       throws ClassNotFoundException
-  {
-    Display display = getSwtDisplay();
+  {    
     shell = new Shell(display, SWT.NO_TRIM);
     // shell.forceActive();
     //shell.forceFocus(); //Keyboard focus
@@ -145,15 +132,15 @@ public class Screen
     shell.setText("LCARS");
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    // Screen repainter
-    renderer = new Renderer();
     // initContentPane();
 
     setPanel(panelClass);
-    fullScreenMode = fullScreen && device.isFullScreenSupported();
+    fullScreenMode = fullScreen;// && device.isFullScreenSupported();
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
-    shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+    
+    final Color black = display.getSystemColor(SWT.COLOR_BLACK);
+    //shell.setBackground(black);
 
     if (fullScreenMode && !"maximized".equals(LCARS.getArg("--mode=")))
     {
@@ -187,31 +174,48 @@ public class Screen
     }
 
     if (LCARS.getArg("--nomouse")!=null)
-      canvas.setCursor(LCARS.createBlankCursor(display));
-    canvas = new Canvas(shell, SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED);
-    canvas.setSize(shell.getSize());
-    Composite treeComp = new Composite(canvas, SWT.NO_BACKGROUND | SWT.EMBEDDED);
-    awtFrame = SWT_AWT.new_Frame(treeComp);
-    awtFrame.setSize(getSize());
-
-    // TODO: check awtFrame is in embedded full screen mode
-    canvas.addPaintListener(new PaintListener()
+      composite.setCursor(LCARS.createBlankCursor(display));
+    composite = new PanelDataComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED*/)
     {
-      public void paintControl(PaintEvent e)
+      
+      @Override
+      public void prePaint(GC gc)
       {
-        long time = System.nanoTime();
-        paint2D(e.gc);
-        loadStat.add((int) ((System.nanoTime() - time) / 400000));
+        // Prepare setup
+        gc.setTransform(AwtSwt.toSwtTransform(getTransform(), gc.getDevice()));
+        gc.setTextAntialias(SWT.ON);
+        gc.setInterpolation(SWT.LOW);
+        
+        //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+        //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+        //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+//        renderer.setSize(shell.getSize());
+//        renderer.paint2D(gc);
       }
-    });
+      
+      @Override
+      public void postPaint(GC gc) {}
+    };
+    composite.setBackground(black);
+    composite.setSize(shell.getSize());
+    composite.setLayout(new FillLayout());
+    
+    //TODO:
+    //awtFrame = SWT_AWT.new_Frame(composite);
+    //awtFrame.setSize(getSize());
+      
+    // TODO: check awtFrame is in embedded full screen mode
 
-    canvas.setTouchEnabled(true);
-    canvas.addTouchListener(this);
-    canvas.addMouseListener(this);
-    canvas.addMouseMoveListener(this);
+    composite.setTouchEnabled(true);
+    composite.addTouchListener(this);
+    composite.addMouseListener(this);
+    composite.addMouseMoveListener(this);
 
+    composite.setEnabled(true);
+    
     // The screen timer
-    screenTimer = new Timer(true);
+    screenTimer = new Timer("ScreenTimerTask", true);
     screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
 
     // The user feedback player
@@ -269,8 +273,8 @@ public class Screen
 
     // Keyboard event handlers
     // addKeyListener(this);
-    canvas.pack();
-    shell.pack();
+    //canvas.pack();
+    //shell.pack();
     shell.open();
 
 //    while (running)
@@ -335,7 +339,7 @@ public class Screen
     if (this.renderingTransform != null)
       return this.renderingTransform;
 
-    Dimension dp = renderer.getSize();
+    org.eclipse.swt.graphics.Rectangle dp = composite.getBounds();
     if (dp == null)
       return new AffineTransform();
 
@@ -346,8 +350,8 @@ public class Screen
     if (sy < sx)
       sx = sy;
     renderingTransform.scale(sx, sx);
-    int x = (int) ((ds.getWidth() - sx * dp.getWidth()) / 2);
-    int y = (int) ((ds.getHeight() - sx * dp.getHeight()) / 2);
+    int x = (int) ((ds.getWidth() - sx * dp.width) / 2);
+    int y = (int) ((ds.getHeight() - sx * dp.height) / 2);
     renderingTransform.translate(x / sx, y / sx);
     return renderingTransform;
   }
@@ -393,27 +397,6 @@ public class Screen
         (int) Math.round(pt2d.getY()));
   }
 
-  /**
-   * Paints the panel elements of this screen on a {@link Graphics2D} context.
-   * 
-   * @param g2d
-   *          the graphics context
-   * @see #elements
-   */
-  protected void paint2D(GC gc)
-  {
-    // Prepare setup
-    gc.setTransform(AwtSwt.toSwtTransform(getTransform(), gc.getDevice()));
-    gc.setTextAntialias(SWT.ON);
-    
-    //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-    //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-    //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-    renderer.setSize(shell.getSize());
-    renderer.paint2D(gc);
-  }
-
   // -- Getters and setters --
 
   /**
@@ -440,7 +423,8 @@ public class Screen
 
     // Set and start new panel
     this.panel = ipanel;
-    this.renderer.reset();
+     if(composite != null)
+       composite.clear();
 
     if (this.panel != null)
       try
@@ -483,47 +467,12 @@ public class Screen
     return panel;
   }
 
-  /**
-   * Sets a hint for selective repaints where only dirty areas on the screen
-   * will be repainted. Dirty areas are defined by elements that has been added,
-   * remove or changed.
-   * 
-   * @param selectiveRepaint
-   */
-  public void setSelectiveRenderingHint(boolean selectiveRepaint)
-  {
-    this.renderer.setSelectiveRenderingHint(selectiveRepaint);
-  }
-
-  /**
-   * Sets a hint for selective repaints where only dirty areas on the screen
-   * will be repainted. Dirty areas are defined by elements that has been added,
-   * remove or changed.
-   * 
-   * @param selectiveRepaint
-   */
-  public void setAsyncRenderingHint(boolean async)
-  {
-    if (async)
-    {
-      if (!(renderer instanceof AsyncRenderer))
-        renderer = new AsyncRenderer(renderer);
-    } else
-    {
-      if (!(renderer instanceof ARenderer))
-      {
-        if ((renderer instanceof AsyncRenderer))
-          ((AsyncRenderer) renderer).shutdown();
-        renderer = new Renderer(renderer);
-      }
-    }
-  }
-
   @Override
   public void update(PanelData data, boolean incremental)
   {
-    renderer.update(data, incremental);
-    invalidateScreen();
+    //TODO: remove incremental
+    composite.applyUpdate(data);
+    invalidateScreen();      
   }
 
   @Override
@@ -733,7 +682,7 @@ public class Screen
       {
         if (isScreenInvalid())
           invoke(() -> {
-            canvas.redraw();
+            composite.redraw();
             //shell.redraw();
             //awtFrame.repaint();
           });
@@ -744,7 +693,7 @@ public class Screen
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
           invoke(() -> {
-            canvas.redraw();
+            composite.redraw();
             //shell.redraw();
             //awtFrame.repaint();
 
@@ -769,6 +718,13 @@ public class Screen
       ctr++;
     }
   }
+
+  @Override
+  public void setArea(Area area) throws RemoteException
+  {
+    Rectangle bnds = area.getBounds();
+    shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);    
+  }  
 }
 
 // EOF

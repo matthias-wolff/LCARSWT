@@ -3,11 +3,9 @@ package de.tucottbus.kt.lcars;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Area;
-import java.awt.geom.Point2D;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.AbstractList;
@@ -725,7 +723,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    *         element at this position
    */
   protected EElement elementAt(Point pt, boolean modal)
-  {
+  {    
     synchronized (elements)
     {
       for (int i=elements.size()-1; i>=0; i--)
@@ -733,10 +731,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         try
         {
           EElement el = elements.get(i);
-          Shape   es = el.getShape();
+          Area     es = new Area();
+          el.getArea(es);
           if (es==null || el.isStatic()) continue;
           if (el.isModal()!=modal) continue;
-          if (el.getShape().contains(new Point2D.Float(pt.x,pt.y)))
+          if (es.contains(pt))
             return el;
         }
         catch (IndexOutOfBoundsException e)
@@ -974,11 +973,16 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
       //GImage.beginCacheRun();
       data.elementData = new ArrayList<ElementData>(elements.size());
-      for (EElement element : elements)
-      {
-        ElementData ed = element.getUpdateData(incremental);
-        data.elementData.add(ed);
-      }
+      if (Log.DebugMode)            
+        for (EElement element : elements)
+        {
+          element.checkValidation();        
+          data.elementData.add(element.getUpdateData(incremental));
+        }
+      else
+        for (EElement element : elements)
+          data.elementData.add(element.getUpdateData(incremental));
+        
       //GImage.endCacheRun();
     }
     
@@ -1028,6 +1032,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     EEvent ee = new EEvent();
     ee.pt = new Point(event.x,event.y);
     ee.el = elementAt(ee.pt);
+    
+    Log.debug(event.toString());
     
     switch (event.type)
     {

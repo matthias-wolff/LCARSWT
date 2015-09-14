@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import de.tucottbus.kt.lcars.LCARS;
 
+
 /**
  * A geometry representing a text.
  * 
@@ -68,10 +69,9 @@ public class GText extends Geometry
   }
   
   @Override
-  public Area getArea()
+  public void getArea(Area area)
   {
-    final java.awt.Rectangle bounds = new java.awt.Rectangle(touchBounds.x, touchBounds.y, touchBounds.width, touchBounds.height);
-    return new Area(bounds);
+    area.add(new Area(new java.awt.Rectangle(touchBounds.x, touchBounds.y, touchBounds.width, touchBounds.height)));
   }
   
   public String getText()
@@ -99,10 +99,12 @@ public class GText extends Geometry
   {
     if(textPath == null) {
       Font font = new Font(gc.getDevice(), this.font);
-      textPath = LCARS.getTextShape(font, text, x, y);
+      textPath = LCARS.getTextShape(new Font(gc.getDevice(), this.font), text, x, y);
       font.dispose();
-    }
-    gc.drawPath(textPath);
+    }    
+    gc.fillPath(textPath);
+    
+    
   }  
 }
 

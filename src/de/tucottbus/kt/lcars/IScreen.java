@@ -24,6 +24,11 @@ public interface IScreen extends Remote
   public Area getArea() throws RemoteException;
   
   /**
+   * Sets the physical geometry of the screen (in pixels).
+   */
+  public void setArea(Area area) throws RemoteException;
+  
+  /**
    * Returns name of the host displaying the screen.
    */
   public String getHostName() throws RemoteException;

@@ -18,7 +18,6 @@
 
 package de.tucottbus.kt.lcars.util;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -46,6 +45,7 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.j2d.EGeometryModifier;
 import de.tucottbus.kt.lcars.j2d.GArea;
 import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * A simple coding example for an LCARS panel showcasing elements (widgets) and color schemes.
@@ -291,19 +291,19 @@ public class ShowcasePanel extends Panel
     add(new ELabel(this,1427,236,300,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT"));
     
     ELabel eLabel = new ELabel(this,1730,154,164,0,LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT,"LARGE TEXT");
-    eLabel.setColor(Color.BLACK);
+    eLabel.setColor(SwtColor.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,189,164,0,LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.EC_TEXT,"NORMAL TEXT");
-    eLabel.setColor(Color.BLACK);
+    eLabel.setColor(SwtColor.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,215,164,0,LCARS.EF_SMALL|LCARS.ES_STATIC|LCARS.EC_TEXT,"SMALL TEXT");
-    eLabel.setColor(Color.BLACK);
+    eLabel.setColor(SwtColor.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,236,164,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT");
-    eLabel.setColor(Color.BLACK);
+    eLabel.setColor(SwtColor.BLACK);
     add(eLabel);
 
     /*
@@ -373,7 +373,7 @@ public class ShowcasePanel extends Panel
     
     add(new ELabel(this,1170,939,327,58,LCARS.EF_LARGE|LCARS.EC_PRIMARY|LCARS.ES_STATIC|LCARS.ES_LABEL_E,"ADVANCED STYLES"));
     eRect = new ERect(this,1530,941,180,58,LCARS.ES_RECT_RND|LCARS.ES_LABEL_W,"CUSTOM COLOR");
-    eRect.setColor(new Color(0,255,96));
+    eRect.setColor(new SwtColor(0,255,96));
     add(eRect);
     add(new ERect(this,1530,1002,180,58,LCARS.EC_SECONDARY|LCARS.ES_OUTLINE|LCARS.ES_RECT_RND|LCARS.ES_LABEL_W,"TRANSPARENCY"));
     add(new ELabel(this,1539,1002,180,58,LCARS.EC_SECONDARY|LCARS.ES_LABEL_W,"OUTLINE"));

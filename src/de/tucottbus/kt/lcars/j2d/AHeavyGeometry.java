@@ -53,22 +53,21 @@ public abstract class AHeavyGeometry extends Geometry
     _height = bounds.height;
   }
 
-  public void onAddToScreen()
+  @Override
+  public void onVisibilityChanged(boolean visible)
   {
-    // TODO: register in FrameData
-
-    if (workerList.containsKey(_serialNo))
-      return;
-
-    // create worker and add to worker list
-    workerList.put(_serialNo, new HeavyRenderWorker(this));
-  }
-
-  public void onRemoveFromScreen()
-  {
-    // TODO: register in FrameData
-
-    workerList.remove(_serialNo);
+    if (visible)
+    {
+      // TODO: register in FrameData
+      
+      if (workerList.containsKey(_serialNo))
+        return;
+      
+      // create worker and add to worker list
+      workerList.put(_serialNo, new HeavyRenderWorker(this));      
+    }
+    else
+      workerList.remove(_serialNo);    
   }
 
   /**

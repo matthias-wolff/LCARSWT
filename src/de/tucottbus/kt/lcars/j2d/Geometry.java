@@ -1,7 +1,6 @@
 package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Composite;
-import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.io.Serializable;
 
@@ -46,10 +45,10 @@ public abstract class Geometry implements Serializable
   /**
    * Returns the {@link Area area} covered by this geometry.
    */
-  public abstract Area getArea();
+  public abstract void getArea(Area area);
 
   /**
-   * Called to paint this geometry on a {@link Graphics2D} context. Implementations <b>must not</b>
+   * Called to paint this geometry on a {@link GC} context. Implementations <b>must not</b>
    * change
    * <ul>
    *   <li>the foreground and background colors and</li>
@@ -57,10 +56,19 @@ public abstract class Geometry implements Serializable
    * </ul>
    * <p>They may, however, change other attributes including the font.</p>
    * 
-   * @param g2d
+   * @param gc
    *          The graphics context.
    */
-  public abstract void paint2D(GC gc); 
+  public abstract void paint2D(GC gc);
+
+  /**
+   * Called when the visibility of the {@link GC} changed.
+   * @param visibility
+   */
+  public void onVisibilityChanged(boolean visibility)
+  {
+    // ignored
+  }  
 }
 
 // EOF

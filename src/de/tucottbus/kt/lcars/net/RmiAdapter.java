@@ -92,7 +92,7 @@ public abstract class RmiAdapter implements Remote
    */
   protected void log(String msg)
   {
-    Log.info("NET",getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
+    Log.info(getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
   }
   
   /**
@@ -103,7 +103,7 @@ public abstract class RmiAdapter implements Remote
    */
   protected void err(String msg)
   {
-    Log.err("NET",getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
+    Log.err(getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
   }
 
   /**

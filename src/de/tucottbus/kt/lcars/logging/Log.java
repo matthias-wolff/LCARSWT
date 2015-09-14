@@ -20,8 +20,8 @@ public class Log {
   private static final String FORMAT = "[%s%c %s]";
   private static final Set<ILogObserver> OBSERVERS = new HashSet<ILogObserver>();
   
-  private static final String INFO_PFX = "INFO:";
-  private static final String WARN_PFX = "WARN:";
+  private static final String INFO_PFX  = "INFO:";
+  private static final String WARN_PFX  = "WARN:";
   private static final String ERROR_PFX = "ERRO:";
   private static final String DEBUG_PFX = "DBUG:";
   
@@ -242,7 +242,7 @@ public class Log {
     {
       logIfInterrupted(pfx2, msg);
     }
-  }    
+  }
   
   /**
    * 

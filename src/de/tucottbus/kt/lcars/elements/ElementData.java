@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import org.eclipse.swt.graphics.GC;
 
@@ -27,8 +28,6 @@ public final class ElementData implements Serializable
 {
   // -- Constants
   
-  public static final String CLASSKEY = "ElementData";
-
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
    * that the {@linkplain #state state} has been updated.
@@ -78,7 +77,7 @@ public final class ElementData implements Serializable
   /**
    * Bounds of the area of this element.
    */
-  private transient org.eclipse.swt.graphics.Rectangle bounds;
+  private transient Rectangle bounds;
   
   /**
    * Bounds of the area of this element.
@@ -141,21 +140,26 @@ public final class ElementData implements Serializable
   /**
    * Returns the {@link Area area} covered by all background geometries.
    */
-  public Area getArea()
-  {
-    if (area == null)
+  public void getArea(Area area)
+  {    
+    if (area == null) return;   
+    if (this.area == null)
+    {
+      Area ar = new Area();
       try
       {
-        Area area = new Area();
         for (Geometry gi : geometry)
           if (!gi.isForeground())
-            area.add(gi.getArea());
-        this.area = area;
+            gi.getArea(area);
+        this.area = ar;
+        return;
       } catch (NullPointerException e)
       {
-        area = new Area(state.getBounds());
+        this.area = new Area(state.getBounds());
+        Log.warn("Missing geometries in ElementData #" + serialNo);
       }      
-    return area;
+    }
+    area.add(this.area);
   }
 
   // -- Operations --
@@ -219,6 +223,15 @@ public final class ElementData implements Serializable
    */
   public int applyUpdate(ElementData other)
   {
+    if (other == null)
+    {
+      if (geometry == null)
+        throw new IllegalArgumentException("geometry required");
+      if (state == null)
+        throw new IllegalArgumentException("state required");
+      return STATE_FLAG | GEOMETRY_FLAG;
+    }
+    
     if (this.serialNo != other.serialNo)
       throw new IllegalArgumentException("Wrong serial numbers");
 
@@ -236,10 +249,10 @@ public final class ElementData implements Serializable
         this.geometry = new ArrayList<Geometry>(other.geometry);
         for(Geometry geom : this.geometry)
           if (geom instanceof AHeavyGeometry)
-            ((AHeavyGeometry) geom).applyUpdate();        
-        this.bounds = other.bounds;
-        this.area = other.area;
-        //TODO: make 
+            ((AHeavyGeometry) geom).applyUpdate();
+        this.area = other.area != null ? new Area(other.area) : null;
+        this.bounds = other.bounds != null ? new Rectangle(other.bounds) : null;
+        //TODO: make a copy
       }
     } else
       ret |= GEOMETRY_FLAG;
@@ -309,19 +322,17 @@ public final class ElementData implements Serializable
    * 
    * @return
    */
-  public org.eclipse.swt.graphics.Rectangle getBounds()
+  public Rectangle getBounds()
   {
     if (bounds == null)
     {
       Area area = new Area();
-      for (Geometry gi : geometry)
-        area.add(gi.getArea());
-      Rectangle rect = area.getBounds();
-      area.reset();
-      bounds = new org.eclipse.swt.graphics.Rectangle(rect.x, rect.y, rect.width, rect.height);
+      getArea(area);
+      area.getBounds();
+      bounds = area.getBounds();
     }
 
-    return new org.eclipse.swt.graphics.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height); 
+    return new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height); 
   }
 
   /**
@@ -335,16 +346,34 @@ public final class ElementData implements Serializable
         | (this.geometry == null ? GEOMETRY_FLAG : 0);
   }
   
-  public void onAddToScreen() {
+  public void onVisibilityChanged(boolean visible) {
     for(Geometry g : geometry)
-      if (g instanceof AHeavyGeometry)
-        ((AHeavyGeometry)g).onAddToScreen();
+      g.onVisibilityChanged(visible);
   }
   
-  public void onRemoveFromScreen() {
-    for(Geometry g : geometry)
-      if (g instanceof AHeavyGeometry)
-        ((AHeavyGeometry)g).onRemoveFromScreen();
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName()+"#"+serialNo;
+  }
+  
+  public boolean checkValidation(boolean incremental) {
+    if (incremental) return true;
+    Boolean[] valid = {true};
+    Consumer<String> invalid = (msg) -> {
+      Log.warn(toString()+": "+msg);
+      valid[0] = false;
+    };
+        
+    if (geometry == null)
+      invalid.accept("geometry == null");
+    else
+        for(int i = 0; i < geometry.size(); )
+          if (geometry.get(i) == null)
+            invalid.accept("geometry["+i+"] == null");   
+    if (state == null)
+      invalid.accept("state == null");
+    
+    return valid[0];
   }
   
 }

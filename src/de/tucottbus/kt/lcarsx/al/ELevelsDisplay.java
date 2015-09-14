@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcarsx.al;
 
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.Locale;
@@ -15,6 +14,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.j2d.EPerspective;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * An animated audio levels display for stereo signals. The display contains a
@@ -37,8 +37,8 @@ public class ELevelsDisplay extends ElementContributor
   private ELabel         eDuration;
   private Vector<ELabel> eHistory;
   private Vector<ELabel> eFuture;
-  private Color          cBars;
-  private Color          cGrid;
+  private SwtColor       cBars;
+  private SwtColor       cGrid;
 
   // -- Constructors --
   
@@ -116,7 +116,7 @@ public class ELevelsDisplay extends ElementContributor
    * @param color
    *          The color, can be <code>null</code> in order to select the default color.
    */
-  public void setBarColor(Color color)
+  public void setBarColor(SwtColor color)
   {
     if (this.cBars==null && color==null) return;
     if (this.cBars!=null && this.cBars.equals(color)) return;
@@ -130,7 +130,7 @@ public class ELevelsDisplay extends ElementContributor
    * @param color
    *          The color, can be <code>null</code> in order to select the default color.
    */
-  public void setGridColor(Color color)
+  public void setGridColor(SwtColor color)
   {
     if (this.cGrid==null && color==null) return;
     if (this.cGrid!=null && this.cGrid.equals(color)) return;
@@ -296,7 +296,7 @@ public class ELevelsDisplay extends ElementContributor
       add(eRect);
     }
     eRect = new ERect(null,-2,0,3,barC*barH,LCARS.ES_STATIC,null);
-    eRect.addGeometryModifier(perspective); eRect.setColor(Color.BLACK);
+    eRect.addGeometryModifier(perspective); eRect.setColor(SwtColor.BLACK);
     add(eRect);
     
     // The frame

@@ -6,16 +6,17 @@ import java.util.HashMap;
 import java.util.function.BiFunction;
 
 import org.eclipse.swt.graphics.Device;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.j2d.GImage;
 import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.util.Object;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * Represents a context containing all data required to render a frame.
@@ -34,7 +35,7 @@ class FrameData //TODO: implements Disposable
   private PanelState panelState;
   private ArrayList<ElementData> elements;
   private ArrayList<ElementData> elementsToPaint;
-  private Image bgImg;
+  private ImageData bgImg;
   private ArrayList<Rectangle> dirtyArea;
   private boolean fullRepaint;
 
@@ -75,7 +76,7 @@ class FrameData //TODO: implements Disposable
 
     if (pred != null)
     {
-      if (Object.equals(thisRes, pred.panelState.bgImageRes))
+      if (Objectt.equals(thisRes, pred.panelState.bgImageRes))
       {
         this.bgImg = pred.bgImg;
         return false;
@@ -149,14 +150,14 @@ class FrameData //TODO: implements Disposable
             applyUpdate.apply(edu, edp);   
             hPred.remove(edu.serialNo);
           } else
-            edu.onAddToScreen();
+            edu.onVisibilityChanged(true);
         } catch (Exception e)
         {
           Log.err("Applying update failed on element #" + edu.serialNo, e);
         }
       
       // notify element removed
-      hPred.forEach((serialNo, edp) -> edp.onRemoveFromScreen());
+      hPred.forEach((serialNo, edp) -> edp.onVisibilityChanged(false));
     } else
     {
       dirtyArea = new ArrayList<Rectangle>(10);
@@ -174,12 +175,12 @@ class FrameData //TODO: implements Disposable
               continue;
             }
             hPred.remove(edp);
-            dirtyArea.add(edp.getBounds());
+            dirtyArea.add(SWTUtils.toSwtRectangle(edp.getBounds()));
           }
           else // added element
-            edu.onAddToScreen();
+            edu.onVisibilityChanged(true);
 
-          dirtyArea.add(edu.getBounds());
+          dirtyArea.add(SWTUtils.toSwtRectangle(edu.getBounds()));
           elementsToPaint.add(edu);
         } catch (Exception e)
         {
@@ -190,8 +191,8 @@ class FrameData //TODO: implements Disposable
       {
         hPred
             .forEach((serialNo, edp) -> {
-              dirtyArea.add(edp.getBounds());
-              edp.onRemoveFromScreen();
+              dirtyArea.add(SWTUtils.toSwtRectangle(edp.getBounds()));
+              edp.onVisibilityChanged(false);
             });
       } catch (Exception e)
       {
@@ -199,7 +200,7 @@ class FrameData //TODO: implements Disposable
       }
 
       for (ElementData edu : validElements)
-        if (dirtyArea.add(edu.getBounds()))
+        if (dirtyArea.add(SWTUtils.toSwtRectangle(edu.getBounds())))
           elementsToPaint.add(edu);
     }
 //    if(elements.size() !=elementsToPaint.size())
@@ -300,7 +301,7 @@ class FrameData //TODO: implements Disposable
     return elementsToPaint;
   }
 
-  public Image getBackgroundImage()
+  public ImageData getBackgroundImage()
   {
     return bgImg;
   }

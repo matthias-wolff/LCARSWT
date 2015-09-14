@@ -1,7 +1,6 @@
 package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Shape;
-import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -121,7 +120,7 @@ public class EPerspective implements EGeometryModifier
       if (geo instanceof GArea)
       {
         GArea are = (GArea)geo;
-        are.setShape(new Area(transform(new Area(are._shape))));
+        are.setShape(transform(are.getArea()));
       }
   }
   

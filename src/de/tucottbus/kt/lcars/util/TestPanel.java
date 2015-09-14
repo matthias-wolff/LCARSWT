@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.util;
 
-import java.awt.Color;
 import java.rmi.RemoteException;
 
 import de.tucottbus.kt.lcars.IScreen;
@@ -10,6 +9,7 @@ import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.speech.ESpeechInput;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 public class TestPanel extends Panel
 {
@@ -57,7 +57,7 @@ public class TestPanel extends Panel
     int h = 100;
     
     eRect = new ERect(this,x-1,y-1,w+2,h+2,LCARS.ES_STATIC|LCARS.ES_OUTLINE,null);
-    eRect.setColor(new Color(0x404040));
+    eRect.setColor(new SwtColor(0x404040));
     add(eRect);
    
     ESpeechInput.EFvrValue eFvr = new ESpeechInput.EFvrValue(this,x,y,w,h,LCARS.ES_STATIC,null);

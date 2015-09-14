@@ -116,6 +116,12 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   {
     return screen.getArea();
   }
+  
+  @Override
+  public void setArea(Area area) throws RemoteException
+  {
+    screen.setArea(area);
+  }
    
   @Override
   public String getHostName()
@@ -223,8 +229,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
     
     Timer timer = new Timer(true);
     timer.scheduleAtFixedRate(timerTask, 0, 1000/25);  
-  }
-  
+  }  
 }
 
 // EOF

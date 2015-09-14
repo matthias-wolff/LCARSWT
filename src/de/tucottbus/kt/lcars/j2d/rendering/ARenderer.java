@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Region;
 
@@ -156,14 +157,16 @@ public abstract class ARenderer
     }
     
     // background setup
-    Image bgImg = context.getBackgroundImage();
-    if (bgImg == null)
+    ImageData bgData = context.getBackgroundImage();
+    if (bgData == null)
     {
       black.applyBackground(gc);
       gc.fillRectangle(0, 0, size.width, size.height);
     } else {
-      org.eclipse.swt.graphics.Rectangle bgb = bgImg.getBounds();
-      gc.drawImage(bgImg, bgb.x, bgb.y, bgb.width, bgb.height, 0, 0, size.width, size.height);
+      Image image = new Image(device, bgData);
+      org.eclipse.swt.graphics.Rectangle bgb = image.getBounds();
+      gc.drawImage(image, bgb.x, bgb.y, bgb.width, bgb.height, 0, 0, size.width, size.height);
+      image.dispose();
     }
     // TODO possible problem with clipping when drawing
 

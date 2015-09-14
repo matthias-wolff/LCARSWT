@@ -23,7 +23,7 @@ public class BlockingBoundedBuffer <E> {
             throw new IllegalArgumentException();
         availableItems = new Semaphore(0);
         availableSpaces = new Semaphore(capacity);
-        items = (E[]) new Object[capacity];
+        items = (E[]) new Objectt[capacity];
         genericType = clazz;
     }
 
