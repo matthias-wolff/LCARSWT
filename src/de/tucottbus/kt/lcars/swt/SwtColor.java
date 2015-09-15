@@ -151,6 +151,10 @@ public final class SwtColor implements Serializable
     return Alpha;
   }
   
+  public org.eclipse.swt.graphics.RGB getRGB() {
+    return new org.eclipse.swt.graphics.RGB(RGB.red, RGB.green, RGB.blue);
+  }
+  
   public float[] getHSB() {
     return RGB.getHSB();
   }
@@ -161,12 +165,6 @@ public final class SwtColor implements Serializable
     c.dispose();
   }
   
-  public void applyBackground(GC gc) {
-    Color c = new Color(gc.getDevice(), RGB);
-    gc.setBackground(c);
-    c.dispose();
-  }
-    
   /**
   * Creates a new <code>Color</code> that is a brighter version of this
   * <code>Color</code>.

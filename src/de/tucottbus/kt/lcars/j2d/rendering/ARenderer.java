@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars.j2d.rendering;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -138,10 +139,13 @@ public abstract class ARenderer
     FrameData context = getContext();
     
     Dimension size = getSize();
+    
+    Color black = new Color(gc.getDevice(), this.black.getRGB());
+    
     if (context == null) // null stands for reset
     {
       gc.setClipping(0, 0, size.width, size.height);
-      black.applyBackground(gc);
+      gc.setBackground(black);
       gc.drawRectangle(0, 0, size.width, size.height);
       return;
     }
@@ -160,7 +164,7 @@ public abstract class ARenderer
     ImageData bgData = context.getBackgroundImage();
     if (bgData == null)
     {
-      black.applyBackground(gc);
+      gc.setBackground(black);
       gc.fillRectangle(0, 0, size.width, size.height);
     } else {
       Image image = new Image(device, bgData);

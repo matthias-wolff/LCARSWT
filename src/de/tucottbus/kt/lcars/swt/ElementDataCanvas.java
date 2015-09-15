@@ -12,8 +12,9 @@ import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
+import de.tucottbus.kt.lcars.logging.Log;
 
-public abstract class ElementDataCanvas extends Canvas implements PaintListener
+public class ElementDataCanvas extends Canvas implements PaintListener
 {    
   private ElementData ed;
   private PanelState ps;
@@ -38,19 +39,17 @@ public abstract class ElementDataCanvas extends Canvas implements PaintListener
     GC gc = e.gc;
     
     Rectangle bounds = getBounds();
-    Transform t = new Transform(gc.getDevice(), 0, 0, 0, 0, -bounds.x, -bounds.y);
-    Transform ot = new Transform(gc.getDevice());
+    Transform t = new Transform(gc.getDevice(), 1, 0, 1, 0, -bounds.x, -bounds.y);
+    //Transform ot = new Transform(gc.getDevice());
     gc.getTransform(t);
-    gc.getTransform(ot);
+    //gc.getTransform(ot);
     gc.setTransform(t);        
       
-    prePaint(gc);
     elData.render2D(gc, pState);        
-    postPaint(gc);
     
-    gc.setTransform(ot);
+    //gc.setTransform(ot);
     t.dispose();
-    ot.dispose();        
+    //ot.dispose();        
   }
   
   public void applyUpdate(ElementData elementData, PanelState panelState) {
@@ -66,15 +65,16 @@ public abstract class ElementDataCanvas extends Canvas implements PaintListener
       redraw = true;
     }
     
-    if ((edUpdate & ElementData.GEOMETRY_FLAG) > 0) // new bounds
+    if ((edUpdate & ElementData.GEOMETRY_FLAG) > 0) // resize
     {
-      Rectangle bounds = SWTUtils.toSwtRectangle(elementData.getBounds());      
+      Rectangle bnds = SWTUtils.toSwtRectangle(elementData.getBounds());
+      Log.debug("#"+elementData.serialNo+" Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
       display.asyncExec(redraw
           ? () -> {          
-              setBounds(bounds);        
+              setBounds(bnds);        
               redraw();
             }
-          : () -> { setBounds(bounds); } 
+          : () -> { setBounds(bnds); } 
           );      
     }
     else
@@ -93,7 +93,9 @@ public abstract class ElementDataCanvas extends Canvas implements PaintListener
     super.setVisible(visible);
     ed.onVisibilityChanged(visible);    
   }
-    
-  public abstract void prePaint(GC gc);
-  public abstract void postPaint(GC gc);  
+  
+  @Override
+  public String toString(){
+    return getClass().getSimpleName() + "#" + ed.serialNo;
+  }
 }

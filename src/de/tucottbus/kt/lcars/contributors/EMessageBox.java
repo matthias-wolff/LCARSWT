@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.contributors;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.util.Vector;
 
@@ -11,6 +10,7 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
  * TODO: The message box concept does not fit well in the LCARS look and feel. Avoid message boxes!
@@ -51,7 +51,7 @@ public class EMessageBox extends ElementContributor implements EEventListener
     add(eTit);
     
     ERect e = new ERect(null,0,44,w,h-47,LCARS.ES_STATIC|LCARS.ES_MODAL,null);
-    e.setColor(new Color(0x80000000,true));
+    e.setColor(new SwtColor(0x80000000,true));
     add(e);
     e = new ERect(null,0,h+3,w-75,3,LCARS.ES_BLINKING|LCARS.EC_ELBOUP|LCARS.ES_STATIC|LCARS.ES_MODAL,null);
     add(e);

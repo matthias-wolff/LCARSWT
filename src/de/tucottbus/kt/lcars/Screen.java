@@ -21,10 +21,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -176,13 +178,15 @@ public class Screen
     if (LCARS.getArg("--nomouse")!=null)
       composite.setCursor(LCARS.createBlankCursor(display));
     composite = new PanelDataComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED*/)
-    {
-      
+    {     
       @Override
-      public void prePaint(GC gc)
+      protected void paintElementData(PaintEvent e, Runnable superPaint)
       {
         // Prepare setup
-        gc.setTransform(AwtSwt.toSwtTransform(getTransform(), gc.getDevice()));
+        GC gc = e.gc;
+        Transform t = AwtSwt.toSwtTransform(getTransform(), gc.getDevice());
+        gc.setTransform(t);
+        t.dispose();
         gc.setTextAntialias(SWT.ON);
         gc.setInterpolation(SWT.LOW);
         
@@ -190,12 +194,8 @@ public class Screen
         //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
         //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
         //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-//        renderer.setSize(shell.getSize());
-//        renderer.paint2D(gc);
+        superPaint.run();
       }
-      
-      @Override
-      public void postPaint(GC gc) {}
     };
     composite.setBackground(black);
     composite.setSize(shell.getSize());
@@ -336,8 +336,8 @@ public class Screen
    */
   protected synchronized AffineTransform getTransform()
   {
-    if (this.renderingTransform != null)
-      return this.renderingTransform;
+    if (renderingTransform != null)
+      return renderingTransform;
 
     org.eclipse.swt.graphics.Rectangle dp = composite.getBounds();
     if (dp == null)

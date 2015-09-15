@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars.j2d;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
@@ -97,12 +98,18 @@ public class GText extends Geometry
   @Override
   public void paint2D(GC gc)
   {
-    if(textPath == null) {
-      Font font = new Font(gc.getDevice(), this.font);
-      textPath = LCARS.getTextShape(new Font(gc.getDevice(), this.font), text, x, y);
-      font.dispose();
-    }    
-    gc.fillPath(textPath);
+    Font font = new Font(gc.getDevice(), this.font);
+    gc.setFont(font);
+    gc.drawText(text, x, y - gc.getFontMetrics().getAscent());
+    font.dispose();
+    
+//    if(textPath == null) {
+//      Font font = new Font(gc.getDevice(), this.font);
+//      textPath = LCARS.getTextShape(new Font(gc.getDevice(), this.font), text, x, y - gc.getFontMetrics().getAscent());
+//      font.dispose();
+//    }
+//    gc.setForeground(new Color(gc.getDevice(), 255, 255, 255));
+//    gc.fillPath(textPath);
     
     
   }  

@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 
 import de.tucottbus.kt.lcars.PanelState;
@@ -275,46 +276,42 @@ public final class ElementData implements Serializable
       Log.err("Missing state in ElementData #"+serialNo);
       return;
     }
-    if (!state.isVisible())
-      return;
-
-    int i = 0;
+    if (!state.isVisible()) return;
     int l = geometry.size();
+    if (l <= 0) return;
 
-    if (l <= 0)
-      return;
+    final int fgAlpha = (int)(state.getFgAlpha()*255);
+    final int bgAlpha = (int)(state.getBgAlpha(panelState)*255);
+    final Color fgColor = new Color(gc.getDevice(), state.getFgColor().getRGB());
+    final Color bgColor = new Color(gc.getDevice(), state.getBgColor(panelState).getRGB());
     
-    Geometry gi = geometry.get(i++);
-    if (!gi.isForeground())
+    if (fgAlpha == bgAlpha)
     {
-      state.getBgColor(panelState).applyBackground(gc);
-      gc.setAlpha((int)(state.getBgAlpha(panelState)*255));
-      
-      //TODO: set alpha composite?
-      //render background elements
-//      gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-//          state.getBgAlpha(panelState)));
-      while(true) {
+      gc.setAlpha(bgAlpha);
+      for(Geometry gi : geometry) {        
+        gc.setBackground(gi.isForeground() ? fgColor : bgColor);
         gi.paint2D(gc);
-        if(i==l)
-          return;
-        gi = geometry.get(i++);
-        if(gi.isForeground())
-          break;
+      }
+    }
+    else
+    {
+      for(Geometry gi : geometry) {
+        if (gi.isForeground())
+        {
+          gc.setBackground(fgColor);
+          gc.setAlpha(fgAlpha);
+        }
+        else
+        {
+          gc.setBackground(bgColor);
+          gc.setAlpha(bgAlpha);
+        }
+        gi.paint2D(gc);
       }
     }
     
-    //TODO: set alpha composite?
-    // render foreground elements
-    // gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, state.getFgAlpha()));
-    state.getFgColor().applyForeground(gc);
-    gc.setAlpha((int)(state.getFgAlpha()*255));
-    while(true) {
-      gi.paint2D(gc);
-      if(i==l)
-        return;
-      gi = geometry.get(i++);
-    }    
+    fgColor.dispose();
+    bgColor.dispose();    
   }
 
   /**
@@ -324,6 +321,7 @@ public final class ElementData implements Serializable
    */
   public Rectangle getBounds()
   {
+    //return state.getBounds();
     if (bounds == null)
     {
       Area area = new Area();
@@ -374,8 +372,7 @@ public final class ElementData implements Serializable
       invalid.accept("state == null");
     
     return valid[0];
-  }
-  
+  }  
 }
 
 // EOF

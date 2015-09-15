@@ -8,11 +8,15 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.PanelData;
@@ -45,25 +49,36 @@ public abstract class PanelDataComposite extends Composite
   private final PanelDataComposite _this = this;
   
   public PanelDataComposite(Composite parent, int style) {
-    super (parent, style);    
-    this.edCanvasStyle = style | SWT.NO_BACKGROUND;
-    this.display = getParent().getDisplay();    
+    super (parent, style);
+    edCanvasStyle = style | SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED;
+    display = getParent().getDisplay();
   }
   
-  public void applyUpdate(PanelData panelData) {        
-    if (panelData == null) {
+  public void applyUpdate(PanelData panelData) {
+    
+    display.asyncExec(() -> {
+      Control[] ctrls = getChildren();
+      //Log.debug(ctrls.toString());      
+    });
+    
+    if (panelData == null)
+    {
       clear();
       return;
     }
     PanelState ps = panelData.panelState;
     PanelState currPs = ps != null ? ps : this.ps; //panel state for those who have not the previous state
+    if (currPs.equals(ps))
+      ps = null;
+    
     if (ps != null) {
       this.ps = ps;
       
       String  nbgr = ps.bgImageRes;
       
       boolean newBg = bgRes != nbgr;
-      if (newBg) {   // update background
+      if (newBg) // update background
+      {   
         ImageData imgDt = GImage.getImage(nbgr);
         if (imgDt != null)
         {
@@ -86,7 +101,8 @@ public abstract class PanelDataComposite extends Composite
     
     ArrayList<ElementData> eds = panelData.elementData;
 
-    if (eds == null) {
+    if (eds == null)
+    {
       clear(); //TODO: reset all or only remove elements?
       return;
     }
@@ -100,36 +116,31 @@ public abstract class PanelDataComposite extends Composite
         assert(edu != null) : "edu != null";      
         long serNo = edu.serialNo;
         ElementDataCanvas canvas = elements.get(serNo);
-        Canvas lowerr = lower;
         
         if (canvas != null) // update existing canvas
         {
           canvas.applyUpdate(edu, ps);
           oSerNo.remove(serNo);
-          
-          display.asyncExec(lowerr == null
-              ? () -> {canvas.moveBelow(null);}
-              : () -> {canvas.moveAbove(lowerr);});                
-          lower = canvas;
         }
         else // create new canvas
         {
-          assert(edu.geometry != null) : "edu.geometry != null";
-                  
-          ElementDataCanvas nCanvas = withdraw(currPs, edu);        
-          elements.put(serNo, nCanvas);
-          display.asyncExec( lowerr == null
-              ? () -> {
-                nCanvas.moveBelow(null);
-                nCanvas.setVisible(true);
-                nCanvas.setEnabled(true);}
-              : ()->{
-                nCanvas.moveAbove(lowerr);
-                nCanvas.setVisible(true);
-                nCanvas.setEnabled(true);}
-              );        
-          lower = nCanvas;
+          assert(edu.geometry != null) : "edu.geometry != null";                  
+          elements.put(serNo, canvas = withdraw(currPs, edu));
         }
+        
+        final Canvas c = canvas;        
+        final Canvas low = lower;
+        display.asyncExec( low == null
+            ? () -> {
+              c.moveAbove(null);
+              c.setVisible(true);
+              c.setEnabled(true);}
+            : ()->{
+              c.moveBelow(low);
+              c.setVisible(true);
+              c.setEnabled(true);}
+            );        
+        lower = canvas;
       }
       
       //if (Log.DebugMode)
@@ -173,9 +184,7 @@ public abstract class PanelDataComposite extends Composite
    * @param ed
    * @return
    */
-  private ElementDataCanvas withdraw(PanelState ps, ElementData ed) {
-    final PanelDataComposite _this = this;
-    
+  private ElementDataCanvas withdraw(PanelState ps, ElementData ed) {    
     if (!disabledControls.empty())
     {
       try
@@ -191,20 +200,29 @@ public abstract class PanelDataComposite extends Composite
     // create new canvas
     ElementDataCanvas[] result = new ElementDataCanvas[1];
     display.syncExec(() -> {      
-      result[0] = new ElementDataCanvas(this, edCanvasStyle)
-      {        
+      result[0] = new ElementDataCanvas(this, edCanvasStyle){
         @Override
-        public void prePaint(GC gc)
+        public void paintControl(PaintEvent e) {
+          Log.debug("fsfgdfd");
+          paintElementData(e, () ->{ super.paintControl(e); });
+        }
+      };
+      result[0].addMouseListener(new MouseListener()
+      {
+        private final ElementDataCanvas edc = result[0];
+        
+        @Override
+        public void mouseUp(MouseEvent e)
         {
-          _this.prePaint(gc);
+          Log.debug("Mouse over ElementDataCanvas #" + edc);          
         }
         
         @Override
-        public void postPaint(GC gc)
-        {
-          _this.postPaint(gc);
-        }
-      };
+        public void mouseDown(MouseEvent e) {}
+        
+        @Override
+        public void mouseDoubleClick(MouseEvent e) {}
+      });
     });
     result[0].applyUpdate(ed, ps);
     return result[0];
@@ -215,6 +233,5 @@ public abstract class PanelDataComposite extends Composite
     throw new UnsupportedOperationException();
   }
   
-  public abstract void prePaint(GC gc);
-  public abstract void postPaint(GC gc);  
+  protected abstract void paintElementData(PaintEvent e, Runnable superPaint);  
 }
