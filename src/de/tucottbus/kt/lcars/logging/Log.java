@@ -21,9 +21,9 @@ public class Log {
   private static final Set<ILogObserver> OBSERVERS = new HashSet<ILogObserver>();
   
   private static final String INFO_PFX = "INFO:";
-  private static final String WARN_PFX = "WARN:";
-  private static final String ERROR_PFX = "ERRO:";
-  private static final String DEBUG_PFX = "DEBU:";
+  private static final String WARN_PFX = "WARNING:";
+  private static final String ERROR_PFX = "ERROR:";
+  private static final String DEBUG_PFX = "DEBUG:";
   
   private static final BlockingQueue<Runnable> logBuffer = new ArrayBlockingQueue<Runnable>(5);
   private static final Thread logWorker = new Thread(() -> {
@@ -54,14 +54,25 @@ public class Log {
    * Log a message at the INFO level. Equivalent to {@link #info(char, String, 
    * String) info}<code>(':',msg)</code>.
    * 
-   * @param pfx
-   *          Prefix string, typically a string of three characters identifying
-   *          the object writing to the log.
    * @param msg
    *          The log message.
    */
   public static void info(String msg) {
     info(':',getPrefix(Thread.currentThread().getStackTrace()[2]), msg);
+  }
+  
+  /**
+   * Log a message at the INFO level. Equivalent to {@link #info(char, String, 
+   * String) info}<code>(':',msg)</code>.
+   * 
+   * @param msg
+   *          The log message.
+   * @param stackTraceItem
+   *          The zero-based index of the stack trace item include in the short
+   *          message.
+   */
+  public static void info(String msg, int stackTraceItem) {
+    info(':',getPrefix(Thread.currentThread().getStackTrace()[stackTraceItem]), msg);
   }
   
   /**
@@ -87,7 +98,21 @@ public class Log {
   public static void info(char type, String msg) {
     info(type, getPrefix(Thread.currentThread().getStackTrace()[2]),msg);
   }
-
+  
+  /**
+   * Log a message at the INFO level.
+   * 
+   * @param type
+   *          <code>':'</code> for info messages, <code>'>'</code> for echos of
+   *          output to external programs or hardware, or <code>'>'</code> for 
+   *          echos of input from external programs or hardware.
+   * @param msg
+   *          The log message.
+   */
+  public static void info(char type, String msg, int stackTraceItem) {
+    info(type, getPrefix(Thread.currentThread().getStackTrace()[stackTraceItem]),msg);
+  }
+  
   /**
    * @deprecated Use overloading method instead.
    * @param type
@@ -153,6 +178,16 @@ public class Log {
   }
   
   /**
+   * Log a message at the ERROR level.
+   * 
+   * @param msg
+   *          The log message.
+   */
+  public static void err(String msg, int stackTraceItem) {
+    err(getPrefix(Thread.currentThread().getStackTrace()[stackTraceItem]), msg);
+  }
+
+  /**
    * @deprecated Use overloading method instead.
    * @param pfx
    * @param msg
@@ -171,6 +206,21 @@ public class Log {
     {
       logIfInterrupted(pfx2, msg);
     }
+  }
+  
+  /**
+   * Log a message at the ERROR level.
+   * 
+   * @param msg
+   *          The log message.
+   * @param e
+   *          The {@link Throwable} causing the error.
+   * @param stackTraceItem
+   *          The zero-based index of the stack trace item include in the short
+   *          message.
+   */
+  public static void err(String msg, Throwable e, int stackTraceItem) {
+    err(getPrefix(Thread.currentThread().getStackTrace()[stackTraceItem]), msg, e);
   }
   
   /**
