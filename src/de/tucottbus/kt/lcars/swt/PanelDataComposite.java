@@ -10,13 +10,11 @@ import java.util.TreeSet;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.PanelData;
@@ -57,7 +55,7 @@ public abstract class PanelDataComposite extends Composite
   public void applyUpdate(PanelData panelData) {
     
     display.asyncExec(() -> {
-      Control[] ctrls = getChildren();
+      //Control[] ctrls = getChildren();
       //Log.debug(ctrls.toString());      
     });
     
@@ -132,11 +130,11 @@ public abstract class PanelDataComposite extends Composite
         final Canvas low = lower;
         display.asyncExec( low == null
             ? () -> {
-              c.moveAbove(null);
+              c.moveBelow(null);
               c.setVisible(true);
               c.setEnabled(true);}
             : ()->{
-              c.moveBelow(low);
+              c.moveAbove(low);
               c.setVisible(true);
               c.setEnabled(true);}
             );        
@@ -203,7 +201,6 @@ public abstract class PanelDataComposite extends Composite
       result[0] = new ElementDataCanvas(this, edCanvasStyle){
         @Override
         public void paintControl(PaintEvent e) {
-          Log.debug("fsfgdfd");
           paintElementData(e, () ->{ super.paintControl(e); });
         }
       };
@@ -214,7 +211,7 @@ public abstract class PanelDataComposite extends Composite
         @Override
         public void mouseUp(MouseEvent e)
         {
-          Log.debug("Mouse over ElementDataCanvas #" + edc);          
+          Log.debug("Mouse over " + edc);          
         }
         
         @Override
@@ -229,8 +226,12 @@ public abstract class PanelDataComposite extends Composite
   }
   
   public void clear() {
+    synchronized (elements)
+    {
+      elements.forEach((serNo, canvas) -> { deposit(canvas); });
+      elements.clear();           
+    };
     Log.info("resetted");    
-    throw new UnsupportedOperationException();
   }
   
   protected abstract void paintElementData(PaintEvent e, Runnable superPaint);  

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.LCARS;
@@ -60,18 +59,10 @@ public class EValue extends ERect
     Rectangle r    = getBounds();
     int       m    = computeValueMargin();
     int       w    = this.vw;
-    Font      font = new Font(Display.getDefault(), getValueFont());
-    
-    Path     t = LCARS.getTextShape(font,value);
-    font.dispose();
     if (w<=0) {
-      if(t == null)
-        w = 6;
-      else {
-        float[] bounds = new float[4];
-        t.getBounds(bounds);
-        w = (int)bounds[2]+6;
-      }
+      Font      font = new Font(Display.getDefault(), getValueFont());    
+      w = LCARS.getTextBounds(font,value).width + 6;
+      font.dispose();
     }
       
     return (getStyle()&LCARS.ES_VALUE_W)!=0
@@ -130,16 +121,16 @@ public class EValue extends ERect
       if ((style&LCARS.ES_RECT_RND_W)==0)
         area.add(new Area(new Rectangle2D.Float(x,y,w/2,h)));
     }
-    area.subtract(new Area(computeValueRect()));
+    area.subtract(new Area(bounds = computeValueRect()));
     geos.add(new GArea(area,false));
 
     // Create value geometry
     int   vstyle = (style&LCARS.ES_VALUE_W)!=0 ? LCARS.ES_LABEL_W : LCARS.ES_LABEL_E;
     FontData  fd   = getValueFont();
     Point insets = new Point(3,1);
-    bounds = computeValueRect();
     if (fd.getName().equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
     
+    //geos.add(new GText(value, new Point2D.Float(bounds.x, bounds.y), null, fd, isBlinking()))
     geos.addAll(LCARS.createTextGeometry2D(fd,value,bounds,vstyle,insets,false));
     
     // Create label geometries

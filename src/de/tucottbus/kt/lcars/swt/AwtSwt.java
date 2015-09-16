@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
 import org.jfree.experimental.swt.SWTUtils;
 
@@ -206,5 +207,9 @@ public class AwtSwt
   
   public static java.awt.Font toAwtFont(FontData font) {
     return SWTUtils.toAwtFont(null, font, true);
+  }
+  
+  public static java.awt.Rectangle toAwtRectangle(Rectangle rectangle) {
+    return new java.awt.Rectangle(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
   }
 }

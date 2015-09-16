@@ -10,7 +10,6 @@ import java.util.TimerTask;
 
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.LCARS;
@@ -24,6 +23,7 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.j2d.GArea;
 import de.tucottbus.kt.lcars.j2d.Geometry;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
+import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
@@ -378,11 +378,9 @@ public class ESpeechInput extends ElementContributor
       String              fvrs   = label==null?"":label;
       int                 xofs   = 0;
       int                 yofs   = 0;
-      float[]             bounds = new float[4];
-      int                 linh   = (int)bounds[3];
+      int                 linh   = (int)LCARS.getTextBounds(font,"M").height;
       int                 yinc   = linh/3;
   
-      LCARS.getTextShape(font,"M").getBounds(bounds);
       
       // Trim on leading and one tailing square brace from label 
       if (fvrs.startsWith("[") && fvrs.endsWith("]"))
@@ -421,19 +419,15 @@ public class ESpeechInput extends ElementContributor
             sw.append(c);
           if (sw.getBuffer().length()>0)
           {
-            String    nlab = sw.toString();
-            LCARS.getTextShape(font,nlab).getBounds(bounds);            
-            Rectangle tbnd = new Rectangle(bnds.x + xofs,
-                                           bnds.y + yofs - (int)(bounds[3]*0.15),
-                                           (int)bounds[2],
-                                           (int)bounds[3]);
+            String    nlab = sw.toString();        
+            org.eclipse.swt.graphics.Rectangle tbnd = LCARS.getTextBounds(font,nlab);
+            tbnd.x = bnds.x + xofs;
+            tbnd.y = bnds.y + yofs - (int)(tbnd.height*0.15);
+            tbnd.height = linh;    
             for (Area area : lines)
-            {
-              Rectangle r = new Rectangle(tbnd);
-              r.x-=2; r.y-=2; r.width+=4; r.height+=4;
-              area.subtract(new Area(r));
-            }
-            geos.addAll(LCARS.createTextGeometry2D(fd,nlab,tbnd,LCARS.ES_LABEL_NW,null,false));      
+              area.subtract(new Area(new Rectangle(tbnd.x-2, tbnd.y-2, tbnd.width+4, tbnd.height+4)));
+
+            geos.addAll(LCARS.createTextGeometry2D(fd,nlab,AwtSwt.toAwtRectangle(tbnd),LCARS.ES_LABEL_NW,null,false));      
             xofs += tbnd.width + 6;
             sw = new StringWriter();
           }
@@ -459,18 +453,16 @@ public class ESpeechInput extends ElementContributor
     protected FontData getFont()
     {
       Rectangle bnds  = getBounds();
-      FontData  fd  = LCARS.getFont(LCARS.EF_LARGE);
-      Font font = new Font(Display.getDefault(), fd);      
+      FontData  fd    = LCARS.getFont(LCARS.EF_LARGE);
+      Font font       = new Font(Display.getDefault(), fd);      
       // TODO: replace font, it is device depended
-      Path      tshp  = LCARS.getTextShape(font,rawLabel(label));
+      int tw          = LCARS.getTextBounds(font,rawLabel(label)).width;
       font.dispose();
       
-      if (bnds==null || tshp==null) return fd;
-      float[] bounds = new float[4];
-      tshp.getBounds(bounds);
-      if (bounds[2]<=bnds.width) return fd;
+      if (bnds==null) return fd;
+      if (tw<=bnds.width) return fd;
   
-      float size = fd.getHeight()*(float)bnds.width/bounds[2];
+      float size = fd.getHeight()*(float)bnds.width/tw;
       return LCARS.getFont(LCARS.EF_LARGE,(int)(size));
     }
   

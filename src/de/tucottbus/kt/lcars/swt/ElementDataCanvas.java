@@ -37,19 +37,20 @@ public class ElementDataCanvas extends Canvas implements PaintListener
             
     //TODO: Add global transform
     GC gc = e.gc;
-    
-    Rectangle bounds = getBounds();
-    Transform t = new Transform(gc.getDevice(), 1, 0, 1, 0, -bounds.x, -bounds.y);
-    //Transform ot = new Transform(gc.getDevice());
+        
+    Transform t = new Transform(gc.getDevice());
+    Rectangle bounds = getBounds();    
     gc.getTransform(t);
-    //gc.getTransform(ot);
-    gc.setTransform(t);        
-      
-    elData.render2D(gc, pState);        
+    float[] point = {bounds.x, bounds.y};    
+    t.transform(point);
+    t.translate(-point[0], -point[1]);
+    gc.setTransform(t);
     
-    //gc.setTransform(ot);
+    elData.render2D(gc, pState); 
+    
+    t.translate(point[0], point[1]);
+    gc.setTransform(t);
     t.dispose();
-    //ot.dispose();        
   }
   
   public void applyUpdate(ElementData elementData, PanelState panelState) {
@@ -91,11 +92,12 @@ public class ElementDataCanvas extends Canvas implements PaintListener
   public void setVisible(boolean visible) {
     if(visible == getVisible()) return;
     super.setVisible(visible);
-    ed.onVisibilityChanged(visible);    
+    if (ed != null)
+      ed.onVisibilityChanged(visible);    
   }
   
   @Override
   public String toString(){
-    return getClass().getSimpleName() + "#" + ed.serialNo;
+    return ElementData.class.getName() + "#" + ed.serialNo;
   }
 }

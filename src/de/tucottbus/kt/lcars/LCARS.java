@@ -63,7 +63,6 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Path;
@@ -593,47 +592,47 @@ public class LCARS implements ILcarsRemote
    *          The text.
    * @return The shape.
    */
-  public static Path getTextShape(Font font, String text)  
-  {    
-    return getTextShape(font, text, 0, 0);
-  }
-
-  /**
-   * Computes the shape of a text.
-   * 
-   * @param fnt
-   *          The font.
-   * @param text
-   *          The text.
-   * @return The shape.
-   */
-  public static Path getTextShape(Font font, String text, float x, float y)  
+  public static Path getTextShape(Font font, String text, Rectangle bounds)  
   {    
     if (text==null || text.length()==0) return null;
-    Display display = Display.getDefault();
-    FontMetrics[] fm = new FontMetrics[1];
-    display.syncExec(() -> {
-        GC gc = new GC(display);
-        fm[0] = (gc).getFontMetrics();
-        gc.dispose();
-    });
+    TextLayout tl = new TextLayout(font.getDevice());
+    tl.setFont(font);
+    tl.setText(text);
+    tl.setWidth(bounds.width);
+
+    int x = bounds.x;
+    int y = bounds.y;
     
-    
-    y += fm[0].getAscent();
+    //y += fm[0].getAscent();
     Path              path = new Path(font.getDevice());
-    String            s[] = text.split("\n");    
-    float dy = fm[0].getAscent() + fm[0].getDescent() + fm[0].getLeading();
+    FontMetrics fm = tl.getLineMetrics(0);
+    float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
     
-    for (int i=0; i<s.length; i++)
+    y -= fm.getAscent();
+    for (String line : text.split("\n"))
     {
-      String l = s[i];      
-      if (l!=null && l.length()!=0)
-        path.addString(l, x, y, font);
+      if (line!=null && line.length()!=0)
+        path.addString(line, x, y, font);
       y+=dy;
     }
+    
+    //float[] bnds = new float[4];
+    //path.getBounds(bnds);
+    tl.dispose();
+    
     return path;
   }
 
+  
+  public static org.eclipse.swt.graphics.Rectangle getTextBounds(Font font, String text) {
+    TextLayout lt = new TextLayout(font.getDevice());
+    lt.setFont(font);
+    lt.setText(text);
+    org.eclipse.swt.graphics.Rectangle result = lt.getBounds();
+    lt.dispose();
+    return result;    
+  }
+  
   /**
    * Creates the 2D geometry/geometries of a multi-line text.
    * 
@@ -687,7 +686,7 @@ public class LCARS implements ILcarsRemote
     ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
     if (text==null || text.length()==0 || bounds==null) return geos;
     if (insets==null) insets = new Point(0,0);
-    
+        
     String            s[] = text.split("\n");
     TextLayout        t[] = new TextLayout[s.length];
     Dimension         td  = new Dimension();
@@ -753,7 +752,10 @@ public class LCARS implements ILcarsRemote
       Point2D.Float pos = new Point2D.Float(tx+x,ty+y);
       //Rectangle shape = new Rectangle((int)(tx+x),(int)(ty+y-tl.getAscent()),
       //    (int)(tl.getAdvance()),(int)(tl.getAscent()+tl.getDescent()));
-      GText e = new GText(s[i],pos,tl.getBounds(),font,foreground);
+      org.eclipse.swt.graphics.Rectangle bnds = tl.getBounds();
+      bnds.x += tx;
+      bnds.y += ty;
+      GText e = new GText(s[i],bnds,font,foreground);
       e.setDescent(tl.getDescent());
       geos.add(e);
       y += tl.getDescent()+tl.getSpacing();
@@ -900,7 +902,7 @@ public class LCARS implements ILcarsRemote
       return null;
     }
   }
-
+    
   /**
    * Recursive method used to find all classes in a given path (directory or zip
    * file URL). Directories are searched recursively.
@@ -1471,6 +1473,10 @@ public class LCARS implements ILcarsRemote
     return largs.toArray(args);
   }
   
+  public static Display getDisplay() {
+    return Display.getDefault();
+  }
+  
   /**
    * The LCARS main method.
    * <h3>Usage</h3>
@@ -1601,7 +1607,7 @@ public class LCARS implements ILcarsRemote
         int scrid = srcIdArg != null ?
             Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
         
-        Screen scr = new Screen(display,"de.tucottbus.kt.lcars.Panel",fullscreen);       
+        Screen scr = new Screen(display,Panel.class.getName(),fullscreen);       
         scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
         //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
         //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);

@@ -238,8 +238,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     try
     {
       getScreen().setPanel(HelpPanel.class.getName());
-      ((HelpPanel)getScreen().getPanel()).setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
-      ((HelpPanel)getScreen().getPanel()).loadDoc();
+      HelpPanel hp = (HelpPanel)getScreen().getPanel();
+      hp.setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
+      hp.loadDoc();
     }
     catch (ClassNotFoundException e)
     {
@@ -267,8 +268,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     try
     {
       getScreen().setPanel(HelpPanel.class.getName());
-      ((HelpPanel)getScreen().getPanel()).setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
-      ((HelpPanel)getScreen().getPanel()).loadHelp();
+      HelpPanel hp = (HelpPanel)getScreen().getPanel();
+      hp.setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
+      hp.loadHelp();
     }
     catch (ClassNotFoundException e)
     {
@@ -288,8 +290,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void setScreen(IScreen iscreen)
   {
     invalidate();
-    if (iscreen==null || iscreen.equals(this.iscreen)) return;
-    this.iscreen = iscreen;
+    if (iscreen!=null)
+      this.iscreen = iscreen;
   }
   
   /**
