@@ -51,8 +51,8 @@ public class TestPanel extends Panel
     });
     add(eRect);
     
-    int x = 1;
-    int y = 1;
+    int x = 300;
+    int y = 300;
     int w = 1000;
     int h = 100;
     

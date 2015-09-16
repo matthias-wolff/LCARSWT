@@ -15,7 +15,7 @@ import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.logging.Log;
 
 public class ElementDataCanvas extends Canvas implements PaintListener
-{    
+{  
   private ElementData ed;
   private PanelState ps;
     
@@ -37,17 +37,17 @@ public class ElementDataCanvas extends Canvas implements PaintListener
             
     //TODO: Add global transform
     GC gc = e.gc;
-        
+    
     Transform t = new Transform(gc.getDevice());
-    Rectangle bounds = getBounds();    
+    Rectangle bnds = getBounds();    
     gc.getTransform(t);
-    float[] point = {bounds.x, bounds.y};    
+    float[] point = {bnds.x, bnds.y};
     t.transform(point);
     t.translate(-point[0], -point[1]);
     gc.setTransform(t);
     
-    elData.render2D(gc, pState); 
-    
+    elData.render2D(gc, pState);
+            
     t.translate(point[0], point[1]);
     gc.setTransform(t);
     t.dispose();

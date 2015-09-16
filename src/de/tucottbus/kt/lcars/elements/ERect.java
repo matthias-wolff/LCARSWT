@@ -41,9 +41,9 @@ public class ERect extends EElement
   
   protected int computeArc()
   {
-    int arc = this.arc>0?this.arc:Math.min(getBounds().width,getBounds().height);
-    if ((getStyle()&LCARS.ES_RECT_RND)==0) arc=0;
-    return arc;
+    return (getStyle()&LCARS.ES_RECT_RND)!=0
+        ? (this.arc>0?this.arc:Math.min(getBounds().width,getBounds().height))
+        : 0;
   }
 
   @Override

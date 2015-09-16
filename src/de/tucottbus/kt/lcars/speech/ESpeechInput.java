@@ -241,12 +241,10 @@ public class ESpeechInput extends ElementContributor
     int curLevel = (int)((level+63f)/66f*numBars);
     for (int i=0; i<numBars; i++)
     {
-      ERect bar = (ERect)getElements().get(i);
-      float alpha = 0.1f;
-      if (i<curLevel)
-        alpha = (float)Math.pow((float)(i)/(float)curLevel+0.3,1.2);
-      if (alpha<0f) alpha=0f;
-      if (alpha>1f) alpha=1f;
+      ERect bar = (ERect)getElements().get(i);      
+      float alpha = i<curLevel
+          ? Math.max(Math.min((float)Math.pow((float)(i)/curLevel+0.3,1.2), 1), 0)
+          : .1f;
       bar.setColor(new SwtColor(bar.getBgColor(),(int)(alpha*255)));
       Rectangle b0 = eCursor[0].getBounds(); b0.y=y+height/2-curLevel*barHeight-5;
       eCursor[0].setBounds(b0);
@@ -382,7 +380,7 @@ public class ESpeechInput extends ElementContributor
       int                 yinc   = linh/3;
   
       
-      // Trim on leading and one tailing square brace from label 
+      // Trim one leading and one tailing square brace from label 
       if (fvrs.startsWith("[") && fvrs.endsWith("]"))
         fvrs = fvrs.substring(1,fvrs.length()-1);
       
@@ -405,7 +403,7 @@ public class ESpeechInput extends ElementContributor
       
       // Create lines
       Area[] lines = new Area[lcnt];
-      for (int i=0; i<lines.length; i++)
+      for (int i=0; i<lcnt; i++)
         lines[i] = new Area(new Rectangle(bnds.x,bnds.y+i*yinc+linh+1,bnds.width,1));
       
       // Create node label geometries
@@ -430,12 +428,15 @@ public class ESpeechInput extends ElementContributor
             geos.addAll(LCARS.createTextGeometry2D(fd,nlab,AwtSwt.toAwtRectangle(tbnd),LCARS.ES_LABEL_NW,null,false));      
             xofs += tbnd.width + 6;
             sw = new StringWriter();
+            
+            //Log.debug(tbnd + ": "+geos.get(geos.size()-1).getBounds());
           }
           yofs += c=='[' ? yinc : -yinc;
         }
         else
           sw.append(c);
       }
+      //Log.debug("global" + bnds);
       
       font.dispose();
       

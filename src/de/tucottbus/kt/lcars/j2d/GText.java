@@ -3,17 +3,14 @@ package de.tucottbus.kt.lcars.j2d;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Path;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * A geometry representing a text.
@@ -25,7 +22,7 @@ public class GText extends Geometry
   private static final long serialVersionUID = -1724627622898883028L;  
   protected Rectangle bounds;
   protected String text;
-  protected float descent;
+  protected int descent;
   protected FontData font;
   
   protected transient Path textPath;
@@ -55,6 +52,7 @@ public class GText extends Geometry
     if (bounds == null)
       throw new NullPointerException("bounds");
 
+    
     this.text = text;
     this.bounds = bounds;
     this.font = font;
@@ -71,9 +69,13 @@ public class GText extends Geometry
   }
   
   @Override
-  public void getArea(Area area)
+  public Area getArea()
   {
-    area.add(new Area(new java.awt.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height)));
+    return new Area(getBounds());
+  }
+  
+  public java.awt.Rectangle getBounds() {
+    return new java.awt.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
   }
   
   public String getText()
@@ -86,21 +88,11 @@ public class GText extends Geometry
     return this.descent;
   }
 
-  public void setDescent(float ascent)
+  public void setDescent(int ascent)
   {
     this.descent = ascent;
   }
 
-  private Path getTextPath() {
-    if(textPath == null) {
-      Display display = LCARS.getDisplay();
-      Font font = new Font(display, this.font);
-      textPath = LCARS.getTextShape(new Font(display, this.font), text, new java.awt.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height));
-      font.dispose();
-    }
-    return textPath;
-  }
-  
   /*
    * (non-Javadoc)
    * 
@@ -108,26 +100,23 @@ public class GText extends Geometry
    */
   @Override
   public void paint2D(GC gc)
-  {
-    gc.setForeground(new Color(gc.getDevice(), new RGB(255, 255, 255)));
+  {    
+    if(textPath == null) {
+      Font font = new Font(gc.getDevice(), this.font);
+      textPath = LCARS.getTextShape(
+          new Font(gc.getDevice(), this.font),
+          text,
+          new java.awt.Rectangle(bounds.x, bounds.y + descent, bounds.width, bounds.height));
+      font.dispose();
+    }    
+    gc.fillPath(textPath);
     
-    gc.drawString(text, bounds.x, bounds.y, true);
-    
-//    Log.debug(isForeground() + "");
-//    Font font = new Font(gc.getDevice(), this.font);
-//    gc.setFont(font);
-//    gc.drawText(text, x, y - gc.getFontMetrics().getAscent());
-//    font.dispose();
-    
-    Path textPath = getTextPath();
-
-    float[] b = new float[4];
-    textPath.getBounds(b);
-    //Log.debug((int)b[0]+","+(int)b[1]+","+(int)b[2]+","+(int)b[3]+"|"+x+","+y);
-    
-    gc.setBackground(new Color(gc.getDevice(), 255, 255, 255));
-    gc.setForeground(new Color(gc.getDevice(), 255, 255, 255));
-    gc.fillPath(textPath);        
+    if (LCARS.SCREEN_DEBUG)
+    {
+      gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
+      gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
+      gc.drawRectangle(bounds.x, bounds.y + descent, bounds.width, bounds.height);
+    }
   }
   
   

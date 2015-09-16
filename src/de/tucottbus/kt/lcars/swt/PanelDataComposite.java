@@ -8,9 +8,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Canvas;
@@ -31,7 +28,7 @@ import de.tucottbus.kt.lcars.logging.Log;
 public abstract class PanelDataComposite extends Composite
 {
   private final static int disabledCapacity = 100;
-  
+    
   private final Stack<ElementDataCanvas> disabledControls = new Stack<ElementDataCanvas>();
     
   private PanelState ps;
@@ -43,22 +40,16 @@ public abstract class PanelDataComposite extends Composite
   private final int edCanvasStyle;
   
   private String bgRes;
-  
+    
   private final PanelDataComposite _this = this;
   
   public PanelDataComposite(Composite parent, int style) {
     super (parent, style);
-    edCanvasStyle = style | SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED;
+    edCanvasStyle = style | SWT.NO_BACKGROUND;
     display = getParent().getDisplay();
   }
   
-  public void applyUpdate(PanelData panelData) {
-    
-    display.asyncExec(() -> {
-      //Control[] ctrls = getChildren();
-      //Log.debug(ctrls.toString());      
-    });
-    
+  public void applyUpdate(PanelData panelData) {    
     if (panelData == null)
     {
       clear();
@@ -145,8 +136,8 @@ public abstract class PanelDataComposite extends Composite
       //  Log.debug("Elements: "+ elements.keySet().toString());
       
       for (Iterator<Long> iterator = oSerNo.iterator(); iterator.hasNext();)
-        deposit(elements.remove(iterator.next()));         
-    }    
+        deposit(elements.remove(iterator.next()));
+    }
   }
   
   /**
@@ -198,41 +189,21 @@ public abstract class PanelDataComposite extends Composite
     // create new canvas
     ElementDataCanvas[] result = new ElementDataCanvas[1];
     display.syncExec(() -> {      
-      result[0] = new ElementDataCanvas(this, edCanvasStyle){
-        @Override
-        public void paintControl(PaintEvent e) {
-          paintElementData(e, () ->{ super.paintControl(e); });
-        }
-      };
-      result[0].addMouseListener(new MouseListener()
-      {
-        private final ElementDataCanvas edc = result[0];
-        
-        @Override
-        public void mouseUp(MouseEvent e)
-        {
-          Log.debug("Mouse over " + edc);          
-        }
-        
-        @Override
-        public void mouseDown(MouseEvent e) {}
-        
-        @Override
-        public void mouseDoubleClick(MouseEvent e) {}
-      });
+      result[0] = createElementDataCanvas(edCanvasStyle);
     });
     result[0].applyUpdate(ed, ps);
     return result[0];
   }
   
-  public void clear() {
-    synchronized (elements)
-    {
-      elements.forEach((serNo, canvas) -> { deposit(canvas); });
-      elements.clear();           
-    };
-    Log.info("resetted");    
-  }
+  protected abstract ElementDataCanvas createElementDataCanvas(int style);
   
-  protected abstract void paintElementData(PaintEvent e, Runnable superPaint);  
+  
+  public void clear() {
+    if (elements.isEmpty()) return;
+    elements.forEach((serNo, canvas) -> {
+      deposit(canvas);
+      elements.remove(serNo);
+    });
+    Log.info("resetted");    
+  }  
 }

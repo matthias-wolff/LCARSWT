@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcars.j2d;
 
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.io.Serializable;
@@ -26,14 +27,13 @@ public class GArea extends Geometry implements Serializable
   }
   
   @Override
-  public void getArea(Area area)
-  {
-    area.add(this.area);
-  }
-  
   public Area getArea()
   {
     return new Area(this.area);
+  }
+  
+  public Rectangle getBounds() {
+    return area.getBounds();
   }
   
   public boolean isOutline()

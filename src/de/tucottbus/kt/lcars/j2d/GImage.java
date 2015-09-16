@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.image.ImageObserver;
 import java.util.HashMap;
@@ -43,13 +44,21 @@ public class GImage extends Geometry
   }
 
   @Override
-  public void getArea(Area area)
+  public Area getArea()
   {
-    ImageData image = getImage();    
-    if(image == null) return;
-    area.add(new Area(new java.awt.Rectangle(pos.x,pos.y,image.width,image.height)));
+    ImageData image = getImage(); 
+    return image != null
+        ? new Area(new java.awt.Rectangle(pos.x,pos.y,image.width,image.height))
+        : new Area();
   }
   
+  @Override
+  public Rectangle getBounds() {
+    ImageData image = getImage(); 
+    return image != null
+        ? new java.awt.Rectangle(pos.x,pos.y,image.width,image.height)
+        : new Rectangle();
+  }
   
   public ImageData getImage()
   {

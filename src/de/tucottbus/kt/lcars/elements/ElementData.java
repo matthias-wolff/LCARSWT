@@ -74,11 +74,6 @@ public final class ElementData implements Serializable
    * Rendering hints for screen
    */
   public int updateFlag = 0;
-
-  /**
-   * Bounds of the area of this element.
-   */
-  private transient Rectangle bounds;
   
   /**
    * Bounds of the area of this element.
@@ -151,7 +146,7 @@ public final class ElementData implements Serializable
       {
         for (Geometry gi : geometry)
           if (!gi.isForeground())
-            gi.getArea(area);
+            area.add(gi.getArea());
         this.area = ar;
         return;
       } catch (NullPointerException e)
@@ -252,7 +247,6 @@ public final class ElementData implements Serializable
           if (geom instanceof AHeavyGeometry)
             ((AHeavyGeometry) geom).applyUpdate();
         this.area = other.area != null ? new Area(other.area) : null;
-        this.bounds = other.bounds != null ? new Rectangle(other.bounds) : null;
         //TODO: make a copy
       }
     } else
@@ -315,22 +309,19 @@ public final class ElementData implements Serializable
   }
 
   /**
-   * Returns the
+   * Returns the smallest rectangle that covers all geometries.
    * 
    * @return
    */
   public Rectangle getBounds()
   {
-    //return state.getBounds();
-    if (bounds == null)
-    {
-      Area area = new Area();
-      getArea(area);
-      area.getBounds();
-      bounds = area.getBounds();
-    }
-
-    return new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height); 
+    if (geometry == null || geometry.isEmpty())
+      return state.getBounds();    
+    Rectangle result = geometry.get(0).getBounds();
+    int n = geometry.size();
+    for (int i = 1; i < n; i++)
+      result.add(geometry.get(i).getBounds());
+    return result; 
   }
 
   /**

@@ -36,6 +36,7 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
+import de.tucottbus.kt.lcars.swt.ElementDataCanvas;
 import de.tucottbus.kt.lcars.swt.PanelDataComposite;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
@@ -129,6 +130,8 @@ public class Screen
     shell = new Shell(display, SWT.NO_TRIM);
     // shell.forceActive();
     //shell.forceFocus(); //Keyboard focus
+
+    
     loadStat = new LoadStatistics(25);
     // Create Swings widgets
     shell.setText("LCARS");
@@ -136,7 +139,41 @@ public class Screen
 
     // initContentPane();
 
-    setPanel(panelClass);
+    final Screen _this = this;
+    
+    composite = new PanelDataComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED*/)
+    {     
+      @Override
+      protected ElementDataCanvas createElementDataCanvas(int style)
+      {
+        ElementDataCanvas result = new ElementDataCanvas(composite, style) {
+            @Override
+            public void paintControl(PaintEvent e)
+            {
+              // Prepare setup
+              GC gc = e.gc;
+              Transform t = AwtSwt.toSwtTransform(getTransform(), gc.getDevice());
+              gc.setTransform(t);
+              t.dispose();
+              gc.setTextAntialias(SWT.ON);
+              gc.setInterpolation(SWT.HIGH);
+              gc.setAntialias(SWT.ON);
+              
+              //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+              //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+              //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+              //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));              
+              super.paintControl(e);
+            }
+          };
+          result.setTouchEnabled(true);
+          result.addTouchListener(_this);
+          result.addMouseListener(_this);
+          result.addMouseMoveListener(_this);
+          return result;          
+      }               
+    };
+
     fullScreenMode = fullScreen;// && device.isFullScreenSupported();
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
@@ -177,26 +214,7 @@ public class Screen
 
     if (LCARS.getArg("--nomouse")!=null)
       composite.setCursor(LCARS.createBlankCursor(display));
-    composite = new PanelDataComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED*/)
-    {     
-      @Override
-      protected void paintElementData(PaintEvent e, Runnable superPaint)
-      {
-        // Prepare setup
-        GC gc = e.gc;
-        Transform t = AwtSwt.toSwtTransform(getTransform(), gc.getDevice());
-        gc.setTransform(t);
-        t.dispose();
-        gc.setTextAntialias(SWT.ON);
-        gc.setInterpolation(SWT.LOW);
-        
-        //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-        //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-        //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-        superPaint.run();
-      }
-    };
+    
     composite.setBackground(black);
     composite.setSize(shell.getSize());
     composite.setLayout(new FillLayout());
@@ -206,11 +224,6 @@ public class Screen
     //awtFrame.setSize(getSize());
       
     // TODO: check awtFrame is in embedded full screen mode
-
-    composite.setTouchEnabled(true);
-    composite.addTouchListener(this);
-    composite.addMouseListener(this);
-    composite.addMouseMoveListener(this);
 
     composite.setEnabled(true);
     
@@ -227,6 +240,8 @@ public class Screen
         // Does not give visual feedback
       }
     };
+    
+    setPanel(panelClass);
 
     // Window event handlers
     // addWindowStateListener(new WindowStateListener()
@@ -682,8 +697,8 @@ public class Screen
       {
         if (isScreenInvalid())
           invoke(() -> {
-            composite.redraw();
-            //shell.redraw();
+            //composite.redraw();
+            shell.redraw();
             //awtFrame.repaint();
           });
       }
@@ -693,8 +708,8 @@ public class Screen
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
           invoke(() -> {
-            composite.redraw();
-            //shell.redraw();
+            //composite.redraw();
+            shell.redraw();
             //awtFrame.repaint();
 
           });

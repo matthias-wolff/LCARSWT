@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars.j2d;
 
 import java.awt.Composite;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.io.Serializable;
 
@@ -45,7 +46,15 @@ public abstract class Geometry implements Serializable
   /**
    * Returns the {@link Area area} covered by this geometry.
    */
-  public abstract void getArea(Area area);
+  public abstract Area getArea();
+  
+  /**
+   * 
+   * @return
+   */
+  public abstract Rectangle getBounds();
+
+  
 
   /**
    * Called to paint this geometry on a {@link GC} context. Implementations <b>must not</b>
@@ -68,7 +77,7 @@ public abstract class Geometry implements Serializable
   public void onVisibilityChanged(boolean visibility)
   {
     // ignored
-  }  
+  }     
 }
 
 // EOF

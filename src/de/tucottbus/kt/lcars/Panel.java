@@ -161,7 +161,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   throws ClassNotFoundException
   {
     Panel panel;
-    if(className == null || className == Panel.class.getName()) {
+    if(className == null) return null;
+                
+    if(className == Panel.class.getName()) {
       panel = new Panel(iscreen);
       panel.panelSelectionDialog();
     } else {
@@ -171,7 +173,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       {
         Object[] args = { iscreen };
         panel = (Panel)panelClass.getConstructors()[0].newInstance(args);
-        LCARS.setPanelDimension(panel.getDimension());
       }
       catch (Exception e)
       {
@@ -1120,8 +1121,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   protected final Dimension getDimension()
   {
-    Area shape = getShape();
-    return new Dimension(shape.getBounds().width,shape.getBounds().height);
+    Rectangle bounds = getShape().getBounds();
+    return new Dimension(bounds.width,bounds.height);
   }  
  
   @Override

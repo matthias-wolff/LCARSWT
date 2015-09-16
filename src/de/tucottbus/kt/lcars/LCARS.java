@@ -21,9 +21,7 @@ package de.tucottbus.kt.lcars;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,7 +51,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.Vector;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -67,6 +65,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
@@ -195,6 +194,7 @@ public class LCARS implements ILcarsRemote
   
   protected HashMap<String,RmiPanelAdapter> rmiPanelAdapters;
   
+  public static boolean SCREEN_DEBUG;
   
   // -- The server singleton --
 
@@ -216,6 +216,18 @@ public class LCARS implements ILcarsRemote
   // -- Panel information --
   
   protected static Dimension panelDim = new Dimension(1920,1080);
+  protected static Point dpi = new Point();
+  
+  static {
+    Display display = getDisplay();
+    display.syncExec(() -> {
+      org.eclipse.swt.graphics.Point dpiPoint = display.getDPI();
+      dpi.x = dpiPoint.x;
+      dpi.y = dpiPoint.y;
+    });
+  }
+  
+    
   
   public static void setPanelDimension(Dimension dim)
   {
@@ -508,20 +520,29 @@ public class LCARS implements ILcarsRemote
   {
     if (fonts==null)
     {
-      String f = LCARS.getInstalledFont(FN_COMPACTA);
+      String[] f = {LCARS.getInstalledFont(FN_COMPACTA)};
+      
       int    h = 1200;/*LCARS.panelDim.height;*/
+      
       fonts = new FontData[EF_COUNT];
-      fonts[EF_LARGE >>EF_SHIFT] = new FontData(f, (int)(h/27.0), SWT.NORMAL); // h/32.0
-      fonts[EF_HEAD1 >>EF_SHIFT] = new FontData(f, (int)(h/10.0), SWT.NORMAL); // h/12.0
-      fonts[EF_HEAD2 >>EF_SHIFT] = new FontData(f, (int)(h/17.0), SWT.NORMAL); // h/25.0
+      
+      double    scaleAwtSwt = 72.0 / dpi.y; // src: SWTUtil.java::toSwtFontData
+      final Function<Integer, FontData> newFont = (height) -> {       
+        return new FontData(f[0], (int)(height*scaleAwtSwt), java.awt.Font.PLAIN);
+      };
+      
+      fonts[EF_LARGE >>EF_SHIFT] = newFont.apply((int)(h/27.0)); //32.0
+      fonts[EF_HEAD1 >>EF_SHIFT] = newFont.apply((int)(h/10.0)); //12.0
+      fonts[EF_HEAD2 >>EF_SHIFT] = newFont.apply((int)(h/17.0)); //25.0
       
       /* --> */
-      if (f.equals(FN_COMPACTA))
-        f = LCARS.getInstalledFont(FN_SWISS911);
+      if (f[0].equals(FN_COMPACTA))
+        f[0] = LCARS.getInstalledFont(FN_SWISS911);
       
-      fonts[EF_NORMAL >>EF_SHIFT] =  new FontData(f, (int)(h/37.5), SWT.NORMAL);
-      fonts[EF_SMALL >>EF_SHIFT] = new FontData(f, (int)(h/50.0), SWT.NORMAL);
-      fonts[EF_TINY >>EF_SHIFT] = new FontData(f, (int)(h/65.0), SWT.NORMAL);      
+      fonts[EF_NORMAL >>EF_SHIFT] = newFont.apply((int)(h/37.5));
+      fonts[EF_SMALL >>EF_SHIFT] = newFont.apply((int)(h/50.0));
+      fonts[EF_TINY >>EF_SHIFT] = newFont.apply((int)(h/65.0));                                
+      
     }
     int font = (style & ES_FONT) >> EF_SHIFT;
     if (font<0 || font>=fonts.length) return fonts[0];
@@ -592,7 +613,7 @@ public class LCARS implements ILcarsRemote
    *          The text.
    * @return The shape.
    */
-  public static Path getTextShape(Font font, String text, Rectangle bounds)  
+  public static Path getTextShape(Font font, String text, java.awt.Rectangle bounds)  
   {    
     if (text==null || text.length()==0) return null;
     TextLayout tl = new TextLayout(font.getDevice());
@@ -603,12 +624,10 @@ public class LCARS implements ILcarsRemote
     int x = bounds.x;
     int y = bounds.y;
     
-    //y += fm[0].getAscent();
     Path              path = new Path(font.getDevice());
     FontMetrics fm = tl.getLineMetrics(0);
     float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
     
-    y -= fm.getAscent();
     for (String line : text.split("\n"))
     {
       if (line!=null && line.length()!=0)
@@ -647,11 +666,11 @@ public class LCARS implements ILcarsRemote
    */
   public static ArrayList<Geometry> createTextGeometry2D
   (
-    String     text,
-    Rectangle  bounds,
-    int        style,
-    Point      insets,
-    boolean    foreground    
+    String              text,
+    java.awt.Rectangle  bounds,
+    int                 style,
+    Point               insets,
+    boolean             foreground    
   )
   {
     return createTextGeometry2D(getFont(style), text, bounds, style, insets, foreground);
@@ -673,12 +692,12 @@ public class LCARS implements ILcarsRemote
    */
   public static ArrayList<Geometry> createTextGeometry2D
   (
-    FontData       font,
-    String     text,
-    Rectangle  bounds,
-    int        style,
-    Point      insets,
-    boolean    foreground    
+    FontData            font,
+    String              text,
+    java.awt.Rectangle  bounds,
+    int                 style,
+    Point               insets,
+    boolean             foreground    
   )
   {
     //TODO: http://pawlan.com/monica/articles/texttutorial/other.html
@@ -687,80 +706,72 @@ public class LCARS implements ILcarsRemote
     if (text==null || text.length()==0 || bounds==null) return geos;
     if (insets==null) insets = new Point(0,0);
         
-    String            s[] = text.split("\n");
-    TextLayout        t[] = new TextLayout[s.length];
-    Dimension         td  = new Dimension();
     // Measure text lines
-    int n = s.length;
-    Display display = Display.getDefault();
+    Display      display = Display.getDefault();
     Font thisFont = new Font(display, font);
+    TextLayout        tl = new TextLayout(display);
+    String s[] = text.split("\n");
+    tl.setFont(thisFont);
+    tl.setText(text);
     
-    for (int i=0; i<n; i++)
-    {
-      String l = s[i]; if (l==null || l.length()==0) l=" ";
-      TextLayout tl = t[i] = new TextLayout(display);
-      tl.setFont(thisFont);
-      tl.setText(l);
-      double w = Math.max(td.getWidth(),t[i].getBounds().width);
-      double h = td.getHeight()+tl.getAscent();
-      
-      if (i<n-1) h += (tl.getDescent()+tl.getSpacing());
-      td.setSize(w,h);
-    }
-    
-    thisFont.dispose();
-    
-    // Position the text box
-    float tx = bounds.x;
-    float ty = bounds.y;
-    float w  = bounds.width;
-    float h  = bounds.height;
-    
+    org.eclipse.swt.graphics.Rectangle tlBnds = tl.getBounds();
+        
     int align = (style & ES_LABEL) >> 4;
     if(align > ES_LABEL_SE)
       align = ES_LABEL_NW >> 4;
     int hAlign = align / 3;
         
-    final BiFunction<Dimension, TextLayout, Float> xFun0 = (d,tl) -> {return 0f;};
-    final BiFunction<Dimension, TextLayout, Float> xFun1 = (d,tl) -> {return (d.width-(float)tl.getBounds().width)/2;};
-    final BiFunction<Dimension, TextLayout, Float> xFun2 = (d,tl) -> {return d.width-tl.getBounds().width-1f;};
-    BiFunction<Dimension, TextLayout, Float> xFun;
-
+    // Position the text box
+    int tx = bounds.x+insets.x;
+    int ty = bounds.y+insets.y;
+    int w  = bounds.width-insets.x*2;
+    int h  = bounds.height-insets.y*2;
+    
+    if (w <= 0 || h <= 0) return geos;
+    
     switch (hAlign) // horizontal alignment
     {
-      case 0: xFun = xFun0; tx += insets.x; break; // left
-      case 1: xFun = xFun1; tx += (w-td.width)/2; break; // middle
-      case 2: xFun = xFun2; tx += w-td.width-insets.x; break; // right
+      case 0: 
+        tl.setAlignment(SWT.LEFT);
+        break; // left
+      case 1:
+        tl.setAlignment(SWT.CENTER);
+        tx += (w-tlBnds.width)/2; break; // middle
+      case 2: 
+        tl.setAlignment(SWT.RIGHT);        
+        tx += w-tlBnds.width-insets.x; break; // right
       default: return geos;
     }
     switch (align % 3) // vertical alignment
     {
-      case 0: ty += insets.y; break;  // top
-      case 1: ty += (h-td.height)/2; break; // middle
-      case 2: ty += h-td.height-insets.y; break; // bottom
+      case 0: break;  // top
+      case 1: ty += (h-tlBnds.height)/2; break; // middle
+      case 2: ty += h-tlBnds.height-insets.y; break; // bottom
       default: return geos;
     }
-
-    // Draw text lines
-    float y = -t[0].getDescent()/3;
+            
+    int n = tl.getLineCount();
     
-    for (int i=0; i<s.length; i++)
+    for (int i=0; i<n; i++)
     {
-      TextLayout tl = t[i];
-      float x = xFun.apply(td, tl);                 
-      y += tl.getAscent();
-      Point2D.Float pos = new Point2D.Float(tx+x,ty+y);
-      //Rectangle shape = new Rectangle((int)(tx+x),(int)(ty+y-tl.getAscent()),
-      //    (int)(tl.getAdvance()),(int)(tl.getAscent()+tl.getDescent()));
-      org.eclipse.swt.graphics.Rectangle bnds = tl.getBounds();
-      bnds.x += tx;
-      bnds.y += ty;
-      GText e = new GText(s[i],bnds,font,foreground);
-      e.setDescent(tl.getDescent());
-      geos.add(e);
-      y += tl.getDescent()+tl.getSpacing();
+      org.eclipse.swt.graphics.Rectangle linBnds = tl.getLineBounds(i);
+      if (linBnds.y > h) break; // line out of vertical bounds
+      int x = linBnds.x+tx;
+      int y = linBnds.y+ty;
+      
+      GText gt = new GText(
+          s[i],
+          new Rectangle(x, y, Math.min(linBnds.width, w-linBnds.x), Math.min(linBnds.height, h-linBnds.y)),
+          font,
+          foreground);
+//    FontMetrics lm = tl.getLineMetrics(i);
+//    gt.setDescent(lm.getDescent());
+      
+      //TODO:
+      geos.add(gt);
     }
     
+    thisFont.dispose();    
     return geos;
   }
 
@@ -1553,6 +1564,8 @@ public class LCARS implements ILcarsRemote
     }
     
     Log.DebugMode = getArg("--debug") != null;
+    LCARS.SCREEN_DEBUG = getArg("--screenDebug") != null;
+    
     Log.addObserver(new ILogObserver()
     {
       private void doLog(String pfx, String msg, Boolean err) {
@@ -1607,7 +1620,7 @@ public class LCARS implements ILcarsRemote
         int scrid = srcIdArg != null ?
             Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
         
-        Screen scr = new Screen(display,Panel.class.getName(),fullscreen);       
+        Screen scr = new Screen(display,null,fullscreen);       
         scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
         //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
         //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
@@ -1704,11 +1717,12 @@ public class LCARS implements ILcarsRemote
         try
         {
           String pcn = getArg("--panel=");
-          if (pcn==null && getArg("--server")!=null)
-            pcn = "de.tucottbus.kt.lcars.net.ServerPanel";
-          
-          if (pcn != null && pcn != iscreen.getPanel().getClass().getName())
-            iscreen.setPanel(pcn);
+          if (pcn==null) {
+            pcn = getArg("--server")!=null
+                ? ServerPanel.class.getName()
+                : Panel.class.getName();
+          } 
+          iscreen.setPanel(pcn);          
         }
         catch (ClassNotFoundException | RemoteException e)
         {
