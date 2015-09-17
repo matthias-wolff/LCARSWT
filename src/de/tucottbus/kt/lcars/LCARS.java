@@ -1579,14 +1579,14 @@ public class LCARS implements ILcarsRemote
         iscreen = scr;
       }
       else
-        Log.info(CLASSKEY,"Command line mode (no GUI)");
+        Log.info("Command line mode (no GUI)");
 
       // Install shut-down hook
       Runtime.getRuntime().addShutdownHook(new Thread()
       {
         public void run()
         {
-          Log.info(CLASSKEY,"Shutting down ...");
+          Log.info("Shutting down ...");
 
           // Shut-down panel
           if (iscreen!=null)
@@ -1632,15 +1632,15 @@ public class LCARS implements ILcarsRemote
           }
           catch (Exception e) {}
 
-          Log.info(CLASSKEY,"... shut-down");  
+          Log.info("... shut-down");  
         }
       });
       
       // Check network command line options
       if (getArg("--server")!=null && getArg("--clientof")!=null)
       {
-        Log.err(CLASSKEY,"FATAL ERROR cannot be client and server at the same time");
-        Log.err(CLASSKEY,"Use either \"--clientof\" or \"--server\"!");
+        Log.err("FATAL ERROR cannot be client and server at the same time");
+        Log.err("Use either \"--clientof\" or \"--server\"!");
         System.exit(-1);
       }
       
@@ -1648,7 +1648,7 @@ public class LCARS implements ILcarsRemote
       if (getArg("--server")!=null)
       {
         LCARS.getRmiRegistry();
-        Log.info(CLASSKEY,"server at "+getHostName());
+        Log.info("server at "+getHostName());
         server = new LCARS();
         try
         {
@@ -1657,7 +1657,7 @@ public class LCARS implements ILcarsRemote
         }
         catch (Exception e)
         {
-          Log.err(CLASSKEY,"FATAL ERROR: RMI binding failed.");
+          Log.err("FATAL ERROR: RMI binding failed.");
           e.printStackTrace();
           System.exit(-1);
         }
@@ -1667,7 +1667,7 @@ public class LCARS implements ILcarsRemote
       String clientOf = getArg("--clientof=");
       if (clientOf!=null)
       {
-        Log.info("["+CLASSKEY,"client of "+clientOf+" at "+getHostName());
+        Log.info("client of "+clientOf+" at "+getHostName());
         LCARS.getRmiRegistry();
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }
