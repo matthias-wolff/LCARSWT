@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * Derived classes play {@linkplain UserFeedback audio-visual feedback signals}.
@@ -173,7 +174,14 @@ public abstract class UserFeedbackPlayer
           {
             Color c = eyeconSamples[eyeconSamples.length-1];
             if (c!=null || eyeconSamples.length==1) fallbackColor = c;
-            writeColor(c==null?fallbackColor:c);
+            try
+            {
+              writeColor(c==null?fallbackColor:c);
+            }
+            catch (Exception e)
+            {
+              Log.err("Cannot write LED color.",e);
+            }
           }
     
           // - Stop playing

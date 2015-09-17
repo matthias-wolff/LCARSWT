@@ -1591,29 +1591,32 @@ public class LCARS implements ILcarsRemote
           // Shut-down panel
           if (iscreen!=null)
           {
-	        try
-	        {
-	          if (iscreen.getPanel()!=null)
-	          {
-	            iscreen.getPanel().stop();
-	          }
-	        }
-	        catch (RemoteException e) {}
-	
-	        // Shut-down RMI screen adapter
-	        if (iscreen instanceof RmiScreenAdapter)
-	          ((RmiScreenAdapter)iscreen).shutDown();
-	        iscreen = null;
+  	        try
+  	        {
+  	          if (iscreen.getPanel()!=null)
+  	          {
+  	            iscreen.getPanel().stop();
+  	          }
+  	        }
+  	        catch (RemoteException e) {}
+  	
+  	        // Shut-down RMI screen adapter
+            try
+            {
+    	        if (iscreen instanceof RmiScreenAdapter)
+    	          ((RmiScreenAdapter)iscreen).shutDown();
+            }
+            catch (Exception e) {}
+  	        iscreen = null;
           }
 
           // Shut-down RMI panel adapters
           if (server!=null)
-          {
-            for (RmiPanelAdapter rpa : server.rmiPanelAdapters.values())
-              rpa.shutDown();
-            server.rmiPanelAdapters.clear();
             try
             {
+              for (RmiPanelAdapter rpa : server.rmiPanelAdapters.values())
+                rpa.shutDown();
+              server.rmiPanelAdapters.clear();
               Naming.unbind(getRmiName());
               UnicastRemoteObject.unexportObject(server,true);
             }
@@ -1621,10 +1624,13 @@ public class LCARS implements ILcarsRemote
             {
               e.printStackTrace();
             }
-          }
 
           // Shut-down speech engine
-          Panel.disposeSpeechEngine();
+          try
+          {
+            Panel.disposeSpeechEngine();
+          }
+          catch (Exception e) {}
 
           Log.info(CLASSKEY,"... shut-down");  
         }
@@ -1700,6 +1706,8 @@ public class LCARS implements ILcarsRemote
     {
       e.printStackTrace();
     }
+    
+    System.err.println("END OF LCARS.main");
   }
 
 }
