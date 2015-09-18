@@ -9,6 +9,8 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.LCARS;
 
@@ -20,10 +22,11 @@ import de.tucottbus.kt.lcars.LCARS;
 public class GText extends Geometry
 {
   private static final long serialVersionUID = -1724627622898883028L;  
-  protected Rectangle bounds;
   protected String text;
   protected int descent;
-  protected FontData font;
+  protected FontData fontData;
+  protected int x;
+  protected int y;
   
   protected transient Path textPath;
   
@@ -45,22 +48,19 @@ public class GText extends Geometry
    * @param foreground
    *          foreground/background flag
    */
-  public GText(String text, Rectangle bounds, FontData font,
+  public GText(String text, int x, int y, FontData fontData,
       boolean foreground)
   {    
     super(foreground);
-    if (bounds == null)
-      throw new NullPointerException("bounds");
-
-    
+    this.x = x;
+    this.y = y;
     this.text = text;
-    this.bounds = bounds;
-    this.font = font;
+    this.fontData = fontData;
   }
   
   public Point2D.Float getPos()
   {
-    return new Point2D.Float(bounds.x, bounds.y);
+    return new Point2D.Float(x, y);
   }
 
   @Deprecated
@@ -75,7 +75,11 @@ public class GText extends Geometry
   }
   
   public java.awt.Rectangle getBounds() {
-    return new java.awt.Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+    Font font = new Font(Display.getDefault(), fontData);
+    Rectangle bnds = LCARS.getTextBounds(font, text);
+    font.dispose();
+    return new java.awt.Rectangle(bnds.x+x, bnds.y+y, bnds.width, bnds.height);
+    
   }
   
   public String getText()
@@ -102,11 +106,8 @@ public class GText extends Geometry
   public void paint2D(GC gc)
   {    
     if(textPath == null) {
-      Font font = new Font(gc.getDevice(), this.font);
-      textPath = LCARS.getTextShape(
-          new Font(gc.getDevice(), this.font),
-          text,
-          new java.awt.Rectangle(bounds.x, bounds.y + descent, bounds.width, bounds.height));
+      Font font = new Font(gc.getDevice(), fontData);
+      textPath = LCARS.getTextShape(font, text, getBounds());
       font.dispose();
     }    
     gc.fillPath(textPath);
@@ -115,7 +116,7 @@ public class GText extends Geometry
     {
       gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
       gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
-      gc.drawRectangle(bounds.x, bounds.y + descent, bounds.width, bounds.height);
+      gc.drawRectangle(SWTUtils.toSwtRectangle(getBounds()));
     }
   }
   

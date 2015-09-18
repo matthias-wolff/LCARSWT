@@ -22,12 +22,12 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.TouchEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Touch;
@@ -386,8 +386,8 @@ public class Screen
     try
     {
       pt2d = getTransform().inverseTransform(pt, null);
-      return new Point((int) Math.round(pt2d.getX()),
-          (int) Math.round(pt2d.getY()));
+      return new Point((int) (pt2d.getX() + .5),
+          (int) (pt2d.getY() + .5));
     } catch (NoninvertibleTransformException e)
     {
       // Cannot happen
@@ -397,7 +397,7 @@ public class Screen
   }
 
   /**
-   * Converts panel to component (LCARS screen) coordinates.
+   * Converts panel to component (LCARS screen) coordinates.out
    * 
    * @param pt
    *          The LCARS panel coordinates.
@@ -408,8 +408,8 @@ public class Screen
   public Point panelToComponent(Point pt)
   {
     Point2D pt2d = getTransform().transform(pt, null);
-    return new Point((int) Math.round(pt2d.getX()),
-        (int) Math.round(pt2d.getY()));
+    return new Point((int) (pt2d.getX() + .5),
+        (int) (pt2d.getY() + .5));
   }
 
   // -- Getters and setters --
@@ -511,7 +511,34 @@ public class Screen
   }
 
   // -- Implementation of the MouseInputListener interface --
+  protected void processTouchEvent(TouchEvent touchEvent) {
+    if (touchEvent == null) {
+      Log.warn("Touch event ignored");
+      return;
+    }
+    try
+    {
+      panel.processTouchEvent(touchEvent);
+    } catch (RemoteException e1)
+    {
+      int t = touchEvent.type;
+      Log.err("Error while transmission of touch "+(t==TouchEvent.DOWN ? "down" : (t==TouchEvent.UP ? "up" : "drag"))+" event", e1);
+    }    
+  }
+  
 
+  protected TouchEvent toTouchEvent(MouseEvent e, int eventType) {
+    if (!(e.widget instanceof Control)) return null;
+    org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
+    Point pt = componentToPanel(new Point(absPos.x, absPos.y));
+    TouchEvent te = new TouchEvent();
+    te.type = eventType;
+    te.x = pt.x;
+    te.y = pt.y;
+    return te;
+  }
+  
+  
   @Override
   public void mouseDoubleClick(MouseEvent e)
   {
@@ -524,21 +551,9 @@ public class Screen
     if(mouseButton != 0) {
       mouseButton = 0;
       return;
-    }
-    
-    mouseButton = e.button;
-    Point pt = componentToPanel(new Point(e.x, e.y));
-    de.tucottbus.kt.lcars.TouchEvent te = new de.tucottbus.kt.lcars.TouchEvent();
-    te.type = de.tucottbus.kt.lcars.TouchEvent.DOWN;
-    te.x = pt.x;
-    te.y = pt.y;
-    try
-    {
-      panel.processTouchEvent(te);
-    } catch (RemoteException e1)
-    {
-      Log.err("Mouse down ignored", e1);
-    }
+    }    
+    mouseButton = e.button;    
+    processTouchEvent(toTouchEvent(e, TouchEvent.DOWN));
   }
 
   @Override
@@ -547,37 +562,14 @@ public class Screen
     if(mouseButton != e.button)
       return;
     mouseButton = 0;
-    Point pt = componentToPanel(new Point(e.x, e.y));
-    de.tucottbus.kt.lcars.TouchEvent te = new de.tucottbus.kt.lcars.TouchEvent();
-    te.type = de.tucottbus.kt.lcars.TouchEvent.UP;
-    te.x = pt.x;
-    te.y = pt.y;
-    try
-    {
-      panel.processTouchEvent(te);
-    } catch (RemoteException e1)
-    {
-      Log.err("Mouse up ignored", e1);
-    }    
+    processTouchEvent(toTouchEvent(e, TouchEvent.UP));
   }
   
   @Override
   public void mouseMove(MouseEvent e)
   {
-    if(mouseButton == 0)
-      return;    
-    Point pt = componentToPanel(new Point(e.x, e.y));
-    de.tucottbus.kt.lcars.TouchEvent te = new de.tucottbus.kt.lcars.TouchEvent();
-    te.type = de.tucottbus.kt.lcars.TouchEvent.DRAG;
-    te.x = pt.x;
-    te.y = pt.y;
-    try
-    {
-      panel.processTouchEvent(te);
-    } catch (RemoteException e1)
-    {
-      Log.err("Mouse drag ignored", e1);
-    }    
+    if(mouseButton != 0)
+      processTouchEvent(toTouchEvent(e, TouchEvent.DRAG));
   }
 
   // -- Implementation of the KeyListener interface --
@@ -617,20 +609,25 @@ public class Screen
       {
       }
   }
-
+  
   @Override
-  public void touch(TouchEvent e)
+  public void touch(org.eclipse.swt.events.TouchEvent e)
   {
     if (e.touches.length <= 0)
       return;
     Log.info(e.touches[0].toString());
-    Touch pt = e.touches[0];
+    Touch touch = e.touches[0];
 
+    if (!(e.widget instanceof Control)) {
+      
+      return;
+    }
+    org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
+    Point pt = componentToPanel(new Point(absPos.x, absPos.y));
     de.tucottbus.kt.lcars.TouchEvent te = new de.tucottbus.kt.lcars.TouchEvent();
     te.x = pt.x;
     te.y = pt.y;
-
-    switch (pt.state)
+    switch (touch.state)
     {
     case SWT.TOUCHSTATE_DOWN:
       te.type = de.tucottbus.kt.lcars.TouchEvent.DOWN;
@@ -644,13 +641,8 @@ public class Screen
 
     default:
       return;
-    }
-    try
-    {
-      panel.processTouchEvent(te);
-    } catch (RemoteException e1)
-    {
-    }
+    }    
+    processTouchEvent(te);
   }
 
   public void add(Component component)

@@ -761,7 +761,7 @@ public class LCARS implements ILcarsRemote
       
       GText gt = new GText(
           s[i],
-          new Rectangle(x, y, Math.min(linBnds.width, w-linBnds.x), Math.min(linBnds.height, h-linBnds.y)),
+          x,y,//new Rectangle(x, y, Math.min(linBnds.width, w-linBnds.x), Math.min(linBnds.height, h-linBnds.y)),
           font,
           foreground);
 //    FontMetrics lm = tl.getLineMetrics(i);
