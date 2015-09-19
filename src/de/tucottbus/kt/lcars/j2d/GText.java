@@ -4,6 +4,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
@@ -21,7 +22,8 @@ import de.tucottbus.kt.lcars.LCARS;
  */
 public class GText extends Geometry
 {
-  private static final long serialVersionUID = -1724627622898883028L;  
+  private static final long serialVersionUID = -1724627622898883028L;
+  
   protected String text;
   protected int descent;
   protected FontData fontData;
@@ -114,13 +116,14 @@ public class GText extends Geometry
     
     if (LCARS.SCREEN_DEBUG)
     {
-      gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
-      gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
+      Color red = gc.getDevice().getSystemColor(SWT.COLOR_RED);
+      gc.setBackground(red);
+      gc.setForeground(red);
       gc.drawRectangle(SWTUtils.toSwtRectangle(getBounds()));
+      red.dispose();
     }
   }
-  
-  
+    
   @Override
   protected void finalize() throws Throwable
   {

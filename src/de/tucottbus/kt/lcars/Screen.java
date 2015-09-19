@@ -459,9 +459,8 @@ public class Screen
   @Override
   public Area getArea()
   {
-    int w = Toolkit.getDefaultToolkit().getScreenSize().width;
-    int h = Toolkit.getDefaultToolkit().getScreenSize().height;
-    return new Area(new Rectangle(0, 0, w, h));
+    Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+    return new Area(new Rectangle(0, 0, size.width, size.height));
   }
 
   @Override

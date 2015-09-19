@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
+import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.logging.Log;
@@ -69,7 +70,8 @@ public class ElementDataCanvas extends Canvas implements PaintListener
     if ((edUpdate & ElementData.GEOMETRY_FLAG) > 0) // resize
     {
       Rectangle bnds = SWTUtils.toSwtRectangle(elementData.getBounds());
-      Log.debug("#"+elementData.serialNo+" Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
+      if (LCARS.SCREEN_DEBUG)
+        Log.debug("#"+elementData.serialNo+" Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
       display.asyncExec(redraw
           ? () -> {          
               setBounds(bnds);        

@@ -65,7 +65,6 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
@@ -216,14 +215,14 @@ public class LCARS implements ILcarsRemote
   // -- Panel information --
   
   protected static Dimension panelDim = new Dimension(1920,1080);
-  protected static Point dpi = new Point();
+  
+  // The scaling to get a swt font with the same height as there awt variant
+  protected static double fontScale; 
   
   static {
     Display display = getDisplay();
     display.syncExec(() -> {
-      org.eclipse.swt.graphics.Point dpiPoint = display.getDPI();
-      dpi.x = dpiPoint.x;
-      dpi.y = dpiPoint.y;
+      fontScale = 72.0 / display.getDPI().y;
     });
   }
   
@@ -526,9 +525,8 @@ public class LCARS implements ILcarsRemote
       
       fonts = new FontData[EF_COUNT];
       
-      double    scaleAwtSwt = 72.0 / dpi.y; // src: SWTUtil.java::toSwtFontData
       final Function<Integer, FontData> newFont = (height) -> {       
-        return new FontData(f[0], (int)(height*scaleAwtSwt), java.awt.Font.PLAIN);
+        return new FontData(f[0], (int)(height*fontScale), java.awt.Font.PLAIN);
       };
       
       fonts[EF_LARGE >>EF_SHIFT] = newFont.apply((int)(h/27.0)); //32.0
@@ -562,7 +560,7 @@ public class LCARS implements ILcarsRemote
   public static FontData getFont(int style, int size)
   {
     FontData next = getFont(style);
-    FontData result = new FontData(next.getName(), next.getHeight(), next.getStyle());
+    FontData result = new FontData(next.getName(), (int)(size*fontScale+.5), next.getStyle());
     result.setLocale(next.getLocale());
     return result;
   }
