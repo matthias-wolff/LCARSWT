@@ -36,7 +36,7 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
-import de.tucottbus.kt.lcars.swt.ElementDataCanvas;
+import de.tucottbus.kt.lcars.swt.ElementDataComposite;
 import de.tucottbus.kt.lcars.swt.PanelDataComposite;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
@@ -142,11 +142,11 @@ public class Screen
     final Screen _this = this;
     
     composite = new PanelDataComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED*/)
-    {     
+    {
       @Override
-      protected ElementDataCanvas createElementDataCanvas(int style)
+      protected ElementDataComposite createElementDataCanvas(int style)
       {
-        ElementDataCanvas result = new ElementDataCanvas(composite, style) {
+        ElementDataComposite result = new ElementDataComposite(composite, style) {
             @Override
             public void paintControl(PaintEvent e)
             {

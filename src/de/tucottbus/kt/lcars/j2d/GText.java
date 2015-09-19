@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * A geometry representing a text.
@@ -118,24 +117,10 @@ public class GText extends Geometry
   {    
     if(tl == null) {
       Font font = new Font(gc.getDevice(), fontData);      
-      tl = LCARS.getTextLayout(font, text);              
-      //font.dispose();
-      
-      if ("EARTH".equals(text))
-      {
-        Rectangle bnds = getBounds();
-        org.eclipse.swt.graphics.Rectangle tpBnds = tl.getBounds();
-        Log.debug(bnds + " - " + tpBnds);
-        
-        Color fgColor = gc.getForeground();
-        Color bgColor = gc.getBackground();
-        
-        Log.debug(fgColor + " - " + bgColor);
-        
-      }
+      tl = LCARS.getTextLayout(font, text);
+      //TODO: font dispose in this::finalize()?
     }
     tl.draw(gc, x, y, 0, text.length()-1, gc.getBackground(), gc.getForeground());
-//    gc.fillPath(textPath);
     
     if (LCARS.SCREEN_DEBUG)
     {

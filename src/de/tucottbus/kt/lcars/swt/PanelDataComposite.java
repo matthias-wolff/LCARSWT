@@ -10,7 +10,6 @@ import java.util.TreeSet;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -29,13 +28,13 @@ public abstract class PanelDataComposite extends Composite
 {
   private final static int disabledCapacity = 100;
     
-  private final Stack<ElementDataCanvas> disabledControls = new Stack<ElementDataCanvas>();
+  private final Stack<ElementDataComposite> disabledControls = new Stack<ElementDataComposite>();
     
   private PanelState ps;
   
   private final Display display;
   
-  private final HashMap<Long, ElementDataCanvas> elements = new HashMap<Long, ElementDataCanvas>(100);
+  private final HashMap<Long, ElementDataComposite> elements = new HashMap<Long, ElementDataComposite>(100);
   
   private final int edCanvasStyle;
   
@@ -96,15 +95,15 @@ public abstract class PanelDataComposite extends Composite
       return;
     }
         
-    synchronized (elements)
+    synchronized (this)
     {
       TreeSet<Long> oSerNo = new TreeSet<Long>(elements.keySet());
             
-      Canvas lower = null;            
+      Composite lower = null;            
       for(ElementData edu : eds) {
         assert(edu != null) : "edu != null";      
         long serNo = edu.serialNo;
-        ElementDataCanvas canvas = elements.get(serNo);
+        ElementDataComposite canvas = elements.get(serNo);
         
         if (canvas != null) // update existing canvas
         {
@@ -117,8 +116,8 @@ public abstract class PanelDataComposite extends Composite
           elements.put(serNo, canvas = withdraw(currPs, edu));
         }
         
-        final Canvas c = canvas;        
-        final Canvas low = lower;
+        final Composite c = canvas;        
+        final Composite low = lower;
         display.asyncExec( low == null
             ? () -> {
               c.moveBelow(null);
@@ -144,7 +143,7 @@ public abstract class PanelDataComposite extends Composite
    * Deactivates and clears the canvas and stores it to the disabledControls stack or if its full, it disposes the canvas
    * @param canvas
    */
-  private void deposit(ElementDataCanvas canvas) {
+  private void deposit(ElementDataComposite canvas) {
     assert(canvas != null);
             
     synchronized (canvas)
@@ -173,12 +172,12 @@ public abstract class PanelDataComposite extends Composite
    * @param ed
    * @return
    */
-  private ElementDataCanvas withdraw(PanelState ps, ElementData ed) {    
+  private ElementDataComposite withdraw(PanelState ps, ElementData ed) {    
     if (!disabledControls.empty())
     {
       try
       {
-        ElementDataCanvas  result = disabledControls.pop();
+        ElementDataComposite  result = disabledControls.pop();
         result.applyUpdate(ed, ps);
         return result;
       } catch (EmptyStackException e)
@@ -187,7 +186,7 @@ public abstract class PanelDataComposite extends Composite
       }      
     }
     // create new canvas
-    ElementDataCanvas[] result = new ElementDataCanvas[1];
+    ElementDataComposite[] result = new ElementDataComposite[1];
     display.syncExec(() -> {      
       result[0] = createElementDataCanvas(edCanvasStyle);
     });
@@ -195,15 +194,19 @@ public abstract class PanelDataComposite extends Composite
     return result[0];
   }
   
-  protected abstract ElementDataCanvas createElementDataCanvas(int style);
+  protected abstract ElementDataComposite createElementDataCanvas(int style);
   
   
   public void clear() {
     if (elements.isEmpty()) return;
-    elements.forEach((serNo, canvas) -> {
-      deposit(canvas);
-      elements.remove(serNo);
-    });
+    synchronized (this)
+    {
+      elements.forEach((serNo, canvas) -> {
+        deposit(canvas);
+      });      
+      elements.clear();
+    }
+    
     Log.info("resetted");    
   }  
 }

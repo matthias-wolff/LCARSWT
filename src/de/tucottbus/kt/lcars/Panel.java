@@ -1036,7 +1036,18 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     ee.pt = new Point(event.x,event.y);
     ee.el = elementAt(ee.pt);
     
-    Log.debug(event.toString());
+    if (Log.DebugMode)
+    {
+      switch (event.type)
+      {
+        case TouchEvent.UP:
+          Log.debug("TouchUp@{"+event.x+","+event.y+"}");        
+          break;
+        case TouchEvent.DOWN:
+          Log.debug("TouchDown@{"+event.x+","+event.y+"}");        
+          break;
+      }
+    }
     
     switch (event.type)
     {
@@ -1108,10 +1119,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   protected Area getShape()
   {
-    if (this instanceof PaddMainPanel)
-      return new Area(new Rectangle(0,0,1366,768));
-    else
-      return new Area(new Rectangle(0,0,1920,1080));
+    return new Area(this instanceof PaddMainPanel
+                    ? new Rectangle(0,0,1366,768)
+                    : new Rectangle(0,0,1920,1080));
   }
   
   /**

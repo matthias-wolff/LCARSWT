@@ -5,7 +5,6 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
@@ -15,14 +14,14 @@ import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.logging.Log;
 
-public class ElementDataCanvas extends Canvas implements PaintListener
+public class ElementDataComposite extends Composite implements PaintListener
 {  
   private ElementData ed;
   private PanelState ps;
     
   private final Display display;
     
-  public ElementDataCanvas(Composite parent, int style) {
+  public ElementDataComposite(Composite parent, int style) {
     super(parent, style);
     display = parent.getDisplay();
     addPaintListener(this);
@@ -71,7 +70,7 @@ public class ElementDataCanvas extends Canvas implements PaintListener
     {
       Rectangle bnds = SWTUtils.toSwtRectangle(elementData.getBounds());
       if (LCARS.SCREEN_DEBUG)
-        Log.debug("#"+elementData.serialNo+" Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
+        Log.debug("#"+elementData.serialNo+" new Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
       display.asyncExec(redraw
           ? () -> {          
               setBounds(bnds);        

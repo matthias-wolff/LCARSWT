@@ -851,7 +851,9 @@ public abstract class EElement
     return valid[0];   
   }
   
-
+  public long getSerialNo() {
+    return data.serialNo;
+  }
 }
 
 // EOF
