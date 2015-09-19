@@ -23,7 +23,6 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.j2d.GArea;
 import de.tucottbus.kt.lcars.j2d.Geometry;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
-import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
@@ -418,14 +417,14 @@ public class ESpeechInput extends ElementContributor
           if (sw.getBuffer().length()>0)
           {
             String    nlab = sw.toString();        
-            org.eclipse.swt.graphics.Rectangle tbnd = LCARS.getTextBounds(font,nlab);
+            Rectangle tbnd = LCARS.getTextBounds(font,nlab);
             tbnd.x = bnds.x + xofs;
             tbnd.y = bnds.y + yofs - (int)(tbnd.height*0.15);
             tbnd.height = linh;    
             for (Area area : lines)
               area.subtract(new Area(new Rectangle(tbnd.x-2, tbnd.y-2, tbnd.width+4, tbnd.height+4)));
 
-            geos.addAll(LCARS.createTextGeometry2D(fd,nlab,AwtSwt.toAwtRectangle(tbnd),LCARS.ES_LABEL_NW,null,false));      
+            geos.addAll(LCARS.createTextGeometry2D(fd,nlab,tbnd,LCARS.ES_LABEL_NW,null,false));      
             xofs += tbnd.width + 6;
             sw = new StringWriter();
             

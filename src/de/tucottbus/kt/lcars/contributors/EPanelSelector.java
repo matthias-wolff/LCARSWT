@@ -78,12 +78,12 @@ public class EPanelSelector extends EMessageBox
     if (panel==null) return;
 
     // Add the panel buttons
-    AbstractList<Class<? extends Panel>> l = getPanelList();
-    for (int i=0; i<l.size(); i++)
+    int y = 66;
+    for (Class<? extends Panel> panelClass : getPanelList())
     {
-      String label = Panel.guessName(l.get(i)).toUpperCase();
-      ERect btn = new ERect(null,0,66+i*56,250,53,style2|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E,label);
-      btn.setData(l.get(i).getName());
+      String label = Panel.guessName(panelClass).toUpperCase();
+      ERect btn = new ERect(null,0,y,250,53,style2|LCARS.ES_RECT_RND|LCARS.ES_LABEL_E,label);
+      btn.setData(panelClass.getName());
       btn.addEEventListener(new EEventListenerAdapter()
       {
         public void touchDown(EEvent ee)
@@ -110,12 +110,13 @@ public class EPanelSelector extends EMessageBox
       });
       add(btn); veList.add(btn);
       
-      EElement e = new ERect (null,250,93+i*56,90,3,style2|LCARS.ES_STATIC,null);
+      EElement e = new ERect (null,250,y+27,90,3,style2|LCARS.ES_STATIC,null);
       add(e); veList.add(e);
 
-      String s = l.get(i).getPackage().getName().toUpperCase();
-      e = new ELabel(null,340,66+i*56,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s);
+      String s = panelClass.getPackage().getName().toUpperCase();
+      e = new ELabel(null,340,y,250,53,LCARS.EC_SECONDARY|LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.ES_LABEL_W|LCARS.ES_MODAL,s);
       add(e); veList.add(e);
+      y+=56;
     }
     
     panel.dim(0.3f);

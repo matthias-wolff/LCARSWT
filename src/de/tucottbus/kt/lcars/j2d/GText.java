@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcars.j2d;
 
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 
@@ -8,12 +9,12 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Path;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * A geometry representing a text.
@@ -27,10 +28,12 @@ public class GText extends Geometry
   protected String text;
   protected int descent;
   protected FontData fontData;
+  
   protected int x;
   protected int y;
+  protected transient Rectangle bounds;
   
-  protected transient Path textPath;
+  protected transient TextLayout tl;
   
   /**
    * Creates a new text geometry. A text geometry provides information and
@@ -62,7 +65,7 @@ public class GText extends Geometry
   
   public Point2D.Float getPos()
   {
-    return new Point2D.Float(x, y);
+    return new Point2D.Float(bounds.x, bounds.y);
   }
 
   @Deprecated
@@ -76,11 +79,15 @@ public class GText extends Geometry
     return new Area(getBounds());
   }
   
-  public java.awt.Rectangle getBounds() {
-    Font font = new Font(Display.getDefault(), fontData);
-    Rectangle bnds = LCARS.getTextBounds(font, text);
-    font.dispose();
-    return new java.awt.Rectangle(bnds.x+x, bnds.y+y, bnds.width, bnds.height);
+  public Rectangle getBounds() {
+    if (bounds == null)
+    {
+      Font font = new Font(Display.getDefault(), fontData);
+      Rectangle bnds = LCARS.getTextBounds(font, text);
+      bounds = new Rectangle(x,y,bnds.width,bnds.height);
+      font.dispose();
+    }
+    return new Rectangle(bounds);
     
   }
   
@@ -89,11 +96,13 @@ public class GText extends Geometry
     return this.text;
   }
 
+  @Deprecated
   public float getDescent()
   {
     return this.descent;
   }
 
+  @Deprecated
   public void setDescent(int ascent)
   {
     this.descent = ascent;
@@ -107,12 +116,26 @@ public class GText extends Geometry
   @Override
   public void paint2D(GC gc)
   {    
-    if(textPath == null) {
-      Font font = new Font(gc.getDevice(), fontData);
-      textPath = LCARS.getTextShape(font, text, getBounds());
-      font.dispose();
-    }    
-    gc.fillPath(textPath);
+    if(tl == null) {
+      Font font = new Font(gc.getDevice(), fontData);      
+      tl = LCARS.getTextLayout(font, text);              
+      //font.dispose();
+      
+      if ("EARTH".equals(text))
+      {
+        Rectangle bnds = getBounds();
+        org.eclipse.swt.graphics.Rectangle tpBnds = tl.getBounds();
+        Log.debug(bnds + " - " + tpBnds);
+        
+        Color fgColor = gc.getForeground();
+        Color bgColor = gc.getBackground();
+        
+        Log.debug(fgColor + " - " + bgColor);
+        
+      }
+    }
+    tl.draw(gc, x, y, 0, text.length()-1, gc.getBackground(), gc.getForeground());
+//    gc.fillPath(textPath);
     
     if (LCARS.SCREEN_DEBUG)
     {
@@ -129,7 +152,7 @@ public class GText extends Geometry
   {
     try
     {
-      textPath.isDisposed();
+      tl.dispose();
     } catch (Exception e)
     {
       // ignored

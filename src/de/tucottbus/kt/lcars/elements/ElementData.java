@@ -282,8 +282,17 @@ public final class ElementData implements Serializable
     if (fgAlpha == bgAlpha)
     {
       gc.setAlpha(bgAlpha);
-      for(Geometry gi : geometry) {        
-        gc.setBackground(gi.isForeground() ? fgColor : bgColor);
+      for(Geometry gi : geometry) {
+        if (gi.isForeground())
+        {
+          gc.setBackground(fgColor);
+          gc.setForeground(bgColor);
+          
+        }
+        else {
+          gc.setBackground(bgColor);
+          gc.setForeground(fgColor);          
+        }
         gi.paint2D(gc);
       }
     }
@@ -293,11 +302,13 @@ public final class ElementData implements Serializable
         if (gi.isForeground())
         {
           gc.setBackground(fgColor);
+          gc.setForeground(bgColor);
           gc.setAlpha(fgAlpha);
         }
         else
         {
           gc.setBackground(bgColor);
+          gc.setForeground(fgColor);          
           gc.setAlpha(bgAlpha);
         }
         gi.paint2D(gc);

@@ -21,6 +21,7 @@ package de.tucottbus.kt.lcars;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -60,10 +61,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.TextLayout;
 import org.eclipse.swt.widgets.Display;
@@ -611,43 +610,46 @@ public class LCARS implements ILcarsRemote
    *          The text.
    * @return The shape.
    */
-  public static Path getTextShape(Font font, String text, java.awt.Rectangle bounds)  
+  public static TextLayout getTextLayout(Font font, String text)  
   {    
     if (text==null || text.length()==0) return null;
     TextLayout tl = new TextLayout(font.getDevice());
     tl.setFont(font);
     tl.setText(text);
-    tl.setWidth(bounds.width);
-
-    int x = bounds.x;
-    int y = bounds.y;
-    
-    Path              path = new Path(font.getDevice());
-    FontMetrics fm = tl.getLineMetrics(0);
-    float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
-    
-    for (String line : text.split("\n"))
-    {
-      if (line!=null && line.length()!=0)
-        path.addString(line, x, y, font);
-      y+=dy;
-    }
-    
-    //float[] bnds = new float[4];
-    //path.getBounds(bnds);
-    tl.dispose();
-    
-    return path;
+    return tl;
+//    Path              path = new Path(font.getDevice());
+//    path.addString("M", 0, 0, font);
+//    float[] mBnds = new float[4];
+//    path.getBounds(mBnds);
+//    path.dispose();
+//    path = new Path(font.getDevice());
+//    
+//    FontMetrics fm = tl.getLineMetrics(0);
+//    x -= mBnds[0];
+//    float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
+//    
+//    for (String line : text.split("\n"))
+//    {
+//      if (line!=null && line.length()!=0)
+//        path.addString(line, x, y, font);
+//      y+=dy;
+//    }
+//    
+//    //float[] bnds = new float[4];
+//    //path.getBounds(bnds);
+//    tl.dispose();
+//    
+//    return path;
   }
 
   
-  public static org.eclipse.swt.graphics.Rectangle getTextBounds(Font font, String text) {
+  public static Rectangle getTextBounds(Font font, String text) {
     TextLayout lt = new TextLayout(font.getDevice());
     lt.setFont(font);
     lt.setText(text);
     org.eclipse.swt.graphics.Rectangle result = lt.getBounds();
     lt.dispose();
-    return result;    
+    return new Rectangle(result.x, result.y, result.width, result.height);    
   }
   
   /**
@@ -703,7 +705,7 @@ public class LCARS implements ILcarsRemote
     ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
     if (text==null || text.length()==0 || bounds==null) return geos;
     if (insets==null) insets = new Point(0,0);
-        
+    
     // Measure text lines
     Display      display = Display.getDefault();
     Font thisFont = new Font(display, font);
@@ -808,15 +810,14 @@ public class LCARS implements ILcarsRemote
    */
   public static AbstractList<Class<? extends Panel>> getMainPanelClasses()
   {
+    final Class<? extends Panel> subclass = onPADD() ? PaddMainPanel.class : MainPanel.class;
     ArrayList<Class<? extends Panel>> l = new ArrayList<Class<? extends Panel>>();
     try
     {
-      Class<?>[] cls = getClassesInPackage("",null);
-      for (int i=0; i<cls.length; i++)
+      for (Class<?> cl : getClassesInPackage("",null))
         try
         {
-          Class<? extends Panel> clazz = cls[i].asSubclass(MainPanel.class);
-          if (onPADD()) clazz = cls[i].asSubclass(PaddMainPanel.class);
+          Class<? extends Panel> clazz = cl.asSubclass(subclass);
           if (clazz.equals(Panel.class)) continue;
           if (Modifier.isAbstract(clazz.getModifiers())) continue;
           l.add(clazz);
@@ -838,11 +839,10 @@ public class LCARS implements ILcarsRemote
     Vector<Class<?>> l = new Vector<Class<?>>();
     try
     {
-      Class<?>[] cls = getClassesInPackage("",null);
-      for (int i=0; i<cls.length; i++)
+      for (Class<?> cl : getClassesInPackage("",null))
         try
         {
-          Class<?> claszz = cls[i].asSubclass(ISpeechEngine.class);
+          Class<?> claszz = cl.asSubclass(ISpeechEngine.class);
           if (Modifier.isAbstract(claszz.getModifiers())) continue;
           l.add(claszz);
         }
