@@ -30,9 +30,12 @@ import de.tucottbus.kt.lcars.util.Objectt;
  */
 public abstract class EElement
 {
-  public static final int INV_BACKGR = 0x0001;
-  public static final int INV_FOREGR = 0x0002;
-  public static final int INV_SHAPE  = 0x0004;
+  public static final int INV_BACKGR    = 0x0001;
+  public static final int INV_FOREGR    = 0x0002;
+  public static final int INV_SHAPE     = 0x0004;
+  
+  public static final int GEO_RECOMPUTE = 0x0010;   // indicates a recompute of the geometries
+  public static final int GEO_UPDATED   = 0x0020;   // indicates if the geometries was updated
   
   // -- Static fields --
   private static long serialNumber     = 0;
@@ -48,7 +51,7 @@ public abstract class EElement
   protected transient Vector<EEventListener>    tlist      = new Vector<EEventListener>(); 
   protected transient Vector<EGeometryModifier> modifiers  = new Vector<EGeometryModifier>(); 
   private   transient Object                    userData   = null;
-  private   transient boolean                   geoChanged = false;
+  private   transient int                       geoState   = GEO_RECOMPUTE;
   
   // -- Constructors --
 
@@ -505,9 +508,9 @@ public abstract class EElement
    */
   public synchronized ElementData getUpdateData(boolean incremental)
   {
-    boolean updateGeometry = !isGeometryValid();
-    geoChanged = false;
     validateGeometry();
+    boolean updateGeometry = (geoState & GEO_UPDATED) != 0;
+    geoState &= ~GEO_UPDATED;
     return data.getUpdate(incremental,updateGeometry);
   }
   
@@ -763,10 +766,9 @@ public abstract class EElement
    * @see #validateGeometry()
    */
   public final void invalidate(boolean geometryChanged)
-  {
+  {    
     if (geometryChanged)
-      data.geometry = null;
-    geoChanged = geometryChanged;
+      geoState |= GEO_RECOMPUTE;
     if (panel!=null) panel.invalidate();
   }
 
@@ -777,16 +779,20 @@ public abstract class EElement
    */
   public final void validateGeometry()
   {
-    if (data.geometry!=null) return; // Unnecessary!
     synchronized (data)
     {
+      if ((geoState & GEO_RECOMPUTE) == 0) return;// Unnecessary!
       ArrayList<Geometry> geos = createGeometriesInt();
+      final boolean isOutline = isOutline();
       for (Geometry geo : geos)
         if (geo instanceof GArea)
-          ((GArea)geo).setOutline(isOutline());
+          ((GArea)geo).setOutline(isOutline);
       for (EGeometryModifier gm : modifiers)
         gm.modify(geos);
-      data.geometry = geos;      
+      data.geometry = geos;
+      
+      geoState &= ~GEO_RECOMPUTE;
+      geoState |= GEO_UPDATED;
     }
   }
   
@@ -820,8 +826,7 @@ public abstract class EElement
   {    
     this.panel = panel;
     data.state.setChanged();
-    data.geometry = null;
-    geoChanged = true;
+    geoState |= GEO_RECOMPUTE;
   }
   
   @Override
@@ -862,7 +867,7 @@ public abstract class EElement
   }
   
   public boolean isGeometryValid() {
-    return data.isGeometryValid() && !geoChanged;
+    return data.isGeometryValid();
   }
 }
 

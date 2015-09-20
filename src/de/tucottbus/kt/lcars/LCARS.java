@@ -644,6 +644,7 @@ public class LCARS implements ILcarsRemote
 
   
   public static Rectangle getTextBounds(Font font, String text) {
+    if (text == null || text == "") return new Rectangle();
     TextLayout lt = new TextLayout(font.getDevice());
     lt.setFont(font);
     lt.setText(text);

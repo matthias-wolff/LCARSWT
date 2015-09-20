@@ -78,7 +78,7 @@ public final class ElementData implements Serializable
   /**
    * Bounds of the area of this element.
    */
-  private transient Area area;
+  private transient Area cachedArea;
 
   // -- Constructors --
 
@@ -139,23 +139,23 @@ public final class ElementData implements Serializable
   public void getArea(Area area)
   {    
     if (area == null) return;   
-    if (this.area == null)
+    if (cachedArea == null)
     {      
       Area ar = new Area();
       try
       {
         for (Geometry gi : geometry)
           if (!gi.isForeground())
-            area.add(gi.getArea());
-        this.area = ar;
-        return;
+            ar.add(gi.getArea());
+        cachedArea = ar;
       } catch (NullPointerException e)
       {
-        this.area = new Area(state.getBounds());
+        cachedArea = new Area(state.getBounds());
         Log.warn("Missing geometries in ElementData #" + serialNo);
       }      
     }
-    area.add(this.area);
+    area.add((Area)cachedArea.clone());
+    return;
   }
 
   // -- Operations --
@@ -246,7 +246,7 @@ public final class ElementData implements Serializable
         for(Geometry geom : this.geometry)
           if (geom instanceof AHeavyGeometry)
             ((AHeavyGeometry) geom).applyUpdate();
-        this.area = other.area != null ? new Area(other.area) : null;
+        this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea) : null;
         //TODO: make a copy
       }
     } else

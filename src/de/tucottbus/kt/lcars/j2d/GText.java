@@ -83,7 +83,7 @@ public class GText extends Geometry
     {
       Font font = new Font(Display.getDefault(), fontData);
       Rectangle bnds = LCARS.getTextBounds(font, text);
-      bounds = new Rectangle(x,y,bnds.width,bnds.height);
+      bounds = new Rectangle(x,y+descent,bnds.width,bnds.height);
       font.dispose();
     }
     return new Rectangle(bounds);
@@ -95,13 +95,11 @@ public class GText extends Geometry
     return this.text;
   }
 
-  @Deprecated
-  public float getDescent()
+  public int getDescent()
   {
     return this.descent;
   }
 
-  @Deprecated
   public void setDescent(int ascent)
   {
     this.descent = ascent;
@@ -120,7 +118,7 @@ public class GText extends Geometry
       tl = LCARS.getTextLayout(font, text);
       //TODO: font dispose in this::finalize()?
     }
-    tl.draw(gc, x, y, 0, text.length()-1, gc.getBackground(), gc.getForeground());
+    tl.draw(gc, x, y+descent, 0, text.length()-1, gc.getBackground(), gc.getForeground());
     
     if (LCARS.SCREEN_DEBUG)
     {

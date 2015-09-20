@@ -734,10 +734,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         try
         {
           EElement el = elements.get(i);
+          if (el.isModal()!=modal) continue;
+          if (el.isStatic()) continue;
+
           Area     es = new Area();
           el.getArea(es);
-          if (es==null || el.isStatic()) continue;
-          if (el.isModal()!=modal) continue;
           if (es.contains(pt))
             return el;
         }
@@ -979,8 +980,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       if (Log.DebugMode)            
         for (EElement element : elements)
         {
-          element.checkValidation();        
-          data.elementData.add(element.getUpdateData(incremental));
+          element.checkValidation();
+          ElementData ed = element.getUpdateData(incremental);
+          data.elementData.add(ed);          
         }
       else
         for (EElement element : elements)
@@ -1033,9 +1035,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void processTouchEvent(TouchEvent event)
   {
     EEvent ee = new EEvent();
-    ee.pt = new Point(event.x,event.y);
-    ee.el = elementAt(ee.pt);
-    
+    ee.el = elementAt(ee.pt = new Point(event.x,event.y));    
     if (Log.DebugMode)
     {
       switch (event.type)

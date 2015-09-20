@@ -100,6 +100,6 @@ public class ElementDataComposite extends Composite implements PaintListener
   
   @Override
   public String toString(){
-    return ElementData.class.getName() + "#" + ed.serialNo;
+    return ElementDataComposite.class.getSimpleName() + "#" + ed.serialNo;
   }
 }

@@ -101,13 +101,11 @@ public abstract class PanelDataComposite extends Composite
             
       Composite lower = null;            
       for(ElementData edu : eds) {
+        
         assert(edu != null) : "edu != null";      
         long serNo = edu.serialNo;
         
         ElementDataComposite canvas = elements.get(serNo);
-
-        if (serNo == 89)
-          assert true;
 
         if (canvas != null) // update existing canvas
         {
@@ -152,9 +150,8 @@ public abstract class PanelDataComposite extends Composite
             
     synchronized (canvas)
     {
-      int count = disabledControls.size();
       assert(!disabledControls.contains(canvas));
-      if (count < disabledCapacity) { // disable and store
+      if (disabledControls.size() < disabledCapacity) { // disable and store
         display.asyncExec(() -> {
           canvas.setVisible(false);
           canvas.setEnabled(false);
@@ -164,8 +161,7 @@ public abstract class PanelDataComposite extends Composite
         return;
       }
       
-      // else dispose canvas
-      canvas.dispose();                                    
+      display.asyncExec(()-> { canvas.dispose(); });
     }    
   }
   
