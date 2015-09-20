@@ -21,6 +21,7 @@ import de.tucottbus.kt.lcars.j2d.GArea;
 import de.tucottbus.kt.lcars.j2d.Geometry;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * The base class of all LCARS GUI element (i.e. buttons, elbos, etc.)
@@ -47,6 +48,7 @@ public abstract class EElement
   protected transient Vector<EEventListener>    tlist      = new Vector<EEventListener>(); 
   protected transient Vector<EGeometryModifier> modifiers  = new Vector<EGeometryModifier>(); 
   private   transient Object                    userData   = null;
+  private   transient boolean                   geoChanged = false;
   
   // -- Constructors --
 
@@ -84,6 +86,7 @@ public abstract class EElement
    */
   public void getArea(Area area)
   {
+    validateGeometry();
     data.getArea(area);
   }
   
@@ -94,7 +97,7 @@ public abstract class EElement
    */
   public Rectangle getBounds()
   {
-    return data.state.getBounds();
+    return data.getBounds();
   }
 
   /**
@@ -106,8 +109,12 @@ public abstract class EElement
    */
   public void setBounds(Rectangle bounds)
   {
-    data.state.setBounds(bounds);
-    invalidate(true);
+    synchronized (data.state)
+    {
+      if(Objectt.equals(bounds, data.state.getBounds())) return;
+      data.state.setBounds(bounds);
+      invalidate(true);
+    }    
   }
   
   // -- Color getters and setters --
@@ -496,14 +503,12 @@ public abstract class EElement
    * @param incremental
    *          Get data for incremental or full update.
    */
-  public ElementData getUpdateData(boolean incremental)
+  public synchronized ElementData getUpdateData(boolean incremental)
   {
-    boolean updateGeometry = !data.isGeometryValid();
+    boolean updateGeometry = !isGeometryValid();
+    geoChanged = false;
     validateGeometry();
-    synchronized (this)
-    {
-      return data.getUpdate(incremental,updateGeometry);
-    }
+    return data.getUpdate(incremental,updateGeometry);
   }
   
   /**
@@ -759,11 +764,9 @@ public abstract class EElement
    */
   public final void invalidate(boolean geometryChanged)
   {
-    synchronized (this)
-    {
-      if (geometryChanged)
-        data.geometry = null;
-    }
+    if (geometryChanged)
+      data.geometry = null;
+    geoChanged = geometryChanged;
     if (panel!=null) panel.invalidate();
   }
 
@@ -772,17 +775,19 @@ public abstract class EElement
    * 
    * @see #invalidate(boolean)
    */
-  public synchronized final void validateGeometry()
+  public final void validateGeometry()
   {
     if (data.geometry!=null) return; // Unnecessary!
-    
-    ArrayList<Geometry> geos = createGeometriesInt();
-    for (Geometry geo : geos)
-      if (geo instanceof GArea)
-        ((GArea)geo).setOutline(isOutline());
-    for (EGeometryModifier gm : modifiers)
-      gm.modify(geos);
-    data.geometry = new ArrayList<Geometry>(geos);
+    synchronized (data)
+    {
+      ArrayList<Geometry> geos = createGeometriesInt();
+      for (Geometry geo : geos)
+        if (geo instanceof GArea)
+          ((GArea)geo).setOutline(isOutline());
+      for (EGeometryModifier gm : modifiers)
+        gm.modify(geos);
+      data.geometry = geos;      
+    }
   }
   
   // -- Deprecation candidates --
@@ -811,11 +816,12 @@ public abstract class EElement
    *          The panel, can be <code>null</code> if the element is not displayed any longer.
    * @see #getPanel()
    */
-  public void setPanel(Panel panel)
-  {
+  public synchronized void setPanel(Panel panel)
+  {    
     this.panel = panel;
     data.state.setChanged();
     data.geometry = null;
+    geoChanged = true;
   }
   
   @Override
@@ -853,6 +859,10 @@ public abstract class EElement
   
   public long getSerialNo() {
     return data.serialNo;
+  }
+  
+  public boolean isGeometryValid() {
+    return data.isGeometryValid() && !geoChanged;
   }
 }
 

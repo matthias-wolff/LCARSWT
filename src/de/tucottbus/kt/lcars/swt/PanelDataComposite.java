@@ -103,8 +103,12 @@ public abstract class PanelDataComposite extends Composite
       for(ElementData edu : eds) {
         assert(edu != null) : "edu != null";      
         long serNo = edu.serialNo;
-        ElementDataComposite canvas = elements.get(serNo);
         
+        ElementDataComposite canvas = elements.get(serNo);
+
+        if (serNo == 89)
+          assert true;
+
         if (canvas != null) // update existing canvas
         {
           canvas.applyUpdate(edu, ps);

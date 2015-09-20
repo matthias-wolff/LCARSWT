@@ -16,8 +16,8 @@ import de.tucottbus.kt.lcars.logging.Log;
 
 public class ElementDataComposite extends Composite implements PaintListener
 {  
-  private ElementData ed;
-  private PanelState ps;
+  ElementData ed;
+  PanelState ps;
     
   private final Display display;
     
@@ -56,7 +56,8 @@ public class ElementDataComposite extends Composite implements PaintListener
   public void applyUpdate(ElementData elementData, PanelState panelState) {
     assert (elementData != null) : "elementData != null";
     assert (ed == null || elementData.serialNo == ed.serialNo);
-    int edUpdate = elementData.applyUpdate(this.ed);
+    
+    int edUpdate = elementData.applyUpdate(ed);
     ed = elementData;
     
     boolean redraw = edUpdate != 0;

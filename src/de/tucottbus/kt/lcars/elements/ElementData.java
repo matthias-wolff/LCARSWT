@@ -140,13 +140,7 @@ public final class ElementData implements Serializable
   {    
     if (area == null) return;   
     if (this.area == null)
-    {
-      if (geometry == null)
-      {
-        area.add(new Area(state.getBounds()));
-        return;
-      }
-      
+    {      
       Area ar = new Area();
       try
       {
