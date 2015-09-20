@@ -707,6 +707,7 @@ public class LCARS implements ILcarsRemote
     if (text==null || text.length()==0 || bounds==null) return geos;
     if (insets==null) insets = new Point(0,0);
     
+    
     // Measure text lines
     Display      display = Display.getDefault();
     Font thisFont = new Font(display, font);
@@ -716,38 +717,50 @@ public class LCARS implements ILcarsRemote
     tl.setText(text);
     
     org.eclipse.swt.graphics.Rectangle tlBnds = tl.getBounds();
-        
+    
     int align = (style & ES_LABEL) >> 4;
     if(align > ES_LABEL_SE)
       align = ES_LABEL_NW >> 4;
     int hAlign = align / 3;
-        
+    
     // Position the text box
     int tx = bounds.x+insets.x;
     int ty = bounds.y+insets.y;
-    int w  = bounds.width-insets.x*2;
-    int h  = bounds.height-insets.y*2;
+    int tw = bounds.width-insets.x*2;
+    int th = bounds.height-insets.y*2;
     
-    if (w <= 0 || h <= 0) return geos;
+    int tlx;
+    int tly;
+    int tlw;
+    int tlh;
+    
+    
+    
+    if (tw <= 0 || th <= 0) return geos;
     
     switch (hAlign) // horizontal alignment
     {
-      case 0: 
+      case 0: // left
         tl.setAlignment(SWT.LEFT);
-        break; // left
-      case 1:
+        tlx = tx;
+        break;
+      case 1: // middle
         tl.setAlignment(SWT.CENTER);
-        tx += (w-tlBnds.width)/2; break; // middle
-      case 2: 
+        tlx = tx + (tw-tlBnds.width)/2;
+        break;
+      case 2: // right
         tl.setAlignment(SWT.RIGHT);        
-        tx += w-tlBnds.width-insets.x; break; // right
+        tlx = tx + tw-tlBnds.width;
+        break;
       default: return geos;
     }
     switch (align % 3) // vertical alignment
     {
-      case 0: break;  // top
-      case 1: ty += (h-tlBnds.height)/2; break; // middle
-      case 2: ty += h-tlBnds.height-insets.y; break; // bottom
+      case 0: // top
+        tly = ty;
+        break;  
+      case 1: tly = ty + (th-tlBnds.height)/2; break; // middle
+      case 2: tly = ty + th-tlBnds.height; break; // bottom
       default: return geos;
     }
             
@@ -756,18 +769,21 @@ public class LCARS implements ILcarsRemote
     for (int i=0; i<n; i++)
     {
       org.eclipse.swt.graphics.Rectangle linBnds = tl.getLineBounds(i);
-      if (linBnds.y > h) break; // line out of vertical bounds
-      int x = linBnds.x+tx;
-      int y = linBnds.y+ty;
+      if (linBnds.y > th) break; // line out of vertical bounds
+      int x = linBnds.x+tlx;
+      int y = linBnds.y+tly;
+      
+      
+      Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
+      if (b.width <= 0 || b.height <=0) continue;
       
       GText gt = new GText(
           s[i],
-          x,y,//new Rectangle(x, y, Math.min(linBnds.width, w-linBnds.x), Math.min(linBnds.height, h-linBnds.y)),
+          b,
           font,
           foreground);
-//    FontMetrics lm = tl.getLineMetrics(i);
-//    gt.setDescent(lm.getDescent());
-      
+      if (x < tx) gt.setIndent(x-tx);
+      if (y < ty) gt.setDescent(y-ty);
       //TODO:
       geos.add(gt);
     }

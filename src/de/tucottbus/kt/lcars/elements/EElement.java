@@ -791,8 +791,7 @@ public abstract class EElement
         gm.modify(geos);
       data.geometry = geos;
       
-      geoState &= ~GEO_RECOMPUTE;
-      geoState |= GEO_UPDATED;
+      geoState = GEO_UPDATED;
     }
   }
   

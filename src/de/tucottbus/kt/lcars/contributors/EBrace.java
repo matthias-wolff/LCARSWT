@@ -93,14 +93,14 @@ public class EBrace extends EElementArray
     if (eLock==null)
     {
       x = this.x+elemSize.width-(2*buttonW+6+braceH);
-      eLock = new ERect(null,x,y,buttonW,braceH,LCARS.EC_SECONDARY|LCARS.ES_LABEL_SE,"LOCK");
+      eLock = new ERect(null,x,y,buttonW,braceH,LCARS.EC_SECONDARY|LCARS.ES_LABEL_E,"LOCK");
       eLock.addEEventListener(this);
     }
 
     if (ePrev==null)
     {
       x = this.x+elemSize.width-(buttonW+3+braceH);
-      ePrev = new ERect(null,x,y,buttonW,braceH,LCARS.EC_PRIMARY|LCARS.ES_LABEL_SE,"PREV");
+      ePrev = new ERect(null,x,y,buttonW,braceH,LCARS.EC_PRIMARY|LCARS.ES_LABEL_E,"PREV");
       ePrev.addEEventListener(this);
     }
 
@@ -132,7 +132,7 @@ public class EBrace extends EElementArray
     if (eNext==null)
     {
       x = this.x+elemSize.width-(buttonW+3+braceH);
-      eNext = new ERect(null,x,y,buttonW,braceH,LCARS.EC_PRIMARY|LCARS.ES_LABEL_SE,"NEXT");
+      eNext = new ERect(null,x,y,buttonW,braceH,LCARS.EC_PRIMARY|LCARS.ES_LABEL_E,"NEXT");
       eNext.addEEventListener(this);
     }
 

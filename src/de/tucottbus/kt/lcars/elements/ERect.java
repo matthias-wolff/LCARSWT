@@ -1,6 +1,5 @@
 package de.tucottbus.kt.lcars.elements;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -70,8 +69,7 @@ public class ERect extends EElement
     geos.add(new GArea(area,false));
 
     // Create label geometries
-    Point insets = computeLabelInsets();
-    geos.addAll(LCARS.createTextGeometry2D(label,bounds,style,insets,true));
+    geos.addAll(LCARS.createTextGeometry2D(label,bounds,style,computeLabelInsets(),true));
     
     // This is it
     return geos;

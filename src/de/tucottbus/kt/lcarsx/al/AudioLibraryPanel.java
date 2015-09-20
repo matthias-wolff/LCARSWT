@@ -82,7 +82,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
   @Override
   public void init()
   {
-    setTitleLabel(new ELabel(this,298,25,200,38,LCARS.EC_HEADLINE|LCARS.EF_HEAD2|LCARS.ES_LABEL_W,null));
+    setTitleLabel(new ELabel(this,298,23,202,46,LCARS.EC_HEADLINE|LCARS.EF_HEAD2|LCARS.ES_LABEL_W,null));
     super.init();
     setColorScheme(LCARS.CS_DATABASE);
     
@@ -94,7 +94,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     // Frame
     add(new ERect(this,1851,23,46,46,LCARS.EC_ELBOUP|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E,null));
 
-    eTitle = new EValue(this,508,23,1341,46,LCARS.EC_PRIMARY|LCARS.ES_STATIC,"");
+    eTitle = new EValue(this,506,23,1343,46,LCARS.EC_PRIMARY|LCARS.ES_STATIC,"");
     eTitle.setValueMargin(0);
     add(eTitle);
     

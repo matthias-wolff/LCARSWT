@@ -13,6 +13,7 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 public class ElementDataComposite extends Composite implements PaintListener
 {  
@@ -63,9 +64,11 @@ public class ElementDataComposite extends Composite implements PaintListener
     boolean redraw = edUpdate != 0;
     
     if (panelState != null) {
-      this.ps = panelState;  
-      redraw = true;
+      if (!Objectt.equals(ps, panelState))
+        redraw = true;      
+      ps = panelState;
     }
+    
     
     if ((edUpdate & ElementData.GEOMETRY_FLAG) > 0) // resize
     {
@@ -73,16 +76,23 @@ public class ElementDataComposite extends Composite implements PaintListener
       if (LCARS.SCREEN_DEBUG)
         Log.debug("#"+elementData.serialNo+" new Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
       display.asyncExec(redraw
-          ? () -> {          
+          ? () -> {
               setBounds(bnds);        
+              setVisible(elementData.state.isVisible());
               redraw();
             }
-          : () -> { setBounds(bnds); } 
+          : () -> { 
+              setBounds(bnds);
+              setVisible(elementData.state.isVisible());
+            } 
           );      
     }
     else
       if (redraw)
-        display.asyncExec(() -> { redraw(); });      
+        display.asyncExec(() -> {
+            redraw();
+            setVisible(elementData.state.isVisible());
+          });      
   }
   
   public void clear() {
