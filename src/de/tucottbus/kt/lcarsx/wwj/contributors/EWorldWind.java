@@ -37,9 +37,7 @@ import de.tucottbus.kt.lcarsx.wwj.places.Camera;
  * @author Matthias Wolff, BTU Cottbus-Senftenberg
  */
 public class EWorldWind extends ElementContributor implements RenderingListener
-{
-  public static final String CLASSKEY = "EWW";
-  
+{  
   /**
    * The LCARS screen this World Wind wrapper is on.
    */
@@ -139,7 +137,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
         }
         catch (ClassCastException e)
         {
-          Log.err(CLASSKEY, "LCARS: Function not supported on remote screens.", e);
+          Log.err("LCARS: Function not supported on remote screens.", e);
         }
 //      }
 //    });

@@ -117,9 +117,9 @@ public class EarthPanel extends WorldWindPanel
       getLayerSets();
       
       // Protocol
-      Log.info("WWJ","LAYERS:");
+      Log.info("LAYERS:");
       for (Layer layer : this.model.getLayers())
-        Log.info("WWJ","- "+layer.getClass().getSimpleName()+" "+
+        Log.info("- "+layer.getClass().getSimpleName()+" "+
           layer.getName()+(layer.isEnabled()?" (on)":" (off)"));
     }
     return this.model;

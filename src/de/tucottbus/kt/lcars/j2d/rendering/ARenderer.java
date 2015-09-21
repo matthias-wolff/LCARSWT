@@ -31,7 +31,7 @@ public abstract class ARenderer
    */
   public static final int DEBUG_INTERVAL = 500; // 1500 updates ~ 60 sec
   
-  private static final SwtColor black = LCARS.BLACK;
+  private final SwtColor black = LCARS.BLACK;
 
   
   /**

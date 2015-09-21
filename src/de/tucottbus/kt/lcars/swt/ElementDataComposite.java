@@ -2,6 +2,7 @@ package de.tucottbus.kt.lcars.swt;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
@@ -15,11 +16,11 @@ import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.Objectt;
 
-public class ElementDataComposite extends Composite implements PaintListener
+public abstract class ElementDataComposite extends Composite implements PaintListener
 {  
   ElementData ed;
-  PanelState ps;
-    
+  PanelState ps;    
+  
   private final Display display;
     
   public ElementDataComposite(Composite parent, int style) {
@@ -33,25 +34,20 @@ public class ElementDataComposite extends Composite implements PaintListener
   {
     ElementData elData = ed;
     PanelState pState = ps;
-    if (elData == null) return;    
+    if (elData == null) return;
     assert(pState != null);
-            
-    //TODO: Add global transform
+    
     GC gc = e.gc;
     
-    Transform t = new Transform(gc.getDevice());
-    Rectangle bnds = getBounds();    
-    gc.getTransform(t);
-    float[] point = {bnds.x, bnds.y};
-    t.transform(point);
-    t.translate(-point[0], -point[1]);
-    gc.setTransform(t);
-    
-    elData.render2D(gc, pState);
-            
-    t.translate(point[0], point[1]);
+    org.eclipse.swt.graphics.Rectangle bnds = getBounds();    
+    Transform t = getTransform(display, -bnds.x, -bnds.y);
     gc.setTransform(t);
     t.dispose();
+    
+    //TODO: Add global transform
+    elData.render2D(gc, pState);
+    //gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
+    //gc.fillRectangle(bnds);
   }
   
   public void applyUpdate(ElementData elementData, PanelState panelState) {
@@ -90,7 +86,6 @@ public class ElementDataComposite extends Composite implements PaintListener
     else
       if (redraw)
         display.asyncExec(() -> {
-            redraw();
             setVisible(elementData.state.isVisible());
           });      
   }
@@ -112,4 +107,6 @@ public class ElementDataComposite extends Composite implements PaintListener
   public String toString(){
     return ElementDataComposite.class.getSimpleName() + "#" + ed.serialNo;
   }
+  
+  protected abstract Transform getTransform(Device device, int dx, int dy);
 }

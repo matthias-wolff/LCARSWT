@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
 /* ===========================================================
@@ -110,13 +111,30 @@ public class AwtSwt
    * 
    * @return The SWT transform.
    */
-  public static Transform toSwtTransform(AffineTransform awtTransform, Device device) {
+  public static Transform toSwtTransform(Device device, AffineTransform awtTransform) {
       Transform t = new Transform(device);
       double[] matrix = new double[6];
       awtTransform.getMatrix(matrix);
       t.setElements((float) matrix[0], (float) matrix[1],
               (float) matrix[2], (float) matrix[3],
               (float) matrix[4], (float) matrix[5]); 
+      return t;
+  }
+  
+  /**
+   * Converts an AWT transform into the equivalent SWT transform.
+   * 
+   * @param awtTransform  the AWT transform.
+   * 
+   * @return The SWT transform.
+   */
+  public static Transform toTranslatedSwtTransform(Device device, AffineTransform awtTransform, int dx, int dy) {
+      Transform t = new Transform(device);
+      double[] matrix = new double[6];
+      awtTransform.getMatrix(matrix);
+      t.setElements((float) matrix[0], (float) matrix[1],
+              (float) matrix[2], (float) matrix[3],
+              (float) (matrix[4]+dx*matrix[0]), (float) (matrix[5]+dy*matrix[3])); 
       return t;
   }  
   
@@ -206,7 +224,10 @@ public class AwtSwt
   }
   
   public static java.awt.Font toAwtFont(FontData font) {
-    return SWTUtils.toAwtFont(null, font, true);
+    Display display = Display.getDefault();
+    java.awt.Font[] result = new java.awt.Font[1];
+    display.syncExec(()-> {result[0] = SWTUtils.toAwtFont(Display.getDefault(), font, true);});    
+    return result[0];
   }
   
   public static java.awt.Rectangle toAwtRectangle(Rectangle rectangle) {

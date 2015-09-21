@@ -101,6 +101,12 @@ public final class SwtColor implements Serializable
   private final byte Alpha;
   
   
+  public SwtColor(SwtColor color) {
+    org.eclipse.swt.graphics.RGB rgb = color.RGB;
+    RGB = new org.eclipse.swt.graphics.RGB(rgb.red, rgb.green, rgb.blue);
+    Alpha = color.Alpha;
+  }
+  
   public SwtColor(SwtColor color, float alpha) {
     org.eclipse.swt.graphics.RGB rgb = color.RGB;
     RGB = new org.eclipse.swt.graphics.RGB(rgb.red, rgb.green, rgb.blue);
@@ -148,7 +154,7 @@ public final class SwtColor implements Serializable
   }
   
   public int getAlpha() {
-    return Alpha;
+    return Alpha & 0xFF;
   }
   
   public org.eclipse.swt.graphics.RGB getRGB() {

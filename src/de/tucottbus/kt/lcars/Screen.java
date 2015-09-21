@@ -24,6 +24,7 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.FillLayout;
@@ -152,9 +153,6 @@ public class Screen
             {
               // Prepare setup
               GC gc = e.gc;
-              Transform t = AwtSwt.toSwtTransform(getTransform(), gc.getDevice());
-              gc.setTransform(t);
-              t.dispose();
               gc.setTextAntialias(SWT.ON);
               gc.setInterpolation(SWT.HIGH);
               gc.setAntialias(SWT.ON);
@@ -165,15 +163,20 @@ public class Screen
               //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));              
               super.paintControl(e);
             }
+            
+            @Override
+            protected Transform getTransform(Device device, int dx, int dy) {
+              return _this.getTransform(device, dx, dy);
+            } 
           };
           result.setTouchEnabled(true);
           result.addTouchListener(_this);
           result.addMouseListener(_this);
           result.addMouseMoveListener(_this);
           return result;          
-      }               
+      }
     };
-
+    
     fullScreenMode = fullScreen;// && device.isFullScreenSupported();
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
@@ -200,7 +203,7 @@ public class Screen
       } catch (NumberFormatException e)
       {
       }
-      ;
+      
       shell.setLocation(nXPos, 200);
       shell.pack();
       shell.setVisible(true);
@@ -217,14 +220,7 @@ public class Screen
     
     composite.setBackground(black);
     composite.setSize(shell.getSize());
-    composite.setLayout(new FillLayout());
-    
-    //TODO:
-    //awtFrame = SWT_AWT.new_Frame(composite);
-    //awtFrame.setSize(getSize());
-      
-    // TODO: check awtFrame is in embedded full screen mode
-
+    composite.setLayout(new FillLayout());          
     composite.setEnabled(true);
     
     // The screen timer
@@ -241,6 +237,13 @@ public class Screen
       }
     };
     
+    //TODO: check awtFrame is in embedded full screen mode
+    //TODO:
+    //awtFrame = SWT_AWT.new_Frame(composite);
+    //awtFrame.setSize(getSize());
+    //awtFrame.setEnabled(true);
+    //awtFrame.setVisible(true);
+   
     setPanel(panelClass);
 
     // Window event handlers
@@ -291,14 +294,6 @@ public class Screen
     //canvas.pack();
     //shell.pack();
     shell.open();
-
-//    while (running)
-//      if (!display.readAndDispatch())
-//        display.sleep();
-//    //display.dispose();
-//    shell.dispose();
-    //renderer.dispose();
-//    System.exit(0);
   }
 
   // -- Getters and setters --
@@ -349,10 +344,10 @@ public class Screen
   /**
    * Returns the rendering transform
    */
-  protected synchronized AffineTransform getTransform()
+  private synchronized AffineTransform getTransf()
   {
     if (renderingTransform != null)
-      return renderingTransform;
+      return new AffineTransform(renderingTransform);
 
     org.eclipse.swt.graphics.Rectangle dp = composite.getBounds();
     if (dp == null)
@@ -368,9 +363,27 @@ public class Screen
     int x = (int) ((ds.getWidth() - sx * dp.width) / 2);
     int y = (int) ((ds.getHeight() - sx * dp.height) / 2);
     renderingTransform.translate(x / sx, y / sx);
-    return renderingTransform;
+    return new AffineTransform(renderingTransform);
+  }
+  
+  /**
+   * Returns a copy of the rendering transform
+   */
+  protected AffineTransform getTransform()
+  {    
+    return new AffineTransform(getTransf());
   }
 
+  /**
+   * Returns the rendering transform with the given translation
+   */
+  protected Transform getTransform(Device device, int dx, int dy)
+  {    
+    return AwtSwt.toTranslatedSwtTransform(device, getTransf(), dx, dy);
+  }
+  
+  
+  
   /**
    * Converts component (LCARS screen) to panel coordinates.
    * 
@@ -667,8 +680,7 @@ public class Screen
 
   private void invoke(Runnable action)
   {
-    final Display display = shell.getDisplay();
-    display.syncExec(action);
+    shell.getDisplay().syncExec(action);
   }
 
   // -- Nested classes --
@@ -688,9 +700,8 @@ public class Screen
       {
         if (isScreenInvalid())
           invoke(() -> {
-            //composite.redraw();
-            shell.redraw();
-            //awtFrame.repaint();
+            long time = System.nanoTime();
+            loadStat.add((int)((System.nanoTime()-time)/400000));
           });
       }
 
@@ -699,10 +710,8 @@ public class Screen
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
           invoke(() -> {
-            //composite.redraw();
-            shell.redraw();
-            //awtFrame.repaint();
-
+            long time = System.nanoTime();
+            loadStat.add((int)((System.nanoTime()-time)/400000));
           });
         loadStat.period();
       }

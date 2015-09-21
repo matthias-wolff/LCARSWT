@@ -671,7 +671,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * 
    * @param el the element
    */
-  public synchronized EElement add(EElement el)
+  public synchronized <T extends EElement> T  add(T el)
   {
     if (!elements.contains(el)) elements.add(el);
     return el;

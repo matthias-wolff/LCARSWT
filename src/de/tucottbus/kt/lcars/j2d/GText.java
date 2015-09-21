@@ -10,7 +10,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.TextLayout;
-import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.LCARS;
 
@@ -82,15 +81,7 @@ public class GText extends Geometry
   }
   
   public Rectangle getBounds() {
-//    if (bounds == null)
-//    {
-//      Font font = new Font(Display.getDefault(), fontData);
-//      Rectangle bnds = LCARS.getTextBounds(font, text);
-//      bounds = new Rectangle(x,y+descent,bnds.width,bnds.height);
-//      font.dispose();
-//    }
-    return new Rectangle(x,y,width,height);
-    
+    return new Rectangle(x,y,width,height);    
   }
   
   public String getText()
@@ -136,9 +127,9 @@ public class GText extends Geometry
     if (LCARS.SCREEN_DEBUG)
     {      
       Color red = gc.getDevice().getSystemColor(SWT.COLOR_RED);
-      gc.setBackground(red);
       gc.setForeground(red);
-      gc.drawRectangle(SWTUtils.toSwtRectangle(getBounds()));
+      Rectangle b = getBounds();
+      gc.drawRectangle(b.x, b.y, b.width-1, b.height-1);
       red.dispose();
     }
   }

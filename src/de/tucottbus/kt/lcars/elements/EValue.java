@@ -15,6 +15,7 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.j2d.GArea;
 import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 public class EValue extends ERect
 {
@@ -48,8 +49,7 @@ public class EValue extends ERect
   
   public void setValue(String value)
   {
-    if (this.value==null && value==null) return;
-    if (this.value!=null && this.value.equals(value)) return;
+    if (Objectt.equals(this.value, value)) return;
     this.value = value;
     invalidate(true);
   }
@@ -60,11 +60,10 @@ public class EValue extends ERect
     int       m    = computeValueMargin();
     int       w    = this.vw;
     if (w<=0) {
-      Font      font = new Font(Display.getDefault(), getValueFont());    
+      Font      font = new Font(Display.getDefault(), getValueFont());
       w = LCARS.getTextBounds(font,value).width + 6;
       font.dispose();
     }
-      
     return (getStyle()&LCARS.ES_VALUE_W)!=0
         ? new Rectangle(r.x+m,r.y,w,r.height)
         : new Rectangle(r.x+(r.width-w-m),r.y,w,r.height);

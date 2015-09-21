@@ -100,7 +100,7 @@ public abstract class EElement
    */
   public Rectangle getBounds()
   {
-    return data.getBounds();
+    return data.state.getBounds();
   }
 
   /**
@@ -555,8 +555,7 @@ public abstract class EElement
    */
   public void setLabel(String label)
   {
-    if (this.label==null && label==null) return;
-    if (this.label!=null && this.label.equals(label)) return;
+    if (Objectt.equals(this.label, label)) return;
     this.label = label;
     invalidate(true);
   }

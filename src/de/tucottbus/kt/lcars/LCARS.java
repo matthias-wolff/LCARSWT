@@ -731,11 +731,7 @@ public class LCARS implements ILcarsRemote
     
     int tlx;
     int tly;
-    int tlw;
-    int tlh;
-    
-    
-    
+        
     if (tw <= 0 || th <= 0) return geos;
     
     switch (hAlign) // horizontal alignment
@@ -772,8 +768,7 @@ public class LCARS implements ILcarsRemote
       if (linBnds.y > th) break; // line out of vertical bounds
       int x = linBnds.x+tlx;
       int y = linBnds.y+tly;
-      
-      
+           
       Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
       if (b.width <= 0 || b.height <=0) continue;
       
@@ -802,24 +797,17 @@ public class LCARS implements ILcarsRemote
    */
   public static SwtColor interpolateColors(SwtColor clr1, SwtColor clr2, float value)
   {
-    if (value<=0f) return clr1;
-    if (value>=1f) return clr2;
+    if (value<=0f) return new SwtColor(clr1);
+    if (value>=1f) return new SwtColor(clr2);
     final float norm = 1/255f;
-    float red1   = (float)clr1.getRed  ()*norm;
-    float green1 = (float)clr1.getGreen()*norm;
-    float blue1  = (float)clr1.getBlue ()*norm;
-    float alpha1 = (float)clr1.getAlpha()*norm;
-    float red2   = (float)clr2.getRed  ()*norm;
-    float green2 = (float)clr2.getGreen()*norm;
-    float blue2  = (float)clr2.getBlue ()*norm;
-    float alpha2 = (float)clr2.getAlpha()*norm;
 
-    float val1 = 1f - value;
+    float val2 = value*norm;
+    float val1 = norm - val2;
     return new SwtColor(
-        val1*red1  +value*red2,
-        val1*green1+value*green2,
-        val1*blue1 +value*blue2,
-        val1*alpha1+value*alpha2);
+        val1*clr1.getRed  () +val2*clr2.getRed  (),
+        val1*clr1.getGreen() +val2*clr2.getGreen(),
+        val1*clr1.getBlue () +val2*clr2.getBlue (),
+        val1*clr1.getAlpha() +val2*clr2.getRed  ());
   }
   
   /**
