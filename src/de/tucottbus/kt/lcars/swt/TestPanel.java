@@ -1,18 +1,30 @@
 package de.tucottbus.kt.lcars.swt;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ESpeechInput;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -96,26 +108,26 @@ public class TestPanel extends Panel
         text));
   }
 
-  public void initLabels()
+  private void initLabels()
   {
-//    final int h = 50;
-//
-//    final ArrayList<EElement> els = new ArrayList<EElement>(10);
-//    els.add(new ELabel(this, x1, y1, w, h,
-//        LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null));
-//
-//    ELabel eLabel = new ELabel(this, x1 + 10, y1 + 10, w, h,
-//        LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null);
-//    els.add(eLabel);
-//    eLabel.setAlpha(.5f);
-//
-//    for (EElement el : els)
-//      add(el);
-//    runAtFrameRate(() -> {
-//      String dt = (new Date()).toString();
-//      for (EElement el : els)
-//        el.setLabel(dt);
-//    });
+    final int h = 50;
+
+    final ArrayList<EElement> els = new ArrayList<EElement>(10);
+    els.add(new ELabel(this, x1, y1, w, h,
+        LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null));
+
+    ELabel eLabel = new ELabel(this, x1 + 10, y1 + 10, w, h,
+        LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null);
+    els.add(eLabel);
+    eLabel.setAlpha(.5f);
+
+    for (EElement el : els)
+      add(el);
+    runAtFrameRate(() -> {
+      String dt = (new Date()).toString();
+      for (EElement el : els)
+        el.setLabel(dt);
+    });
 
     EValue eTimecode = add(
         new EValue(this, m, 991, 278, 66, LCARS.EC_PRIMARY | LCARS.ES_STATIC
@@ -127,7 +139,7 @@ public class TestPanel extends Panel
 
   }
 
-  public void initSpeechInpuPanel()
+  private void initSpeechInpuPanel()
   {
     ERect eRect;
     eRect = new ERect(this, 1209, 22, 208, 80,
@@ -175,7 +187,7 @@ public class TestPanel extends Panel
     add(eFvr);
   }
 
-  public void initStatistics() {
+  private void initStatistics() {
     ELabel eGuiLd = add(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
     runEverySecond(() -> {
       LoadStatistics ls1 = getLoadStatistics();
@@ -212,6 +224,68 @@ public class TestPanel extends Panel
       initStatistics();    
   }
 
+  
+  private static void addComp(Composite parent, int fg, int bg, int xOff) {
+    int h = parent.getSize().y;
+    Display display = parent.getDisplay();
+    Composite composite = new Composite(parent, SWT.TRANSPARENT);
+    composite.setLayout(new FillLayout());
+    composite.setEnabled(true);
+    composite.setSize(parent.getSize());
+    composite.setBackground(parent.getDisplay().getSystemColor(bg));
+    composite.addPaintListener(new PaintListener()
+    {
+      final int xMax = parent.getSize().x*2;
+      int x = xOff%h;
+      @Override
+      public void paintControl(PaintEvent e)
+      {
+        e.gc.setForeground(e.gc.getDevice().getSystemColor(fg));
+        e.gc.drawLine(xMax/4, h, Math.abs((x = (x+5)%xMax)-h), 0);
+        //shell.redraw();
+        
+      }
+    });
+    Timer timer = new Timer();
+    timer.schedule(new TimerTask()
+    {
+      
+      @Override
+      public void run()
+      {
+        display.asyncExec(()-> {
+          composite.redraw();
+        });
+      }
+    }, 40, 40);    
+  }
+  
+  public static void initShell() {
+    final int l = 400;
+    
+    Display display = Display.getDefault();
+    Shell shell = new Shell(display);
+    shell.setSize(l,l);
+    shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+    addComp(shell, SWT.COLOR_CYAN, SWT.COLOR_BLUE, 0);
+    addComp(shell, SWT.COLOR_RED, SWT.COLOR_DARK_RED, 300);
+    
+    shell.open();
+    
+    // Run SWT event loop 
+    while (!shell.isDisposed())
+      try
+      {
+        while (!shell.isDisposed())
+          if (!Display.getDefault().readAndDispatch())
+            Display.getDefault().sleep();
+      }
+      catch (Exception e)
+      {
+        Log.err("Error in screen execution.", e);
+      }    
+  }
+  
   /**
    * Convenience method: Runs the test panel.
    * 
@@ -219,8 +293,8 @@ public class TestPanel extends Panel
    *          The command line arguments, see {@link LCARS#main(String[])}.
    */
   public static void main(String[] args)
-  {
+  {    
     LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
+    //initShell();
   }
-
 }

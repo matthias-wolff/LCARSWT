@@ -44,7 +44,7 @@ public abstract class PanelDataComposite extends Composite
   
   public PanelDataComposite(Composite parent, int style) {
     super (parent, style);
-    edCanvasStyle = style | SWT.NO_BACKGROUND;
+    edCanvasStyle = style | SWT.TRANSPARENT;
     display = getParent().getDisplay();
   }
   
