@@ -430,18 +430,16 @@ public class EElementArray extends ElementContributor implements EEventListener
   protected synchronized void showItemsInt(int first, int count)
   {
     // Remove old elements
-    for (int i=getElements().size()-1; i>=0; i--)
-    {
-      EElement e = getElements().get(i);
-      if (e!=eTitle)
+    final EElement eTitle = this.eTitle;
+    getElements().removeIf((el) -> {
+      if (el!=eTitle)
       {
-        e.clearTouch();
-        remove(e);
+        el.clearTouch();
+        return true;
       }
-      else
-        i++;
-    }
-
+      return false;
+    });
+    
     // Do nothing of there are no items
     if (this.eList==null)
     {

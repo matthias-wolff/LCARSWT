@@ -1,5 +1,7 @@
 package de.tucottbus.kt.lcars.swt;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Device;
@@ -10,10 +12,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
-import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
-import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.j2d.ElementState;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 public abstract class ElementDataComposite extends Composite implements PaintListener
@@ -54,40 +55,38 @@ public abstract class ElementDataComposite extends Composite implements PaintLis
     assert (elementData != null) : "elementData != null";
     assert (ed == null || elementData.serialNo == ed.serialNo);
     
-    int edUpdate = elementData.applyUpdate(ed);
+    //update date and get update flags    
+    int u = elementData.applyUpdate(ed)
+          | ((ed != null) ? elementData.state.getUpdateFlags(ed.state) : ElementState.FLAG_MASK);    
     ed = elementData;
     
-    boolean redraw = edUpdate != 0;
-    
+    boolean redraw = u != 0;    
     if (panelState != null) {
       if (!Objectt.equals(ps, panelState))
         redraw = true;      
       ps = panelState;
     }
     
+    boolean visible = elementData.state.isVisible();
     
-    if ((edUpdate & ElementData.GEOMETRY_FLAG) > 0) // resize
+    ArrayList<Runnable> updates = new ArrayList<Runnable>(3);
+    
+    if ((u & ElementState.VISIBLE) != 0)
+      updates.add(() -> {setVisible(visible);});
+    
+    if ((u & (ElementData.GEOMETRY_FLAG | ElementState.BOUNDS)) != 0) // bounds update check
     {
       Rectangle bnds = SWTUtils.toSwtRectangle(elementData.getBounds());
-      if (LCARS.SCREEN_DEBUG)
-        Log.debug("#"+elementData.serialNo+" new Bounds="+bnds.x+","+bnds.y+","+bnds.width+","+bnds.height);
-      display.asyncExec(redraw
-          ? () -> {
-              setBounds(bnds);        
-              setVisible(elementData.state.isVisible());
-              redraw();
-            }
-          : () -> { 
-              setBounds(bnds);
-              setVisible(elementData.state.isVisible());
-            } 
-          );      
+      updates.add(() -> {setBounds(bnds);});
     }
-    else
-      if (redraw)
-        display.asyncExec(() -> {
-            setVisible(elementData.state.isVisible());
-          });      
+        
+    if (redraw & visible) // redraw check
+      updates.add(() -> {redraw();});
+    
+    display.asyncExec(() -> {
+      for (Runnable update : updates)
+        update.run();
+    });
   }
   
   public void clear() {

@@ -87,16 +87,11 @@ public abstract class ElementContributor implements EEventListener
   
   public void addToPanel(Panel panel)
   {
-    if (panel==null) return;
-    if (this.panel==panel) return;
+    if (panel==null || this.panel==panel) return;
     this.panel = panel;
-    for (int i=0; i<elements.size(); i++)
-    {
-      EElement el = elements.get(i);
-      el.setPanel(this.panel);
-      this.panel.add(el);
-    }
-    
+    elements.forEach((el) -> {
+      this.panel.add(el).setPanel(this.panel);
+    });
     this.panel.invalidate();
   }
   

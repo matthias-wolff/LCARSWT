@@ -12,38 +12,43 @@ import de.tucottbus.kt.lcars.util.Objectt;
  */
 public class PanelState implements Serializable
 {
-  /**flag for changed dimension**/
-  public static final int DIMENSION    = 0x01;
-  
-  /**flag for changed color scheme**/
-  public static final int COLOR_SCHEME = 0x02;
-
-  /**flag for changed blink state**/
-  public static final int BLINK        = 0x04;
-  
-  /**flag for changed modal**/
-  public static final int MODAL        = 0x08;
-  
-  /**flag for changed silent state**/
-  public static final int SILENT       = 0x0F;
-  
-  /**flag for changed lock state**/
-  public static final int LOCKED       = 0x10;
-  
-  /**flag for changed transparency**/
-  public static final int ALPHA        = 0x20;
-  
-  /**flag for changed background source**/
-  public static final int BACKGROUND   = 0x40;
-  
-  /**flag indicates an complete change**/
-  public static final int ALL          = 0x7F; // all changed
-   
   /**
    * The default serial version ID.
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -6737109958392273399L;
 
+  // only use the first byte for flags, all other digits are reserved for flags of ElementData or ElementState
+  
+  /**flag mask**/
+  public static final int FLAG_MASK    = 0xFF0000;      
+  
+  /**flag for changed dimension**/
+  public static final int DIMENSION    = 0x010000;
+  
+  /**flag for changed color scheme**/
+  public static final int COLOR_SCHEME = 0x020000;
+
+  /**flag for changed blink state**/
+  public static final int BLINK        = 0x040000;
+  
+  /**flag for changed modal**/
+  public static final int MODAL        = 0x080000;
+  
+  /**flag for changed silent state**/
+  public static final int SILENT       = 0x100000;
+  
+  /**flag for changed lock state**/
+  public static final int LOCKED       = 0x200000;
+  
+  /**flag for changed transparency**/
+  public static final int ALPHA        = 0x400000;
+  
+  /**flag for changed background source**/
+  public static final int BACKGROUND   = 0x800000;
+     
+
+  //-- field --//
+  
   /**
    * The panel dimension.
    */
@@ -109,20 +114,17 @@ public class PanelState implements Serializable
    * Returns the flags that indicates the changed parts of this PanelState and another.
    */  
   public int getUpdateFlags(PanelState other) {
-    if (other == null) return ALL;
-    int result = Objectt.equals(dimension, other.dimension) ? DIMENSION : 0;
-    
-    if (Objectt.equals(bgImageRes, other.bgImageRes)) result |= BACKGROUND;
-    if (colorScheme != other.colorScheme) result |= COLOR_SCHEME;
-    if (blink       != other.blink) result |= BLINK;
-    if (modal       != other.modal) result |= MODAL;
-    if (silent      != other.silent) result |= SILENT;
-    if (alpha       != other.alpha) result |= ALPHA;
-    if (locked      != other.locked) result |= LOCKED;
-    return result;
+    if (other == null) throw new NullPointerException();
+    int result = !Objectt.equals(dimension,     other.dimension) ?           DIMENSION : 0;    
+    if (         !Objectt.equals(bgImageRes,    other.bgImageRes)) result |= BACKGROUND;
+    if (                         colorScheme != other.colorScheme) result |= COLOR_SCHEME;
+    if (                         blink       != other.blink)       result |= BLINK;
+    if (                         modal       != other.modal)       result |= MODAL;
+    if (                         silent      != other.silent)      result |= SILENT;
+    if (                         alpha       != other.alpha)       result |= ALPHA;
+    return                       locked      != other.locked ?     result | LOCKED : result;
   }
-  
-  
+    
   @Override
   public boolean equals(Object o)
   {

@@ -29,17 +29,22 @@ public final class ElementData implements Serializable
 {
   // -- Constants
   
+  // only use the first byte for flags, all other digits are reserved for flags of PanelState or ElementState
+
+  /**flag mask**/
+  public static final int FLAG_MASK          = 0xFF;
+      
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
    * that the {@linkplain #state state} has been updated.
    */
-  public static final int STATE_FLAG = 0x00000001;
+  public static final int STATE_FLAG    = 0x01;
 
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
    * that the {@linkplain #geometry geometry} has been updated.
    */
-  public static final int GEOMETRY_FLAG = 0x00000002;
+  public static final int GEOMETRY_FLAG = 0x02;
 
   /**
    * Bits that indicates that all has changed.

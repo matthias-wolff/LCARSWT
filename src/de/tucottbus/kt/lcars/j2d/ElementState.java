@@ -8,6 +8,7 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * The serializable state of an {@linkplain EElement LCARS GUI element}. Contains style and state
@@ -19,6 +20,32 @@ import de.tucottbus.kt.lcars.swt.SwtColor;
 // TODO: Re-integrate into EElement?
 public class ElementState implements Serializable
 {
+  // only use the second byte for flags, all other digits are reserved for flags of ElementData or PanelState
+  
+  /**flag mask**/
+  public static final int FLAG_MASK    = 0xFF00;
+      
+  /**flag for changed bounds**/
+  public static final int BOUNDS       = 0x0100;
+  
+  /**flag for changed color**/
+  public static final int COLOR        = 0x0200;
+
+  /**flag for changed transparency**/
+  public static final int ALPHA        = 0x0400;
+
+  /**flag for changed style**/
+  public static final int STYLE        = 0x0800;
+  
+  /**flag for changed visibility**/
+  public static final int VISIBLE      = 0x1000;
+  
+  /**flag for changed highlight**/
+  public static final int HIGHLIGHT    = 0x2000;
+  
+  /**flag for changed touch state**/
+  public static final int TOUCH        = 0x4000;
+    
   // -- Fields --
   
   /**
@@ -361,6 +388,20 @@ public class ElementState implements Serializable
     this.visible = visible;
   }
 
+  /**
+   * Returns the flags that indicates the changed parts of this PanelState and another.
+   */  
+  public int getUpdateFlags(ElementState other) {
+    if (other == null) throw new NullPointerException();
+    int result = !Objectt.equals(bounds,        other.bounds) ?              BOUNDS : 0;    
+    if (         !Objectt.equals(color,         other.color))      result |= COLOR;
+    if (                         alpha       != other.alpha)       result |= ALPHA;
+    if (                         style       != other.style)       result |= STYLE;
+    if (                         visible     != other.visible)     result |= VISIBLE;
+    if (                         highlighted != other.highlighted) result |= HIGHLIGHT;
+    if (                         alpha       != other.alpha)       result |= ALPHA;
+    return                       touch       != other.touch ?      result |  TOUCH : result;
+  }
 }
 
 // EOF
