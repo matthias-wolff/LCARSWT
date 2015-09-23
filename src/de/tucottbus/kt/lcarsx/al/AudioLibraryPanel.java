@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.sound.sampled.AudioSystem;
 
@@ -359,23 +358,26 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     eTrackNext   .setSelected(trackMode==1);
     eTrackExclude.setSelected(trackMode==2);
 
+    AudioPlayer player = AudioPlayer.getInstance();
+    AudioTrack track = player.getCurrentTrack();
+   
     // Display current player status
-    if (AudioPlayer.getInstance().isPlaying())
+    if (player.isPlaying())
     {
-      eTitle.setLabel((""+AudioPlayer.getInstance().getCurrentTrack().getArtist()).toUpperCase());
+      eTitle.setLabel((""+track.getArtist()).toUpperCase());
       if (getMode()==0)
-        eTitle.setValue((""+AudioPlayer.getInstance().getCurrentTrack().getTitle()).toUpperCase());
+        eTitle.setValue((""+track.getTitle()).toUpperCase());
       else
-        eTitle.setValue((""+AudioPlayer.getInstance().getCurrentTrack().getAlbum()).toUpperCase());
+        eTitle.setValue((""+track.getAlbum()).toUpperCase());
 
-      double sec = AudioPlayer.getInstance().getMediaTime();
+      double sec = player.getMediaTime();
       int    min = (int)sec/60;
       String s   = String.format(Locale.ENGLISH,"%02d:%04.1f",min,sec-min*60);
       eTimecode.setValue(s);
       
       ePause.setDisabled(false);
-      ePause.setBlinking(AudioPlayer.getInstance().isPaused());
-      ePause.setColorStyle(AudioPlayer.getInstance().isPaused()?LCARS.EC_SECONDARY:LCARS.EC_PRIMARY);
+      ePause.setBlinking(player.isPaused());
+      ePause.setColorStyle(player.isPaused()?LCARS.EC_SECONDARY:LCARS.EC_PRIMARY);
       eStop.setDisabled(false);
     }
     else
@@ -392,12 +394,10 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     // Feed audio visualization
     if (eDisplay.isDisplayed())
     {
-      Vector<AudioBuffer> win = AudioPlayer.getInstance().getAudioWindow();
-      eDisplay.setAudioWindow(win,AudioPlayer.getInstance().getMediaTime());
-      if (AudioPlayer.getInstance().isPlaying())
+      eDisplay.setAudioWindow(player.getAudioWindow(),player.getMediaTime());
+      if (player.isPlaying())
       {
-        AudioTrack track = AudioPlayer.getInstance().getCurrentTrack();
-        eDisplay.setTitle((""+track.getTitle()).toUpperCase());
+        eDisplay.setTitle((track.getTitle()).toUpperCase());
         eDisplay.setDuration(track.getLength());
       }
       else

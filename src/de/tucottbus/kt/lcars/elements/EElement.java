@@ -114,7 +114,7 @@ public abstract class EElement
   {
     synchronized (data.state)
     {
-      if(Objectt.equals(bounds, data.state.getBounds())) return;
+      //if(Objectt.equals(bounds, data.state.getBounds())) return;
       data.state.setBounds(bounds);
       invalidate(true);
     }    

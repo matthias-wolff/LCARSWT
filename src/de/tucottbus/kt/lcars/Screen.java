@@ -154,7 +154,7 @@ public class Screen
               // Prepare setup
               GC gc = e.gc;
               gc.setTextAntialias(SWT.ON);
-              gc.setInterpolation(SWT.HIGH);
+              gc.setInterpolation(SWT.LOW);
               gc.setAntialias(SWT.ON);
               
               //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);

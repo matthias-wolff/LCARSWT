@@ -20,36 +20,26 @@ import de.tucottbus.kt.lcars.logging.Log;
  * The serializable data of an {@linkplain EElement LCARS GUI element}. An
  * element data instance stores the {@link #state} and the {@link #geometry} of
  * a GUI element. Element data instances are also used to transfer rendering
- * information from the {@linkplain Panel LCARS panel} to the
- * {@linkplain Screen screen}.
+ * information from the {@linkplain Panel LCARS panel} to the {@linkplain Screen
+ * screen}.
  * 
  * @author Matthias Wolff, Christian Borck
  */
 public final class ElementData implements Serializable
 {
   // -- Constants
-  
-  // only use the first byte for flags, all other digits are reserved for flags of PanelState or ElementState
 
-  /**flag mask**/
-  public static final int FLAG_MASK          = 0xFF;
-      
-  /**
-   * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
-   * that the {@linkplain #state state} has been updated.
-   */
-  public static final int STATE_FLAG    = 0x01;
+  // only use the first byte for flags, all other digits are reserved for flags
+  // of PanelState or ElementState
+
+  /** flag mask **/
+  public static final int FLAG_MASK = 0xFF;
 
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
    * that the {@linkplain #geometry geometry} has been updated.
    */
-  public static final int GEOMETRY_FLAG = 0x02;
-
-  /**
-   * Bits that indicates that all has changed.
-   */
-  public static final int ALL_FLAG = STATE_FLAG | GEOMETRY_FLAG;
+  public static final int GEOMETRY_FLAG = 0x01;
 
   // -- Fields --
 
@@ -75,11 +65,6 @@ public final class ElementData implements Serializable
    */
   public ArrayList<Geometry> geometry;
 
-  /**
-   * Rendering hints for screen
-   */
-  public int updateFlag = 0;
-  
   /**
    * Bounds of the area of this element.
    */
@@ -142,10 +127,11 @@ public final class ElementData implements Serializable
    * Returns the {@link Area area} covered by all background geometries.
    */
   public void getArea(Area area)
-  {    
-    if (area == null) return;   
+  {
+    if (area == null)
+      return;
     if (cachedArea == null)
-    {      
+    {
       Area ar = new Area();
       try
       {
@@ -157,9 +143,9 @@ public final class ElementData implements Serializable
       {
         cachedArea = new Area(state.getBounds());
         Log.warn("Missing geometries in ElementData #" + serialNo);
-      }      
+      }
     }
-    area.add((Area)cachedArea.clone());
+    area.add((Area) cachedArea.clone());
     return;
   }
 
@@ -186,20 +172,18 @@ public final class ElementData implements Serializable
       try
       {
         other.geometry = new ArrayList<Geometry>(this.geometry.size());
-        for(Geometry geom : this.geometry)
+        for (Geometry geom : this.geometry)
           other.geometry.add(geom instanceof AHeavyGeometry
-              ? ((AHeavyGeometry)geom).getUpdate(incremental)
-              : geom);
+              ? ((AHeavyGeometry) geom).getUpdate(incremental) : geom);
       } catch (Exception e)
       {
         // TODO: synchronization problem, exception should never occur
         other.geometry = new ArrayList<Geometry>();
-        Log.err("Error while extracting updated data from ElementData with #" + serialNo, e);
+        Log.err("Error while extracting updated data from ElementData with #"
+            + serialNo, e);
       }
 
     state.clearChanged();
-    other.updateFlag = (stateChanged ? STATE_FLAG : 0)
-        | (updateGeometry ? GEOMETRY_FLAG : 0);
     return other;
   }
 
@@ -208,51 +192,60 @@ public final class ElementData implements Serializable
    * 
    * @param other
    *          The other instance.
-   * @return A combination of {@link #STATE_FLAG} and {@link #GEOMETRY_FLAG}
-   *         indicating the which data have actually been updated. A return
-   *         value of 0 indicates that no updates have been performed.
+   * @return An bitwise OR combination of {@link #GEOMETRY_FLAG}, {@link ElementState#BOUNDS}, {@link ElementState#COLOR}, {@link ElementState#ALPHA}, {@link ElementState#STYLE}, {@link ElementState#VISIBLE}, {@link ElementState#HIGHLIGHT} or {@link ElementState#TOUCH} 
+   *         indicating the which data have actually been updated. If
+   *         {@link #STATE_FLAG} is in result, then element-wise state changes
+   *         has been checked and added to the result too
+   *         {@link ElementState#FLAG_MASK}. A return value of 0 indicates that
+   *         no updates have been performed.
    * @throws IllegalArgumentException
    *           <ol>
    *           <li>If the serial number of <code>other</code> is not equal to
    *           the serial number of <code>this</code> (i.e. the two instances
-   *           describe different {@linkplain EElement LCARS GUI elements}).</li>
+   *           describe different {@linkplain EElement LCARS GUI elements}).
+   *           </li>
    *           <li>If the {@link #state} of this instance needs to be updated
    *           (i.e. <code>this.</code>{@link #state} is <code>null</code>) and
    *           <code>other</code> does not contain the information (i.e.
    *           <code>other.</code>{@link #state} is <code>null</code>).
    *           </ol>
    */
-  public int applyUpdate(ElementData other)
+  public int applyUpdate(ElementData other, boolean detailedFlags)
   {
+    // if (serialNo == 25)
+    // Log.debug("#" + serialNo + ": geometry is " + (geometry == null ? "NULL"
+    // : "not null"));
     if (other == null)
     {
       if (geometry == null)
         throw new IllegalArgumentException("geometry required");
       if (state == null)
         throw new IllegalArgumentException("state required");
-      return STATE_FLAG | GEOMETRY_FLAG;
+      return GEOMETRY_FLAG | ElementState.FLAG_MASK;
     }
-    
+
     if (this.serialNo != other.serialNo)
       throw new IllegalArgumentException("Wrong serial numbers");
 
     int ret = 0;
-    if (this.state == null)
+    if (state == null)
     {
       if (other.state != null)
-        this.state = new ElementState(other.state);
+        state = new ElementState(other.state);
     } else
-      ret |= STATE_FLAG;
-    if (this.geometry == null)
+      ret |= detailedFlags ? state.getUpdateFlags(other.state) : ElementState.FLAG_MASK;
+
+    if (geometry == null)
     {
       if (other.geometry != null)
       {
         this.geometry = new ArrayList<Geometry>(other.geometry);
-        for(Geometry geom : this.geometry)
+        for (Geometry geom : this.geometry)
           if (geom instanceof AHeavyGeometry)
             ((AHeavyGeometry) geom).applyUpdate();
-        this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea) : null;
-        //TODO: make a copy
+        this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea)
+            : null;
+        // TODO: make a copy
       }
     } else
       ret |= GEOMETRY_FLAG;
@@ -271,57 +264,62 @@ public final class ElementData implements Serializable
   public void render2D(GC gc, PanelState panelState)
   {
     // if (geometry==null) return;
-    if (state==null) {
-      Log.err("Missing state in ElementData #"+serialNo);
+    if (state == null)
+    {
+      Log.err("Missing state in ElementData #" + serialNo);
       return;
     }
-    if (!state.isVisible()) return;
+    if (!state.isVisible())
+      return;
     int l = geometry.size();
-    if (l <= 0) return;
+    if (l <= 0)
+      return;
 
-    final int fgAlpha = (int)(state.getFgAlpha()*255);
-    final int bgAlpha = (int)(state.getBgAlpha(panelState)*255);
-    final Color fgColor = new Color(gc.getDevice(), state.getFgColor().getRGB());
-    final Color bgColor = new Color(gc.getDevice(), state.getBgColor(panelState).getRGB());
-    
+    final int fgAlpha = (int) (state.getFgAlpha() * 255);
+    final int bgAlpha = (int) (state.getBgAlpha(panelState) * 255);
+    final Color fgColor = new Color(gc.getDevice(),
+        state.getFgColor().getRGB());
+    final Color bgColor = new Color(gc.getDevice(),
+        state.getBgColor(panelState).getRGB());
+
     if (fgAlpha == bgAlpha)
     {
       gc.setAlpha(bgAlpha);
-      for(Geometry gi : geometry) {
+      for (Geometry gi : geometry)
+      {
         if (gi.isForeground())
         {
           gc.setBackground(fgColor);
           gc.setForeground(bgColor);
-          
-        }
-        else {
+
+        } else
+        {
           gc.setBackground(bgColor);
-          gc.setForeground(fgColor);          
+          gc.setForeground(fgColor);
         }
         gi.paint2D(gc);
       }
-    }
-    else
+    } else
     {
-      for(Geometry gi : geometry) {
+      for (Geometry gi : geometry)
+      {
         if (gi.isForeground())
         {
           gc.setBackground(fgColor);
           gc.setForeground(bgColor);
           gc.setAlpha(fgAlpha);
-        }
-        else
+        } else
         {
           gc.setBackground(bgColor);
-          gc.setForeground(fgColor);          
+          gc.setForeground(fgColor);
           gc.setAlpha(bgAlpha);
         }
         gi.paint2D(gc);
       }
     }
-    
+
     fgColor.dispose();
-    bgColor.dispose();    
+    bgColor.dispose();
   }
 
   /**
@@ -332,54 +330,54 @@ public final class ElementData implements Serializable
   public Rectangle getBounds()
   {
     if (geometry == null || geometry.isEmpty())
-      return state.getBounds();    
+      return state.getBounds();
     Rectangle result = geometry.get(0).getBounds();
     int n = geometry.size();
     for (int i = 1; i < n; i++)
       result.add(geometry.get(i).getBounds());
-    return result; 
+    return result;
   }
 
-  /**
-   * Returns a flags that indicates which data is currently missing
-   * 
-   * @return
-   */
-  public int getMissingFlag()
+  public void onVisibilityChanged(boolean visible)
   {
-    return (this.state == null ? STATE_FLAG : 0)
-        | (this.geometry == null ? GEOMETRY_FLAG : 0);
-  }
-  
-  public void onVisibilityChanged(boolean visible) {
-    for(Geometry g : geometry)
+    for (Geometry g : geometry)
       g.onVisibilityChanged(visible);
   }
-  
+
   @Override
-  public String toString() {
-    return this.getClass().getSimpleName()+"#"+serialNo;
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "#" + serialNo;
   }
-  
-  public boolean checkValidation(boolean incremental) {
-    if (incremental) return true;
-    Boolean[] valid = {true};
+
+  public boolean checkValidation(boolean incremental)
+  {
+    if (incremental)
+      return true;
+    Boolean[] valid =
+    { true };
     Consumer<String> invalid = (msg) -> {
-      Log.warn(toString()+": "+msg);
+      Log.warn(toString() + ": " + msg);
       valid[0] = false;
     };
-        
+
     if (geometry == null)
       invalid.accept("geometry == null");
     else
-        for(int i = 0; i < geometry.size(); )
-          if (geometry.get(i) == null)
-            invalid.accept("geometry["+i+"] == null");   
+      for (int i = 0; i < geometry.size();)
+        if (geometry.get(i) == null)
+          invalid.accept("geometry[" + i + "] == null");
     if (state == null)
       invalid.accept("state == null");
-    
+
     return valid[0];
-  }  
+  }
+  
+  public int getMissing() {
+    return geometry == null
+        ? (state == null ? ElementState.FLAG_MASK | GEOMETRY_FLAG : GEOMETRY_FLAG) 
+        : (state == null ? ElementState.FLAG_MASK                 : 0);
+  }
 }
 
 // EOF

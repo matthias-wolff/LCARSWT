@@ -14,6 +14,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.j2d.EPerspective;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
@@ -158,29 +159,34 @@ public class ELevelsDisplay extends ElementContributor
     else
       audio = new Vector<AudioBuffer>(audio);
     int b = barF;
-    for (AudioBuffer abuf : audio)
-    {
-      float[] levels = { -96, -96 }; 
-      if (abuf!=null) levels = abuf.getLevels();
-
-      EElement e = getElements().get(b++);
-      Rectangle r = e.getBounds();
-      int wl = Math.max(barH,levelToPanel(levels[0])+3);
-      int wr = Math.max(barH,levelToPanel(levels[1])+3);
-      r.x = this.x-wl-2; r.width = wl+wr+3;
-      e.setBounds(r);
-      
-      if (b==barC) break;
-    }
-    for (; b<barC; b++)
-    {
-      EElement e = getElements().get(b);
-      Rectangle r = e.getBounds();
-      int w = Math.max(barH,levelToPanel(-96)+3);
-      r.x = this.x-w-2; r.width = 2*w+3;
-      e.setBounds(r);
-    }
     
+    Vector<EElement> els = getElements();
+    synchronized(els) {
+      for (AudioBuffer abuf : audio)
+      {
+        float[] levels = { -96, -96 }; 
+        if (abuf!=null) levels = abuf.getLevels();
+
+        EElement e = els.get(b++);
+        Rectangle r = e.getBounds();
+        int wl = Math.max(barH,levelToPanel(levels[0])+3);
+        int wr = Math.max(barH,levelToPanel(levels[1])+3);
+        r.x = this.x-wl-2; r.width = wl+wr+3;
+        e.setBounds(r);
+        
+        if (b==barC) break;
+      }
+      for (; b<barC; b++)
+      {
+        EElement e = els.get(b);
+        Rectangle r = e.getBounds();
+        int w = Math.max(barH,levelToPanel(-96)+3);
+        r.x = this.x-w-2; r.width = 2*w+3;
+        e.setBounds(r);
+      }
+
+    }
+        
     setTimeLabel(eTimecode,time);
     int offset = 1;
     for (ELabel eLabel : eHistory)
@@ -292,6 +298,8 @@ public class ELevelsDisplay extends ElementContributor
       eRect = new ERect(null,-barH,b*barH,2*barH+3,barH,LCARS.ES_STATIC|LCARS.ES_RECT_RND|style,null);
       eRect.setArc(4*barH); eRect.setAlpha(alpha);
       eRect.addGeometryModifier(perspective);
+      Log.debug(eRect.getSerialNo() + "");
+      
       if (b!=barZ) eRect.setColor(cBars);
       add(eRect);
     }

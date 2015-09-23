@@ -59,6 +59,9 @@ public abstract class PanelDataComposite extends Composite
     if (currPs.equals(ps))
       ps = null;
     
+    ArrayList<ElementData> eds = panelData.elementData;
+    ArrayList<Runnable> updateQueue = new ArrayList<Runnable>(eds != null ? eds.size()*3 : 10);
+    
     if (ps != null) {
       this.ps = ps;
       
@@ -72,7 +75,7 @@ public abstract class PanelDataComposite extends Composite
         {
           Image image = new Image(display, imgDt);
           
-          display.asyncExec(() -> {
+          updateQueue.add(() -> {
             Image oldImg = _this.getBackgroundImage();            
             _this.setBackgroundImage(image);
             if (oldImg != null)
@@ -81,88 +84,83 @@ public abstract class PanelDataComposite extends Composite
         }
       }                  
       else
-        display.asyncExec(() -> {
+        updateQueue.add(() -> {
           _this.setBackgroundImage(null);
         });                    
       bgRes = nbgr;
     }
     
-    ArrayList<ElementData> eds = panelData.elementData;
-
     if (eds == null)
-    {
       clear(); //TODO: reset all or only remove elements?
-      return;
-    }
-        
-    synchronized (this)
-    {
-      TreeSet<Long> oSerNo = new TreeSet<Long>(elements.keySet());
-            
-      Composite lower = null;            
-      for(ElementData edu : eds) {
-        
-        assert(edu != null) : "edu != null";      
-        long serNo = edu.serialNo;
-        
-        ElementDataComposite canvas = elements.get(serNo);
-
-        if (canvas != null) // update existing canvas
-        {
-          canvas.applyUpdate(edu, ps);
-          oSerNo.remove(serNo);
+    else
+      synchronized (this)
+      {
+        TreeSet<Long> oSerNo = new TreeSet<Long>(elements.keySet());
+              
+        Composite lower = null;            
+        for(ElementData edu : eds) {
+          
+          assert(edu != null) : "edu != null";      
+          long serNo = edu.serialNo;
+          
+          ElementDataComposite canvas = elements.get(serNo);
+  
+          if (canvas != null) // update existing canvas
+          {
+            canvas.applyUpdate(edu, ps, updateQueue);
+            oSerNo.remove(serNo);
+          }
+          else // create new canvas
+          {
+            assert(edu.geometry != null) : "edu.geometry != null";                  
+            elements.put(serNo, canvas = withdraw(currPs, edu, updateQueue));
+          }
+          
+          final Composite c = canvas;        
+          final Composite low = lower;
+          updateQueue.add( low == null
+              ? () -> {
+                c.moveBelow(null);
+                c.setVisible(true);
+                c.setEnabled(true);}
+              : ()->{
+                c.moveAbove(low);
+                c.setVisible(true);
+                c.setEnabled(true);}
+              );        
+          lower = canvas;
         }
-        else // create new canvas
-        {
-          assert(edu.geometry != null) : "edu.geometry != null";                  
-          elements.put(serNo, canvas = withdraw(currPs, edu));
-        }
         
-        final Composite c = canvas;        
-        final Composite low = lower;
-        display.asyncExec( low == null
-            ? () -> {
-              c.moveBelow(null);
-              c.setVisible(true);
-              c.setEnabled(true);}
-            : ()->{
-              c.moveAbove(low);
-              c.setVisible(true);
-              c.setEnabled(true);}
-            );        
-        lower = canvas;
+        //if (Log.DebugMode)
+        //  Log.debug("Elements: "+ elements.keySet().toString());
+        
+        for (Iterator<Long> iterator = oSerNo.iterator(); iterator.hasNext();)
+          deposit(elements.remove(iterator.next()), updateQueue);
       }
-      
-      //if (Log.DebugMode)
-      //  Log.debug("Elements: "+ elements.keySet().toString());
-      
-      for (Iterator<Long> iterator = oSerNo.iterator(); iterator.hasNext();)
-        deposit(elements.remove(iterator.next()));
-    }
+    applyUpdate(updateQueue);    
   }
   
   /**
    * Deactivates and clears the canvas and stores it to the disabledControls stack or if its full, it disposes the canvas
    * @param canvas
    */
-  private void deposit(ElementDataComposite canvas) {
+  private void deposit(ElementDataComposite canvas, ArrayList<Runnable> updateQueue) {
     assert(canvas != null);
             
     synchronized (canvas)
     {
       assert(!disabledControls.contains(canvas));
       if (disabledControls.size() < disabledCapacity) { // disable and store
-        display.asyncExec(() -> {
+        updateQueue.add(() -> {
           canvas.setVisible(false);
           canvas.setEnabled(false);
         });
         canvas.clear();
         disabledControls.push(canvas);
         return;
-      }
-      
-      display.asyncExec(()-> { canvas.dispose(); });
-    }    
+      }      
+      updateQueue.add(()-> { canvas.dispose(); });
+    }
   }
   
   
@@ -172,13 +170,13 @@ public abstract class PanelDataComposite extends Composite
    * @param ed
    * @return
    */
-  private ElementDataComposite withdraw(PanelState ps, ElementData ed) {    
+  private ElementDataComposite withdraw(PanelState ps, ElementData ed, ArrayList<Runnable> updateQueue) {    
     if (!disabledControls.empty())
     {
       try
       {
         ElementDataComposite  result = disabledControls.pop();
-        result.applyUpdate(ed, ps);
+        result.applyUpdate(ed, ps, updateQueue);
         return result;
       } catch (EmptyStackException e)
       {
@@ -190,23 +188,29 @@ public abstract class PanelDataComposite extends Composite
     display.syncExec(() -> {      
       result[0] = createElementDataCanvas(edCanvasStyle);
     });
-    result[0].applyUpdate(ed, ps);
+    result[0].applyUpdate(ed, ps, updateQueue);
     return result[0];
   }
   
   protected abstract ElementDataComposite createElementDataCanvas(int style);
-  
-  
+      
   public void clear() {
     if (elements.isEmpty()) return;
     synchronized (this)
     {
+      ArrayList<Runnable> updateQueue = new ArrayList<Runnable>(elements.size());
       elements.forEach((serNo, canvas) -> {
-        deposit(canvas);
+        deposit(canvas,updateQueue);
       });      
       elements.clear();
-    }
-    
+      applyUpdate(updateQueue);
+    }    
     Log.info("resetted");    
-  }  
+  }
+  
+  protected void applyUpdate(ArrayList<Runnable> updateQueue) {
+    display.asyncExec(() -> {
+      updateQueue.forEach((update) -> {update.run();});
+    });
+  }
 }

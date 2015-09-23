@@ -1,11 +1,15 @@
 package de.tucottbus.kt.lcars.swt;
 
+import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
@@ -21,12 +25,16 @@ import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
+import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ESpeechInput;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
+import de.tucottbus.kt.lcarsx.al.AudioPlayer;
+import de.tucottbus.kt.lcarsx.al.AudioTrack;
+import de.tucottbus.kt.lcarsx.al.ELevelsDisplay;
 
 public class TestPanel extends Panel
 {
@@ -113,10 +121,10 @@ public class TestPanel extends Panel
     final int h = 50;
 
     final ArrayList<EElement> els = new ArrayList<EElement>(10);
-    els.add(new ELabel(this, x1, y1, w, h,
-        LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null));
+    els.add(new ELabel(this, x1, y1, w * 5, h * 3,
+        LCARS.EC_SECONDARY | LCARS.EF_HEAD2 | LCARS.ES_LABEL_W, null));
 
-    ELabel eLabel = new ELabel(this, x1 + 10, y1 + 10, w, h,
+    ELabel eLabel = new ELabel(this, x1, y1 + h, w * 2, h,
         LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null);
     els.add(eLabel);
     eLabel.setAlpha(.5f);
@@ -132,9 +140,11 @@ public class TestPanel extends Panel
     EValue eTimecode = add(
         new EValue(this, m, 991, 278, 66, LCARS.EC_PRIMARY | LCARS.ES_STATIC
             | LCARS.ES_VALUE_W | LCARS.ES_LABEL_SE, "TIME INDEX"));
-    int[] sec = {0};
+    int[] sec =
+    { 0 };
     runAtFrameRate(() -> {
-      eTimecode.setValue(String.format(Locale.ENGLISH,"%02d:%01d",sec[0]/60,sec[0]++%60));
+      eTimecode.setValue(String.format(Locale.ENGLISH, "%02d:%01d", sec[0] / 60,
+          sec[0]++ % 60));
     });
 
   }
@@ -187,7 +197,8 @@ public class TestPanel extends Panel
     add(eFvr);
   }
 
-  private void initStatistics() {
+  private void initStatistics()
+  {
     ELabel eGuiLd = add(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
     runEverySecond(() -> {
       LoadStatistics ls1 = getLoadStatistics();
@@ -205,27 +216,9 @@ public class TestPanel extends Panel
       eGuiLd.setLabel(s);
     });
   }
-  
-  
-  
-  @Override
-  public void init()
+
+  private static void addComp(Composite parent, int fg, int bg, int xOff)
   {
-    super.init();
-    setTitle("TEST PANEL");
-
-    if (LCARS.getArg("--testLayout") != null)
-      initLayout();
-    if (LCARS.getArg("--testSpeechInput") != null)
-      initSpeechInpuPanel();
-    if (LCARS.getArg("--testELabel") != null)
-      initLabels();
-    if (LCARS.getArg("--noStats") == null)
-      initStatistics();    
-  }
-
-  
-  private static void addComp(Composite parent, int fg, int bg, int xOff) {
     int h = parent.getSize().y;
     Display display = parent.getDisplay();
     Composite composite = new Composite(parent, SWT.TRANSPARENT);
@@ -235,57 +228,109 @@ public class TestPanel extends Panel
     composite.setBackground(parent.getDisplay().getSystemColor(bg));
     composite.addPaintListener(new PaintListener()
     {
-      final int xMax = parent.getSize().x*2;
-      int x = xOff%h;
+      final int xMax = parent.getSize().x * 2;
+      int x = xOff % h;
+
       @Override
       public void paintControl(PaintEvent e)
       {
         e.gc.setForeground(e.gc.getDevice().getSystemColor(fg));
-        e.gc.drawLine(xMax/4, h, Math.abs((x = (x+5)%xMax)-h), 0);
-        //shell.redraw();
-        
+        e.gc.drawLine(xMax / 4, h, Math.abs((x = (x + 5) % xMax) - h), 0);
+        // shell.redraw();
       }
     });
     Timer timer = new Timer();
     timer.schedule(new TimerTask()
     {
-      
       @Override
       public void run()
       {
-        display.asyncExec(()-> {
+        display.asyncExec(() -> {
           composite.redraw();
         });
       }
-    }, 40, 40);    
+    }, 40, 40);
   }
-  
-  public static void initShell() {
+
+  private void initAudioPlayer()
+  {
+    AudioPlayer player = AudioPlayer.getInstance();
+
+    ELevelsDisplay eDisplay = new ELevelsDisplay(765, 515, 880, 125, 25);
+    eDisplay.setBarColor(new SwtColor(0x9999FF));
+    eDisplay.setGridColor(new SwtColor(0xDDB18E));
+    eDisplay.addToPanel(this);
+
+    try
+    {
+      AudioTrack track = new AudioTrack(new File(
+          "C:/Users/borck/AppData/Local/Temp/lcars-wt-music/Matthias Wolff/L2/Captain's Lounge.mp3"));
+      track.fetch();
+      player.setCurrentTrack(track);
+    } catch (UnsupportedAudioFileException | IOException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return;
+    }
+
+    player.play();
+    runAtFrameRate(() -> {
+      eDisplay.setAudioWindow(player.getAudioWindow(), player.getMediaTime());
+    });
+  }
+
+  public void initEImage()
+  {
+    add(new EImage(this, 7, 650, LCARS.ES_STATIC,
+        "de/tucottbus/kt/lcars/resources/images/flare.png"));
+  }
+
+  public static void initShell()
+  {
     final int l = 400;
-    
+
     Display display = Display.getDefault();
     Shell shell = new Shell(display);
-    shell.setSize(l,l);
+    shell.setSize(l, l);
     shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
     addComp(shell, SWT.COLOR_CYAN, SWT.COLOR_BLUE, 0);
     addComp(shell, SWT.COLOR_RED, SWT.COLOR_DARK_RED, 300);
-    
+
     shell.open();
-    
-    // Run SWT event loop 
+
+    // Run SWT event loop
     while (!shell.isDisposed())
       try
       {
         while (!shell.isDisposed())
           if (!Display.getDefault().readAndDispatch())
             Display.getDefault().sleep();
-      }
-      catch (Exception e)
+      } catch (Exception e)
       {
         Log.err("Error in screen execution.", e);
-      }    
+      }
   }
-  
+
+  @Override
+  public void init()
+  {
+    super.init();
+    setTitle("TEST PANEL");
+    if (LCARS.getArg("--testLayout") != null)
+      initLayout();
+    if (LCARS.getArg("--testSpeechInput") != null)
+      initSpeechInpuPanel();
+    if (LCARS.getArg("--testELabel") != null)
+      initLabels();
+    if (LCARS.getArg("--testAudioPlayer") != null)
+      initAudioPlayer();
+    if (LCARS.getArg("--testImage") != null)
+      initEImage();
+    if (LCARS.getArg("--noStats") == null)
+      initStatistics();
+  }
+
   /**
    * Convenience method: Runs the test panel.
    * 
@@ -293,8 +338,8 @@ public class TestPanel extends Panel
    *          The command line arguments, see {@link LCARS#main(String[])}.
    */
   public static void main(String[] args)
-  {    
+  {
     LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
-    //initShell();
+    // initShell();
   }
 }

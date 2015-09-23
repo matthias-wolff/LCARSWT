@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -161,9 +160,9 @@ public class GImage extends Geometry
           ? new ImageData(GImage.class.getClassLoader().getResourceAsStream(path))
           : new ImageData(path);
     }
-    catch(SWTException ex)
+    catch(Exception e)
     {
-      Log.warn("ERROR: Cannot find image file \""+path+"\"");
+      Log.err("ERROR: Cannot find image file \""+path+"\"", e);
       return null;
     }  
   }

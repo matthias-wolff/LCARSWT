@@ -145,7 +145,6 @@ public class PanelState implements Serializable
         && alpha       == other.alpha
         && locked      == other.locked;
   }
-  
 }
 
 // EOF
