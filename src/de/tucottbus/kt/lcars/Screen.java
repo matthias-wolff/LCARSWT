@@ -22,12 +22,14 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -35,10 +37,10 @@ import org.eclipse.swt.widgets.Touch;
 
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
+import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
+import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
-import de.tucottbus.kt.lcars.swt.ElementDataComposite;
-import de.tucottbus.kt.lcars.swt.PanelDataComposite;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -97,17 +99,16 @@ public class Screen
   /**
    * 
    */
-  //protected AdvGraphics2D g2dWrapper;
 
   protected Shell shell;
   
-  protected PanelDataComposite composite;
+  protected Composite composite;
 
   private java.awt.Frame awtFrame;
   
   private int mouseButton = 0;
   
-  //private boolean running = true;
+  private ARenderer renderer;
 
   // -- Constructors --
 
@@ -140,43 +141,9 @@ public class Screen
 
     // initContentPane();
 
+    
     final Screen _this = this;
-    
-    composite = new PanelDataComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED*/)
-    {
-      @Override
-      protected ElementDataComposite createElementDataCanvas(int style)
-      {
-        ElementDataComposite result = new ElementDataComposite(composite, style) {
-            @Override
-            public void paintControl(PaintEvent e)
-            {
-              // Prepare setup
-              GC gc = e.gc;
-              gc.setTextAntialias(SWT.ON);
-              gc.setInterpolation(SWT.LOW);
-              gc.setAntialias(SWT.ON);
-              
-              //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-              //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-              //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-              //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));              
-              super.paintControl(e);
-            }
-            
-            @Override
-            protected Transform getTransform(Device device, int dx, int dy) {
-              return _this.getTransform(device, dx, dy);
-            } 
-          };
-          result.setTouchEnabled(true);
-          result.addTouchListener(_this);
-          result.addMouseListener(_this);
-          result.addMouseMoveListener(_this);
-          return result;          
-      }
-    };
-    
+        
     fullScreenMode = fullScreen;// && device.isFullScreenSupported();
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
@@ -218,6 +185,32 @@ public class Screen
     if (LCARS.getArg("--nomouse")!=null)
       composite.setCursor(LCARS.createBlankCursor(display));
     
+    renderer = new Renderer(getSize());
+
+    composite = new Composite(shell, SWT.NONE /*SWT.NO_BACKGROUND*/ | SWT.DOUBLE_BUFFERED /*| SWT.EMBEDDED*/);        
+    composite.setTouchEnabled(true);
+    composite.addTouchListener(_this);
+    composite.addMouseListener(_this);
+    composite.addMouseMoveListener(_this);
+    composite.addPaintListener(new PaintListener()
+    {      
+      @Override
+      public void paintControl(PaintEvent e)
+      {
+        // Prepare setup
+        GC gc = e.gc;
+        gc.setTextAntialias(SWT.ON);
+        gc.setInterpolation(SWT.LOW);
+        gc.setAntialias(SWT.ON);
+        
+        //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+        //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+        //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));              
+        renderer.paint2D(gc);        
+      }
+    });
+   
     composite.setBackground(black);
     composite.setSize(shell.getSize());
     composite.setLayout(new FillLayout());          
@@ -293,7 +286,7 @@ public class Screen
     // addKeyListener(this);
     //canvas.pack();
     //shell.pack();
-    shell.open();
+    shell.open();    
   }
 
   // -- Getters and setters --
@@ -452,7 +445,7 @@ public class Screen
     // Set and start new panel
     this.panel = ipanel;
      if(composite != null)
-       composite.clear();
+       renderer.clear();
 
     if (this.panel != null)
       try
@@ -498,7 +491,7 @@ public class Screen
   public void update(PanelData data, boolean incremental)
   {
     //TODO: remove incremental
-    composite.applyUpdate(data);
+    renderer.applyUpdate(data, incremental);
     invalidateScreen();      
   }
 
@@ -703,6 +696,9 @@ public class Screen
             long time = System.nanoTime();
             loadStat.add((int)((System.nanoTime()-time)/400000));
           });
+        Display.getDefault().syncExec(() -> {
+          composite.redraw();
+        });
       }
 
       // Every second...

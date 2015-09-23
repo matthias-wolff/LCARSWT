@@ -111,7 +111,7 @@ public abstract class ARenderer
    * @param data
    * @param incremental
    */
-  public abstract void update(PanelData data, boolean incremental);
+  public abstract void applyUpdate(PanelData data, boolean incremental);
   
   /**
    * Paints the panel elements of this screen on a {@link Graphics2D} context. 
@@ -177,10 +177,10 @@ public abstract class ARenderer
   }
   
   /**
-   * Resets the painter and fills the screen with the default background color (
+   * Clears the painter and fills the screen with the default background color (
    * {@value #DEFAULT_BG_COLOR}).
    */
-  public void reset()
+  public void clear()
   {
     setContext(null);
   }

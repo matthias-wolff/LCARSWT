@@ -45,7 +45,7 @@ public class Renderer extends ARenderer
    * @param data
    * @param incremental
    */
-  public void update(PanelData data, boolean incremental)
+  public void applyUpdate(PanelData data, boolean incremental)
   {
     try
     {
@@ -71,17 +71,17 @@ public class Renderer extends ARenderer
    * Resets the painter and fills the screen with the default background color (
    * {@value #DEFAULT_BG_COLOR}).
    */
-  public void reset()
+  public void clear()
   {    
     try
     {
       mutex.acquire();
-      super.reset();
+      super.clear();
       mutex.release();
     } catch (InterruptedException e)
     {
       synchronized (this) {
-        super.reset();
+        super.clear();
       }
     }    
   }

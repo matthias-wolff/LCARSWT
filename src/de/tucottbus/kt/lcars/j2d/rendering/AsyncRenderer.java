@@ -144,7 +144,7 @@ public class AsyncRenderer extends ARenderer
   }
   
   @Override
-  public void update(PanelData data, boolean incremental)
+  public void applyUpdate(PanelData data, boolean incremental)
   {
     try
     {
@@ -179,7 +179,7 @@ public class AsyncRenderer extends ARenderer
    * Resets the painter and fills the screen with the default background color (
    * {@value #DEFAULT_BG_COLOR}).
    */
-  public void reset()
+  public void clear()
   {
     try
     {
