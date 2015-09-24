@@ -797,8 +797,8 @@ public class LCARS implements ILcarsRemote
    */
   public static SwtColor interpolateColors(SwtColor clr1, SwtColor clr2, float value)
   {
-    if (value<=0f) return new SwtColor(clr1);
-    if (value>=1f) return new SwtColor(clr2);
+    if (value<=0f) return clr1;
+    if (value>=1f) return clr2;
     final float norm = 1/255f;
 
     float val2 = value*norm;

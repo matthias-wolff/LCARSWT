@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Touch;
 
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
-import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
 import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
@@ -108,7 +107,7 @@ public class Screen
   
   private int mouseButton = 0;
   
-  private ARenderer renderer;
+  private Renderer renderer;
 
   // -- Constructors --
 
@@ -132,7 +131,6 @@ public class Screen
     shell = new Shell(display, SWT.NO_TRIM);
     // shell.forceActive();
     //shell.forceFocus(); //Keyboard focus
-
     
     loadStat = new LoadStatistics(25);
     // Create Swings widgets
@@ -185,7 +183,11 @@ public class Screen
     if (LCARS.getArg("--nomouse")!=null)
       composite.setCursor(LCARS.createBlankCursor(display));
     
-    renderer = new Renderer(getSize());
+    final Dimension size = getSize();
+    final int w = size.width;
+    final int h = size.height;
+        
+    renderer = new Renderer(display, w, h);
 
     composite = new Composite(shell, SWT.NONE /*SWT.NO_BACKGROUND*/ | SWT.DOUBLE_BUFFERED /*| SWT.EMBEDDED*/);        
     composite.setTouchEnabled(true);
@@ -206,20 +208,16 @@ public class Screen
         //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
         //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-        //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));              
-        renderer.paint2D(gc);        
+        //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        renderer.paint2D(gc);
       }
     });
    
     composite.setBackground(black);
-    composite.setSize(shell.getSize());
+    composite.setSize(w, h);
     composite.setLayout(new FillLayout());          
-    composite.setEnabled(true);
+    composite.setVisible(true);
     
-    // The screen timer
-    screenTimer = new Timer("ScreenTimerTask", true);
-    screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
-
     // The user feedback player
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
     {
@@ -286,7 +284,13 @@ public class Screen
     // addKeyListener(this);
     //canvas.pack();
     //shell.pack();
-    shell.open();    
+    shell.open();
+    
+    // The screen timer
+    screenTimer = new Timer("ScreenTimerTask", true);    
+    screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
+    //screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
+
   }
 
   // -- Getters and setters --
@@ -347,16 +351,16 @@ public class Screen
       return new AffineTransform();
 
     Dimension ds = getSize();
-    renderingTransform = new AffineTransform();
+    AffineTransform rt = new AffineTransform();
     double sx = (double) ds.width / (double) dp.width;
     double sy = (double) ds.height / (double) dp.height;
     if (sy < sx)
       sx = sy;
-    renderingTransform.scale(sx, sx);
+    rt.scale(sx, sx);
     int x = (int) ((ds.getWidth() - sx * dp.width) / 2);
     int y = (int) ((ds.getHeight() - sx * dp.height) / 2);
-    renderingTransform.translate(x / sx, y / sx);
-    return new AffineTransform(renderingTransform);
+    rt.translate(x / sx, y / sx);
+    return new AffineTransform(renderingTransform = rt);
   }
   
   /**
@@ -443,9 +447,9 @@ public class Screen
       }
 
     // Set and start new panel
+    if(this.panel != null && renderer != null)
+      renderer.clear();
     this.panel = ipanel;
-     if(composite != null)
-       renderer.clear();
 
     if (this.panel != null)
       try
@@ -492,7 +496,7 @@ public class Screen
   {
     //TODO: remove incremental
     renderer.applyUpdate(data, incremental);
-    invalidateScreen();      
+    invalidateScreen();
   }
 
   @Override
@@ -684,21 +688,20 @@ public class Screen
    */
   protected final class ScreenTimerTask extends TimerTask
   {
-    private long ctr;
+    private long ctr = 25;
 
     @Override
     public void run()
     {
       // Every 40 milliseconds...
       {
-        if (isScreenInvalid())
+        if (isScreenInvalid()) {
           invoke(() -> {
-            long time = System.nanoTime();
+            long time = System.nanoTime();            
+            composite.redraw();
             loadStat.add((int)((System.nanoTime()-time)/400000));
           });
-        Display.getDefault().syncExec(() -> {
-          composite.redraw();
-        });
+        }
       }
 
       // Every second...
@@ -707,6 +710,7 @@ public class Screen
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
           invoke(() -> {
             long time = System.nanoTime();
+            composite.redraw();
             loadStat.add((int)((System.nanoTime()-time)/400000));
           });
         loadStat.period();

@@ -21,7 +21,7 @@ import de.tucottbus.kt.lcars.logging.Log;
  */
 public class GImage extends Geometry
 {
-  private static final long       serialVersionUID = 1L;
+  private static final long serialVersionUID = -1878671224748589604L;
   private String                  resourceName;
   //private transient ImageObserver imageObserver;
   private Point                   pos;
@@ -167,4 +167,9 @@ public class GImage extends Geometry
     }  
   }
   
+  @Override
+  public String toString() {
+    return GArea.class.getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") source="
+          +(resourceName!=null ? "\"" + resourceName + "\"" : "null");
+  }
 }

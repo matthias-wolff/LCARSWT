@@ -2,9 +2,6 @@ package de.tucottbus.kt.lcars.swt;
 
 import java.io.Serializable;
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-
 public final class SwtColor implements Serializable
 {
   private static final long serialVersionUID = 7144575098466224086L;
@@ -97,78 +94,91 @@ public final class SwtColor implements Serializable
   
   // field //
   
-  private final org.eclipse.swt.graphics.RGB RGB;
+  private final byte Red;
+  private final byte Green;
+  private final byte Blue;
   private final byte Alpha;
   
-  
-  public SwtColor(SwtColor color) {
-    org.eclipse.swt.graphics.RGB rgb = color.RGB;
-    RGB = new org.eclipse.swt.graphics.RGB(rgb.red, rgb.green, rgb.blue);
-    Alpha = color.Alpha;
-  }
+  public final boolean HasAlpha;
   
   public SwtColor(SwtColor color, float alpha) {
-    org.eclipse.swt.graphics.RGB rgb = color.RGB;
-    RGB = new org.eclipse.swt.graphics.RGB(rgb.red, rgb.green, rgb.blue);
-    Alpha = alpha <= 0 ? Byte.MIN_VALUE : (alpha >= 1 ? Byte.MAX_VALUE : (byte)(alpha*Byte.MAX_VALUE));
+    Red = color.Red;
+    Green = color.Green;
+    Blue = color.Blue;
+    Alpha = alpha <= 0 ? 0 : (alpha >= 1 ? -1 : (byte)(alpha*0xFF));
+    HasAlpha = true;
   }
   
   public SwtColor(int argb, boolean hasTransparence) {
-    RGB = new org.eclipse.swt.graphics.RGB((argb >> R_SHIFT) & 0xFF, (argb >> G_SHIFT) & 0xFF, (argb >> B_SHIFT) & 0xFF);
-    Alpha = hasTransparence ? (byte)(argb >> A_SHIFT) : Byte.MAX_VALUE;
+    Red = (byte)((argb >> R_SHIFT) & 0xFF);
+    Green = (byte)((argb >> G_SHIFT) & 0xFF);
+    Blue = (byte)((argb >> B_SHIFT) & 0xFF);
+    Alpha = hasTransparence ? (byte)(argb >> A_SHIFT) : -1;
+    HasAlpha = hasTransparence;
   }
   
   public SwtColor(int rgb) {
-    RGB = new org.eclipse.swt.graphics.RGB((rgb >> R_SHIFT) & 0xFF, (rgb >> G_SHIFT) & 0xFF, (rgb >> B_SHIFT) & 0xFF);
-    Alpha = Byte.MAX_VALUE;
+    Red = (byte)((rgb >> R_SHIFT) & 0xFF);
+    Green = (byte)((rgb >> G_SHIFT) & 0xFF);
+    Blue = (byte)((rgb >> B_SHIFT) & 0xFF);
+    Alpha = -1;
+    HasAlpha = false;
   } 
   
   public SwtColor(float r, float g, float b, float a) {
-    RGB = new org.eclipse.swt.graphics.RGB(
-                    r <= 0 ? Byte.MIN_VALUE : (r >= 1 ? Byte.MAX_VALUE : (int)(r*Byte.MAX_VALUE)),
-                    g <= 0 ? Byte.MIN_VALUE : (g >= 1 ? Byte.MAX_VALUE : (int)(g*Byte.MAX_VALUE)),
-                    b <= 0 ? Byte.MIN_VALUE : (b >= 1 ? Byte.MAX_VALUE : (int)(b*Byte.MAX_VALUE)));
-    Alpha = a <= 0 ? Byte.MIN_VALUE : (a >= 1 ? Byte.MAX_VALUE : (byte)(a*Byte.MAX_VALUE));
+    Red   = r <= 0 ? 0 : (r >= 1 ? -1 : (byte)(r*0xFF));
+    Green = g <= 0 ? 0 : (g >= 1 ? -1 : (byte)(g*0xFF));
+    Blue  = b <= 0 ? 0 : (b >= 1 ? -1 : (byte)(b*0xFF));
+    Alpha = a <= 0 ? 0 : (a >= 1 ? -1 : (byte)(a*0xFF));
+    HasAlpha = true;
+  }
+  
+  public SwtColor(float r, float g, float b) {
+    Red   = r <= 0 ? 0 : (r >= 1 ? -1 : (byte)(r*0xFF));
+    Green = g <= 0 ? 0 : (g >= 1 ? -1 : (byte)(g*0xFF));
+    Blue  = b <= 0 ? 0 : (b >= 1 ? -1 : (byte)(b*0xFF));
+    Alpha = -1;
+    HasAlpha = false;
   }
   
   public SwtColor(int r, int g, int b, int a) {
-    RGB = new org.eclipse.swt.graphics.RGB(r, g, b);
-    Alpha = a < Byte.MIN_VALUE ? Byte.MIN_VALUE : (a > Byte.MAX_VALUE ? Byte.MAX_VALUE : (byte)a);    
+    Red   = r <= 0 ? 0 : (r >= 0xFF ? -1 : (byte)r);
+    Green = g <= 0 ? 0 : (g >= 0xFF ? -1 : (byte)g);
+    Blue  = b <= 0 ? 0 : (b >= 0xFF ? -1 : (byte)b);
+    Alpha = a <= 0 ? 0 : (a >= 0xFF ? -1 : (byte)a);    
+    HasAlpha = true;
   }
   
   public SwtColor(int r, int g, int b) {
-    RGB = new org.eclipse.swt.graphics.RGB(r, g, b);
-    Alpha = Byte.MAX_VALUE;    
+    Red   = r <= 0 ? 0 : (r >= 0xFF ? -1 : (byte)r);
+    Green = g <= 0 ? 0 : (g >= 0xFF ? -1 : (byte)g);
+    Blue  = b <= 0 ? 0 : (b >= 0xFF ? -1 : (byte)b);
+    Alpha = -1;    
+    HasAlpha = false;
   }
     
   public int getRed() {
-    return RGB.red;
+    return Red & 0xFF;
   }
   
   public int getGreen() {
-    return RGB.green;
+    return Green & 0xFF;
   }
   
   public int getBlue() {
-    return RGB.blue;
+    return Blue & 0xFF;
   }
   
   public int getAlpha() {
-    return Alpha & 0xFF;
+    return HasAlpha ? Alpha & 0xFF : 0xFF;
   }
   
   public org.eclipse.swt.graphics.RGB getRGB() {
-    return new org.eclipse.swt.graphics.RGB(RGB.red, RGB.green, RGB.blue);
+    return new org.eclipse.swt.graphics.RGB(Red & 0xFF, Green & 0xFF, Blue & 0xFF);
   }
   
   public float[] getHSB() {
-    return RGB.getHSB();
-  }
-  
-  public void applyForeground(GC gc) {
-    Color c = new Color(gc.getDevice(), RGB);
-    gc.setForeground(c);
-    c.dispose();
+    return getRGB().getHSB();
   }
   
   /**
@@ -191,9 +201,9 @@ public final class SwtColor implements Serializable
   */
   public SwtColor brighter() {
     final float scale = 1/BRIGHT_SCALE;
-    int r = RGB.red;
-    int g = RGB.green;
-    int b = RGB.blue;
+    int r = Red & 0xFF;
+    int g = Green & 0xFF;
+    int b = Blue & 0xFF;
         
     /* From 2D group:
      * 1. black.brighter() should return grey
@@ -232,9 +242,9 @@ public final class SwtColor implements Serializable
    * @see        de.tucottbus.kt.lcars.swt.SwtColor#brighter
    */
   public SwtColor darker() {
-    return new SwtColor(Math.max((int)(RGB.red  *BRIGHT_SCALE), 0),
-                        Math.max((int)(RGB.green*BRIGHT_SCALE), 0),
-                        Math.max((int)(RGB.blue *BRIGHT_SCALE), 0),
+    return new SwtColor(Math.max((int)((Red & 0xFF)*BRIGHT_SCALE), 0),
+                        Math.max((int)((Green & 0xFF)*BRIGHT_SCALE), 0),
+                        Math.max((int)((Blue & 0xFF) *BRIGHT_SCALE), 0),
                         Alpha);
   }
   
@@ -245,17 +255,28 @@ public final class SwtColor implements Serializable
     if (!(obj instanceof SwtColor))
       return false;    
     SwtColor c = (SwtColor)obj;
-    return RGB.red == c.RGB.red
-        && RGB.green == c.RGB.green
-        && RGB.blue == c.RGB.blue
+    return Red == c.Red
+        && Green == c.Green
+        && Blue == c.Blue
         && Alpha == c.Alpha;    
   }
   
   public boolean equals(SwtColor c) {
     return c != null && (this == c
-        || (RGB.red == c.RGB.red
-        && RGB.green == c.RGB.green
-        && RGB.blue == c.RGB.blue
+        || (Red == c.Red
+        && Green == c.Green
+        && Blue == c.Blue
         && Alpha == c.Alpha));    
+  }
+  
+  public int getValue() {
+    return ((Red & 0xFF) << R_SHIFT)
+         | ((Green & 0xFF) << G_SHIFT)
+         | ((Blue & 0xFF) << B_SHIFT)
+         | (HasAlpha ? ((Alpha & 0xFF) << A_SHIFT) : (0xFF << A_SHIFT));
+  }
+  
+  public String toString() {
+    return SwtColor.class.getSimpleName() + " rgba="+Integer.toHexString(getValue());
   }
 }

@@ -968,7 +968,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       fullUpdateTime = time;
       //incremental = false;
     }
-
+    
     // Make update data
     PanelData data = new PanelData();
     synchronized (this)
@@ -982,7 +982,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         {
           element.checkValidation();
           ElementData ed = element.getUpdateData(incremental);
-          data.elementData.add(ed);          
+          data.elementData.add(ed);
         }
       else
         for (EElement element : elements)

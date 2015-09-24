@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import java.util.Iterator;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -164,15 +164,14 @@ public final class ElementData implements Serializable
   public ElementData getUpdate(boolean incremental, boolean updateGeometry)
   {
     ElementData other = new ElementData(serialNo);
-
     boolean stateChanged = isStateChanged();
     if (stateChanged || !incremental)
       other.state = new ElementState(this.state);
     if (updateGeometry || !incremental)
       try
       {
-        other.geometry = new ArrayList<Geometry>(this.geometry.size());
-        for (Geometry geom : this.geometry)
+        other.geometry = new ArrayList<Geometry>(geometry.size());
+        for (Geometry geom : geometry)
           other.geometry.add(geom instanceof AHeavyGeometry
               ? ((AHeavyGeometry) geom).getUpdate(incremental) : geom);
       } catch (Exception e)
@@ -271,8 +270,9 @@ public final class ElementData implements Serializable
     }
     if (!state.isVisible())
       return;
-    int l = geometry.size();
-    if (l <= 0)
+    
+    Iterator<Geometry> geoIt = geometry.iterator();
+    if (!geoIt.hasNext())
       return;
 
     final int fgAlpha = (int) (state.getFgAlpha() * 255);
@@ -282,42 +282,26 @@ public final class ElementData implements Serializable
     final Color bgColor = new Color(gc.getDevice(),
         state.getBgColor(panelState).getRGB());
 
-    if (fgAlpha == bgAlpha)
+    Geometry gi = geoIt.next();
+    boolean foreground = gi.isForeground();
+    gc.setBackground(foreground ? fgColor : bgColor);
+    gc.setForeground(foreground ? bgColor : fgColor);
+    gc.setAlpha(foreground ? fgAlpha : bgAlpha);
+    gi.paint2D(gc);
+    
+    while (geoIt.hasNext())
     {
-      gc.setAlpha(bgAlpha);
-      for (Geometry gi : geometry)
+      gi = geoIt.next();
+      if (foreground != gi.isForeground()) 
       {
-        if (gi.isForeground())
-        {
-          gc.setBackground(fgColor);
-          gc.setForeground(bgColor);
-
-        } else
-        {
-          gc.setBackground(bgColor);
-          gc.setForeground(fgColor);
-        }
-        gi.paint2D(gc);
+        foreground = gi.isForeground();        
+        gc.setBackground(foreground ? fgColor : bgColor);
+        gc.setForeground(foreground ? bgColor : fgColor);
+        gc.setAlpha(foreground ? fgAlpha : bgAlpha);
       }
-    } else
-    {
-      for (Geometry gi : geometry)
-      {
-        if (gi.isForeground())
-        {
-          gc.setBackground(fgColor);
-          gc.setForeground(bgColor);
-          gc.setAlpha(fgAlpha);
-        } else
-        {
-          gc.setBackground(bgColor);
-          gc.setForeground(fgColor);
-          gc.setAlpha(bgAlpha);
-        }
-        gi.paint2D(gc);
-      }
+      gi.paint2D(gc);      
     }
-
+    
     fgColor.dispose();
     bgColor.dispose();
   }
@@ -347,37 +331,19 @@ public final class ElementData implements Serializable
   @Override
   public String toString()
   {
-    return this.getClass().getSimpleName() + "#" + serialNo;
+    return this.getClass().getSimpleName() + "#" + serialNo
+        + (state != null && state.isVisible() ? " " : "!INVISIBLE ") + geometry;
   }
 
-  public boolean checkValidation(boolean incremental)
-  {
-    if (incremental)
-      return true;
-    Boolean[] valid =
-    { true };
-    Consumer<String> invalid = (msg) -> {
-      Log.warn(toString() + ": " + msg);
-      valid[0] = false;
-    };
-
-    if (geometry == null)
-      invalid.accept("geometry == null");
-    else
-      for (int i = 0; i < geometry.size();)
-        if (geometry.get(i) == null)
-          invalid.accept("geometry[" + i + "] == null");
-    if (state == null)
-      invalid.accept("state == null");
-
-    return valid[0];
-  }
-  
+  /**
+   * Indicates missing data by returning the flags {@link #GEOMETRY_FLAG} and {@link ElementState#FLAG_MASK} as xor combined integer.
+   * @return
+   */
   public int getMissing() {
     return geometry == null
         ? (state == null ? ElementState.FLAG_MASK | GEOMETRY_FLAG : GEOMETRY_FLAG) 
         : (state == null ? ElementState.FLAG_MASK                 : 0);
-  }
+  }  
 }
 
 // EOF

@@ -273,11 +273,31 @@ public class TestPanel extends Panel
       e.printStackTrace();
       return;
     }
-
+    
     player.play();
     runAtFrameRate(() -> {
       eDisplay.setAudioWindow(player.getAudioWindow(), player.getMediaTime());
     });
+  }
+
+  private void initAudioSlider()
+  {
+    //EGainSlider eGain = new EGainSlider(462,992,731,66);
+    //eGain.addToPanel(this);
+    
+//    Log.debug(Integer.toHexString(((byte)(.6f*0xFF))&0xFF));
+//    Log.debug(Integer.toHexString(Float.floatToRawIntBits(.0f)));
+//    Log.debug(Integer.toHexString(Float.floatToRawIntBits(1f)));
+//    
+    Log.debug(Integer.toHexString((byte)(127)&0xFF));
+    
+    ERect eback = new ERect(null,0,0,1731,166,LCARS.EF_SMALL|LCARS.ES_LABEL_W,null);
+    add(eback);
+
+    ERect eTouchArea = new ERect(null,0,0,731,66,LCARS.EB_OVERDRAG,null);
+    eTouchArea.setColor(new SwtColor(0,true));
+    add(eTouchArea);
+
   }
 
   public void initEImage()
@@ -325,6 +345,8 @@ public class TestPanel extends Panel
       initLabels();
     if (LCARS.getArg("--testAudioPlayer") != null)
       initAudioPlayer();
+    if (LCARS.getArg("--testAudioSlider") != null)
+      initAudioSlider();
     if (LCARS.getArg("--testImage") != null)
       initEImage();
     if (LCARS.getArg("--noStats") == null)

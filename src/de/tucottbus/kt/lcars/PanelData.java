@@ -28,6 +28,14 @@ public class PanelData implements Serializable
    * The rendering data of the {@linkplain EElement LCARS GUI elements} on the panel.
    */
   public ArrayList<ElementData> elementData;
+  
+  @Override
+  public String toString() {
+    return PanelData.class.getSimpleName()
+        + " panelState="+(panelState != null ? panelState.toString() : "null")
+        + " elementData="+(elementData != null ? elementData.toString() : "null");
+  }
+  
 }
 
 // EOF

@@ -16,7 +16,8 @@ import de.tucottbus.kt.lcars.swt.AwtSwt;
  */
 public class GArea extends Geometry implements Serializable
 {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 254038909353270177L;
+
   protected Area            area;
   protected boolean         outline;
   
@@ -62,6 +63,11 @@ public class GArea extends Geometry implements Serializable
     else
       gc.fillPath(AwtSwt.toSwtPath(area, gc.getDevice()));
   }  
+
+  @Override
+  public String toString() {
+    return GArea.class.getSimpleName() + " outline=" + outline;
+  }
 }
 
 // EOF

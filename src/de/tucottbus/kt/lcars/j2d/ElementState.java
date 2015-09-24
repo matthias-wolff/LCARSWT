@@ -197,11 +197,7 @@ public class ElementState implements Serializable
    */
   public float getBgAlpha(PanelState panelState)
   {
-    float bgAlpha = this.alpha;
-    if (getStyle(LCARS.ES_MODAL)==0)
-      if (panelState!=null)
-        bgAlpha = panelState.alpha*bgAlpha;
-    return bgAlpha;
+    return (getStyle(LCARS.ES_MODAL)==0 && panelState!=null) ? alpha * panelState.alpha : alpha;
   }
 
   /**
@@ -224,10 +220,11 @@ public class ElementState implements Serializable
    *          be painted in their "natural" color defined by the {@linkplain #style style}.
    */
   public void setColor(SwtColor color)
-  {
-    boolean equal = (this.color==null&&color==null) || (this.color!=null&&this.color.equals(color));
-    changed |= !equal;
-    this.color = color;
+  {    
+    changed |= !Objectt.equals(this.color, color);
+    this.color = color;// != null ? color : SwtColor.BLACK;
+    if (color != null && color.HasAlpha)
+      this.alpha = color.getAlpha()/255;
   }
 
   /**

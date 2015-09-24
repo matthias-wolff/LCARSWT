@@ -508,8 +508,7 @@ public abstract class EElement
    */
   public synchronized ElementData getUpdateData(boolean incremental)
   {
-    validateGeometry();
-    boolean updateGeometry = (geoState & GEO_UPDATED) != 0;
+    boolean updateGeometry = (validateGeometry() & GEO_UPDATED) != 0;
     geoState &= ~GEO_UPDATED;
     return data.getUpdate(incremental,updateGeometry);
   }
@@ -774,13 +773,16 @@ public abstract class EElement
   /**
    * Recomputes the {@link ElementData#geometry geometry} if necessary. If the geometry is still valid.
    * 
+   * @return the current geoState
+   *
    * @see #invalidate(boolean)
    */
-  public final void validateGeometry()
+  public final int validateGeometry()
   {
     synchronized (data)
     {
-      if ((geoState & GEO_RECOMPUTE) == 0) return;// Unnecessary!
+      int geoState = this.geoState;
+      if ((geoState & GEO_RECOMPUTE) == 0) return geoState;// Unnecessary!
       ArrayList<Geometry> geos = createGeometriesInt();
       final boolean isOutline = isOutline();
       for (Geometry geo : geos)
@@ -788,9 +790,8 @@ public abstract class EElement
           ((GArea)geo).setOutline(isOutline);
       for (EGeometryModifier gm : modifiers)
         gm.modify(geos);
-      data.geometry = geos;
-      
-      geoState = GEO_UPDATED;
+      data.geometry = geos;      
+      return geoState = GEO_UPDATED;
     }
   }
   

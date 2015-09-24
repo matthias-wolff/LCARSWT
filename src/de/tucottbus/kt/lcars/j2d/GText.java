@@ -144,9 +144,13 @@ public class GText extends Geometry
     } catch (Exception e)
     {
       // ignored
-    }
-          
+    }          
     super.finalize();
+  }
+  
+  @Override
+  public String toString() {
+    return GText.class.getSimpleName() + " text=\"" + text+"\" bounds=("+x+","+y+","+width+","+height+") fontsize=" + fontData.height + " font=\"" + fontData.getName() + "\"";
   }
   
 }

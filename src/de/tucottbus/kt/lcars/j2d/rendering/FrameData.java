@@ -281,7 +281,7 @@ class FrameData
 
   public Dimension getRenderSize()
   {
-    return panelState.dimension;
+    return new Dimension(panelState.dimension);
   }
 
   public PanelState getPanelState()
