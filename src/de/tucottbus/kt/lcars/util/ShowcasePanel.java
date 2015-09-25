@@ -44,7 +44,7 @@ import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
 import de.tucottbus.kt.lcars.geometry.GArea;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 /**
@@ -291,19 +291,19 @@ public class ShowcasePanel extends Panel
     add(new ELabel(this,1427,236,300,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT"));
     
     ELabel eLabel = new ELabel(this,1730,154,164,0,LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT,"LARGE TEXT");
-    eLabel.setColor(SwtColor.BLACK);
+    eLabel.setColor(SWTColor.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,189,164,0,LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.EC_TEXT,"NORMAL TEXT");
-    eLabel.setColor(SwtColor.BLACK);
+    eLabel.setColor(SWTColor.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,215,164,0,LCARS.EF_SMALL|LCARS.ES_STATIC|LCARS.EC_TEXT,"SMALL TEXT");
-    eLabel.setColor(SwtColor.BLACK);
+    eLabel.setColor(SWTColor.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,236,164,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT");
-    eLabel.setColor(SwtColor.BLACK);
+    eLabel.setColor(SWTColor.BLACK);
     add(eLabel);
 
     /*
@@ -373,7 +373,7 @@ public class ShowcasePanel extends Panel
     
     add(new ELabel(this,1170,939,327,58,LCARS.EF_LARGE|LCARS.EC_PRIMARY|LCARS.ES_STATIC|LCARS.ES_LABEL_E,"ADVANCED STYLES"));
     eRect = new ERect(this,1530,941,180,58,LCARS.ES_RECT_RND|LCARS.ES_LABEL_W,"CUSTOM COLOR");
-    eRect.setColor(new SwtColor(0,255,96));
+    eRect.setColor(new SWTColor(0,255,96));
     add(eRect);
     add(new ERect(this,1530,1002,180,58,LCARS.EC_SECONDARY|LCARS.ES_OUTLINE|LCARS.ES_RECT_RND|LCARS.ES_LABEL_W,"TRANSPARENCY"));
     add(new ELabel(this,1539,1002,180,58,LCARS.EC_SECONDARY|LCARS.ES_LABEL_W,"OUTLINE"));

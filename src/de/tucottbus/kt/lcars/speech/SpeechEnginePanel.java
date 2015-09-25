@@ -21,7 +21,7 @@ import de.tucottbus.kt.lcars.speech.events.LevelEvent;
 import de.tucottbus.kt.lcars.speech.events.PostprocEvent;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
 import de.tucottbus.kt.lcars.speech.events.SpeechEvent;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 import de.tucottbus.kt.lcars.util.Range;
 
 public class SpeechEnginePanel extends Panel
@@ -54,7 +54,7 @@ public class SpeechEnginePanel extends Panel
   // Misc
   private   int             modeU;
   private   int             redAlertCtr;
-  private   SwtColor           cRed = LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED);
+  private   SWTColor           cRed = LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED);
   
   public SpeechEnginePanel(IScreen screen)
   {
@@ -243,7 +243,7 @@ public class SpeechEnginePanel extends Panel
       spe.addUserFeedbackPlayer(new UserFeedbackPlayer(UserFeedbackPlayer.VISUAL)
       {
         @Override
-        public void writeColor(SwtColor color)
+        public void writeColor(SWTColor color)
         {
           eVisFdbkMonitor.setColor(color);
         }
@@ -327,7 +327,7 @@ public class SpeechEnginePanel extends Panel
         {
           int   smp = cSpeechSig.addSample(new Range(-amp,amp),
               event.spe.getListenMode()<0
-                ? SwtColor.GRAY
+                ? SWTColor.GRAY
                 : (event.spe.getVoiceActivity()
                     ? cRed
                     : null));

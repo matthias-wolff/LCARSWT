@@ -33,6 +33,7 @@ public class GText extends AGeometry
   protected int height;
     
   protected transient TextLayout tl;
+  protected transient Font font;
   
   /**
    * Creates a new text geometry. A text geometry provides information and
@@ -115,11 +116,9 @@ public class GText extends AGeometry
   @Override
   public void paint2D(GC gc)
   {    
-    if(tl == null) {
-      Font font = new Font(gc.getDevice(), fontData);
-      tl = LCARS.getTextLayout(font, text);
-      //TODO: font dispose in this::finalize()?
-    }
+    if(tl == null)
+      tl = LCARS.getTextLayout(font = new Font(gc.getDevice(), fontData), text);
+    
     org.eclipse.swt.graphics.Rectangle clip = gc.getClipping();
     gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height));
     tl.draw(gc, x+indent, y+descent, 0, text.length()-1, gc.getBackground(), gc.getForeground());
@@ -138,14 +137,10 @@ public class GText extends AGeometry
   @Override
   protected void finalize() throws Throwable
   {    
-    try
-    {
-      if (tl != null)
-        tl.dispose();
-    } catch (Exception e)
-    {
-      // ignored
-    }          
+    if (tl != null && !tl.isDisposed())
+      tl.dispose();
+    if (font != null && !font.isDisposed())
+      font.dispose();
     super.finalize();
   }
   

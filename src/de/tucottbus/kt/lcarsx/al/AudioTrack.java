@@ -646,27 +646,23 @@ public class AudioTrack
    * @see #prefetch(float, float)
    * @see #fetch()
    */
-  public Vector<AudioBuffer> getWindow(float mediaTime)
+  public synchronized Vector<AudioBuffer> getWindow(float mediaTime)
   {
     if (mediaTime<0) return win;
+    int tail = Math.round((prefetch-mediaTime)*25);
+    int len  = win.size();
+    int size = s2b(history+future);
+    int first = len-tail-s2b(history);
 
-    synchronized (win)
+    Vector<AudioBuffer> ret = new Vector<AudioBuffer>(size);
+    for (int i = first; i<0; i++) ret.add(null);
+    for (int i = 0; i<win.size(); i++)
     {
-      int tail = Math.round((prefetch-mediaTime)*25);
-      int len  = win.size();
-      int size = s2b(history+future);
-      int first = len-tail-s2b(history);
-  
-      Vector<AudioBuffer> ret = new Vector<AudioBuffer>(size);
-      for (int i = first; i<0; i++) ret.add(null);
-      for (int i = 0; i<win.size(); i++)
-      {
-        ret.add(win.get(i));
-        if (ret.size()==size) break;
-      }
-      while (ret.size()<size) ret.add(null);
-      return ret;
+      ret.add(win.get(i));
+      if (ret.size()==size) break;
     }
+    while (ret.size()<size) ret.add(null);
+    return ret;
   }
 
   /**

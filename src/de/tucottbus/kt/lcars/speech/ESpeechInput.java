@@ -23,7 +23,7 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 
 /**
  * EXPERIMENTAL: Display of speech level and recognition result details.
@@ -66,9 +66,9 @@ public class ESpeechInput extends ElementContributor
     this.numBars  = (hh-7)/barHeight*2;
     int numHi     = numBars*4/5;
     int numMid    = numBars*1/3;
-    SwtColor clrHi   = new SwtColor(0x11FF0066,true);
-    SwtColor clrMid  = new SwtColor(0x11CCCC66,true);
-    SwtColor clrLo   = new SwtColor(0x110066FF/*0x3366FF00*/,true); 
+    SWTColor clrHi   = new SWTColor(0x11FF0066,true);
+    SWTColor clrMid  = new SWTColor(0x11CCCC66,true);
+    SWTColor clrLo   = new SWTColor(0x110066FF/*0x3366FF00*/,true); 
     for (int i=0; i<this.numBars; i++)
     {
       ERect e = new ERect(null,width-40,+hh-i*barHeight-barHeight,52,barHeight,LCARS.ES_STATIC,null);
@@ -114,9 +114,9 @@ public class ESpeechInput extends ElementContributor
     eFrame[6] = new EElbo(null,width+22,hh-14,20,28,style|LCARS.ES_SHAPE_SE,null);
     eFrame[6].setArmWidths(12,8); eFrame[6].setArcWidths(18,10); add(eFrame[6]);
     eCursor[0] = new ERect(null,width+17,hh-1,22,14,LCARS.ES_RECT_RND|LCARS.ES_STATIC,null);
-    eCursor[0].setColor(SwtColor.black); add(eCursor[0]);
+    eCursor[0].setColor(SWTColor.black); add(eCursor[0]);
     eCursor[1] = new ERect(null,width+18,hh,20,12,LCARS.ES_RECT_RND|LCARS.ES_STATIC,null);
-    eCursor[1].setColor(SwtColor.white); add(eCursor[1]);
+    eCursor[1].setColor(SWTColor.white); add(eCursor[1]);
     
     // The speech engine elements
     eFvrFrame[0] = new EElbo(null,0,-96,72,62,LCARS.EC_ELBOUP|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_SHAPE_NW|LCARS.ES_LABEL_NE,"FVR");
@@ -165,7 +165,7 @@ public class ESpeechInput extends ElementContributor
       eLex.setValue(lexValue.size()==1?lexValue.get(0):"");
       
       
-      SwtColor color = new SwtColor(event.accepted ? 0x00FF66 : 0xFF0066);
+      SWTColor color = new SWTColor(event.accepted ? 0x00FF66 : 0xFF0066);
       for (EElement e : eFvrFrame) e.setColor(color);
       eFvrVal.setColor(color);
       eAccept.setColor(color);
@@ -244,7 +244,7 @@ public class ESpeechInput extends ElementContributor
       float alpha = i<curLevel
           ? Math.max(Math.min((float)Math.pow((float)(i)/curLevel+0.3,1.2), 1), 0)
           : .1f;
-      bar.setColor(new SwtColor(bar.getBgColor(),(int)(alpha*255)));
+      bar.setColor(new SWTColor(bar.getBgColor(),(int)(alpha*255)));
       Rectangle b0 = eCursor[0].getBounds(); b0.y=y+height/2-curLevel*barHeight-5;
       eCursor[0].setBounds(b0);
       Rectangle b1 = eCursor[1].getBounds(); b1.y=y+height/2-curLevel*barHeight-4;
@@ -286,7 +286,7 @@ public class ESpeechInput extends ElementContributor
         hilightCtr--;
         if (hilightCtr==0)
         {
-          SwtColor nullColor = null;
+          SWTColor nullColor = null;
           for (EElement e : eFvrFrame) e.setColor(nullColor);
           eFvrVal.setColor(nullColor);
           eAccept.setColor(nullColor);
@@ -367,10 +367,8 @@ public class ESpeechInput extends ElementContributor
     {
       ArrayList<AGeometry> geos   = new ArrayList<AGeometry>();
       Rectangle           bnds   = getBounds();
-      FontData            fd     = getFont();
-      
       //TODO: replace font, it is device depended
-      Font                font   = new Font(Display.getDefault(), fd);      
+      Font                font   = getFont();      
 
       String              fvrs   = label==null?"":label;
       int                 xofs   = 0;
@@ -424,7 +422,7 @@ public class ESpeechInput extends ElementContributor
             for (Area area : lines)
               area.subtract(new Area(new Rectangle(tbnd.x-2, tbnd.y-2, tbnd.width+4, tbnd.height+4)));
 
-            geos.addAll(LCARS.createTextGeometry2D(fd,nlab,tbnd,LCARS.ES_LABEL_NW,null,false));      
+            geos.addAll(LCARS.createTextGeometry2D(font,nlab,tbnd,LCARS.ES_LABEL_NW,null,false));      
             xofs += tbnd.width + 6;
             sw = new StringWriter();
             
@@ -450,19 +448,19 @@ public class ESpeechInput extends ElementContributor
      * Returns a font which allows to display the semantic value within the bounds
      * of this element.
      */
-    protected FontData getFont()
+    protected Font getFont()
     {
       Rectangle bnds  = getBounds();
-      FontData  fd    = LCARS.getFont(LCARS.EF_LARGE);
-      Font font       = new Font(Display.getDefault(), fd);      
+      Font font       = LCARS.getFont(LCARS.EF_LARGE);      
       // TODO: replace font, it is device depended
       int tw          = LCARS.getTextBounds(font,rawLabel(label)).width;
       font.dispose();
       
-      if (bnds==null) return fd;
-      if (tw<=bnds.width) return fd;
+      if (bnds==null) return font;
+      if (tw<=bnds.width) return font;
   
-      float size = fd.getHeight()*(float)bnds.width/tw;
+      float size = font.getFontData()[0].getHeight()*(float)bnds.width/tw;
+      font.dispose();
       return LCARS.getFont(LCARS.EF_LARGE,(int)(size));
     }
   

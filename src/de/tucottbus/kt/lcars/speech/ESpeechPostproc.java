@@ -11,7 +11,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.speech.events.PostprocEvent;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 
 /**
  * EXPERIMENTAL: Display of recognition post-processing information.
@@ -20,15 +20,15 @@ import de.tucottbus.kt.lcars.swt.SwtColor;
  */
 public class ESpeechPostproc extends ElementContributor
 {
-  private final SwtColor cLsr = new SwtColor(0xCC9999FF,true);
+  private final SWTColor cLsr = new SWTColor(0xCC9999FF,true);
   
-  private final SwtColor cNll = new SwtColor(0xCCFF0066,true);
+  private final SWTColor cNll = new SWTColor(0xCCFF0066,true);
   
-  private final SwtColor c1 = new SwtColor(137,101,70);
+  private final SWTColor c1 = new SWTColor(137,101,70);
 
-  private final SwtColor c2 = new SwtColor(137,101,70,64);
+  private final SWTColor c2 = new SWTColor(137,101,70,64);
 
-  private final SwtColor c3 = new SwtColor(0xFF9900);
+  private final SWTColor c3 = new SWTColor(0xFF9900);
   
   /**
    * The number of NLL display bars.
@@ -174,7 +174,7 @@ public class ESpeechPostproc extends ElementContributor
     eLen.setValue("0.00");
     add(eLen);
     l = new ELabel(null,numBars*barWidth-411,barHeight+42,18,38,LCARS.ES_LABEL_C|LCARS.ES_STATIC,"s");
-    l.setColor(SwtColor.BLACK);
+    l.setColor(SWTColor.BLACK);
     add(l);
     
     eLock = new ERect(null,numBars*barWidth-389,barHeight+42,96,38,LCARS.EC_SECONDARY|LCARS.ES_LABEL_E,"LOCK");
@@ -343,7 +343,7 @@ public class ESpeechPostproc extends ElementContributor
   protected void addMarker(int track, String label, int bar, float nll)
   {
     if (track!=0) track = 1;
-    SwtColor c  = track==0 ? c3 : c1;
+    SWTColor c  = track==0 ? c3 : c1;
     int   x  = bar*barWidth+barWidth/2;
     int   y  = track==0 ? 0 : Math.max(nllToDisplay(0),nllToDisplay(nll))+barWidth/2; 
     int   h  = track==0 ? nllToDisplay(nll)-barWidth/2 : barHeight-y;
@@ -356,7 +356,7 @@ public class ESpeechPostproc extends ElementContributor
     add(e);
   }
   
-  protected void addBar(int bar, SwtColor color, float nll)
+  protected void addBar(int bar, SWTColor color, float nll)
   {
     int yNull = nllToDisplay(0);
     int yNll  = nllToDisplay(nll);

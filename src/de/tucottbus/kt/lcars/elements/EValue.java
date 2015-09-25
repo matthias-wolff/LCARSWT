@@ -125,18 +125,21 @@ public class EValue extends ERect
 
     // Create value geometry
     int   vstyle = (style&LCARS.ES_VALUE_W)!=0 ? LCARS.ES_LABEL_W : LCARS.ES_LABEL_E;
-    FontData  fd   = getValueFont();
+    Font  font   = new Font(LCARS.getDisplay(), getValueFont());
     Point insets = new Point(3,1);
-    if (fd.getName().equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
+    if (font.getFontData()[0].getName().equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
     
     //geos.add(new GText(value, new Point2D.Float(bounds.x, bounds.y), null, fd, isBlinking()))
-    geos.addAll(LCARS.createTextGeometry2D(fd,value,bounds,vstyle,insets,false));
+    geos.addAll(LCARS.createTextGeometry2D(font,value,bounds,vstyle,insets,false));
+    
+    font.dispose();
     
     // Create label geometries
-    fd   = LCARS.getFont(style);
+    font   = LCARS.getFont(style);
     bounds = getBounds();
     insets = computeLabelInsets();
-    geos.addAll(LCARS.createTextGeometry2D(fd,label,bounds,style,insets,true));
+    geos.addAll(LCARS.createTextGeometry2D(font,label,bounds,style,insets,true));
+    font.dispose();
     
     // This is it
     return geos;
@@ -144,8 +147,8 @@ public class EValue extends ERect
 
   public FontData getValueFont()
   {
-    return LCARS.getFont(LCARS.EF_HEAD1,(int)(getBounds().height *
-                                              (LCARS.getFont(LCARS.EF_HEAD1).getName().equals(LCARS.FN_COMPACTA)?1.45f:1.30f)));
+    return LCARS.getFontData(LCARS.EF_HEAD1,(int)(getBounds().height *
+                                              (LCARS.getFontData(LCARS.EF_HEAD1).getName().equals(LCARS.FN_COMPACTA)?1.45f:1.30f)));
   }
   
 }

@@ -41,8 +41,8 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     final boolean addVersionTag=true;  //true if pointing to a new wfs server
     
     
-    final Font fntSmall = AwtSwt.toAwtFont(LCARS.getFont(LCARS.EF_SMALL));
-    final Font fntNormal = AwtSwt.toAwtFont(LCARS.getFont(LCARS.EF_NORMAL));
+    final Font fntSmall = AwtSwt.toAwtFont(LCARS.getFontData(LCARS.EF_SMALL));
+    final Font fntNormal = AwtSwt.toAwtFont(LCARS.getFontData(LCARS.EF_NORMAL));
     final Color colElboup = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_ELBOUP));
     final Color colElbolo = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_ELBOLO));
     final Color colPriSel = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_PRIMARY|LCARS.ES_SELECTED));

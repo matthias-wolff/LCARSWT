@@ -18,7 +18,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 
 /**
  * A simple topographic map with a background image, a sector grid, point shaped
@@ -347,7 +347,7 @@ public class ETopography extends ElementContributor
     int       cx = r.x;
     int       cy = r.y;
     
-    final SwtColor transparent = new SwtColor(0, true);    
+    final SWTColor transparent = new SWTColor(0, true);    
     Point2D.Float ncp = new Point2D.Float(x,y);
     
     int n = cursor.size();
@@ -539,7 +539,7 @@ public class ETopography extends ElementContributor
     {
     }
     
-    final SwtColor transparent = new SwtColor(0, true);
+    final SWTColor transparent = new SWTColor(0, true);
     
     // Create points
     for (ERect point : points)
@@ -575,7 +575,7 @@ public class ETopography extends ElementContributor
     if (this.gridStyle!=-1)
       gs = this.gridStyle & (LCARS.ES_COLOR|LCARS.ES_FONT);
       
-    SwtColor color = new SwtColor(LCARS.getColor(panel.getColorScheme(),gs), (int)(255*gridMajorAlpha));
+    SWTColor color = new SWTColor(LCARS.getColor(panel.getColorScheme(),gs), (int)(255*gridMajorAlpha));
     ELabel unitLabel = null;
     if (pGridMajor!=null)
     {

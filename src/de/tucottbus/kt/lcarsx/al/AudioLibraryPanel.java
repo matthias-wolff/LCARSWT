@@ -29,7 +29,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -85,7 +85,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     super.init();
     setColorScheme(LCARS.CS_DATABASE);
     
-    SwtColor  cOutline = new SwtColor(1f,1f,1f,0.25f);
+    SWTColor  cOutline = new SWTColor(1f,1f,1f,0.25f);
     ERect  eRect;
     EElbo  eElbo;
     EElement e;
@@ -181,7 +181,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     add(eElbo);
 
     eRect = new ERect(this,461,991,731,66,LCARS.ES_STATIC,null);
-    eRect.setColor(new SwtColor(0x333333));
+    eRect.setColor(new SWTColor(0x333333));
     add(eRect);
     eGain = new EGainSlider(462,992,731,66);
     eGain.addToPanel(this);
@@ -258,8 +258,8 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     // Elements in mode 1: track info
     eTracks = new ETrackSelector(266,129);
     eDisplay = new ELevelsDisplay(765,515,880,125,25);
-    eDisplay.setBarColor (new SwtColor(0x9999FF));
-    eDisplay.setGridColor(new SwtColor(0xDDB18E));
+    eDisplay.setBarColor (new SWTColor(0x9999FF));
+    eDisplay.setGridColor(new SWTColor(0xDDB18E));
     eInfo = new ETrackInfo(1230,515);
     
     // Initialize

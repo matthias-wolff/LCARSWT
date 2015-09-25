@@ -8,6 +8,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 
+import org.eclipse.swt.graphics.Font;
+
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.geometry.GArea;
@@ -195,14 +197,17 @@ public class EElbo extends EElement
     area.intersect(new Area(new Rectangle2D.Float(x,y,w,h)));
     geos.add(new GArea(area,false));
 
+    Font font = LCARS.getFont(getStyle());
+    
     // Create label geometries
-    geos.addAll(LCARS.createTextGeometry2D(LCARS.getFont(getStyle()),
+    geos.addAll(LCARS.createTextGeometry2D(font,
                                            label,
                                            bounds,
                                            getStyle(),
                                            computeLabelInsets(),
                                            true));
     
+    font.dispose();    
     // This is it
     return geos;
   }

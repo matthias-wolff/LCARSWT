@@ -187,7 +187,7 @@ public class TestPanel extends Panel
 
     eRect = new ERect(this, x - 1, y - 1, w + 2, h + 2,
         LCARS.ES_STATIC | LCARS.ES_OUTLINE, null);
-    eRect.setColor(new SwtColor(0x404040));
+    eRect.setColor(new SWTColor(0x404040));
     add(eRect);
 
     ESpeechInput.EFvrValue eFvr = new ESpeechInput.EFvrValue(this, x, y, w, h,
@@ -257,8 +257,8 @@ public class TestPanel extends Panel
     AudioPlayer player = AudioPlayer.getInstance();
 
     ELevelsDisplay eDisplay = new ELevelsDisplay(765, 515, 880, 125, 25);
-    eDisplay.setBarColor(new SwtColor(0x9999FF));
-    eDisplay.setGridColor(new SwtColor(0xDDB18E));
+    eDisplay.setBarColor(new SWTColor(0x9999FF));
+    eDisplay.setGridColor(new SWTColor(0xDDB18E));
     eDisplay.addToPanel(this);
 
     try
@@ -295,7 +295,7 @@ public class TestPanel extends Panel
     add(eback);
 
     ERect eTouchArea = new ERect(null,0,0,731,66,LCARS.EB_OVERDRAG,null);
-    eTouchArea.setColor(new SwtColor(0,true));
+    eTouchArea.setColor(new SWTColor(0,true));
     add(eTouchArea);
 
   }

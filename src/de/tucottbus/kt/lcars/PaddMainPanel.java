@@ -9,7 +9,7 @@ import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ERect;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 
 /**
  * PADD main panels are displayed on the PADD panel selector.
@@ -33,7 +33,7 @@ public abstract class PaddMainPanel extends Panel
     // Hidden emergency button (in the lower right corner)
     EElement e;
     e = new ERect(this,0,dim.height-23,23,23,0,null);
-    e.setColor(new SwtColor(0,true));
+    e.setColor(new SWTColor(0,true));
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override

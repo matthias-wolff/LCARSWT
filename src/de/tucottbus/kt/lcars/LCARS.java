@@ -80,7 +80,7 @@ import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
 import de.tucottbus.kt.lcars.net.RmiSecurityManager;
 import de.tucottbus.kt.lcars.net.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 
 /**
  * The LCARS main class. Includes the main method, constants, static service methods, and the panel
@@ -186,8 +186,8 @@ public class LCARS implements ILcarsRemote
   public static final String FN_COMPACTA = "Compacta LT Light";
   public static final String FN_SWISS911 = "Swiss911 UCm BT";
 
-  public static final SwtColor BLACK = new SwtColor(0x000000);
-  public static final SwtColor WHITE = new SwtColor(0xFFFFFF);
+  public static final SWTColor BLACK = new SWTColor(0x000000);
+  public static final SWTColor WHITE = new SWTColor(0xFFFFFF);
   // -- Fields --
   
   protected HashMap<String,RmiPanelAdapter> rmiPanelAdapters;
@@ -239,7 +239,7 @@ public class LCARS implements ILcarsRemote
   }
   
   // -- Color manager --
-  private static HashMap<Integer,SwtColor[]> colorSchemes;
+  private static HashMap<Integer,SWTColor[]> colorSchemes;
 
   /**
    * Returns an LCARS color scheme.
@@ -247,71 +247,71 @@ public class LCARS implements ILcarsRemote
    * @param colorScheme
    *          The color scheme, one of the <code>LCARS.CS_XXX</code> constants.
    */
-  private static SwtColor[] getColors(int colorScheme)
+  private static SWTColor[] getColors(int colorScheme)
   {
-    SwtColor colors[] = new SwtColor[EC_COUNT];
+    SWTColor colors[] = new SWTColor[EC_COUNT];
     
-    SwtColor cElbos    = null; // Elbos
-    SwtColor cElbosS   = null; // Elbos selected
-    SwtColor cUnavail  = null; // Element unavailable
-    SwtColor cPrimary  = null; // Primary element
-    SwtColor cPrimaryS = null; // Primary element selected
-    SwtColor cColor1   = null; // Auxiliary color 1 (secondary element selected)
-    SwtColor cColor2   = null; // Auxiliary color 2 (secondary element)
+    SWTColor cElbos    = null; // Elbos
+    SWTColor cElbosS   = null; // Elbos selected
+    SWTColor cUnavail  = null; // Element unavailable
+    SWTColor cPrimary  = null; // Primary element
+    SWTColor cPrimaryS = null; // Primary element selected
+    SWTColor cColor1   = null; // Auxiliary color 1 (secondary element selected)
+    SWTColor cColor2   = null; // Auxiliary color 2 (secondary element)
     switch (colorScheme)
     {
     case CS_SECONDARY: 
       
-      cElbos    = new SwtColor(0xFFAAA07C, true);
-      cUnavail  = new SwtColor(0xFF5355DE, true);
-      cPrimary  = new SwtColor(0xFF99AAFF, true);
-      cPrimaryS = new SwtColor(0xFFC9E8FD, true);
-      cColor1   = new SwtColor(0xFFFFCC00, true);
-      cColor2   = new SwtColor(0xFFFFFF99, true);
+      cElbos    = new SWTColor(0xFFAAA07C, true);
+      cUnavail  = new SWTColor(0xFF5355DE, true);
+      cPrimary  = new SWTColor(0xFF99AAFF, true);
+      cPrimaryS = new SWTColor(0xFFC9E8FD, true);
+      cColor1   = new SWTColor(0xFFFFCC00, true);
+      cColor2   = new SWTColor(0xFFFFFF99, true);
       break;
     case CS_ANCILLARY: 
-      cElbos    = new SwtColor(0xFFF1B1AF, true);
-      cUnavail  = new SwtColor(0xFFA27FA5, true);
-      cPrimary  = new SwtColor(0xFFADACD8, true);
-      cColor1   = new SwtColor(0xFFFFFF33, true);
-      cColor2   = new SwtColor(0xFFE6B0D4, true);
+      cElbos    = new SWTColor(0xFFF1B1AF, true);
+      cUnavail  = new SWTColor(0xFFA27FA5, true);
+      cPrimary  = new SWTColor(0xFFADACD8, true);
+      cColor1   = new SWTColor(0xFFFFFF33, true);
+      cColor2   = new SWTColor(0xFFE6B0D4, true);
       break;
     case CS_DATABASE: 
-      cElbos   = new SwtColor(0xFFCC6666, true);
-      cUnavail = new SwtColor(0xFFCCCCFF, true);
-      cPrimary = new SwtColor(0xFF99CCFF, true);
-      cColor1  = new SwtColor(0xFFFF9900, true);
+      cElbos   = new SWTColor(0xFFCC6666, true);
+      cUnavail = new SWTColor(0xFFCCCCFF, true);
+      cPrimary = new SWTColor(0xFF99CCFF, true);
+      cColor1  = new SWTColor(0xFFFF9900, true);
       cColor2  = cElbos;
       // Upper elbo
-      colors[ EC_ELBOUP                >>EC_SHIFT] = new SwtColor(0xCC6666);
-      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9999);
-      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xCC6666).darker();
-      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9999).darker();
+      colors[ EC_ELBOUP                >>EC_SHIFT] = new SWTColor(0xCC6666);
+      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFF9999);
+      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xCC6666).darker();
+      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFF9999).darker();
       // Lower elbo
-      colors[ EC_ELBOLO                >>EC_SHIFT] = new SwtColor(0xCC6666);
-      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9999);
-      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xCC6666).darker();
-      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9999).darker();
+      colors[ EC_ELBOLO                >>EC_SHIFT] = new SWTColor(0xCC6666);
+      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFF9999);
+      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xCC6666).darker();
+      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFF9999).darker();
       // Primary element
-      colors[ EC_PRIMARY               >>EC_SHIFT] = new SwtColor(0x99CCFF);
-      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xCCCCFF);
-      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0x3399FF);
-      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0x9999FF);
+      colors[ EC_PRIMARY               >>EC_SHIFT] = new SWTColor(0x99CCFF);
+      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xCCCCFF);
+      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0x3399FF);
+      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0x9999FF);
       // Secondary element
-      colors[ EC_SECONDARY             >>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFCC33);
-      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SwtColor(0x996600);
-      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SwtColor(0x996633);
+      colors[ EC_SECONDARY             >>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFCC33);
+      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SWTColor(0x996600);
+      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SWTColor(0x996633);
       // Text
-      colors[ EC_TEXT                  >>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[ EC_TEXT                  >>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
       // Headline
-      colors[ EC_HEADLINE              >>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[ EC_HEADLINE              >>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFF9900);
       // Special case: return!
       return colors;
     case CS_REDALERT: {
@@ -320,76 +320,76 @@ public class LCARS implements ILcarsRemote
       int opaque = 0xFF000000;
       int dimmed = 0x80000000;
       // Upper elbo
-      colors[ EC_ELBOUP                >>EC_SHIFT] = new SwtColor(color2|opaque,true);
-      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
-      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color2|opaque,true);
-      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
+      colors[ EC_ELBOUP                >>EC_SHIFT] = new SWTColor(color2|opaque,true);
+      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SWTColor(color1|opaque,true);
+      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SWTColor(color2|opaque,true);
+      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SWTColor(color1|opaque,true);
       // Lower elbo
-      colors[ EC_ELBOLO                >>EC_SHIFT] = new SwtColor(color1|opaque,true);
-      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color2|opaque,true);
-      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
-      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color2|opaque,true);
+      colors[ EC_ELBOLO                >>EC_SHIFT] = new SWTColor(color1|opaque,true);
+      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SWTColor(color2|opaque,true);
+      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SWTColor(color1|opaque,true);
+      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SWTColor(color2|opaque,true);
       // Primary element
-      colors[ EC_PRIMARY               >>EC_SHIFT] = new SwtColor(color2|opaque,true);
-      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
-      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color2|dimmed,true);
-      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|dimmed,true);
+      colors[ EC_PRIMARY               >>EC_SHIFT] = new SWTColor(color2|opaque,true);
+      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SWTColor(color1|opaque,true);
+      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SWTColor(color2|dimmed,true);
+      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SWTColor(color1|dimmed,true);
       // Secondary element
-      colors[ EC_SECONDARY             >>EC_SHIFT] = new SwtColor(color2|opaque,true);
-      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque,true);
-      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SwtColor(color2|dimmed,true);
-      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|dimmed,true);
+      colors[ EC_SECONDARY             >>EC_SHIFT] = new SWTColor(color2|opaque,true);
+      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SWTColor(color1|opaque,true);
+      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SWTColor(color2|dimmed,true);
+      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SWTColor(color1|dimmed,true);
       // Text
-      colors[ EC_TEXT                  >>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[ EC_TEXT                  >>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
       // Headline
-      colors[ EC_HEADLINE              >>EC_SHIFT] = new SwtColor(color1|opaque);
-      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SwtColor(color1|opaque);
-      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SwtColor(color1|opaque);
-      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SwtColor(color1|opaque);
+      colors[ EC_HEADLINE              >>EC_SHIFT] = new SWTColor(color1|opaque);
+      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SWTColor(color1|opaque);
+      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SWTColor(color1|opaque);
+      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SWTColor(color1|opaque);
       // Special case: return!
       return colors; }
     case CS_MULTIDISP:
       // Upper elbo
-      colors[ EC_ELBOUP                >>EC_SHIFT] = new SwtColor(0xFF9999FF,true);
-      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFCC99CC,true);
-      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA09999FF,true);
-      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0CC99CC,true);
+      colors[ EC_ELBOUP                >>EC_SHIFT] = new SWTColor(0xFF9999FF,true);
+      colors[(EC_ELBOUP   |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFCC99CC,true);
+      colors[(EC_ELBOUP   |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xA09999FF,true);
+      colors[(EC_ELBOUP   |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xA0CC99CC,true);
       // Lower elbo
-      colors[ EC_ELBOLO                >>EC_SHIFT] = new SwtColor(0xFFCC6666,true);
-      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFF9900,true);
-      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA0CC6666,true);
-      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0FF9900,true);
+      colors[ EC_ELBOLO                >>EC_SHIFT] = new SWTColor(0xFFCC6666,true);
+      colors[(EC_ELBOLO   |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFFF9900,true);
+      colors[(EC_ELBOLO   |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xA0CC6666,true);
+      colors[(EC_ELBOLO   |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xA0FF9900,true);
       // Primary element
-      colors[ EC_PRIMARY               >>EC_SHIFT] = new SwtColor(0xFFCC6666,true);
-      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFF9900,true);
-      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA0CC6666,true);
-      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0FF9900,true);
+      colors[ EC_PRIMARY               >>EC_SHIFT] = new SWTColor(0xFFCC6666,true);
+      colors[(EC_PRIMARY  |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFFF9900,true);
+      colors[(EC_PRIMARY  |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xA0CC6666,true);
+      colors[(EC_PRIMARY  |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xA0FF9900,true);
       // Secondary element
-      colors[ EC_SECONDARY             >>EC_SHIFT] = new SwtColor(0xFFDDB18E,true);
-      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFEFC66A,true);
-      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xA0DDB18E,true);
-      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xA0EFC66A,true);
+      colors[ EC_SECONDARY             >>EC_SHIFT] = new SWTColor(0xFFDDB18E,true);
+      colors[(EC_SECONDARY|ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFEFC66A,true);
+      colors[(EC_SECONDARY|ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xA0DDB18E,true);
+      colors[(EC_SECONDARY|ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xA0EFC66A,true);
       // Text
-      colors[ EC_TEXT                  >>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
-      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFFFFFF);
+      colors[ EC_TEXT                  >>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
+      colors[(EC_TEXT     |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFFFFFF);
       // Headline
-      colors[ EC_HEADLINE              >>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SwtColor(0xFF9900);
-      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SwtColor(0xFF9900);
+      colors[ EC_HEADLINE              >>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELECTED)>>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_DISABLED)>>EC_SHIFT] = new SWTColor(0xFF9900);
+      colors[(EC_HEADLINE |ES_SELDISED)>>EC_SHIFT] = new SWTColor(0xFF9900);
       // Special case: return!
       return colors;
     default: // CS_PRIMARY
-      cElbos   = new SwtColor(0xFFF1DF6F,true);
-      cUnavail = new SwtColor(0xFF3399FF,true);
-      cPrimary = new SwtColor(0xFF99CCFF,true);
-      cColor1  = new SwtColor(0xFFFFFF33,true);
-      cColor2  = new SwtColor(0xFFFFFFCC,true);
+      cElbos   = new SWTColor(0xFFF1DF6F,true);
+      cUnavail = new SWTColor(0xFF3399FF,true);
+      cPrimary = new SWTColor(0xFF99CCFF,true);
+      cColor1  = new SWTColor(0xFFFFFF33,true);
+      cColor2  = new SWTColor(0xFFFFFFCC,true);
       break;
     }
 
@@ -441,10 +441,10 @@ public class LCARS implements ILcarsRemote
    * @return The color (according to the currently selected color scheme) or the black color if
    *         <code>color</code> is invalid.
    */
-  public static SwtColor getColor(int colorScheme, int style)
+  public static SWTColor getColor(int colorScheme, int style)
   {
-    if (colorSchemes==null) colorSchemes=new HashMap<Integer,SwtColor[]>();
-    SwtColor colors[] = colorSchemes.get(new Integer(colorScheme));
+    if (colorSchemes==null) colorSchemes=new HashMap<Integer,SWTColor[]>();
+    SWTColor colors[] = colorSchemes.get(new Integer(colorScheme));
     if (colors==null) 
     {
       colors = getColors(colorScheme);
@@ -514,7 +514,7 @@ public class LCARS implements ILcarsRemote
    *          and <code>LCARS.EC_XXX</code> constants.
    * @return The font.
    */
-  public static FontData getFont(int style)
+  public static FontData getFontData(int style)
   {
     if (fonts==null)
     {
@@ -545,7 +545,11 @@ public class LCARS implements ILcarsRemote
     if (font<0 || font>=fonts.length) return fonts[0];
     return fonts[font];
   }
-
+  
+  public static Font getFont(int style) {
+    return new Font(getDisplay(), getFontData(style));
+  }
+  
   /**
    * Returns an LCARS font with a custom font size.
    * 
@@ -556,14 +560,18 @@ public class LCARS implements ILcarsRemote
    *          The point size of the font.
    * @return The font.
    */
-  public static FontData getFont(int style, int size)
+  public static FontData getFontData(int style, int size)
   {
-    FontData next = getFont(style);
+    FontData next = getFontData(style);
     FontData result = new FontData(next.getName(), (int)(size*fontScale+.5), next.getStyle());
     result.setLocale(next.getLocale());
     return result;
   }
 
+  public static Font getFont(int style, int size) {
+    return new Font(getDisplay(), getFontData(style, size));
+  }
+  
   // -- Cursor manager --
   
   /**
@@ -674,7 +682,10 @@ public class LCARS implements ILcarsRemote
     boolean             foreground    
   )
   {
-    return createTextGeometry2D(getFont(style), text, bounds, style, insets, foreground);
+    Font font = getFont(style);
+    ArrayList<AGeometry> result = createTextGeometry2D(font, text, bounds, style, insets, foreground);
+    font.dispose();
+    return result;
   }
 
   /**
@@ -693,7 +704,7 @@ public class LCARS implements ILcarsRemote
    */
   public static ArrayList<AGeometry> createTextGeometry2D
   (
-    FontData            font,
+    Font                font,
     String              text,
     java.awt.Rectangle  bounds,
     int                 style,
@@ -710,10 +721,9 @@ public class LCARS implements ILcarsRemote
     
     // Measure text lines
     Display      display = Display.getDefault();
-    Font thisFont = new Font(display, font);
     TextLayout        tl = new TextLayout(display);
     String s[] = text.split("\n");
-    tl.setFont(thisFont);
+    tl.setFont(font);
     tl.setText(text);
     
     org.eclipse.swt.graphics.Rectangle tlBnds = tl.getBounds();
@@ -762,6 +772,8 @@ public class LCARS implements ILcarsRemote
             
     int n = tl.getLineCount();
     
+    FontData fd = font.getFontData()[0];
+    
     for (int i=0; i<n; i++)
     {
       org.eclipse.swt.graphics.Rectangle linBnds = tl.getLineBounds(i);
@@ -775,7 +787,7 @@ public class LCARS implements ILcarsRemote
       GText gt = new GText(
           s[i],
           b,
-          font,
+          fd,
           foreground);
       if (x < tx) gt.setIndent(x-tx);
       if (y < ty) gt.setDescent(y-ty);
@@ -783,7 +795,7 @@ public class LCARS implements ILcarsRemote
       geos.add(gt);
     }
     
-    thisFont.dispose();    
+    tl.dispose();
     return geos;
   }
 
@@ -795,7 +807,7 @@ public class LCARS implements ILcarsRemote
    * @param value interpolation value; 0 (first color) ... 1 (second color)
    * @return the interpolated color
    */
-  public static SwtColor interpolateColors(SwtColor clr1, SwtColor clr2, float value)
+  public static SWTColor interpolateColors(SWTColor clr1, SWTColor clr2, float value)
   {
     if (value<=0f) return clr1;
     if (value>=1f) return clr2;
@@ -803,7 +815,7 @@ public class LCARS implements ILcarsRemote
 
     float val2 = value*norm;
     float val1 = norm - val2;
-    return new SwtColor(
+    return new SWTColor(
         val1*clr1.getRed  () +val2*clr2.getRed  (),
         val1*clr1.getGreen() +val2*clr2.getGreen(),
         val1*clr1.getBlue () +val2*clr2.getBlue (),

@@ -2,79 +2,79 @@ package de.tucottbus.kt.lcars.swt;
 
 import java.io.Serializable;
 
-public final class SwtColor implements Serializable
+public final class SWTColor implements Serializable
 {
   private static final long serialVersionUID = 7144575098466224086L;
   
   /** Constant for the color white: R=255, G=255, B=255. */
-  public static final SwtColor white = new SwtColor(0xFFFFFF);
+  public static final SWTColor white = new SWTColor(0xFFFFFF);
   
   /** Constant for the color white: R=255, G=255, B=255. */
-  public static final SwtColor WHITE = white;
+  public static final SWTColor WHITE = white;
   
   /** Constant for the color light gray: R=192, G=192, B=192. */
-  public static final SwtColor lightGray = new SwtColor(0xc0c0c0);
+  public static final SWTColor lightGray = new SWTColor(0xc0c0c0);
   
   /** Constant for the color light gray: R=192, G=192, B=192. */
-  public static final SwtColor LIGHT_GRAY = lightGray;
+  public static final SWTColor LIGHT_GRAY = lightGray;
   
   /** Constant for the color gray: R=128, G=128, B=128. */
-  public static final SwtColor gray = new SwtColor(0x808080);
+  public static final SWTColor gray = new SWTColor(0x808080);
   
   /** Constant for the color gray: R=128, G=128, B=128. */
-  public static final SwtColor GRAY = gray;
+  public static final SWTColor GRAY = gray;
   
   /** Constant for the color dark gray: R=64, G=64, B=64. */
-  public static final SwtColor darkGray = new SwtColor(0x404040);
+  public static final SWTColor darkGray = new SWTColor(0x404040);
 
   /** Constant for the color dark gray: R=64, G=64, B=64. */
-  public static final SwtColor DARK_GRAY = darkGray;
+  public static final SWTColor DARK_GRAY = darkGray;
   
   /** Constant for the color red: R=255, G=0, B=0. */
-  public static final SwtColor black = new SwtColor(0x000000);
+  public static final SWTColor black = new SWTColor(0x000000);
   
   /** Constant for the color red: R=255, G=0, B=0. */
-  public static final SwtColor BLACK = black;
+  public static final SWTColor BLACK = black;
 
   /** Constant for the color red: R=255, G=0, B=0. */
-  public static final SwtColor red = new SwtColor(0xff0000);
+  public static final SWTColor red = new SWTColor(0xff0000);
   
-  public static final SwtColor RED = red;
+  public static final SWTColor RED = red;
   
   /** Constant for the color pink: R=255, G=175, B=175. */
-  public static final SwtColor pink = new SwtColor(0xffafaf);
+  public static final SWTColor pink = new SWTColor(0xffafaf);
   
-  public static final SwtColor PINK = pink;
+  public static final SWTColor PINK = pink;
   
   /** Constant for the color orange: R=255, G=200, B=0. */
-  public static final SwtColor orange = new SwtColor(0xffc800);
+  public static final SWTColor orange = new SWTColor(0xffc800);
   
-  public static final SwtColor ORANGE = orange;
+  public static final SWTColor ORANGE = orange;
   
   /** Constant for the color yellow: R=255, G=255, B=0. */
-  public static final SwtColor yellow = new SwtColor(0xffff00);
+  public static final SWTColor yellow = new SWTColor(0xffff00);
   
-  public static final SwtColor YELLOW = yellow;
+  public static final SWTColor YELLOW = yellow;
   
   /** Constant for the color green: R=0, G=255, B=0. */
-  public static final SwtColor green = new SwtColor(0x00ff00);
+  public static final SWTColor green = new SWTColor(0x00ff00);
   
-  public static final SwtColor GREEN = green;
+  public static final SWTColor GREEN = green;
   
   /** Constant for the color magenta: R=255, G=0, B=255. */
-  public static final SwtColor magenta = new SwtColor(0xff00ff);
+  public static final SWTColor magenta = new SWTColor(0xff00ff);
   
-  public static final SwtColor MAGENTA = magenta;
+  public static final SWTColor MAGENTA = magenta;
   
   /** Constant for the color cyan: R=0, G=255, B=255. */
-  public static final SwtColor cyan = new SwtColor(0x00ffff);
+  public static final SWTColor cyan = new SWTColor(0x00ffff);
   
-  public static final SwtColor CYAN = cyan;
+  public static final SWTColor CYAN = cyan;
   
   /** Constant for the color blue: R=0, G=0, B=255. */
-  public static final SwtColor blue = new SwtColor(0x0000ff);
+  public static final SWTColor blue = new SWTColor(0x0000ff);
   
-  public static final SwtColor BLUE = blue;
+  public static final SWTColor BLUE = blue;
   
   /** Internal mask for red. */
   private static final int R_SHIFT = 16;
@@ -101,7 +101,7 @@ public final class SwtColor implements Serializable
   
   public final boolean HasAlpha;
   
-  public SwtColor(SwtColor color, float alpha) {
+  public SWTColor(SWTColor color, float alpha) {
     Red = color.Red;
     Green = color.Green;
     Blue = color.Blue;
@@ -109,7 +109,7 @@ public final class SwtColor implements Serializable
     HasAlpha = true;
   }
   
-  public SwtColor(int argb, boolean hasTransparence) {
+  public SWTColor(int argb, boolean hasTransparence) {
     Red = (byte)((argb >> R_SHIFT) & 0xFF);
     Green = (byte)((argb >> G_SHIFT) & 0xFF);
     Blue = (byte)((argb >> B_SHIFT) & 0xFF);
@@ -117,7 +117,7 @@ public final class SwtColor implements Serializable
     HasAlpha = hasTransparence;
   }
   
-  public SwtColor(int rgb) {
+  public SWTColor(int rgb) {
     Red = (byte)((rgb >> R_SHIFT) & 0xFF);
     Green = (byte)((rgb >> G_SHIFT) & 0xFF);
     Blue = (byte)((rgb >> B_SHIFT) & 0xFF);
@@ -125,7 +125,7 @@ public final class SwtColor implements Serializable
     HasAlpha = false;
   } 
   
-  public SwtColor(float r, float g, float b, float a) {
+  public SWTColor(float r, float g, float b, float a) {
     Red   = r <= 0 ? 0 : (r >= 1 ? -1 : (byte)(r*0xFF));
     Green = g <= 0 ? 0 : (g >= 1 ? -1 : (byte)(g*0xFF));
     Blue  = b <= 0 ? 0 : (b >= 1 ? -1 : (byte)(b*0xFF));
@@ -133,7 +133,7 @@ public final class SwtColor implements Serializable
     HasAlpha = true;
   }
   
-  public SwtColor(float r, float g, float b) {
+  public SWTColor(float r, float g, float b) {
     Red   = r <= 0 ? 0 : (r >= 1 ? -1 : (byte)(r*0xFF));
     Green = g <= 0 ? 0 : (g >= 1 ? -1 : (byte)(g*0xFF));
     Blue  = b <= 0 ? 0 : (b >= 1 ? -1 : (byte)(b*0xFF));
@@ -141,7 +141,7 @@ public final class SwtColor implements Serializable
     HasAlpha = false;
   }
   
-  public SwtColor(int r, int g, int b, int a) {
+  public SWTColor(int r, int g, int b, int a) {
     Red   = r <= 0 ? 0 : (r >= 0xFF ? -1 : (byte)r);
     Green = g <= 0 ? 0 : (g >= 0xFF ? -1 : (byte)g);
     Blue  = b <= 0 ? 0 : (b >= 0xFF ? -1 : (byte)b);
@@ -149,7 +149,7 @@ public final class SwtColor implements Serializable
     HasAlpha = true;
   }
   
-  public SwtColor(int r, int g, int b) {
+  public SWTColor(int r, int g, int b) {
     Red   = r <= 0 ? 0 : (r >= 0xFF ? -1 : (byte)r);
     Green = g <= 0 ? 0 : (g >= 0xFF ? -1 : (byte)g);
     Blue  = b <= 0 ? 0 : (b >= 0xFF ? -1 : (byte)b);
@@ -196,10 +196,10 @@ public final class SwtColor implements Serializable
   * @return     a new <code>Color</code> object that is
   *                 a brighter version of this <code>Color</code>
   *                 with the same {@code alpha} value.
-  * @see        de.tucottbus.kt.lcars.swt.SwtColor#darker
+  * @see        de.tucottbus.kt.lcars.swt.SWTColor#darker
   * @since      JDK1.0
   */
-  public SwtColor brighter() {
+  public SWTColor brighter() {
     final float scale = 1/BRIGHT_SCALE;
     int r = Red & 0xFF;
     int g = Green & 0xFF;
@@ -212,13 +212,13 @@ public final class SwtColor implements Serializable
      */
     final int i = (int)(1/(1-BRIGHT_SCALE));
     if ( r == 0 && g == 0 && b == 0)
-      return new SwtColor(i, i, i, Alpha);
+      return new SWTColor(i, i, i, Alpha);
     
     if ( r > 0 && r < i ) r = i;
     if ( g > 0 && g < i ) g = i;
     if ( b > 0 && b < i ) b = i;
     
-    return new SwtColor(Math.min((int)(r*scale), 255),
+    return new SWTColor(Math.min((int)(r*scale), 255),
                         Math.min((int)(g*scale), 255),
                         Math.min((int)(b*scale), 255),
                         Alpha);
@@ -239,10 +239,10 @@ public final class SwtColor implements Serializable
    * @return  a new <code>Color</code> object that is
    *                    a darker version of this <code>Color</code>
    *                    with the same {@code alpha} value.
-   * @see        de.tucottbus.kt.lcars.swt.SwtColor#brighter
+   * @see        de.tucottbus.kt.lcars.swt.SWTColor#brighter
    */
-  public SwtColor darker() {
-    return new SwtColor(Math.max((int)((Red & 0xFF)*BRIGHT_SCALE), 0),
+  public SWTColor darker() {
+    return new SWTColor(Math.max((int)((Red & 0xFF)*BRIGHT_SCALE), 0),
                         Math.max((int)((Green & 0xFF)*BRIGHT_SCALE), 0),
                         Math.max((int)((Blue & 0xFF) *BRIGHT_SCALE), 0),
                         Alpha);
@@ -252,16 +252,16 @@ public final class SwtColor implements Serializable
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (!(obj instanceof SwtColor))
+    if (!(obj instanceof SWTColor))
       return false;    
-    SwtColor c = (SwtColor)obj;
+    SWTColor c = (SWTColor)obj;
     return Red == c.Red
         && Green == c.Green
         && Blue == c.Blue
         && Alpha == c.Alpha;    
   }
   
-  public boolean equals(SwtColor c) {
+  public boolean equals(SWTColor c) {
     return c != null && (this == c
         || (Red == c.Red
         && Green == c.Green
@@ -277,6 +277,6 @@ public final class SwtColor implements Serializable
   }
   
   public String toString() {
-    return SwtColor.class.getSimpleName() + " rgba="+Integer.toHexString(getValue());
+    return SWTColor.class.getSimpleName() + " rgba="+Integer.toHexString(getValue());
   }
 }

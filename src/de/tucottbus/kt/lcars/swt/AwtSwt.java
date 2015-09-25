@@ -17,6 +17,8 @@ import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
+import de.tucottbus.kt.lcars.LCARS;
+
 /* ===========================================================
  * JFreeChart : a free chart library for the Java(tm) platform
  * ===========================================================
@@ -207,20 +209,16 @@ public class AwtSwt
 
   
   
-  public static SwtColor toSwtColor(Color color) {
-    return new SwtColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());        
+  public static SWTColor toSwtColor(Color color) {
+    return new SWTColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());        
   }
   
-  public static Color toAwtColor(SwtColor color) {
+  public static Color toAwtColor(SWTColor color) {
     return new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());        
   }
   
-  public static java.awt.Font toAwtFont(Font font) {
-    return SWTUtils.toAwtFont(null, font);
-  }
-  
   public static java.awt.Font toAwtFont(FontData font, boolean ensureSameSize) {
-    return SWTUtils.toAwtFont(null, font, ensureSameSize);
+    return SWTUtils.toAwtFont(LCARS.getDisplay(), font, ensureSameSize);
   }
   
   public static java.awt.Font toAwtFont(FontData font) {

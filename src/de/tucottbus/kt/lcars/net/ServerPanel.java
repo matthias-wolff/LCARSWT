@@ -18,7 +18,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.swt.SWTColor;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -59,7 +59,7 @@ public class ServerPanel extends Panel
   private ERect         eCscStart;
   private ERect         eCscStop;
   private ERect         eCscPnlSel;
-  private final SwtColor   cRed = new SwtColor(0x00FF0066,false);
+  private final SWTColor   cRed = new SWTColor(0x00FF0066,false);
   
   // -- Constructors --
   
@@ -90,7 +90,7 @@ public class ServerPanel extends Panel
     int    cp = LCARS.EC_PRIMARY;
     int    c1 = LCARS.EC_SECONDARY|LCARS.ES_SELECTED;
     int    c2 = LCARS.EC_SECONDARY;
-    SwtColor  cSpecial = new SwtColor(0xFF95848C,true);
+    SWTColor  cSpecial = new SWTColor(0xFF95848C,true);
     ERect  eRect;
     EElbo  eElbo;
     EValue eValue;
@@ -425,7 +425,7 @@ public class ServerPanel extends Panel
       }
       else
       {
-        eCscShutdown.setColor((SwtColor)null);
+        eCscShutdown.setColor((SWTColor)null);
         eCscShutdown.setLabel("SCREEN\nSHUTDOWN");
       }
       eCscShutdown.setData(ctr<9?new Integer(ctr+1):null);
@@ -435,7 +435,7 @@ public class ServerPanel extends Panel
     }
     else
     {
-      eCscShutdown.setColor((SwtColor)null);
+      eCscShutdown.setColor((SWTColor)null);
       eCscShutdown.setLabel("SCREEN\nSHUTDOWN");
     }
     
