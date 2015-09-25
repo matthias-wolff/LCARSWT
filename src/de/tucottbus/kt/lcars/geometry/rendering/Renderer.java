@@ -135,16 +135,22 @@ public class Renderer
       gc.setClipping(dirtyArea);
 
     // background setup
-    ImageData bgImg = context.getBackgroundImage();
+    Image bgImg = context.getBackgroundImage().getImage();
     if (bgImg == null)
     {
       gc.setBackground(DEFAULT_BG_COLOR);
       gc.fillRectangle(dirtyArea);
     } else {
-      bgImg.scaledTo(context.getRenderWidth(), context.getRenderHeight());
-      Image img = new Image(gc.getDevice(), bgImg);
-      gc.drawImage(img, 0, 0);
-      img.dispose();
+      ImageData id = bgImg.getImageData();
+      if (id.width == context.getRenderWidth() && id.height == context.getRenderHeight())
+        gc.drawImage(bgImg, 0, 0);
+      else {
+        //TODO: cache resized image in SWTResourceManager or set background in composite properties
+        bgImg = new Image(gc.getDevice(), bgImg, SWT.IMAGE_COPY);
+        bgImg.getImageData().scaledTo(context.getRenderWidth(), context.getRenderHeight());
+        gc.drawImage(bgImg, 0, 0);
+        bgImg.dispose();
+      }      
     }
     // TODO possible problem with clipping when drawing
 

@@ -3,7 +3,7 @@ package de.tucottbus.kt.lcars.feedback;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
 
@@ -34,12 +34,12 @@ public abstract class UserFeedbackPlayer
   /**
    * The samples of the currently played eyecon.
    */
-  private SWTColor[] eyeconSamples;
+  private ColorMeta[] eyeconSamples;
 
   /**
    * The color to display instead of <code>null</code>.
    */
-  private SWTColor fallbackColor;
+  private ColorMeta fallbackColor;
   
   /**
    * The current eyecon play-back position.
@@ -171,7 +171,7 @@ public abstract class UserFeedbackPlayer
           // - Skip to last sample of currently played signal
           if (eyeconSamples!=null && eyeconSamples.length>0)
           {
-            SWTColor c = eyeconSamples[eyeconSamples.length-1];
+            ColorMeta c = eyeconSamples[eyeconSamples.length-1];
             if (c!=null || eyeconSamples.length==1) fallbackColor = c;
             writeColor(c==null?fallbackColor:c);
           }
@@ -201,7 +201,7 @@ public abstract class UserFeedbackPlayer
                 {
                   if (eyeconSamples!=null&&eyeconSample<eyeconSamples.length)
                   {
-                    SWTColor c = eyeconSamples[eyeconSample];
+                    ColorMeta c = eyeconSamples[eyeconSample];
                     if (eyeconSample==eyeconSamples.length-1 && (c!=null||eyeconSamples.length==1))
                       fallbackColor = c;
                     eyeconSample++;
@@ -252,7 +252,7 @@ public abstract class UserFeedbackPlayer
    *          The color. Implementations are expected to accept <code>null</code> as color value and
    *          display a default color in this case.
    */
-  public abstract void writeColor(SWTColor color);
+  public abstract void writeColor(ColorMeta color);
   
 }
 

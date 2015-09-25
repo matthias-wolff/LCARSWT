@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 public class LcarsGraticuleLayer extends LatLonGraticuleLayer
 {
@@ -17,14 +17,14 @@ public class LcarsGraticuleLayer extends LatLonGraticuleLayer
   protected void initRenderingParams()
   {
       GraticuleRenderingParams params;
-      SWTColor color;
+      ColorMeta color;
       
       Display display = LCARS.getDisplay();
       Font fNormal = SWTUtils.toAwtFont(display, LCARS.getFontMeta(LCARS.EF_NORMAL).getFont());
       Font fSmall = SWTUtils.toAwtFont(display, LCARS.getFontMeta(LCARS.EF_SMALL).getFont());
       
       // Ten degrees grid
-      color = SWTColor.WHITE;
+      color = ColorMeta.WHITE;
       params = new GraticuleRenderingParams();
       params.setValue(GraticuleRenderingParams.KEY_LINE_COLOR, color);
       params.setValue(GraticuleRenderingParams.KEY_LABEL_COLOR, color);

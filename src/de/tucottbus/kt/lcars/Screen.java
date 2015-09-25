@@ -40,7 +40,7 @@ import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -222,7 +222,7 @@ public class Screen
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
     {
       @Override
-      public void writeColor(SWTColor color)
+      public void writeColor(ColorMeta color)
       {
         // Does not give visual feedback
       }

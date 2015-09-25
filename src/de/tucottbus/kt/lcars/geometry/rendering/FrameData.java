@@ -8,14 +8,13 @@ import java.util.HashMap;
 import java.util.Vector;
 import java.util.function.BiFunction;
 
-import org.eclipse.swt.graphics.ImageData;
-
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.elements.ElementState;
-import de.tucottbus.kt.lcars.geometry.GImage;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * Represents a context containing all data required to render a frame.
@@ -34,7 +33,6 @@ class FrameData
   private PanelState panelState;
   private ArrayList<ElementData> elements;
   private ArrayList<ElementData> elementsToPaint;
-  private ImageData bgImg;
   private Shape dirtyArea;
   private boolean fullRepaint;
 
@@ -71,25 +69,14 @@ class FrameData
    */
   private boolean updateBgImage(FrameData pred)
   {
-    String thisRes = panelState.bgImageRes;
+    ImageMeta thisRes = panelState.bgImage;
 
-    if (pred != null)
-    {
-      String predRes = pred.panelState.bgImageRes;
-      if (thisRes == predRes || (thisRes != null && thisRes.equals(predRes)))
-      {
-        this.bgImg = pred.bgImg;
-        return false;
-      }
-    }
+    if (pred != null && Objectt.equals(thisRes, pred.panelState.bgImage))
+      return false;
 
     if (thisRes == null)
-    {
-      bgImg = null;
       return true;
-    }
 
-    bgImg = GImage.getImage(thisRes);
     // Dimension d = updateData.panelState.dimension;
     // bgImg.getScaledInstance(d.width,d.height,Image.SCALE_DEFAULT);
     return true;
@@ -299,9 +286,9 @@ class FrameData
     return elementsToPaint;
   }
 
-  public ImageData getBackgroundImage()
+  public ImageMeta getBackgroundImage()
   {
-    return bgImg;
+    return panelState.bgImage;
   }
   
   public Boolean getFullRepaint() {

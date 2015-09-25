@@ -18,7 +18,8 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 
 /**
  * A simple topographic map with a background image, a sector grid, point shaped
@@ -52,7 +53,7 @@ public class ETopography extends ElementContributor
   private Vector<ERect>     points;
 
   // Map image fields
-  private String            mapImageFile;
+  private ImageMeta            mapImage;
   private Rectangle2D.Float mapImageBounds;
   private int               mapStyle;
   
@@ -172,9 +173,9 @@ public class ETopography extends ElementContributor
    *          <code>true</code> to recompute the layout (this will make the
    *          changes visible)
    */
-  public void setMapImage(String imageFile, Rectangle2D.Float bounds, boolean layout)
+  public void setMapImage(ImageMeta imageMeta, Rectangle2D.Float bounds, boolean layout)
   {
-    this.mapImageFile   = imageFile;
+    this.mapImage       = imageMeta;
     this.mapImageBounds = bounds;
     if (layout) layout();
   }
@@ -347,7 +348,7 @@ public class ETopography extends ElementContributor
     int       cx = r.x;
     int       cy = r.y;
     
-    final SWTColor transparent = new SWTColor(0, true);    
+    final ColorMeta transparent = new ColorMeta(0, true);    
     Point2D.Float ncp = new Point2D.Float(x,y);
     
     int n = cursor.size();
@@ -533,13 +534,13 @@ public class ETopography extends ElementContributor
 //      bi = bi.getSubimage(x,y,w,h);
 //      img = bi.getScaledInstance(lBounds.width,lBounds.height,Image.SCALE_DEFAULT);
 //      add(new EImage(null,0,0,LCARS.ES_STATIC,img));
-      add(new EImage(null,0,0,LCARS.ES_STATIC,mapImageFile));
+      add(new EImage(null,0,0,LCARS.ES_STATIC,mapImage));
     }
     catch (IllegalStateException e)
     {
     }
     
-    final SWTColor transparent = new SWTColor(0, true);
+    final ColorMeta transparent = new ColorMeta(0, true);
     
     // Create points
     for (ERect point : points)
@@ -575,7 +576,7 @@ public class ETopography extends ElementContributor
     if (this.gridStyle!=-1)
       gs = this.gridStyle & (LCARS.ES_COLOR|LCARS.ES_FONT);
       
-    SWTColor color = new SWTColor(LCARS.getColor(panel.getColorScheme(),gs), (int)(255*gridMajorAlpha));
+    ColorMeta color = new ColorMeta(LCARS.getColor(panel.getColorScheme(),gs), (int)(255*gridMajorAlpha));
     ELabel unitLabel = null;
     if (pGridMajor!=null)
     {

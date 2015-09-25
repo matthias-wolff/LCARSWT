@@ -18,7 +18,7 @@ import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.util.Objectt;
 
@@ -131,7 +131,7 @@ public abstract class EElement
    * @see #getColor()
    * @see #getBgColor()
    */
-  public void setColor(SWTColor color)
+  public void setColor(ColorMeta color)
   {
     if (de.tucottbus.kt.lcars.util.Objectt.equals(color, data.state.getColor())) return;
     data.state.setColor(color);
@@ -151,13 +151,13 @@ public abstract class EElement
   @Deprecated
   public void setColor(Color color)
   {
-    SWTColor dsc = data.state.getColor();
+    ColorMeta dsc = data.state.getColor();
     if(color == null) {
       if (dsc == null) return;
       data.state.setColor(null);        
     }
     else {
-      SWTColor ndsc = AwtSwt.toSwtColor(color);
+      ColorMeta ndsc = AwtSwt.toSwtColor(color);
       if (ndsc.equals(dsc)) return;
       data.state.setColor(ndsc);
     }
@@ -176,7 +176,7 @@ public abstract class EElement
    * @see #getColorStyle()
    * @see #setColor(Color)
    */
-  public SWTColor getColor()
+  public ColorMeta getColor()
   {
     return data.state.getColor();
   }
@@ -184,7 +184,7 @@ public abstract class EElement
   /**
    * @deprecated 
    */
-  public SWTColor getBgColor()
+  public ColorMeta getBgColor()
   {
     return data.state.getBgColor(new PanelState(null));
   }

@@ -209,11 +209,11 @@ public class AwtSwt
 
   
   
-  public static SWTColor toSwtColor(Color color) {
-    return new SWTColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());        
+  public static ColorMeta toSwtColor(Color color) {
+    return new ColorMeta(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());        
   }
   
-  public static Color toAwtColor(SWTColor color) {
+  public static Color toAwtColor(ColorMeta color) {
     return new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());        
   }
   

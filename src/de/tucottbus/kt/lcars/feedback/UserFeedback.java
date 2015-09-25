@@ -1,6 +1,6 @@
 package de.tucottbus.kt.lcars.feedback;
 
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 
 /**
@@ -47,7 +47,7 @@ public class UserFeedback
     case NONE:
     {
       signal.eyecon = new Eyecon();
-      signal.eyecon.setSamples(new SWTColor[] { null });
+      signal.eyecon.setSamples(new ColorMeta[] { null });
       return signal;
     }
     case TOUCH:
@@ -61,7 +61,7 @@ public class UserFeedback
     case REC_LISTENING:
     {
       signal.eyecon = new Eyecon();
-      signal.eyecon.setSamples(new SWTColor[]{ new SWTColor(0x0099CC) });
+      signal.eyecon.setSamples(new ColorMeta[]{ new ColorMeta(0x0099CC) });
       signal.earcon = new Earcon();
       signal.earcon.resourceFile = earconFileBase+"/earcon-rec-listening.wav";
       return signal;
@@ -69,15 +69,15 @@ public class UserFeedback
     case REC_SLEEPING:
     {
       signal.eyecon = new Eyecon();
-      signal.eyecon.setSamples(new SWTColor[] {new SWTColor(0x0000FF)});
+      signal.eyecon.setSamples(new ColorMeta[] {new ColorMeta(0x0000FF)});
       signal.earcon = new Earcon();
       signal.earcon.resourceFile = earconFileBase+"/earcon-rec-sleeping.wav";
       return signal;
     }
     case REC_ACCEPTED:
     {
-      SWTColor c = new SWTColor(0x00FF66);
-      SWTColor[] samples = new SWTColor[13];
+      ColorMeta c = new ColorMeta(0x00FF66);
+      ColorMeta[] samples = new ColorMeta[13];
       for (int i=0; i<4; i++)
       {
         samples[i]=c;
@@ -91,8 +91,8 @@ public class UserFeedback
     }
     case REC_REJECTED:
     {
-      SWTColor c = new SWTColor(0xFF0066);
-      SWTColor[] samples = new SWTColor[25];
+      ColorMeta c = new ColorMeta(0xFF0066);
+      ColorMeta[] samples = new ColorMeta[25];
       for (int i=0; i<24; i++) samples[i]=c;
       signal.eyecon = new Eyecon();
       signal.eyecon.setSamples(samples);

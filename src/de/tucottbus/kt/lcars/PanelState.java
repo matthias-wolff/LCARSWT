@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars;
 import java.awt.Dimension;
 import java.io.Serializable;
 
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
@@ -101,7 +102,7 @@ public class PanelState implements Serializable
    * The resource name of the background image file or <code>null</code> for no
    * background image.
    */
-  public String bgImageRes = null;
+  public ImageMeta bgImage = null;
 
   /**
    * Creates a new panel state instance.
@@ -117,7 +118,7 @@ public class PanelState implements Serializable
    */  
   public int getUpdateFlags(PanelState other) {
     if (other == null) throw new NullPointerException();
-    int result = !Objectt.equals(bgImageRes,    other.bgImageRes) ?          BACKGROUND : 0;    
+    int result = !Objectt.equals(bgImage,    other.bgImage) ?          BACKGROUND : 0;    
     if (                         width       != other.width
                               || height      != other.height)      result |= DIMENSION;
     if (                         colorScheme != other.colorScheme) result |= COLOR_SCHEME;
@@ -139,7 +140,7 @@ public class PanelState implements Serializable
   public boolean equals(PanelState other)
   {
     return other != null
-        && Objectt.equals(bgImageRes, other.bgImageRes)
+        && Objectt.equals(bgImage, other.bgImage)
         && width       == other.width
         && height      == other.height
         && colorScheme == other.colorScheme

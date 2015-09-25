@@ -9,7 +9,8 @@ import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ERect;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 
 /**
  * PADD main panels are displayed on the PADD panel selector.
@@ -33,7 +34,7 @@ public abstract class PaddMainPanel extends Panel
     // Hidden emergency button (in the lower right corner)
     EElement e;
     e = new ERect(this,0,dim.height-23,23,23,0,null);
-    e.setColor(new SWTColor(0,true));
+    e.setColor(new ColorMeta(0,true));
     e.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -72,7 +73,7 @@ public abstract class PaddMainPanel extends Panel
     // On WeTab: add a close button
     if ("wetab".equals(LCARS.getArg("--device=")))
     {
-      e = new EImage(this,dim.width-50,20,0,"de/tudresden/ias/lcars/padd/WeTabRemoveButton.png");
+      e = new EImage(this,dim.width-50,20,0,new ImageMeta.Resource("padd/WeTabRemoveButton.png"));
       e.addEEventListener(new EEventListenerAdapter()
       {
         @Override

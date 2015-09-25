@@ -48,7 +48,7 @@ public abstract class FontMeta implements Serializable
       return LCARS.getFontMeta(style).getFont();
     }
     public String toString() {
-      return Explicit.class.getSimpleName() + " style=" + Integer.toHexString(style);
+      return FontMeta.class.getSimpleName() + "." + Implicit.class.getSimpleName() + " style=" + Integer.toHexString(style);
     }
 
   }
@@ -83,8 +83,9 @@ public abstract class FontMeta implements Serializable
       return SWTResourceManager.getFont(name, height, style);
     }
     
+    @Override
     public String toString() {
-      return Explicit.class.getSimpleName() + " name=\"" + name + "\" height=" + height + " style=" + style;
+      return FontMeta.class.getSimpleName() + "." + Explicit.class.getSimpleName() + " name=\"" + name + "\" height=" + height + " style=" + style;
     }    
   }
 }

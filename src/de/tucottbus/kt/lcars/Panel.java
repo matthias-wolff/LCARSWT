@@ -27,7 +27,9 @@ import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 import de.tucottbus.kt.lcars.speech.ISpeechEventListener;
 import de.tucottbus.kt.lcars.speech.events.SpeechEvent;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * An LCARS panel. A panel represents the contents and semantics of a graphical, haptic, acoustic
@@ -214,7 +216,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       e.printStackTrace();
     }
 
-    setBgImageResource(LCARS.getArg("--wallpaper="));
+    setBackground(new ImageMeta.Resource(LCARS.getArg("--wallpaper=")));
     
     eMsgBox = new EMessageBox((dim.width-600)/2,(dim.height-280)/2,600,280);
     ePnlSel = new EPanelSelector((dim.width-800)/2,(dim.height-480)/2,800,480);
@@ -407,25 +409,24 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * Returns the resource name of the background image of this panel. Can be
    * <code>null</code>.
    */
-  public String getBgImageResource()
+  public ImageMeta getBackground()
   {
-    return state.bgImageRes;
+    return state.bgImage;
   }
 
   /**
    * Sets the resource name of the background image of this panel.
    * 
-   * @param bgImageRes
+   * @param bgImage
    *          The resource file name (<code>package/file.ext</code>) of the
    *          background image. The package separator '.' must be replaced by a
    *          slash '/'. Can be <code>null</code> for no background image. PNG,
    *          GIF and JPG image files are acceptable.
    */
-  public void setBgImageResource(String bgImageRes)
+  public void setBackground(ImageMeta bgImageRes)
   {
-    if (bgImageRes==null && state.bgImageRes==null) return;
-    if (bgImageRes!=null && bgImageRes.equals(state.bgImageRes)) return;
-    state.bgImageRes = bgImageRes;
+    if (Objectt.equals(bgImageRes, state.bgImage)) return;
+    state.bgImage = bgImageRes;
     invalidate();
   }
   

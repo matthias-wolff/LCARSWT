@@ -44,7 +44,8 @@ import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
 import de.tucottbus.kt.lcars.geometry.GArea;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 /**
@@ -228,10 +229,10 @@ public class ShowcasePanel extends Panel
       @Override
       public void touchDown(EEvent ee)
       {
-        if (getBgImageResource()==null)
-          setBgImageResource("de/tucottbus/kt/lcars/resources/images/PanelBackground.png");
+        if (getBackground()==null || getBackground().path == null)
+          setBackground(new ImageMeta.Resource("resources/images/PanelBackground.png"));
         else
-          setBgImageResource(null);
+          setBackground(null);
       }
     });
     add(eRect);
@@ -291,19 +292,19 @@ public class ShowcasePanel extends Panel
     add(new ELabel(this,1427,236,300,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT"));
     
     ELabel eLabel = new ELabel(this,1730,154,164,0,LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT,"LARGE TEXT");
-    eLabel.setColor(SWTColor.BLACK);
+    eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,189,164,0,LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.EC_TEXT,"NORMAL TEXT");
-    eLabel.setColor(SWTColor.BLACK);
+    eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,215,164,0,LCARS.EF_SMALL|LCARS.ES_STATIC|LCARS.EC_TEXT,"SMALL TEXT");
-    eLabel.setColor(SWTColor.BLACK);
+    eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
     eLabel = new ELabel(this,1730,236,164,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT");
-    eLabel.setColor(SWTColor.BLACK);
+    eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
     /*
@@ -368,12 +369,12 @@ public class ShowcasePanel extends Panel
     add(eElbo);
     
     add(new ELabel(this,1170,706,327,97,LCARS.EF_LARGE|LCARS.EC_PRIMARY|LCARS.ES_STATIC|LCARS.ES_LABEL_SE,"IMAGE"));
-    EImage eImage = new EImage(this,1500,700,0,"de/tucottbus/kt/lcars/resources/images/flare.png");
+    EImage eImage = new EImage(this,1500,700,0,new ImageMeta.Resource("resources/images/flare.png"));
     add(eImage);
     
     add(new ELabel(this,1170,939,327,58,LCARS.EF_LARGE|LCARS.EC_PRIMARY|LCARS.ES_STATIC|LCARS.ES_LABEL_E,"ADVANCED STYLES"));
     eRect = new ERect(this,1530,941,180,58,LCARS.ES_RECT_RND|LCARS.ES_LABEL_W,"CUSTOM COLOR");
-    eRect.setColor(new SWTColor(0,255,96));
+    eRect.setColor(new ColorMeta(0,255,96));
     add(eRect);
     add(new ERect(this,1530,1002,180,58,LCARS.EC_SECONDARY|LCARS.ES_OUTLINE|LCARS.ES_RECT_RND|LCARS.ES_LABEL_W,"TRANSPARENCY"));
     add(new ELabel(this,1539,1002,180,58,LCARS.EC_SECONDARY|LCARS.ES_LABEL_W,"OUTLINE"));

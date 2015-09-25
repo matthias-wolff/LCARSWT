@@ -7,7 +7,7 @@ import java.io.Serializable;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
@@ -67,7 +67,7 @@ public class ElementState implements Serializable
    * The custom color of background {@link AGeometry}s. If <code>null</code> the color is
    * obtained from the {@link #style} of the geometry through {@link LCARS#getColor(int, int)}.
    */
-  private SWTColor color;
+  private ColorMeta color;
   
   /**
    * The custom opacity of background {@link AGeometry}s.
@@ -207,7 +207,7 @@ public class ElementState implements Serializable
    * {@link #getBgColor(PanelState)} to obtain the color actually used for
    * painting the background geometries.
    */
-  public SWTColor getColor()
+  public ColorMeta getColor()
   {
     return this.color;
   }
@@ -219,7 +219,7 @@ public class ElementState implements Serializable
    *          The new custom background color. If <code>null</code> the background geometries will
    *          be painted in their "natural" color defined by the {@linkplain #style style}.
    */
-  public void setColor(SWTColor color)
+  public void setColor(ColorMeta color)
   {    
     changed |= !Objectt.equals(this.color, color);
     this.color = color;// != null ? color : SwtColor.BLACK;
@@ -230,9 +230,9 @@ public class ElementState implements Serializable
   /**
    * Returns the color actually used for painting foreground {@linkplain AGeometry geometries}.
    */
-  public SWTColor getFgColor()
+  public ColorMeta getFgColor()
   {
-    return SWTColor.BLACK;
+    return ColorMeta.BLACK;
   }
 
   /**
@@ -243,13 +243,13 @@ public class ElementState implements Serializable
    * @param panelState
    *          The current panel state.
    */
-  public SWTColor getBgColor(PanelState panelState)
+  public ColorMeta getBgColor(PanelState panelState)
   {
     boolean blinking = getStyle(LCARS.ES_BLINKING)!=0;
     int     blink    = panelState!=null?panelState.blink:0;
 
     if (this.color!=null && (!blinking || blink!=0)) return color;
-    if (highlighted) return SWTColor.WHITE;
+    if (highlighted) return ColorMeta.WHITE;
     return LCARS.getColor(panelState.colorScheme,style^touch^(blinking?blink:0));
   }
 

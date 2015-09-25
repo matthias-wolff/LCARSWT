@@ -14,7 +14,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.elements.modify.EPerspective;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 /**
  * An animated audio levels display for stereo signals. The display contains a
@@ -37,8 +37,8 @@ public class ELevelsDisplay extends ElementContributor
   private ELabel         eDuration;
   private Vector<ELabel> eHistory;
   private Vector<ELabel> eFuture;
-  private SWTColor       cBars;
-  private SWTColor       cGrid;
+  private ColorMeta       cBars;
+  private ColorMeta       cGrid;
 
   // -- Constructors --
   
@@ -116,7 +116,7 @@ public class ELevelsDisplay extends ElementContributor
    * @param color
    *          The color, can be <code>null</code> in order to select the default color.
    */
-  public void setBarColor(SWTColor color)
+  public void setBarColor(ColorMeta color)
   {
     if (this.cBars==null && color==null) return;
     if (this.cBars!=null && this.cBars.equals(color)) return;
@@ -130,7 +130,7 @@ public class ELevelsDisplay extends ElementContributor
    * @param color
    *          The color, can be <code>null</code> in order to select the default color.
    */
-  public void setGridColor(SWTColor color)
+  public void setGridColor(ColorMeta color)
   {
     if (this.cGrid==null && color==null) return;
     if (this.cGrid!=null && this.cGrid.equals(color)) return;
@@ -301,7 +301,7 @@ public class ELevelsDisplay extends ElementContributor
       add(eRect);
     }
     eRect = new ERect(null,-2,0,3,barC*barH,LCARS.ES_STATIC,null);
-    eRect.addGeometryModifier(perspective); eRect.setColor(SWTColor.BLACK);
+    eRect.addGeometryModifier(perspective); eRect.setColor(ColorMeta.BLACK);
     add(eRect);
     
     // The frame

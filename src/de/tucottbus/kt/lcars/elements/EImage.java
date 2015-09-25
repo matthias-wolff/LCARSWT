@@ -5,11 +5,11 @@ import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.geometry.GImage;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 /**
@@ -19,12 +19,12 @@ import de.tucottbus.kt.lcars.geometry.AGeometry;
  */
 public class EImage extends EElement implements ImageObserver
 {
-  private String resourceName;
+  private ImageMeta meta;
   
-  public EImage(Panel panel, int x, int y, int style, String imageFile)
+  public EImage(Panel panel, int x, int y, int style, ImageMeta imageMeta)
   {
     super(panel,x,y,0,0,style,null);
-    this.resourceName = imageFile;
+    meta = imageMeta;
   }
 
   @Override
@@ -42,7 +42,7 @@ public class EImage extends EElement implements ImageObserver
 //      getImage().getHeight(this);
 //    }
     ArrayList<AGeometry> geos = new ArrayList<AGeometry>();
-    geos.add(new GImage(resourceName,new Point(x,y),this));
+    geos.add(new GImage(meta,new Point(x,y),this));
     return geos;
   }
   
@@ -62,9 +62,9 @@ public class EImage extends EElement implements ImageObserver
    *   
    * @return image
    */
-  public ImageData getImage()
+  public Image getImage()
   {
-    return GImage.getImage(this.resourceName);  
+    return meta.getImage();  
   }
 
   @Override

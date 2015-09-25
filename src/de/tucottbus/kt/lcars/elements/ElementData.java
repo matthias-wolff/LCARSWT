@@ -276,10 +276,8 @@ public final class ElementData implements Serializable
 
     final int fgAlpha = (int) (state.getFgAlpha() * 255);
     final int bgAlpha = (int) (state.getBgAlpha(panelState) * 255);
-    final Color fgColor = new Color(gc.getDevice(),
-        state.getFgColor().getRGB());
-    final Color bgColor = new Color(gc.getDevice(),
-        state.getBgColor(panelState).getRGB());
+    final Color fgColor = state.getFgColor().getColor();
+    final Color bgColor = state.getBgColor(panelState).getColor();
 
     // init with and render first geometry
     AGeometry gi = geoIt.next();
@@ -302,9 +300,6 @@ public final class ElementData implements Serializable
       }
       gi.paint2D(gc);      
     }
-    
-    fgColor.dispose();
-    bgColor.dispose();
   }
 
   /**

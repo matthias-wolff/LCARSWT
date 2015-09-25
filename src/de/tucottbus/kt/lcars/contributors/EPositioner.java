@@ -11,7 +11,7 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.swt.SWTColor;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 /**
  * A {@linkplain ETopography topographic map} with one movable point.
@@ -246,7 +246,7 @@ public class EPositioner extends ETopography
     // Add slider touch control
     Rectangle lBounds = getLogicalBounds();
     eTouchArea = new ERect(null,0,0,lBounds.width,lBounds.height,LCARS.EB_OVERDRAG,null);
-    eTouchArea.setColor(new SWTColor(0,true));
+    eTouchArea.setColor(new ColorMeta(0,true));
     eTouchArea.addEEventListener(this);
     eTouchArea.setStatic(this.lock);
     add(eTouchArea);

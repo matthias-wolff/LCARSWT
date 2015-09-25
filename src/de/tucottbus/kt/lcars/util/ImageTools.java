@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.geometry.GImage;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 
 /**
  * This class supplies assorted {@linkplain java.awt.Image image} tools.
@@ -79,9 +80,9 @@ public class ImageTools
    * @return The image or <code>null</code> if the image file was not found.
    * @deprecated Image files handled by {@link GImage}
    */
-  public static Image loadImage(String imageFile)
+  public static Image loadImage(ImageMeta imageMeta)
   {
-    ImageData data = GImage.getImage(imageFile);
+    ImageData data = imageMeta.getImage().getImageData();
     ColorModel colorModel = null;
     PaletteData palette = data.palette;
     if (palette.isDirect) {
