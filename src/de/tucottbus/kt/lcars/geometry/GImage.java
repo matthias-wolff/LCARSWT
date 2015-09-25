@@ -46,6 +46,8 @@ public class GImage extends AGeometry
   @Override
   public Area getArea()
   {
+    if (cachedImage != null)
+      return new Area(new Rectangle(pos.x,pos.y, cachedImage.getImageData().width, cachedImage.getImageData().height));    
     ImageData image = getImage(); 
     return image != null
         ? new Area(new java.awt.Rectangle(pos.x,pos.y,image.width,image.height))
@@ -178,7 +180,7 @@ public class GImage extends AGeometry
   @Override
   protected void finalize() throws Throwable
   {
-    if (cachedImage != null)
+    if (cachedImage != null && !cachedImage.isDisposed())
       cachedImage.dispose();
     super.finalize();
   }

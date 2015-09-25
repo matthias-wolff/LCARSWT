@@ -12,7 +12,7 @@ public class LcarsScalebarLayer extends ScalebarLayer
   public LcarsScalebarLayer()
   {
     super();
-    setFont(SWTUtils.toAwtFont(LCARS.getDisplay(), LCARS.getFontData(LCARS.EF_SMALL), true));
+    setFont(SWTUtils.toAwtFont(LCARS.getDisplay(), LCARS.getFontMeta(LCARS.EF_SMALL).getFont()));
   }
 
 }

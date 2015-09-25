@@ -10,6 +10,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.GregorianCalendar;
 
+import org.jfree.experimental.swt.SWTUtils;
+
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
 
@@ -41,8 +43,8 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     final boolean addVersionTag=true;  //true if pointing to a new wfs server
     
     
-    final Font fntSmall = AwtSwt.toAwtFont(LCARS.getFontData(LCARS.EF_SMALL));
-    final Font fntNormal = AwtSwt.toAwtFont(LCARS.getFontData(LCARS.EF_NORMAL));
+    final Font fntSmall = SWTUtils.toAwtFont(LCARS.getDisplay(), LCARS.getFontMeta(LCARS.EF_SMALL).getFont());
+    final Font fntNormal = SWTUtils.toAwtFont(LCARS.getDisplay(), LCARS.getFontMeta(LCARS.EF_NORMAL).getFont());
     final Color colElboup = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_ELBOUP));
     final Color colElbolo = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_ELBOLO));
     final Color colPriSel = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_PRIMARY|LCARS.ES_SELECTED));

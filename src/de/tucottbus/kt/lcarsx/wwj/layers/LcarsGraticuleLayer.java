@@ -20,8 +20,8 @@ public class LcarsGraticuleLayer extends LatLonGraticuleLayer
       SWTColor color;
       
       Display display = LCARS.getDisplay();
-      Font fNormal = SWTUtils.toAwtFont(display, LCARS.getFontData(LCARS.EF_NORMAL), true);
-      Font fSmall = SWTUtils.toAwtFont(display, LCARS.getFontData(LCARS.EF_SMALL), true);
+      Font fNormal = SWTUtils.toAwtFont(display, LCARS.getFontMeta(LCARS.EF_NORMAL).getFont());
+      Font fSmall = SWTUtils.toAwtFont(display, LCARS.getFontMeta(LCARS.EF_SMALL).getFont());
       
       // Ten degrees grid
       color = SWTColor.WHITE;

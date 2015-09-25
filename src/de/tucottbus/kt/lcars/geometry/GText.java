@@ -6,12 +6,11 @@ import java.awt.geom.Point2D;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.TextLayout;
 
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.swt.FontMeta;
 
 /**
  * A geometry representing a text.
@@ -25,7 +24,7 @@ public class GText extends AGeometry
   protected String text;
   protected int descent;
   protected int indent;
-  protected FontData fontData;
+  protected FontMeta fontMeta;
   
   protected int x;
   protected int y;
@@ -33,7 +32,6 @@ public class GText extends AGeometry
   protected int height;
     
   protected transient TextLayout tl;
-  protected transient Font font;
   
   /**
    * Creates a new text geometry. A text geometry provides information and
@@ -53,7 +51,7 @@ public class GText extends AGeometry
    * @param foreground
    *          foreground/background flag
    */
-  public GText(String text, Rectangle bounds, FontData fontData,
+  public GText(String text, Rectangle bounds, FontMeta fontMeta,
       boolean foreground)
   {    
     super(foreground);
@@ -62,7 +60,7 @@ public class GText extends AGeometry
     width = bounds.width;
     height = bounds.height;
     this.text = text;
-    this.fontData = fontData;
+    this.fontMeta = fontMeta;
   }
   
   public Point2D.Float getPos()
@@ -117,7 +115,7 @@ public class GText extends AGeometry
   public void paint2D(GC gc)
   {    
     if(tl == null)
-      tl = LCARS.getTextLayout(font = new Font(gc.getDevice(), fontData), text);
+      tl = LCARS.getTextLayout(fontMeta.getFont(), text);
     
     org.eclipse.swt.graphics.Rectangle clip = gc.getClipping();
     gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height));
@@ -139,14 +137,12 @@ public class GText extends AGeometry
   {    
     if (tl != null && !tl.isDisposed())
       tl.dispose();
-    if (font != null && !font.isDisposed())
-      font.dispose();
     super.finalize();
   }
   
   @Override
   public String toString() {
-    return getClass().getSimpleName() + " text=\"" + text+"\" bounds=("+x+","+y+","+width+","+height+") fontsize=" + fontData.height + " font=\"" + fontData.getName() + "\"";
+    return getClass().getSimpleName() + " text=\"" + text+"\" bounds=("+x+","+y+","+width+","+height+") fontmeta=" + fontMeta;
   }
   
 }

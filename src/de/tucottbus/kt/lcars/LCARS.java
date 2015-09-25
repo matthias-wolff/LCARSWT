@@ -60,7 +60,6 @@ import java.util.zip.ZipInputStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -80,6 +79,7 @@ import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
 import de.tucottbus.kt.lcars.net.RmiSecurityManager;
 import de.tucottbus.kt.lcars.net.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
+import de.tucottbus.kt.lcars.swt.FontMeta;
 import de.tucottbus.kt.lcars.swt.SWTColor;
 
 /**
@@ -456,7 +456,7 @@ public class LCARS implements ILcarsRemote
   }
 
   // -- Font manager --
-  private static FontData[] fonts = null;
+  private static FontMeta.Explicit[] fonts = null;
   private static Map<String,Boolean> insFnts = new Hashtable<String,Boolean>();
 
   /**
@@ -514,7 +514,7 @@ public class LCARS implements ILcarsRemote
    *          and <code>LCARS.EC_XXX</code> constants.
    * @return The font.
    */
-  public static FontData getFontData(int style)
+  public static FontMeta.Explicit getFontMeta(int style)
   {
     if (fonts==null)
     {
@@ -522,10 +522,9 @@ public class LCARS implements ILcarsRemote
       
       int    h = 1200;/*LCARS.panelDim.height;*/
       
-      fonts = new FontData[EF_COUNT];
-      
-      final Function<Integer, FontData> newFont = (height) -> {       
-        return new FontData(f[0], (int)(height*fontScale), java.awt.Font.PLAIN);
+      fonts = new FontMeta.Explicit[EF_COUNT];
+      final Function<Integer, FontMeta.Explicit> newFont = (height) -> {       
+        return new FontMeta.Explicit(f[0], (int)(height*fontScale), java.awt.Font.PLAIN);
       };
       
       fonts[EF_LARGE >>EF_SHIFT] = newFont.apply((int)(h/27.0)); //32.0
@@ -546,10 +545,6 @@ public class LCARS implements ILcarsRemote
     return fonts[font];
   }
   
-  public static Font getFont(int style) {
-    return new Font(getDisplay(), getFontData(style));
-  }
-  
   /**
    * Returns an LCARS font with a custom font size.
    * 
@@ -560,18 +555,11 @@ public class LCARS implements ILcarsRemote
    *          The point size of the font.
    * @return The font.
    */
-  public static FontData getFontData(int style, int size)
+  public static FontMeta.Explicit getFontMeta(int style, int size)
   {
-    FontData next = getFontData(style);
-    FontData result = new FontData(next.getName(), (int)(size*fontScale+.5), next.getStyle());
-    result.setLocale(next.getLocale());
-    return result;
+    return new FontMeta.Explicit(getFontMeta(style), (int)(size*fontScale+.5));
   }
 
-  public static Font getFont(int style, int size) {
-    return new Font(getDisplay(), getFontData(style, size));
-  }
-  
   // -- Cursor manager --
   
   /**
@@ -651,8 +639,9 @@ public class LCARS implements ILcarsRemote
   }
 
   
-  public static Rectangle getTextBounds(Font font, String text) {
+  public static Rectangle getTextBounds(FontMeta meta, String text) {    
     if (text == null || text == "") return new Rectangle();
+    Font font = meta.getFont();    
     TextLayout lt = new TextLayout(font.getDevice());
     lt.setFont(font);
     lt.setText(text);
@@ -682,10 +671,7 @@ public class LCARS implements ILcarsRemote
     boolean             foreground    
   )
   {
-    Font font = getFont(style);
-    ArrayList<AGeometry> result = createTextGeometry2D(font, text, bounds, style, insets, foreground);
-    font.dispose();
-    return result;
+    return createTextGeometry2D(getFontMeta(style), text, bounds, style, insets, foreground);
   }
 
   /**
@@ -704,7 +690,7 @@ public class LCARS implements ILcarsRemote
    */
   public static ArrayList<AGeometry> createTextGeometry2D
   (
-    Font                font,
+    FontMeta            fontMeta,
     String              text,
     java.awt.Rectangle  bounds,
     int                 style,
@@ -723,6 +709,8 @@ public class LCARS implements ILcarsRemote
     Display      display = Display.getDefault();
     TextLayout        tl = new TextLayout(display);
     String s[] = text.split("\n");
+    
+    Font font = fontMeta.getFont();
     tl.setFont(font);
     tl.setText(text);
     
@@ -771,9 +759,7 @@ public class LCARS implements ILcarsRemote
     }
             
     int n = tl.getLineCount();
-    
-    FontData fd = font.getFontData()[0];
-    
+        
     for (int i=0; i<n; i++)
     {
       org.eclipse.swt.graphics.Rectangle linBnds = tl.getLineBounds(i);
@@ -787,7 +773,7 @@ public class LCARS implements ILcarsRemote
       GText gt = new GText(
           s[i],
           b,
-          fd,
+          fontMeta,
           foreground);
       if (x < tx) gt.setIndent(x-tx);
       if (y < ty) gt.setDescent(y-ty);
@@ -1762,5 +1748,4 @@ public class LCARS implements ILcarsRemote
       Log.err("", e);
     }
   }
-
 }

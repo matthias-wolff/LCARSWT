@@ -7,13 +7,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.widgets.Display;
-
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.swt.FontMeta;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.util.Objectt;
 
@@ -59,11 +56,8 @@ public class EValue extends ERect
     Rectangle r    = getBounds();
     int       m    = computeValueMargin();
     int       w    = this.vw;
-    if (w<=0) {
-      Font      font = new Font(Display.getDefault(), getValueFont());
-      w = LCARS.getTextBounds(font,value).width + 6;
-      font.dispose();
-    }
+    if (w<=0)
+      w = LCARS.getTextBounds(getValueFont(),value).width + 6;
     return (getStyle()&LCARS.ES_VALUE_W)!=0
         ? new Rectangle(r.x+m,r.y,w,r.height)
         : new Rectangle(r.x+(r.width-w-m),r.y,w,r.height);
@@ -125,30 +119,28 @@ public class EValue extends ERect
 
     // Create value geometry
     int   vstyle = (style&LCARS.ES_VALUE_W)!=0 ? LCARS.ES_LABEL_W : LCARS.ES_LABEL_E;
-    Font  font   = new Font(LCARS.getDisplay(), getValueFont());
+    FontMeta.Explicit  fm = getValueFont();
     Point insets = new Point(3,1);
-    if (font.getFontData()[0].getName().equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
+    if (fm.name.equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
     
     //geos.add(new GText(value, new Point2D.Float(bounds.x, bounds.y), null, fd, isBlinking()))
-    geos.addAll(LCARS.createTextGeometry2D(font,value,bounds,vstyle,insets,false));
+    geos.addAll(LCARS.createTextGeometry2D(fm,value,bounds,vstyle,insets,false));
     
-    font.dispose();
     
     // Create label geometries
-    font   = LCARS.getFont(style);
+    fm   = LCARS.getFontMeta(style);
     bounds = getBounds();
     insets = computeLabelInsets();
-    geos.addAll(LCARS.createTextGeometry2D(font,label,bounds,style,insets,true));
-    font.dispose();
+    geos.addAll(LCARS.createTextGeometry2D(fm,label,bounds,style,insets,true));
     
     // This is it
     return geos;
   }  
 
-  public FontData getValueFont()
+  public FontMeta.Explicit getValueFont()
   {
-    return LCARS.getFontData(LCARS.EF_HEAD1,(int)(getBounds().height *
-                                              (LCARS.getFontData(LCARS.EF_HEAD1).getName().equals(LCARS.FN_COMPACTA)?1.45f:1.30f)));
+    return LCARS.getFontMeta(LCARS.EF_HEAD1,(int)(getBounds().height *
+        (LCARS.getFontMeta(LCARS.EF_HEAD1).name.equals(LCARS.FN_COMPACTA)?1.45f:1.30f))); 
   }
   
 }
