@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.geometry;
 
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -18,7 +18,7 @@ import de.tucottbus.kt.lcars.LCARS;
  * 
  * @author Matthias Wolff, Christian Borck
  */
-public class GText extends Geometry
+public class GText extends AGeometry
 {
   private static final long serialVersionUID = -1724627622898883028L;
   
@@ -124,6 +124,7 @@ public class GText extends Geometry
     gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height));
     tl.draw(gc, x+indent, y+descent, 0, text.length()-1, gc.getBackground(), gc.getForeground());
     gc.setClipping(clip);
+    
     if (LCARS.SCREEN_DEBUG)
     {      
       Color red = gc.getDevice().getSystemColor(SWT.COLOR_RED);
@@ -150,7 +151,7 @@ public class GText extends Geometry
   
   @Override
   public String toString() {
-    return GText.class.getSimpleName() + " text=\"" + text+"\" bounds=("+x+","+y+","+width+","+height+") fontsize=" + fontData.height + " font=\"" + fontData.getName() + "\"";
+    return getClass().getSimpleName() + " text=\"" + text+"\" bounds=("+x+","+y+","+width+","+height+") fontsize=" + fontData.height + " font=\"" + fontData.getName() + "\"";
   }
   
 }

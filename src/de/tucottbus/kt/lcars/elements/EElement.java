@@ -14,13 +14,12 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
+import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
-import de.tucottbus.kt.lcars.j2d.EGeometryModifier;
-import de.tucottbus.kt.lcars.j2d.ElementState;
-import de.tucottbus.kt.lcars.j2d.GArea;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
@@ -191,7 +190,7 @@ public abstract class EElement
   }
 
   /**
-   * Returns the custom opacity of background {@linkplain Geometry geometries}.
+   * Returns the custom opacity of background {@linkplain AGeometry geometries}.
    * 
    * @see #setAlpha(float)
    */
@@ -754,7 +753,7 @@ public abstract class EElement
    * @return The geometries.
    */
   //TODO: replace Vector with ArrayList 
-  protected abstract ArrayList<Geometry> createGeometriesInt();
+  protected abstract ArrayList<AGeometry> createGeometriesInt();
     
   /**
    * Marks the GUI representation of element invalid. 
@@ -783,9 +782,9 @@ public abstract class EElement
     {
       int geoState = this.geoState;
       if ((geoState & GEO_RECOMPUTE) == 0) return geoState;// Unnecessary!
-      ArrayList<Geometry> geos = createGeometriesInt();
+      ArrayList<AGeometry> geos = createGeometriesInt();
       final boolean isOutline = isOutline();
-      for (Geometry geo : geos)
+      for (AGeometry geo : geos)
         if (geo instanceof GArea)
           ((GArea)geo).setOutline(isOutline);
       for (EGeometryModifier gm : modifiers)
@@ -850,7 +849,7 @@ public abstract class EElement
         invalid.accept("data.geometry == null");
       else {
         int i = 0;
-        for(Geometry g : data.geometry) {
+        for(AGeometry g : data.geometry) {
           if (g == null)
             invalid.accept("geometry["+i+"] == null");   
           i++;

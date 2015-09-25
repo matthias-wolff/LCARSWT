@@ -1,6 +1,5 @@
-package de.tucottbus.kt.lcars.j2d.rendering;
+package de.tucottbus.kt.lcars.geometry.rendering;
 
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -14,8 +13,8 @@ import org.eclipse.swt.graphics.ImageData;
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
-import de.tucottbus.kt.lcars.j2d.ElementState;
-import de.tucottbus.kt.lcars.j2d.GImage;
+import de.tucottbus.kt.lcars.elements.ElementState;
+import de.tucottbus.kt.lcars.geometry.GImage;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -124,7 +123,7 @@ class FrameData
   {
     if (pred == null)
     {
-      dirtyArea = new Rectangle(getRenderSize());
+      dirtyArea = new Rectangle(getRenderWidth(), getRenderHeight());
       elementsToPaint = elements;
       updateBgImage(null);
       return;
@@ -136,9 +135,7 @@ class FrameData
     //fullRepaint = true;
 
     int elCount = elements.size();
-    this.dirtyArea = new Rectangle(panelState.dimension);
 
-    Area dirtyArea = new Area();
     // 1. Create a hash map of the current ElementData
     HashMap<Long, ElementData> hPred = createHashMap(pred.elements);
 
@@ -161,11 +158,12 @@ class FrameData
           Log.err("Update failed on element #" + edu.serialNo + ": "
                   + e.getMessage());
         }
-
+      dirtyArea = new Area(new Rectangle(getRenderWidth(), getRenderHeight()));
     } else
     {
-      elementsToPaint = new ArrayList<ElementData>(elCount);
+      ArrayList<ElementData> elementsToPaint = new ArrayList<ElementData>(elCount);
       Vector<ElementData> elsWithoutChanges = new Vector<ElementData>(elCount);
+      Area dirtyArea = new Area();
 
       for (ElementData edu : elements)
         try
@@ -198,13 +196,15 @@ class FrameData
       {
         e.printStackTrace();
       }
-      dirtyArea.intersect(new Area(this.dirtyArea));
+      dirtyArea.intersect(new Area(new Rectangle(getRenderWidth(), getRenderHeight())));
       this.dirtyArea = dirtyArea;
 
       for (ElementData edu : elsWithoutChanges)
         if (dirtyArea.intersects(edu.getBounds()))
           elementsToPaint.add(edu);
+      this.elementsToPaint = elementsToPaint;
     }
+    
 //    if(elements.size() !=elementsToPaint.size())
 //      Log.warn(CLASSKEY, "Element difference " + elements.size() + ":" + elementsToPaint.size());
   }
@@ -279,11 +279,16 @@ class FrameData
     return dirtyArea;
   }
 
-  public Dimension getRenderSize()
+  public int getRenderWidth()
   {
-    return new Dimension(panelState.dimension);
+    return panelState.width;
   }
 
+  public int getRenderHeight()
+  {
+    return panelState.height;
+  }
+  
   public PanelState getPanelState()
   {
     return panelState;

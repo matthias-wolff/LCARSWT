@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.elements;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -6,13 +6,13 @@ import java.io.Serializable;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelState;
-import de.tucottbus.kt.lcars.elements.EElement;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * The serializable state of an {@linkplain EElement LCARS GUI element}. Contains style and state
- * information as well as a set of {@link Geometry}s defining the graphical representation of the
+ * information as well as a set of {@link AGeometry}s defining the graphical representation of the
  * element.
  * 
  * @author Matthias Wolff
@@ -64,13 +64,13 @@ public class ElementState implements Serializable
   private Rectangle bounds;
 
   /**
-   * The custom color of background {@link Geometry}s. If <code>null</code> the color is
+   * The custom color of background {@link AGeometry}s. If <code>null</code> the color is
    * obtained from the {@link #style} of the geometry through {@link LCARS#getColor(int, int)}.
    */
   private SwtColor color;
   
   /**
-   * The custom opacity of background {@link Geometry}s.
+   * The custom opacity of background {@link AGeometry}s.
    */
   private float alpha;
   
@@ -158,7 +158,7 @@ public class ElementState implements Serializable
   // -- Color getters and setters --
 
   /**
-   * Returns the custom opacity of background {@linkplain Geometry geometries}. Note that the return
+   * Returns the custom opacity of background {@linkplain AGeometry geometries}. Note that the return
    * value is not necessarily the opacity actually used for painting. The obtain the actual opacity
    * call {@link #getBgAlpha(PanelState)}.
    */
@@ -168,7 +168,7 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Sets custom the opacity of background {@linkplain Geometry geometries}.
+   * Sets custom the opacity of background {@linkplain AGeometry geometries}.
    * 
    * @param alpha
    *          The new opacity (0: transparent ... 1: opaque).
@@ -180,7 +180,7 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Returns the opacity actually used for painting foreground {@linkplain Geometry geometries}.
+   * Returns the opacity actually used for painting foreground {@linkplain AGeometry geometries}.
    */
   public float getFgAlpha()
   {
@@ -188,7 +188,7 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Returns the opacity actually used for painting background {@linkplain Geometry geometries}. The
+   * Returns the opacity actually used for painting background {@linkplain AGeometry geometries}. The
    * value depends on the custom opacity set through {@link #setAlpha(float)}, the
    * {@linkplain #style style}, the <code>panelState</code>, and internal states.
    * 
@@ -201,7 +201,7 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Returns the custom color of background {@linkplain Geometry geometries}. If
+   * Returns the custom color of background {@linkplain AGeometry geometries}. If
    * the value is <code>null</code> the background geometries will be painted in
    * their "natural" color defined by the {@linkplain #style style}. Call
    * {@link #getBgColor(PanelState)} to obtain the color actually used for
@@ -213,7 +213,7 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Sets the custom color of background {@linkplain Geometry geometries}.
+   * Sets the custom color of background {@linkplain AGeometry geometries}.
    * 
    * @param color
    *          The new custom background color. If <code>null</code> the background geometries will
@@ -224,11 +224,11 @@ public class ElementState implements Serializable
     changed |= !Objectt.equals(this.color, color);
     this.color = color;// != null ? color : SwtColor.BLACK;
     if (color != null && color.HasAlpha)
-      this.alpha = color.getAlpha()/255;
+      this.alpha = color.getAlpha()/255f;
   }
 
   /**
-   * Returns the color actually used for painting foreground {@linkplain Geometry geometries}.
+   * Returns the color actually used for painting foreground {@linkplain AGeometry geometries}.
    */
   public SwtColor getFgColor()
   {
@@ -236,7 +236,7 @@ public class ElementState implements Serializable
   }
 
   /**
-   * Returns the color actually used for painting background {@linkplain Geometry geometries}. The
+   * Returns the color actually used for painting background {@linkplain AGeometry geometries}. The
    * color depends on the custom color set through {@link #setColor(Color)}, the {@linkplain #style
    * style}, the <code>panelState</code>, and internal states.
    * 

@@ -8,8 +8,8 @@ import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
-import de.tucottbus.kt.lcars.j2d.GArea;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 public class ERect extends EElement
 {
@@ -46,9 +46,9 @@ public class ERect extends EElement
   }
 
   @Override
-  public ArrayList<Geometry> createGeometriesInt()
+  public ArrayList<AGeometry> createGeometriesInt()
   {
-    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
+    ArrayList<AGeometry> geos = new ArrayList<AGeometry>(); 
     
     // Create background geometry
     Rectangle bounds = getBounds();

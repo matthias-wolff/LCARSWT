@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.geometry;
 
 import java.awt.Composite;
 import java.awt.Rectangle;
@@ -16,7 +16,7 @@ import de.tucottbus.kt.lcars.elements.EElement;
  * @author Matthias Wolff
  */
 // TODO: rename to AGeometry
-public abstract class Geometry implements Serializable
+public abstract class AGeometry implements Serializable
 {  
   private static final long serialVersionUID = -6704273422742875854L;
   protected boolean         foreground;
@@ -27,7 +27,7 @@ public abstract class Geometry implements Serializable
    * @param foreground
    *          <code>true</code> for foreground geometries, <code>false</code> for background geometries.
    */
-  public Geometry(boolean foreground)
+  public AGeometry(boolean foreground)
   {
     this.foreground = foreground;
   }

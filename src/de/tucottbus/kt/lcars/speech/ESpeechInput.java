@@ -20,8 +20,8 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.j2d.GArea;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 
@@ -363,9 +363,9 @@ public class ESpeechInput extends ElementContributor
     }
     
     @Override
-    protected ArrayList<Geometry> createGeometriesInt()
+    protected ArrayList<AGeometry> createGeometriesInt()
     {
-      ArrayList<Geometry> geos   = new ArrayList<Geometry>();
+      ArrayList<AGeometry> geos   = new ArrayList<AGeometry>();
       Rectangle           bnds   = getBounds();
       FontData            fd     = getFont();
       

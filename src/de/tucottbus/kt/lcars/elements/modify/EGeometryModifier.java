@@ -1,8 +1,9 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.elements.modify;
 
 import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.elements.EElement;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 /**
  * Geometry modifiers are registered with {@link EElement}s in order to apply
@@ -20,7 +21,7 @@ public interface EGeometryModifier
    * @param geos
    *          The geometries to modify.
    */
-  public void modify(ArrayList<Geometry> geos);
+  public void modify(ArrayList<AGeometry> geos);
 }
 
 // EOF

@@ -69,8 +69,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
 import org.jfree.experimental.swt.SWTUtils;
 
-import de.tucottbus.kt.lcars.j2d.GText;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.GText;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.logging.ILogObserver;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.net.ILcarsRemote;
@@ -665,7 +665,7 @@ public class LCARS implements ILcarsRemote
    * @param insets
    *          The margin which the text should keep from the bounding box; may be <code>null</code>.
    */
-  public static ArrayList<Geometry> createTextGeometry2D
+  public static ArrayList<AGeometry> createTextGeometry2D
   (
     String              text,
     java.awt.Rectangle  bounds,
@@ -691,7 +691,7 @@ public class LCARS implements ILcarsRemote
    * @param insets
    *          The margin which the text should keep from the bounding box; may be <code>null</code>.
    */
-  public static ArrayList<Geometry> createTextGeometry2D
+  public static ArrayList<AGeometry> createTextGeometry2D
   (
     FontData            font,
     String              text,
@@ -703,7 +703,7 @@ public class LCARS implements ILcarsRemote
   {
     //TODO: http://pawlan.com/monica/articles/texttutorial/other.html
     
-    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
+    ArrayList<AGeometry> geos = new ArrayList<AGeometry>(); 
     if (text==null || text.length()==0 || bounds==null) return geos;
     if (insets==null) insets = new Point(0,0);
     

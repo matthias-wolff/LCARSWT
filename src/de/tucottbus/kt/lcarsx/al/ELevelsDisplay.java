@@ -13,8 +13,7 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.j2d.EPerspective;
-import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.elements.modify.EPerspective;
 import de.tucottbus.kt.lcars.swt.SwtColor;
 
 /**
@@ -297,9 +296,7 @@ public class ELevelsDisplay extends ElementContributor
       int style = b==barZ ? LCARS.EC_HEADLINE : LCARS.EC_ELBOUP;
       eRect = new ERect(null,-barH,b*barH,2*barH+3,barH,LCARS.ES_STATIC|LCARS.ES_RECT_RND|style,null);
       eRect.setArc(4*barH); eRect.setAlpha(alpha);
-      eRect.addGeometryModifier(perspective);
-      Log.debug(eRect.getSerialNo() + "");
-      
+      eRect.addGeometryModifier(perspective);      
       if (b!=barZ) eRect.setColor(cBars);
       add(eRect);
     }

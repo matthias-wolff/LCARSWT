@@ -9,8 +9,8 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 
 import de.tucottbus.kt.lcars.Panel;
-import de.tucottbus.kt.lcars.j2d.GImage;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.GImage;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 /**
  * An image.
@@ -28,7 +28,7 @@ public class EImage extends EElement implements ImageObserver
   }
 
   @Override
-  public ArrayList<Geometry> createGeometriesInt()
+  public ArrayList<AGeometry> createGeometriesInt()
   {
     int x = getBounds().x;
     int y = getBounds().y;
@@ -41,7 +41,7 @@ public class EImage extends EElement implements ImageObserver
 //      getImage().getWidth(this);
 //      getImage().getHeight(this);
 //    }
-    ArrayList<Geometry> geos = new ArrayList<Geometry>();
+    ArrayList<AGeometry> geos = new ArrayList<AGeometry>();
     geos.add(new GImage(resourceName,new Point(x,y),this));
     return geos;
   }

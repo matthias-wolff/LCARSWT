@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 public class ELabel extends EElement
 {
@@ -22,7 +22,7 @@ public class ELabel extends EElement
   }
 
   @Override
-  public ArrayList<Geometry> createGeometriesInt()
+  public ArrayList<AGeometry> createGeometriesInt()
   {
     return LCARS.createTextGeometry2D(label,getBounds(),getStyle(),computeLabelInsets(),false);
   }

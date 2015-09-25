@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.geometry;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -19,12 +19,13 @@ import de.tucottbus.kt.lcars.logging.Log;
  * 
  * @author Matthias Wolff
  */
-public class GImage extends Geometry
+public class GImage extends AGeometry
 {
   private static final long serialVersionUID = -1878671224748589604L;
-  private String                  resourceName;
-  //private transient ImageObserver imageObserver;
-  private Point                   pos;
+  
+  private String            resourceName;
+  private Point             pos;  
+  private transient Image   cachedImage;
   
   /**
    * Creates a new image geometry.
@@ -71,14 +72,15 @@ public class GImage extends Geometry
     if (resourceName == null)
       return;
     
-    ImageData imgData = GImage.getImage(resourceName);
-    if(imgData != null) {
-      Image image = new Image(gc.getDevice(), imgData);
-      gc.drawImage(image, pos.x, pos.y);
-      image.dispose();
+    if (cachedImage == null) {
+      ImageData imgData = GImage.getImage(resourceName);
+      if(imgData != null)
+        cachedImage = new Image(gc.getDevice(), imgData);
+      else
+        Log.debug("Image not found at Location: "+ resourceName);
     }
-    else
-      Log.debug("Image not found at Location: "+ resourceName);
+          
+    gc.drawImage(cachedImage, pos.x, pos.y);
   }
 
   // -- The image cache --
@@ -169,7 +171,16 @@ public class GImage extends Geometry
   
   @Override
   public String toString() {
-    return GArea.class.getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") source="
+    return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") source="
           +(resourceName!=null ? "\"" + resourceName + "\"" : "null");
   }
+  
+  @Override
+  protected void finalize() throws Throwable
+  {
+    if (cachedImage != null)
+      cachedImage.dispose();
+    super.finalize();
+  }
+
 }

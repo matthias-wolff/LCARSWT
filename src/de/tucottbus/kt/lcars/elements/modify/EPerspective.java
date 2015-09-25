@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.elements.modify;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
@@ -7,6 +7,8 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
+import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 
 /**
@@ -114,9 +116,9 @@ public class EPerspective implements EGeometryModifier
   // -- Implementation of the EGeometryModifier interface --
   
   @Override
-  public void modify(ArrayList<Geometry> geos)
+  public void modify(ArrayList<AGeometry> geos)
   {
-    for (Geometry geo : geos)
+    for (AGeometry geo : geos)
       if (geo instanceof GArea)
       {
         GArea are = (GArea)geo;

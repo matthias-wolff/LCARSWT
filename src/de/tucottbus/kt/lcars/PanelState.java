@@ -52,7 +52,8 @@ public class PanelState implements Serializable
   /**
    * The panel dimension.
    */
-  public Dimension dimension = null;
+  public int width;
+  public int height;
 
   /**
    * The color scheme.
@@ -107,7 +108,8 @@ public class PanelState implements Serializable
    */
   public PanelState(Dimension dimension)
   {
-    this.dimension = dimension;
+    width = dimension.width;
+    height = dimension.height;
   }
 
   /**
@@ -115,8 +117,9 @@ public class PanelState implements Serializable
    */  
   public int getUpdateFlags(PanelState other) {
     if (other == null) throw new NullPointerException();
-    int result = !Objectt.equals(dimension,     other.dimension) ?           DIMENSION : 0;    
-    if (         !Objectt.equals(bgImageRes,    other.bgImageRes)) result |= BACKGROUND;
+    int result = !Objectt.equals(bgImageRes,    other.bgImageRes) ?          BACKGROUND : 0;    
+    if (                         width       != other.width
+                              || height      != other.height)      result |= DIMENSION;
     if (                         colorScheme != other.colorScheme) result |= COLOR_SCHEME;
     if (                         blink       != other.blink)       result |= BLINK;
     if (                         modal       != other.modal)       result |= MODAL;
@@ -136,8 +139,9 @@ public class PanelState implements Serializable
   public boolean equals(PanelState other)
   {
     return other != null
-        && Objectt.equals(dimension, other.dimension)
         && Objectt.equals(bgImageRes, other.bgImageRes)
+        && width       == other.width
+        && height      == other.height
         && colorScheme == other.colorScheme
         && blink       == other.blink
         && modal       == other.modal

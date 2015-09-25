@@ -11,9 +11,8 @@ import org.eclipse.swt.graphics.GC;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
-import de.tucottbus.kt.lcars.j2d.AHeavyGeometry;
-import de.tucottbus.kt.lcars.j2d.ElementState;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.AHeavyGeometry;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -63,7 +62,7 @@ public final class ElementData implements Serializable
    * The graphical representation of the {@link EElement} described by this
    * instance.
    */
-  public ArrayList<Geometry> geometry;
+  public ArrayList<AGeometry> geometry;
 
   /**
    * Bounds of the area of this element.
@@ -97,7 +96,7 @@ public final class ElementData implements Serializable
   {
     this.serialNo = element.data.serialNo;
     this.state = new ElementState(element.data.state);
-    this.geometry = new ArrayList<Geometry>(element.data.geometry);
+    this.geometry = new ArrayList<AGeometry>(element.data.geometry);
   }
 
   // -- Getters and setters --
@@ -135,7 +134,7 @@ public final class ElementData implements Serializable
       Area ar = new Area();
       try
       {
-        for (Geometry gi : geometry)
+        for (AGeometry gi : geometry)
           if (!gi.isForeground())
             ar.add(gi.getArea());
         cachedArea = ar;
@@ -170,14 +169,14 @@ public final class ElementData implements Serializable
     if (updateGeometry || !incremental)
       try
       {
-        other.geometry = new ArrayList<Geometry>(geometry.size());
-        for (Geometry geom : geometry)
+        other.geometry = new ArrayList<AGeometry>(geometry.size());
+        for (AGeometry geom : geometry)
           other.geometry.add(geom instanceof AHeavyGeometry
               ? ((AHeavyGeometry) geom).getUpdate(incremental) : geom);
       } catch (Exception e)
       {
         // TODO: synchronization problem, exception should never occur
-        other.geometry = new ArrayList<Geometry>();
+        other.geometry = new ArrayList<AGeometry>();
         Log.err("Error while extracting updated data from ElementData with #"
             + serialNo, e);
       }
@@ -238,8 +237,8 @@ public final class ElementData implements Serializable
     {
       if (other.geometry != null)
       {
-        this.geometry = new ArrayList<Geometry>(other.geometry);
-        for (Geometry geom : this.geometry)
+        this.geometry = new ArrayList<AGeometry>(other.geometry);
+        for (AGeometry geom : this.geometry)
           if (geom instanceof AHeavyGeometry)
             ((AHeavyGeometry) geom).applyUpdate();
         this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea)
@@ -271,7 +270,7 @@ public final class ElementData implements Serializable
     if (!state.isVisible())
       return;
     
-    Iterator<Geometry> geoIt = geometry.iterator();
+    Iterator<AGeometry> geoIt = geometry.iterator();
     if (!geoIt.hasNext())
       return;
 
@@ -282,13 +281,15 @@ public final class ElementData implements Serializable
     final Color bgColor = new Color(gc.getDevice(),
         state.getBgColor(panelState).getRGB());
 
-    Geometry gi = geoIt.next();
+    // init with and render first geometry
+    AGeometry gi = geoIt.next();
     boolean foreground = gi.isForeground();
     gc.setBackground(foreground ? fgColor : bgColor);
     gc.setForeground(foreground ? bgColor : fgColor);
     gc.setAlpha(foreground ? fgAlpha : bgAlpha);
     gi.paint2D(gc);
     
+    // render all other geometry
     while (geoIt.hasNext())
     {
       gi = geoIt.next();
@@ -324,7 +325,7 @@ public final class ElementData implements Serializable
 
   public void onVisibilityChanged(boolean visible)
   {
-    for (Geometry g : geometry)
+    for (AGeometry g : geometry)
       g.onVisibilityChanged(visible);
   }
 

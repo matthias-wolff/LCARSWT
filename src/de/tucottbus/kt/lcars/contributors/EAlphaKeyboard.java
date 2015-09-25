@@ -12,9 +12,9 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.ESector;
-import de.tucottbus.kt.lcars.j2d.EGeometryModifier;
-import de.tucottbus.kt.lcars.j2d.GArea;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
+import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 public class EAlphaKeyboard extends EKeyboard
 {
@@ -219,7 +219,7 @@ public class EAlphaKeyboard extends EKeyboard
     rect = e.getBounds(); rect.width+=37; e.setBounds(rect);
     e.addGeometryModifier(new EGeometryModifier()
     {
-      public void modify(ArrayList<Geometry> geos)
+      public void modify(ArrayList<AGeometry> geos)
       {
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
@@ -236,7 +236,7 @@ public class EAlphaKeyboard extends EKeyboard
     rect = e.getBounds(); rect.width+=14; e.setBounds(rect);
     e.addGeometryModifier(new EGeometryModifier()
     {
-      public void modify(ArrayList<Geometry> geos)
+      public void modify(ArrayList<AGeometry> geos)
       {
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
@@ -254,7 +254,7 @@ public class EAlphaKeyboard extends EKeyboard
     rect = e.getBounds(); rect.width+=8; e.setBounds(rect);
     e.addGeometryModifier(new EGeometryModifier()
     {
-      public void modify(ArrayList<Geometry> geos)
+      public void modify(ArrayList<AGeometry> geos)
       {
         int   cx  = navi.x+x;
         int   cy  = navi.y+y;
@@ -328,7 +328,7 @@ public class EAlphaKeyboard extends EKeyboard
  
   class TrimToRadiusModifier implements EGeometryModifier
   {
-    public void modify(ArrayList<Geometry> geos)
+    public void modify(ArrayList<AGeometry> geos)
     {
       int  cx   = navi.x+x;
       int  cy   = navi.y+y;

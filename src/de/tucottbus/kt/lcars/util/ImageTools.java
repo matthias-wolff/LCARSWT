@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.j2d.GImage;
+import de.tucottbus.kt.lcars.geometry.GImage;
 
 /**
  * This class supplies assorted {@linkplain java.awt.Image image} tools.

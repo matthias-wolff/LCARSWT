@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d.rendering;
+package de.tucottbus.kt.lcars.geometry.rendering;
 
 import java.awt.Dimension;
 
@@ -55,14 +55,16 @@ public class Renderer
    */
   private FrameData context;
   
-  private final org.eclipse.swt.graphics.Rectangle initialBounds;
+  private final int initialWidth;
+  private final int initialHeight;
   
   /**
    * 
    * @param initialSize
    */
   public Renderer(Device device, int initialWidth, int initialHeight) {
-    this.initialBounds = new org.eclipse.swt.graphics.Rectangle(0, 0, initialWidth, initialHeight);
+    this.initialWidth = initialWidth;
+    this.initialHeight = initialHeight;
     DEFAULT_BG_COLOR = device.getSystemColor(SWT.COLOR_BLACK);
   }
     
@@ -82,10 +84,12 @@ public class Renderer
    * 
    * @return
    */
-  public Dimension getDimension()
+  public Dimension getWidth()
   {
     FrameData fd = context;
-    return fd != null ? fd.getRenderSize() : new Dimension(initialBounds.width, initialBounds.height);
+    return fd != null 
+        ? new Dimension(fd.getRenderWidth(), fd.getRenderHeight())
+        : new Dimension(initialWidth, initialHeight);
   }
 
   /**
@@ -115,17 +119,17 @@ public class Renderer
     FrameData context = this.context;
     if (context == null) // null stands for reset
     {
-      gc.setClipping(initialBounds);
+      gc.setClipping(0,0,initialWidth, initialHeight);
       gc.setBackground(DEFAULT_BG_COLOR);
-      gc.drawRectangle(initialBounds);
+      gc.drawRectangle(0,0,initialWidth, initialHeight);
       return;
     }
     
     // clipping setup
-    org.eclipse.swt.graphics.Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
+    final org.eclipse.swt.graphics.Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
+            
     if(context.getFullRepaint()) {
-      Dimension size = context.getRenderSize();
-      gc.setClipping(0,0,size.width,size.height);
+      gc.setClipping(0,0,context.getRenderWidth(), context.getRenderHeight());
     }
     else
       gc.setClipping(dirtyArea);
@@ -137,8 +141,10 @@ public class Renderer
       gc.setBackground(DEFAULT_BG_COLOR);
       gc.fillRectangle(dirtyArea);
     } else {
+      bgImg.scaledTo(context.getRenderWidth(), context.getRenderHeight());
       Image img = new Image(gc.getDevice(), bgImg);
       gc.drawImage(img, 0, 0);
+      img.dispose();
     }
     // TODO possible problem with clipping when drawing
 
@@ -148,22 +154,12 @@ public class Renderer
     try
     {
       for (ElementData el : context.getElementsToPaint())
-        el.render2D(gc, state);
-      
-//      gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
-//      for (ElementData el : context.getElementsToPaint())
-//        gc.drawRectangle(SWTUtils.toSwtRectangle(el.getBounds()));
-      
-      // LCARS.log(CLASSKEY, context.getElementsToPaint().size() +
-      // " elements are rendered");
+        el.render2D(gc, state);      
     } catch (Throwable e)
     {
       Log.err("error drawing elements to the screen", e);
     }
     // GImage.endCacheRun();
-
-    // g2d.setColor(Color.red);
-    // g2d.draw(dirtyArea);
   }
 
   /**
@@ -198,7 +194,9 @@ public class Renderer
     this.updateCount++;
   }
   
-  protected void finalize() {
+  @Override
+  protected void finalize() throws Throwable {
     DEFAULT_BG_COLOR.dispose();
+    super.finalize();
   }
 }

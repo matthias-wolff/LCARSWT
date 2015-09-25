@@ -13,19 +13,19 @@ public final class SwtColor implements Serializable
   public static final SwtColor WHITE = white;
   
   /** Constant for the color light gray: R=192, G=192, B=192. */
-  public static final SwtColor lightGray = new SwtColor(0xc0c0c0, false);
+  public static final SwtColor lightGray = new SwtColor(0xc0c0c0);
   
   /** Constant for the color light gray: R=192, G=192, B=192. */
   public static final SwtColor LIGHT_GRAY = lightGray;
   
   /** Constant for the color gray: R=128, G=128, B=128. */
-  public static final SwtColor gray = new SwtColor(0x808080, false);
+  public static final SwtColor gray = new SwtColor(0x808080);
   
   /** Constant for the color gray: R=128, G=128, B=128. */
   public static final SwtColor GRAY = gray;
   
   /** Constant for the color dark gray: R=64, G=64, B=64. */
-  public static final SwtColor darkGray = new SwtColor(0x404040, false);
+  public static final SwtColor darkGray = new SwtColor(0x404040);
 
   /** Constant for the color dark gray: R=64, G=64, B=64. */
   public static final SwtColor DARK_GRAY = darkGray;
@@ -37,42 +37,42 @@ public final class SwtColor implements Serializable
   public static final SwtColor BLACK = black;
 
   /** Constant for the color red: R=255, G=0, B=0. */
-  public static final SwtColor red = new SwtColor(0xff0000, false);
+  public static final SwtColor red = new SwtColor(0xff0000);
   
   public static final SwtColor RED = red;
   
   /** Constant for the color pink: R=255, G=175, B=175. */
-  public static final SwtColor pink = new SwtColor(0xffafaf, false);
+  public static final SwtColor pink = new SwtColor(0xffafaf);
   
   public static final SwtColor PINK = pink;
   
   /** Constant for the color orange: R=255, G=200, B=0. */
-  public static final SwtColor orange = new SwtColor(0xffc800, false);
+  public static final SwtColor orange = new SwtColor(0xffc800);
   
   public static final SwtColor ORANGE = orange;
   
   /** Constant for the color yellow: R=255, G=255, B=0. */
-  public static final SwtColor yellow = new SwtColor(0xffff00, false);
+  public static final SwtColor yellow = new SwtColor(0xffff00);
   
   public static final SwtColor YELLOW = yellow;
   
   /** Constant for the color green: R=0, G=255, B=0. */
-  public static final SwtColor green = new SwtColor(0x00ff00, false);
+  public static final SwtColor green = new SwtColor(0x00ff00);
   
   public static final SwtColor GREEN = green;
   
   /** Constant for the color magenta: R=255, G=0, B=255. */
-  public static final SwtColor magenta = new SwtColor(0xff00ff, false);
+  public static final SwtColor magenta = new SwtColor(0xff00ff);
   
   public static final SwtColor MAGENTA = magenta;
   
   /** Constant for the color cyan: R=0, G=255, B=255. */
-  public static final SwtColor cyan = new SwtColor(0x00ffff, false);
+  public static final SwtColor cyan = new SwtColor(0x00ffff);
   
   public static final SwtColor CYAN = cyan;
   
   /** Constant for the color blue: R=0, G=0, B=255. */
-  public static final SwtColor blue = new SwtColor(0x0000ff, false);
+  public static final SwtColor blue = new SwtColor(0x0000ff);
   
   public static final SwtColor BLUE = blue;
   

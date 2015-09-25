@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d;
+package de.tucottbus.kt.lcars.geometry;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.swt.graphics.GC;
 
-import de.tucottbus.kt.lcars.j2d.rendering.HeavyRenderWorker;
+import de.tucottbus.kt.lcars.geometry.rendering.HeavyRenderWorker;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -16,7 +16,7 @@ import de.tucottbus.kt.lcars.logging.Log;
  * @author Christian Borck
  *
  */
-public abstract class AHeavyGeometry extends Geometry
+public abstract class AHeavyGeometry extends AGeometry
 {
   private static final long serialVersionUID = 5157875180660436224L;
 

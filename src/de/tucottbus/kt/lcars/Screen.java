@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Touch;
 
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
-import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
+import de.tucottbus.kt.lcars.geometry.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.SwtColor;

@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.j2d.rendering;
+package de.tucottbus.kt.lcars.geometry.rendering;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutorService;
@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 
-import de.tucottbus.kt.lcars.j2d.AHeavyGeometry;
+import de.tucottbus.kt.lcars.geometry.AHeavyGeometry;
 
 public class HeavyRenderWorker
 {

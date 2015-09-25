@@ -13,8 +13,8 @@ import org.eclipse.swt.widgets.Display;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
-import de.tucottbus.kt.lcars.j2d.GArea;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 public class EValue extends ERect
@@ -100,9 +100,9 @@ public class EValue extends ERect
   }
   
   @Override
-  public ArrayList<Geometry> createGeometriesInt()
+  public ArrayList<AGeometry> createGeometriesInt()
   {
-    ArrayList<Geometry> geos = new ArrayList<Geometry>(); 
+    ArrayList<AGeometry> geos = new ArrayList<AGeometry>(); 
     
     // Create background geometry
     Rectangle bounds = getBounds();

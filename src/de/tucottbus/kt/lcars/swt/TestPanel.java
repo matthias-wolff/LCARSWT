@@ -149,7 +149,7 @@ public class TestPanel extends Panel
 
   }
 
-  private void initSpeechInpuPanel()
+  private void initSpeechInputPanel()
   {
     ERect eRect;
     eRect = new ERect(this, 1209, 22, 208, 80,
@@ -340,7 +340,7 @@ public class TestPanel extends Panel
     if (LCARS.getArg("--testLayout") != null)
       initLayout();
     if (LCARS.getArg("--testSpeechInput") != null)
-      initSpeechInpuPanel();
+      initSpeechInputPanel();
     if (LCARS.getArg("--testELabel") != null)
       initLabels();
     if (LCARS.getArg("--testAudioPlayer") != null)
@@ -352,7 +352,7 @@ public class TestPanel extends Panel
     if (LCARS.getArg("--noStats") == null)
       initStatistics();
   }
-
+  
   /**
    * Convenience method: Runs the test panel.
    * 

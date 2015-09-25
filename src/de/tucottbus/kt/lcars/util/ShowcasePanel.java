@@ -42,10 +42,10 @@ import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.j2d.EGeometryModifier;
-import de.tucottbus.kt.lcars.j2d.GArea;
-import de.tucottbus.kt.lcars.j2d.Geometry;
+import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
+import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.swt.SwtColor;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 
 /**
  * A simple coding example for an LCARS panel showcasing elements (widgets) and color schemes.
@@ -315,10 +315,10 @@ public class ShowcasePanel extends Panel
     EElement eElement = new EElement(this,1560,362,0,0,LCARS.EC_SECONDARY,null)
     {
       @Override
-      protected ArrayList<Geometry> createGeometriesInt()
+      protected ArrayList<AGeometry> createGeometriesInt()
       {
         // Create element geometries vector
-        ArrayList<Geometry> geos = new ArrayList<Geometry>();
+        ArrayList<AGeometry> geos = new ArrayList<AGeometry>();
         
         // Create a custom background shape
         // Note: Converted from EPS using pstoedit -f java2 <source>.eps <target>.java
@@ -355,7 +355,7 @@ public class ShowcasePanel extends Panel
     eElbo.addGeometryModifier(new EGeometryModifier()
     {
       @Override
-      public void modify(ArrayList<Geometry> geos)
+      public void modify(ArrayList<AGeometry> geos)
       {
         Area are = new Area(((GArea)geos.get(0)).getArea());
         Rectangle r = are.getBounds();
