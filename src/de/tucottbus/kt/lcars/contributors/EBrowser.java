@@ -110,8 +110,8 @@ public class EBrowser extends ElementContributor
       canvas = new Canvas();
       canvas.setBackground(Color.BLACK);
       screen.add(canvas);
-      tl = screen.panelToComponent(new Point(bounds.x,bounds.y));
-      br = screen.panelToComponent(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
+      tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
+      br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
       canvas.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
       screen.getSwtDisplay().asyncExec(new Runnable()
       {

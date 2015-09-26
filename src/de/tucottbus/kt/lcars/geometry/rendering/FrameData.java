@@ -35,6 +35,7 @@ class FrameData
   private ArrayList<ElementData> elementsToPaint;
   private Shape dirtyArea;
   private boolean fullRepaint;
+  private boolean bgChanged = true;
 
   private FrameData(PanelData panelData, boolean incremental,
       boolean selectiveRepaint)
@@ -112,13 +113,15 @@ class FrameData
     {
       dirtyArea = new Rectangle(getRenderWidth(), getRenderHeight());
       elementsToPaint = elements;
-      updateBgImage(null);
+      bgChanged = updateBgImage(null);
       return;
     }
     
-    this.fullRepaint = updateBgImage(pred)
-        || !panelState.equals(pred.panelState) || !incremental
-        || !selectiveRepaint;
+    bgChanged = updateBgImage(pred);
+    
+    this.fullRepaint = !panelState.equals(pred.panelState)
+                    || !incremental
+                    || !selectiveRepaint;
     //fullRepaint = true;
 
     int elCount = elements.size();
@@ -286,6 +289,11 @@ class FrameData
     return elementsToPaint;
   }
 
+  public boolean isBgChanged()
+  {
+    return bgChanged;
+  }
+  
   public ImageMeta getBackgroundImage()
   {
     return panelState.bgImage;

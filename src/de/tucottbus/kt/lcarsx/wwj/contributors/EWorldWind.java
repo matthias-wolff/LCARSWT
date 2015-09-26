@@ -126,8 +126,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
             wwd.addRenderingListener(EWorldWind.this);
           }
           screen.add(wwd);
-          Point tl = screen.panelToComponent(new Point(bounds.x,bounds.y));
-          Point br = screen.panelToComponent(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
+          Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
+          Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
           wwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
           
           animator = new Animator();

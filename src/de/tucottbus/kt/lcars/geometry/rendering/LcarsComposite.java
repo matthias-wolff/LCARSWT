@@ -1,13 +1,15 @@
 package de.tucottbus.kt.lcars.geometry.rendering;
 
-import java.awt.Dimension;
+import java.awt.geom.Point2D;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Device;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.PanelData;
@@ -21,14 +23,8 @@ import de.tucottbus.kt.lcars.logging.Log;
  * @author Christian Borck
  *
  */
-public class Renderer
-{
-  /**
-   * The Default background color is black.
-   */
-  public final Color DEFAULT_BG_COLOR;
-  
-  
+public class LcarsComposite extends Composite implements PaintListener
+{  
   /**
    * Number of updates between two debug logs 
    */
@@ -49,23 +45,24 @@ public class Renderer
    */
   protected boolean selectiveRepaint = false;
   
+  protected Point2D.Float scale = new Point2D.Float(1, 1);
+  
   /**
    * Context for the next repaint. Contains all element and the region of the
    * screen that has to be updated.
    */
   private FrameData context;
   
-  private final int initialWidth;
-  private final int initialHeight;
+  private final Display display;
   
   /**
    * 
    * @param initialSize
    */
-  public Renderer(Device device, int initialWidth, int initialHeight) {
-    this.initialWidth = initialWidth;
-    this.initialHeight = initialHeight;
-    DEFAULT_BG_COLOR = device.getSystemColor(SWT.COLOR_BLACK);
+  public LcarsComposite(Composite parent, int style) {
+    super(parent, style);    
+    display = parent.getDisplay();
+    addPaintListener(this);
   }
     
   /**
@@ -79,31 +76,25 @@ public class Renderer
   }
 
   /**
-   * Returns the dimension defined by the panel data. If panel data is not set,
-   * it returns null.
-   * 
-   * @return
-   */
-  public Dimension getWidth()
-  {
-    FrameData fd = context;
-    return fd != null 
-        ? new Dimension(fd.getRenderWidth(), fd.getRenderHeight())
-        : new Dimension(initialWidth, initialHeight);
-  }
-
-  /**
    * Updates the data for rendering.
    * @param data
    * @param incremental
    */
-  public void applyUpdate(PanelData data, boolean incremental) {
+  public void applyUpdate(PanelData data, boolean incremental)
+  {
+    FrameData nextContext;
     synchronized (this)
     {
-      FrameData nextContext = FrameData.create(data, incremental, this.selectiveRepaint);    
-      nextContext.apply(context);      
-      context = nextContext;      
+      nextContext = FrameData.create(data, incremental, this.selectiveRepaint);    
+      nextContext.apply(context);
+      context = nextContext;
     }
+    
+    Image bg = nextContext.isBgChanged() ? nextContext.getBackgroundImage().getImage() : null;
+    display.asyncExec(() -> {
+      if (nextContext.isBgChanged())
+        setBackgroundImage(bg);
+    });
     onUpdate();
   }
   
@@ -113,59 +104,46 @@ public class Renderer
    * @param gc the graphics context
    * @see #elements
    */
-  public void paint2D(GC gc)
+  @Override
+  public void paintControl(PaintEvent e)
   {
+    GC gc = e.gc;
     onPaint();
     FrameData context = this.context;
-    if (context == null) // null stands for reset
+    if (context == null) // null -> reset
     {
-      gc.setClipping(0,0,initialWidth, initialHeight);
-      gc.setBackground(DEFAULT_BG_COLOR);
-      gc.drawRectangle(0,0,initialWidth, initialHeight);
+      if (scale.x != 1 || scale.y != 1)
+        scale = new Point2D.Float(1, 1);
       return;
     }
     
+    Rectangle b = getBounds();
+    float sx = (float)b.width /context.getRenderWidth();
+    float sy = (float)b.height/context.getRenderHeight();
+    if (scale.x != sx || scale.y != sy)
+      scale = new Point2D.Float(sx, sy);    
+    
+    Transform t = new Transform(display, sx, 0, 0, sy, 0, 0);
+    gc.setTransform(t);
+    t.dispose();
+    
     // clipping setup
-    final org.eclipse.swt.graphics.Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
-            
-    if(context.getFullRepaint()) {
-      gc.setClipping(0,0,context.getRenderWidth(), context.getRenderHeight());
-    }
+    final Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
+       
+    if(context.getFullRepaint())
+      gc.setClipping(0,0,getBounds().width, getBounds().height);
     else
       gc.setClipping(dirtyArea);
 
-    // background setup
-    Image bgImg = context.getBackgroundImage().getImage();
-    if (bgImg == null)
-    {
-      gc.setBackground(DEFAULT_BG_COLOR);
-      gc.fillRectangle(dirtyArea);
-    } else {
-      ImageData id = bgImg.getImageData();
-      if (id.width == context.getRenderWidth() && id.height == context.getRenderHeight())
-        gc.drawImage(bgImg, 0, 0);
-      else {
-        //TODO: cache resized image in SWTResourceManager or set background in composite properties
-        bgImg = new Image(gc.getDevice(), bgImg, SWT.IMAGE_COPY);
-        bgImg.getImageData().scaledTo(context.getRenderWidth(), context.getRenderHeight());
-        gc.drawImage(bgImg, 0, 0);
-        bgImg.dispose();
-      }      
-    }
-    // TODO possible problem with clipping when drawing
-
     PanelState state = context.getPanelState();
-
-    // GImage.beginCacheRun();
     try
     {
       for (ElementData el : context.getElementsToPaint())
         el.render2D(gc, state);      
-    } catch (Throwable e)
+    } catch (Throwable ex)
     {
-      Log.err("error drawing elements to the screen", e);
+      Log.err("error drawing elements to the screen", ex);
     }
-    // GImage.endCacheRun();
   }
 
   /**
@@ -178,6 +156,11 @@ public class Renderer
     context = null;    
   }
 
+  public Point2D.Float getScale() {
+    Point2D.Float scale = this.scale;
+    return new Point2D.Float(scale.x, scale.y);
+  }
+  
   /**
    * Checks paint count and 
    */
@@ -198,11 +181,5 @@ public class Renderer
    */
   protected void onUpdate() {
     this.updateCount++;
-  }
-  
-  @Override
-  protected void finalize() throws Throwable {
-    DEFAULT_BG_COLOR.dispose();
-    super.finalize();
-  }
+  }  
 }

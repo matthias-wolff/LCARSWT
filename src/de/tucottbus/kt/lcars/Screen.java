@@ -9,9 +9,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.rmi.RemoteException;
 import java.util.Timer;
@@ -22,14 +20,9 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.TouchListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -37,9 +30,8 @@ import org.eclipse.swt.widgets.Touch;
 
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
-import de.tucottbus.kt.lcars.geometry.rendering.Renderer;
+import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -77,7 +69,7 @@ public class Screen
   /**
    * The cache for the 2D rendering transform.
    */
-  protected AffineTransform renderingTransform;
+  protected boolean invalid;
 
   /**
    * The screen timer. Blocks the screen saver and keeps the
@@ -101,13 +93,11 @@ public class Screen
 
   protected Shell shell;
   
-  protected Composite composite;
-
   private java.awt.Frame awtFrame;
   
   private int mouseButton = 0;
   
-  private Renderer renderer;
+  protected final LcarsComposite composite;
 
   // -- Constructors --
 
@@ -146,7 +136,6 @@ public class Screen
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
     
-    final Color black = display.getSystemColor(SWT.COLOR_BLACK);
     //shell.setBackground(black);
 
     if (fullScreenMode && !"maximized".equals(LCARS.getArg("--mode=")))
@@ -180,22 +169,11 @@ public class Screen
       // TODO: createBufferStrategy(2);
     }
 
-    if (LCARS.getArg("--nomouse")!=null)
-      composite.setCursor(LCARS.createBlankCursor(display));
     
     final Dimension size = getSize();
     final int w = size.width;
     final int h = size.height;
-        
-    renderer = new Renderer(display, w, h);
-
-    composite = new Composite(shell, SWT.NONE /*SWT.NO_BACKGROUND*/ | SWT.DOUBLE_BUFFERED /*| SWT.EMBEDDED*/);        
-    composite.setTouchEnabled(true);
-    composite.addTouchListener(_this);
-    composite.addMouseListener(_this);
-    composite.addMouseMoveListener(_this);
-    composite.addPaintListener(new PaintListener()
-    {      
+    composite = new LcarsComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND*/ | SWT.DOUBLE_BUFFERED /*| SWT.EMBEDDED*/){
       @Override
       public void paintControl(PaintEvent e)
       {
@@ -209,14 +187,20 @@ public class Screen
         //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
         //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
         //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-        renderer.paint2D(gc);
+        super.paintControl(e);
       }
-    });
-   
-    composite.setBackground(black);
+      
+    };        
+    composite.setTouchEnabled(true);
+    composite.addTouchListener(_this);
+    composite.addMouseListener(_this);
+    composite.addMouseMoveListener(_this);   
+    composite.setBackground(ColorMeta.BLACK.getColor());
     composite.setSize(w, h);
     composite.setLayout(new FillLayout());          
     composite.setVisible(true);
+    if (LCARS.getArg("--nomouse")!=null)
+      composite.setCursor(LCARS.createBlankCursor(display));
     
     // The user feedback player
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
@@ -327,7 +311,7 @@ public class Screen
    */
   protected boolean isScreenInvalid()
   {
-    return renderingTransform == null;
+    return invalid;
   }
 
   /**
@@ -335,51 +319,8 @@ public class Screen
    */
   public synchronized void invalidateScreen()
   {
-    renderingTransform = null;
+    invalid = true;
   }
-
-  /**
-   * Returns the rendering transform
-   */
-  private synchronized AffineTransform getTransf()
-  {
-    if (renderingTransform != null)
-      return new AffineTransform(renderingTransform);
-
-    org.eclipse.swt.graphics.Rectangle dp = composite.getBounds();
-    if (dp == null)
-      return new AffineTransform();
-
-    Dimension ds = getSize();
-    AffineTransform rt = new AffineTransform();
-    double sx = (double) ds.width / (double) dp.width;
-    double sy = (double) ds.height / (double) dp.height;
-    if (sy < sx)
-      sx = sy;
-    rt.scale(sx, sx);
-    int x = (int) ((ds.getWidth() - sx * dp.width) / 2);
-    int y = (int) ((ds.getHeight() - sx * dp.height) / 2);
-    rt.translate(x / sx, y / sx);
-    return new AffineTransform(renderingTransform = rt);
-  }
-  
-  /**
-   * Returns a copy of the rendering transform
-   */
-  protected AffineTransform getTransform()
-  {    
-    return new AffineTransform(getTransf());
-  }
-
-  /**
-   * Returns the rendering transform with the given translation
-   */
-  protected Transform getTransform(Device device, int dx, int dy)
-  {    
-    return AwtSwt.toTranslatedSwtTransform(device, getTransf(), dx, dy);
-  }
-  
-  
   
   /**
    * Converts component (LCARS screen) to panel coordinates.
@@ -388,22 +329,12 @@ public class Screen
    *          The AWT component coordinates.
    * @return The panel coordinates
    * 
-   * @see #panelToComponent(Point)
+   * @see #panelToScreen(Point)
    */
-  protected Point componentToPanel(Point pt)
+  protected Point screenToPanel(int x, int y)
   {
-    Point2D pt2d;
-    try
-    {
-      pt2d = getTransform().inverseTransform(pt, null);
-      return new Point((int) (pt2d.getX() + .5),
-          (int) (pt2d.getY() + .5));
-    } catch (NoninvertibleTransformException e)
-    {
-      // Cannot happen
-      e.printStackTrace();
-      return null;
-    }
+    Point2D.Float scale = composite.getScale();
+    return new Point((int) (x/scale.x + .5f), (int) (y/scale.y + .5f));
   }
 
   /**
@@ -415,11 +346,10 @@ public class Screen
    * 
    * @see #componentToPanel(Point)
    */
-  public Point panelToComponent(Point pt)
+  public Point panelToScreen(Point pt)
   {
-    Point2D pt2d = getTransform().transform(pt, null);
-    return new Point((int) (pt2d.getX() + .5),
-        (int) (pt2d.getY() + .5));
+    Point2D.Float scale = composite.getScale();
+    return new Point((int) (pt.x*scale.x + .5f), (int) (pt.y*scale.y + .5f));
   }
 
   // -- Getters and setters --
@@ -447,8 +377,8 @@ public class Screen
       }
 
     // Set and start new panel
-    if(this.panel != null && renderer != null)
-      renderer.clear();
+    if(this.panel != null && composite != null)
+      composite.clear();
     this.panel = ipanel;
 
     if (this.panel != null)
@@ -495,7 +425,7 @@ public class Screen
   public void update(PanelData data, boolean incremental)
   {
     //TODO: remove incremental
-    renderer.applyUpdate(data, incremental);
+    composite.applyUpdate(data, incremental);
     invalidateScreen();
   }
 
@@ -539,7 +469,7 @@ public class Screen
   protected TouchEvent toTouchEvent(MouseEvent e, int eventType) {
     if (!(e.widget instanceof Control)) return null;
     org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
-    Point pt = componentToPanel(new Point(absPos.x, absPos.y));
+    Point pt = screenToPanel(absPos.x, absPos.y);
     TouchEvent te = new TouchEvent();
     te.type = eventType;
     te.x = pt.x;
@@ -627,12 +557,11 @@ public class Screen
     Log.info(e.touches[0].toString());
     Touch touch = e.touches[0];
 
-    if (!(e.widget instanceof Control)) {
-      
+    if (!(e.widget instanceof Control))  
       return;
-    }
+    
     org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
-    Point pt = componentToPanel(new Point(absPos.x, absPos.y));
+    Point pt = screenToPanel(absPos.x, absPos.y);
     de.tucottbus.kt.lcars.TouchEvent te = new de.tucottbus.kt.lcars.TouchEvent();
     te.x = pt.x;
     te.y = pt.y;

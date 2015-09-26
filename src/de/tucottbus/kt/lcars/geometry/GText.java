@@ -4,12 +4,12 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.TextLayout;
 
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.FontMeta;
 
 /**
@@ -122,13 +122,14 @@ public class GText extends AGeometry
     tl.draw(gc, x+indent, y+descent, 0, text.length()-1, gc.getBackground(), gc.getForeground());
     gc.setClipping(clip);
     
-    if (LCARS.SCREEN_DEBUG)
+    if (LCARS.SCREEN_DEBUG) // draw bounds
     {      
-      Color red = gc.getDevice().getSystemColor(SWT.COLOR_RED);
-      gc.setForeground(red);
+      Color c = gc.getForeground();
+      gc.setForeground(ColorMeta.RED.getColor());      
       Rectangle b = getBounds();
       gc.drawRectangle(b.x, b.y, b.width-1, b.height-1);
-      red.dispose();
+      gc.setForeground(c);      
+      c.dispose();
     }
   }
     
