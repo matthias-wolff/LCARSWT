@@ -119,16 +119,11 @@ public class Screen
       throws ClassNotFoundException
   {    
     shell = new Shell(display, SWT.NO_TRIM);
-    // shell.forceActive();
-    //shell.forceFocus(); //Keyboard focus
     
     loadStat = new LoadStatistics(25);
     // Create Swings widgets
     shell.setText("LCARS");
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-    // initContentPane();
-
     
     final Screen _this = this;
         
@@ -136,8 +131,6 @@ public class Screen
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
     
-    //shell.setBackground(black);
-
     if (fullScreenMode && !"maximized".equals(LCARS.getArg("--mode=")))
     {
       // Full-screen mode
@@ -163,7 +156,6 @@ public class Screen
       shell.setVisible(true);
       if (fullScreen)
         shell.setMaximized(true);
-      // TODO: setExtendedState(JFrame.MAXIMIZED_BOTH);
 
       // TODO: sometimes an error occurs that the buffer has not been created
       // TODO: createBufferStrategy(2);

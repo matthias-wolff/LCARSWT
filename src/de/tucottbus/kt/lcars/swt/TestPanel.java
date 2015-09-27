@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.elements.EElbo;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
@@ -217,6 +218,32 @@ public class TestPanel extends Panel
     });
   }
 
+  private void initDimmed()
+  {
+    ELabel eGuiLd = add(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
+    runEverySecond(() -> {
+      LoadStatistics ls1 = getLoadStatistics();
+      String s = String.format("%03d-%02d", ls1.getLoad(),
+          ls1.getEventsPerPeriod());
+      try
+      {
+        LoadStatistics ls2 = getScreen().getLoadStatistics();
+        s += String.format("/%03d-%02d", ls2.getLoad(),
+            ls2.getEventsPerPeriod());
+      } catch (RemoteException e)
+      {
+        e.printStackTrace();
+      }
+      eGuiLd.setLabel(s);
+    });
+    
+    EElbo eElbo = new EElbo(this,23,23,268,146,LCARS.EC_ELBOUP|LCARS.ES_LABEL_SE,"LCARS");
+    eElbo.setArmWidths(192,46);
+    add(eElbo);
+    
+    dim(.3f);
+  }
+
   private static void addComp(Composite parent, int fg, int bg, int xOff)
   {
     int h = parent.getSize().y;
@@ -348,6 +375,8 @@ public class TestPanel extends Panel
       initAudioSlider();
     if (LCARS.getArg("--testImage") != null)
       initEImage();
+    if (LCARS.getArg("--testDim") != null)
+      initDimmed();
     if (LCARS.getArg("--noStats") == null)
       initStatistics();
   }

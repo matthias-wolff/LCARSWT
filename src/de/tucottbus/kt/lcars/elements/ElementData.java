@@ -285,6 +285,7 @@ public final class ElementData implements Serializable
     gc.setBackground(foreground ? fgColor : bgColor);
     gc.setForeground(foreground ? bgColor : fgColor);
     gc.setAlpha(foreground ? fgAlpha : bgAlpha);
+    
     gi.paint2D(gc);
     
     // render all other geometry
@@ -295,7 +296,7 @@ public final class ElementData implements Serializable
       {
         foreground = gi.isForeground();        
         gc.setBackground(foreground ? fgColor : bgColor);
-        gc.setForeground(foreground ? bgColor : fgColor);
+        gc.setForeground(foreground ? bgColor : fgColor);        
         gc.setAlpha(foreground ? fgAlpha : bgAlpha);
       }
       gi.paint2D(gc);      

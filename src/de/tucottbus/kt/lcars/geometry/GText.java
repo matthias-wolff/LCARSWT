@@ -31,8 +31,6 @@ public class GText extends AGeometry
   protected int width;
   protected int height;
     
-  protected transient TextLayout tl;
-  
   /**
    * Creates a new text geometry. A text geometry provides information and
    * 2D-rendering for a single line of text
@@ -114,31 +112,24 @@ public class GText extends AGeometry
   @Override
   public void paint2D(GC gc)
   {    
-    if(tl == null)
-      tl = LCARS.getTextLayout(fontMeta.getFont(), text);
-    
     org.eclipse.swt.graphics.Rectangle clip = gc.getClipping();
+    Color cf = gc.getForeground();
+    Color cb = gc.getBackground();
+    gc.setFont(fontMeta.getFont());
+    gc.setForeground(cb);      
     gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height));
-    tl.draw(gc, x+indent, y+descent, 0, text.length()-1, gc.getBackground(), gc.getForeground());
+    gc.drawString(text, x, y, true);
     gc.setClipping(clip);
     
     if (LCARS.SCREEN_DEBUG) // draw bounds
     {      
-      Color c = gc.getForeground();
       gc.setForeground(ColorMeta.RED.getColor());      
       Rectangle b = getBounds();
       gc.drawRectangle(b.x, b.y, b.width-1, b.height-1);
-      gc.setForeground(c);      
-      c.dispose();
     }
-  }
-    
-  @Override
-  protected void finalize() throws Throwable
-  {    
-    if (tl != null && !tl.isDisposed())
-      tl.dispose();
-    super.finalize();
+    gc.setForeground(cf);      
+    cf.dispose();
+    cb.dispose();
   }
   
   @Override
