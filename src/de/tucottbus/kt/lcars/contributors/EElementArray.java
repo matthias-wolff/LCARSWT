@@ -6,6 +6,7 @@ import java.lang.ref.WeakReference;
 import java.util.AbstractList;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.function.Consumer;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -31,7 +32,7 @@ public class EElementArray extends ElementContributor implements EEventListener
   protected int               elemStyle;
   protected Point[]           elemPos;
   protected boolean           lock;
-  protected Vector<EElement>  eList;
+  protected final Vector<EElement>  eList;
   protected ELabel            eTitle;
   protected EElement          ePrev;
   protected EElement          eNext;
@@ -441,31 +442,43 @@ public class EElementArray extends ElementContributor implements EEventListener
     });
     
     // Do nothing of there are no items
-    if (this.eList==null)
+    if (eList.isEmpty())
     {
-      this.firstItem = -1;
+      firstItem = -1;
       return;
     }
     
     // Set first item
-    this.firstItem = first;
-    if (this.firstItem>this.eList.size())
-      this.firstItem = this.eList.size()-this.rows*this.cols-1;
-    if (this.firstItem<0) this.firstItem=0;
+    firstItem = first;
+    final int n = eList.size();
+    
+    if (firstItem>n)
+      firstItem = n-this.rows*this.cols-1;
+    if (firstItem<0) firstItem=0;
 
     // Add new elements
     if (count<0) count = this.cols*this.rows;
-    for (int i=0; i<count && firstItem+i<this.eList.size() && i<this.cols*this.rows; i++)
+    
+    final int fromIn = firstItem;
+    final int toEx = firstItem+Math.min(count, cols*rows);
+    
+    int i = 0;
+    for (EElement el : eList)
     {
-      EElement e = eList.get(this.firstItem+i);
-      e.clearTouch();
-      add(e,false);
+      if (i++ >= fromIn && i <= toEx) {
+        el.clearTouch();
+        add(el,false).setVisible(true);        
+      }
+      else
+        el.setVisible(false);
     }
     
     // GUI reflection
-    if (ePrev!=null) { ePrev.clearTouch(); ePrev.setDisabled(firstItem<=0); }
-    if (eNext!=null) { eNext.clearTouch(); eNext.setDisabled(firstItem>=eList.size()-rows*cols); }
-    if (panel!=null) panel.invalidate();
+    EElement e;
+    Panel p;
+    if ((e=ePrev)!=null) { e.clearTouch(); e.setDisabled(firstItem<=0); }
+    if ((e=eNext)!=null) { e.clearTouch(); e.setDisabled(firstItem>=eList.size()-rows*cols); }
+    if ((p=panel)!=null) p.invalidate();
   }
   
   // -- Overrides --
@@ -478,21 +491,16 @@ public class EElementArray extends ElementContributor implements EEventListener
   public void addToPanel(Panel panel)
   {
     super.addToPanel(panel);
-    if (ePrev!=null)
-    {
-      ePrev.removeAllEEventListeners();
-      ePrev.addEEventListener(this);
-    }
-    if (eNext!=null)
-    {
-      eNext.removeAllEEventListeners();
-      eNext.addEEventListener(this);
-    }
-    if (eLock!=null)
-    {
-      eLock.removeAllEEventListeners();
-      eLock.addEEventListener(this);
-    }
+    
+    Consumer<EElement> remove = e -> {
+      if (e == null) return;
+      e.removeAllEEventListeners();
+      e.addEEventListener(EElementArray.this);
+    };
+    remove.accept(ePrev);
+    remove.accept(eNext);
+    remove.accept(eLock);
+    
     animate();
     autopage();
   }
@@ -505,9 +513,13 @@ public class EElementArray extends ElementContributor implements EEventListener
   public void removeFromPanel()
   {
     cancelAllTimerTasks();
-    if (ePrev!=null) ePrev.removeAllEEventListeners();
-    if (eNext!=null) eNext.removeAllEEventListeners();
-    if (eLock!=null) eLock.removeAllEEventListeners();
+    Consumer<EElement> remove = e -> {
+      if (e != null)
+        e.removeAllEEventListeners();
+    };
+    remove.accept(ePrev);
+    remove.accept(eNext);
+    remove.accept(eLock);
     super.removeFromPanel();
   }
   

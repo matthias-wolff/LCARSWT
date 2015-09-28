@@ -120,7 +120,7 @@ public class EValue extends ERect
     // Create value geometry
     int   vstyle = (style&LCARS.ES_VALUE_W)!=0 ? LCARS.ES_LABEL_W : LCARS.ES_LABEL_E;
     FontMeta.Explicit  fm = getValueFont();
-    Point insets = new Point(3,1);
+    Point insets = new Point(3,0);
     if (fm.name.equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
     
     //geos.add(new GText(value, new Point2D.Float(bounds.x, bounds.y), null, fd, isBlinking()))

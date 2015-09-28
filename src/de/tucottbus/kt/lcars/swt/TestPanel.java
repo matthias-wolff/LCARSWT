@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcars.swt;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.contributors.EElementArray;
 import de.tucottbus.kt.lcars.elements.EElbo;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
@@ -119,14 +121,15 @@ public class TestPanel extends Panel
 
   private void initLabels()
   {
+    final int style1 = LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_MODAL;
     final int h = 50;
 
     final ArrayList<EElement> els = new ArrayList<EElement>(10);
     els.add(new ELabel(this, x1, y1, w * 5, h * 3,
-        LCARS.EC_SECONDARY | LCARS.EF_HEAD2 | LCARS.ES_LABEL_W, null));
+        LCARS.EC_ELBOUP | LCARS.EF_HEAD2 | LCARS.ES_LABEL_W, null));
 
     ELabel eLabel = new ELabel(this, x1, y1 + h, w * 2, h,
-        LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null);
+        LCARS.EC_TEXT | LCARS.EF_SMALL | LCARS.ES_LABEL_W, null);
     els.add(eLabel);
     eLabel.setAlpha(.5f);    
     
@@ -148,12 +151,14 @@ public class TestPanel extends Panel
           sec[0]++ % 60));
     });
     
-    final int style1 = LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_MODAL;
+    
     final int w = 1920;
     add(new ERect(null,0,50,w-75,3,style1,null));
-    add(new ELabel(null,0,50,w-20,14,style1|LCARS.ES_LABEL_NE|LCARS.EF_TINY,"LCARS DIALOG"));
+    add(new ELabel(null,0,50,w-10,14,style1|LCARS.ES_LABEL_NE|LCARS.EF_TINY,"LCARS DIALOG"));
 
-
+    EValue eTit = new EValue(null,0,0,1120/2,53,style1|LCARS.ES_RECT_RND,null);
+    eTit.setValue("PANEL SELECT");
+    add(eTit);
   }
 
   private void initSpeechInputPanel()
@@ -224,6 +229,34 @@ public class TestPanel extends Panel
     });
   }
 
+  
+  private void initEElementArrayAnimation() {
+    final int x = 200;
+    final int y = 400;
+    
+    EValue        eTitle;
+    EElementArray eKeys;
+    EElementArray eValues;
+    eTitle = new EValue(this,x+233,y-40,0,32,LCARS.ES_STATIC|LCARS.EC_TEXT,null);
+    eTitle.setValueMargin(0); eTitle.setValue("TRACK TAGS");
+    eTitle.setVisible(false);
+    add(eTitle);
+    int style = LCARS.ES_STATIC|LCARS.EF_SMALL|LCARS.EC_ELBOUP; 
+    eKeys = new EElementArray(x,y,ELabel.class,new Dimension(230,18),18,1,style|LCARS.ES_LABEL_E,null);
+    eValues = new EElementArray(x+240,y,ELabel.class,new Dimension(432,18),18,1,style|LCARS.ES_LABEL_W,null);
+    
+    for (int i = 0; i < 20; i++)
+    {
+      eKeys.add("Key"+i);
+      eValues.add("Value"+i);
+    }
+    eKeys.addToPanel(this);
+    eValues.addToPanel(this);
+    
+    eKeys.animate();
+    eValues.animate();
+  }
+  
   private void initDimmed()
   {
     ELabel eGuiLd = add(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
@@ -385,6 +418,9 @@ public class TestPanel extends Panel
       initDimmed();
     if (LCARS.getArg("--noStats") == null)
       initStatistics();
+    if (LCARS.getArg("--noAnimation") == null)
+      initEElementArrayAnimation();
+    
   }
   
   /**

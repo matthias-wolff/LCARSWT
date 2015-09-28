@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars.contributors;
 import java.awt.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -225,7 +226,7 @@ public class ESignalDisplay extends ElementContributor
   @Override
   public void addToPanel(Panel panel)
   {
-    if (getElements().size()==0) layout();
+    if (getElements().isEmpty()) layout();
     super.addToPanel(panel);
     //reset();
     animate();
@@ -262,11 +263,12 @@ public class ESignalDisplay extends ElementContributor
   {
     curSample++;
     if (curSample>=sampleCount) curSample=0;
-
-    getElements().get(curSample).setColor(ColorMeta.WHITE);
+    
+    Vector<EElement> els = getElements();
+    els.get(curSample).setColor(ColorMeta.WHITE);
     for (int i=0; i<sampleCount; i++)
     {
-      EElement el = getElements().get(i);
+      EElement el = els.get(i);
       if (i==curSample)
       {
         if (color==null)
@@ -274,7 +276,7 @@ public class ESignalDisplay extends ElementContributor
         else
           for (int j=curSample-1; j>=0 && j>=curSample-6; j--)
           {
-            EElement el2 = getElements().get(j);
+            EElement el2 = els.get(j);
             el2.setColor(new ColorMeta(color, el2.getBgColor().getAlpha()));
           }
         setSample(curSample,value,color);

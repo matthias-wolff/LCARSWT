@@ -503,7 +503,7 @@ public class ETopography extends ElementContributor
   protected void layout()
   {
     if (panel==null || pTx==null) return;
-    while (getElements().size()>0) remove(getElements().get(0));
+    while (!getElements().isEmpty()) remove(getElements().get(0));
     
     Point tl = pToL(pBounds.x,pBounds.y+pBounds.height);
     Point br = pToL(pBounds.x+pBounds.width,pBounds.y);

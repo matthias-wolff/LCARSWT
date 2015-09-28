@@ -717,7 +717,6 @@ public class LCARS implements ILcarsRemote
     int align = (style & ES_LABEL) >> 4;
     if(align > ES_LABEL_SE)
       align = ES_LABEL_NW >> 4;
-    int hAlign = align / 3;
     
     // Position the text box
     int tx = bounds.x+insets.x;
@@ -730,7 +729,7 @@ public class LCARS implements ILcarsRemote
         
     if (tw <= 0 || th <= 0) return geos;
     
-    switch (hAlign) // horizontal alignment
+    switch (align / 3) // horizontal alignment
     {
       case 0: // left
         tl.setAlignment(SWT.LEFT);
@@ -746,13 +745,18 @@ public class LCARS implements ILcarsRemote
         break;
       default: return geos;
     }
+        
     switch (align % 3) // vertical alignment
     {
       case 0: // top
         tly = ty-tl.getLineMetrics(0).getLeading();
         break;  
-      case 1: tly = ty + (th-tlBnds.height)/2; break; // middle
-      case 2: tly = ty + th-tlBnds.height; break; // bottom
+      case 1: // middle
+        tly = ty + (th-tlBnds.height-tl.getDescent()+tl.getLineMetrics(0).getLeading())/2;
+        break;
+      case 2: // bottom
+        tly = ty + th-tlBnds.height;
+        break;
       default: return geos;
     }
             
@@ -764,7 +768,7 @@ public class LCARS implements ILcarsRemote
       if (linBnds.y > th) break; // line out of vertical bounds
       int x = linBnds.x+tlx;
       int y = linBnds.y+tly;
-           
+      
       Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
       if (b.width <= 0 || b.height <=0) continue;
       

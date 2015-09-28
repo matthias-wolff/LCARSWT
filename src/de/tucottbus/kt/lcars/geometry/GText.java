@@ -120,7 +120,7 @@ public class GText extends AGeometry
     Color cb = gc.getBackground();
     gc.setFont(fontMeta.getFont());
     gc.setForeground(cb);
-    gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height));
+    gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height+2));
     gc.drawString(text, x + indent, y + descent, true);
     gc.setClipping(clip);
 

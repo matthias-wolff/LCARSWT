@@ -21,13 +21,13 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
  */
 public abstract class ElementContributor implements EEventListener
 {
-  protected Panel                      panel;
-  private   Vector<EElement>           elements;
-  protected int                        x;
-  protected int                        y;
-  private   Vector<EEventListener>     listeners;
-  private   Timer                      timer;
-  private   HashMap<String, TimerTask> timerTasks;
+  protected Panel                            panel;
+  private   final Vector<EElement>           elements;
+  protected final int                        x;
+  protected final int                        y;
+  private   final Vector<EEventListener>     listeners;
+  private   Timer                            timer;
+  private   final HashMap<String, TimerTask> timerTasks;
   
   // -- Constructors --
   
@@ -42,9 +42,9 @@ public abstract class ElementContributor implements EEventListener
 
   // -- Element management --
   
-  protected void add(EElement el, boolean reposition)
+  protected <T extends EElement> T add(T el, boolean reposition)
   {
-    if (el==null) return;
+    if (el==null) return null;
     if (reposition)
     {
       Rectangle bounds = el.getBounds();
@@ -52,17 +52,19 @@ public abstract class ElementContributor implements EEventListener
       bounds.y += this.y;
       el.setBounds(bounds);
     }
+    elements.remove(el);
     elements.add(el);
     if (this.panel!=null)
     {
       el.setPanel(this.panel);
       this.panel.add(el);
     }
+    return el;
   }
   
-  protected void add(EElement el)
+  protected <T extends EElement> T add(T el)
   {
-    add(el,true);
+    return add(el,true);
   }
 
   protected void remove(EElement el)
@@ -77,7 +79,7 @@ public abstract class ElementContributor implements EEventListener
     if (this.panel!=null)
       for (EElement el : elements)
         panel.remove(el);
-    elements.removeAllElements();
+    elements.clear();;
   }
   
   protected Vector<EElement> getElements()
