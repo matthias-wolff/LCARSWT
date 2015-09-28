@@ -129,7 +129,8 @@ public class EarthPanel extends WorldWindPanel
   protected void fps1()
   {
     super.fps1();
-    sunController.update(new Date());
+    if (sunController != null)
+      sunController.update(new Date());
   }
   
   @Override

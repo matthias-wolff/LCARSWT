@@ -2,6 +2,7 @@ package de.tucottbus.kt.lcars;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -12,6 +13,7 @@ import java.awt.event.KeyListener;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,7 +26,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -95,11 +96,11 @@ public class Screen
 
   protected Shell shell;
   
-  private java.awt.Frame awtFrame;
-  
   private int mouseButton = 0;
   
   protected final LcarsComposite composite;
+  
+  protected HashMap<Component, Frame> awtComponents = new HashMap<>(5);
 
   // -- Constructors --
 
@@ -136,6 +137,7 @@ public class Screen
     if (fullScreenMode && !"maximized".equals(LCARS.getArg("--mode=")))
     {
       // Full-screen mode
+      shell.setLayout(new FillLayout());
       shell.setFullScreen(true);
       // setAlwaysOnTop(fullScreen);
       // TODO: validate();
@@ -166,7 +168,7 @@ public class Screen
     final Dimension size = getSize();
     final int w = size.width;
     final int h = size.height;
-    composite = new LcarsComposite(shell, SWT.NONE /*SWT.NO_BACKGROUND*/ | SWT.DOUBLE_BUFFERED /*| SWT.EMBEDDED*/){
+    composite = new LcarsComposite(shell, /*SWT.NO_BACKGROUND |*/ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED){
       @Override
       public void paintControl(PaintEvent e)
       {
@@ -185,7 +187,7 @@ public class Screen
         super.paintControl(e);
         loadStat.add((int)((System.nanoTime()-time)/400000));
       }
-    };        
+    };
     composite.setTouchEnabled(true);
     composite.addTouchListener(_this);
     composite.addMouseListener(_this);
@@ -194,9 +196,10 @@ public class Screen
     composite.setSize(w, h);
     composite.setLayout(new FillLayout());          
     composite.setVisible(true);
+    
     if (LCARS.getArg("--nomouse")!=null)
       composite.setCursor(LCARS.createBlankCursor(display));
-    
+        
     // The user feedback player
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
     {
@@ -573,21 +576,23 @@ public class Screen
   public synchronized void add(Component component)
   {
     if (component == null)
-      throw new NullPointerException(); 
-    if (awtFrame == null)
-      LCARS.getDisplay().syncExec(() -> {
-        //TODO: check awtFrame is in embedded full screen mode
-        awtFrame = SWT_AWT.new_Frame(new Composite(composite, SWT.EMBEDDED | SWT.NO_BACKGROUND));
-        awtFrame.setSize(getSize());
-        awtFrame.setEnabled(true);
-        awtFrame.setVisible(true);              
-      });
-    awtFrame.add(component);
+      throw new NullPointerException("component");    
+        
+    if (awtComponents.containsKey(component)) return;
+    LCARS.getDisplay().syncExec(() -> {
+      //TODO: check awtFrame is in embedded full screen mode
+      if (awtComponents.containsKey(component)) return;
+      Frame awtFrame = SWT_AWT.new_Frame(composite);
+      awtComponents.put(component, awtFrame);
+      awtFrame.setBounds(component.getBounds());
+      shell.redraw();
+    });
   }
 
   public void remove(Component component)
   {
-    awtFrame.remove(component);
+    Frame frame = awtComponents.remove(component);
+    frame.dispose();
   }
 
   public Dimension getSize()
@@ -622,6 +627,7 @@ public class Screen
       // Every 40 milliseconds...
       {
         if (isScreenInvalid()) {
+          invalid = false;
           invoke(() -> {
             composite.redraw();
           });

@@ -300,6 +300,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       for (int i=0; i<ea.getItemCount(); i++)
       {
         EElement   e  = ea.getItemElement(i);
+        if (!(e.getData() instanceof AudioTrack)) continue;
         AudioTrack at = (AudioTrack)e.getData();
         if (AudioPlayer.getInstance()!=null && AudioPlayer.getInstance().isPlaying())
         {
@@ -315,7 +316,9 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
           if (AudioPlayer.getInstance().getCurrentTrack()==at && AudioPlayer.getInstance().getNextTrack()==null)
             for (int j=i+1; j<ea.getItemCount(); j++)
             {
-              AudioTrack at2 = (AudioTrack)ea.getItemElement(j).getData();
+              Object data = ea.getItemElement(j).getData();
+              if (!(data instanceof AudioTrack)) continue;              
+              AudioTrack at2 = (AudioTrack)data;
               if (!at2.isExcluded())
               {
                 AudioPlayer.getInstance().setNextTrack(at2);

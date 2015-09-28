@@ -1,6 +1,10 @@
 package de.tucottbus.kt.lcars.swt;
 
+import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Graphics;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -13,8 +17,10 @@ import java.util.TimerTask;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -32,6 +38,7 @@ import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ESpeechInput;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
@@ -282,7 +289,7 @@ public class TestPanel extends Panel
     
     dim(.3f);
   }
-
+  
   private static void addComp(Composite parent, int fg, int bg, int xOff)
   {
     int h = parent.getSize().y;
@@ -397,6 +404,65 @@ public class TestPanel extends Panel
       }
   }
 
+  private static void initAwtSwtBridge() {
+    final Display display = new Display();
+    final Shell shell = new Shell(display, SWT.NO_TRIM);
+//    shell.setLayout(new FillLayout());
+//    shell.setFullScreen(true);
+//    Composite composite = new Composite(shell, SWT.DOUBLE_BUFFERED | SWT.EMBEDDED | SWT.NO_BACKGROUND);
+//    composite.setBackground(ColorMeta.BLACK.getColor());
+
+    // Create Swings widgets
+    shell.setText("LCARS");
+    
+      // Full-screen mode
+    shell.setLayout(new FillLayout());
+    shell.setFullScreen(true);
+        
+    Composite composite = new LcarsComposite(shell, /*SWT.NO_BACKGROUND |*/ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED){
+      @Override
+      public void paintControl(PaintEvent e)
+      {
+        // Prepare setup
+        GC gc = e.gc;
+        gc.setForeground(ColorMeta.BLUE.getColor());
+        gc.drawLine(getSize().x, 0, 0, getSize().y);
+      }
+    };
+    composite.setTouchEnabled(true);
+    composite.setBackground(ColorMeta.BLACK.getColor());
+    //composite.setSize(size.x, size.y);
+    composite.setLayout(new FillLayout());
+    new Timer().schedule(new TimerTask()
+    {
+      @Override
+      public void run()
+      {
+        display.asyncExec(() -> {
+          Frame frame = SWT_AWT.new_Frame(composite);
+          Canvas canvas = new Canvas() {
+            private static final long serialVersionUID = -8288002304817297959L;
+            public void paint(Graphics g) {
+              Dimension d = getSize();
+              g.setColor(Color.RED);
+              g.drawLine(0, 0, d.width, d.height);
+            }
+          };
+          canvas.setBackground(Color.BLACK);
+          frame.add(canvas);
+        });
+      }
+    }, 3000,3000);
+        
+    shell.layout();
+    shell.open();
+    while (!shell.isDisposed()) {
+      if (!display.readAndDispatch())
+        display.sleep();
+    }
+    display.dispose();
+  }
+  
   @Override
   public void init()
   {
@@ -431,7 +497,8 @@ public class TestPanel extends Panel
    */
   public static void main(String[] args)
   {
-    LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
+    //LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
     // initShell();
+    initAwtSwtBridge();
   }
 }

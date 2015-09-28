@@ -225,8 +225,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public View getView()
   {
-    if (wwd==null) return null;
-    return wwd.getView();
+    WorldWindowGLCanvas wwd = this.wwd;
+    return wwd!=null ? wwd.getView() : null;
   }
 
   /**

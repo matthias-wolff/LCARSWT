@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcarsx.wwj.contributors;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 
@@ -437,7 +438,11 @@ public class ENavigation extends ElementContributor
     boolean sky = this.worldWindPanel.getTitle().startsWith("SKY");
 
     // Display actual view
-    v = eWw.getView().getEyePosition().getLatitude().getDegrees();
+    eWw.setView(null);
+    View view = eWw.getView();
+    Position pos = view.getEyePosition();
+    Angle angle = pos.getLatitude();
+    v = angle.getDegrees();
     s = String.format(Locale.US,"%05.2f",Math.abs(v))+(v<0?"S":"N");
     eLat.setLabel(sky?"DEC/°":"LAT/°");
     eLat.setValue(s);

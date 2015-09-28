@@ -33,8 +33,11 @@ public abstract class EElement
   public static final int INV_FOREGR    = 0x0002;
   public static final int INV_SHAPE     = 0x0004;
   
-  public static final int GEO_RECOMPUTE = 0x0010;   // indicates a recompute of the geometries
-  public static final int GEO_UPDATED   = 0x0020;   // indicates if the geometries was updated
+  /** indicates a recompute of the geometries at the next cycle **/
+  public static final int GEO_RECOMPUTE = 0x0010;
+  
+  /** indicates that the geometries has been updated **/
+  public static final int GEO_UPDATED   = 0x0020;
   
   // -- Static fields --
   private static long serialNumber     = 0;
@@ -681,6 +684,12 @@ public abstract class EElement
    */
   class HoldThread extends Thread
   {
+    public HoldThread()
+    {
+      super(HoldThread.class.getSimpleName() + " of EElement#" + data.serialNo);
+    }
+    
+    
     @Override
     public void run()
     {

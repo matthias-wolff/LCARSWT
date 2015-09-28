@@ -825,14 +825,15 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   
   class PanelTimerTask extends TimerTask
   {
+    
     @Override
     public void run()
     {
       // Call periodic panel methods
-      if (runc% 2==0) try { fps25(); } catch (Exception e) {}
-      if (runc% 5==0) try { fps10(); } catch (Exception e) {}
-      if (runc%25==0) try { fps2 (); } catch (Exception e) {}
-      if (runc%50==0) try { fps1 (); } catch (Exception e) {}
+      if (runc% 2==0) try { fps25(); } catch (Exception e) {err(e);}
+      if (runc% 5==0) try { fps10(); } catch (Exception e) {err(e);}
+      if (runc%25==0) try { fps2 (); } catch (Exception e) {err(e);}
+      if (runc%50==0) try { fps1 (); } catch (Exception e) {err(e);}
       if (++runc>=50) runc=0;
       
       // Dimming
@@ -883,6 +884,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       if (runc% 2==0) updateScreen();
     }
   }
+
+  private void err(Exception e) {
+    Log.err("Error in Panel execution.", e);
+  }
+
   
   /**
    * <p><i><b style="color:red">Experimental.</b></i></p>
@@ -1012,7 +1018,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     if (runt==null)
     {
-      runt = new Timer(true);
+      runt = new Timer("Panel timer", true);
       runt.scheduleAtFixedRate(new PanelTimerTask(),20,20);
     }
     if (getSpeechEngine()!=null)
