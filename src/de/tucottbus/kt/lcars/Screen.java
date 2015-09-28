@@ -16,6 +16,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -23,6 +24,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -205,13 +207,6 @@ public class Screen
       }
     };
     
-    //TODO: check awtFrame is in embedded full screen mode
-    //TODO:
-    //awtFrame = SWT_AWT.new_Frame(composite);
-    //awtFrame.setSize(getSize());
-    //awtFrame.setEnabled(true);
-    //awtFrame.setVisible(true);
-   
     setPanel(panelClass);
 
     // Window event handlers
@@ -576,8 +571,20 @@ public class Screen
     processTouchEvent(te);
   }
 
-  public void add(Component component)
+  public synchronized void add(Component component)
   {
+    if (component == null)
+      throw new NullPointerException(); 
+    if (awtFrame == null)
+    {
+      LCARS.getDisplay().syncExec(() -> {
+        //TODO: check awtFrame is in embedded full screen mode
+        awtFrame = SWT_AWT.new_Frame(new Composite(composite, SWT.EMBEDDED | SWT.NO_BACKGROUND));
+        awtFrame.setSize(getSize());
+        awtFrame.setEnabled(true);
+        awtFrame.setVisible(true);              
+      });
+    }    
     awtFrame.add(component);
   }
 

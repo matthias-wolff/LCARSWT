@@ -19,11 +19,9 @@
 package de.tucottbus.kt.lcars;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -572,25 +570,6 @@ public class LCARS implements ILcarsRemote
         }));
     sourceData.transparentPixel = 0;
     return new Cursor(display, sourceData, 0, 0);
-  }
-
-  // -- Fake Graphics2D --
-  
-  private static BufferedImage g2dImg;
-  private static Graphics2D g2d;
-  
-  /**
-   * Returns a (fake) graphics context which can be used to create 2D geometries. 
-   */
-  public static Graphics2D getGraphics2D()
-  {
-    if (LCARS.g2d==null)
-    {
-      if (LCARS.g2dImg==null)
-        LCARS.g2dImg = new BufferedImage(1920,1080,BufferedImage.TYPE_INT_ARGB);
-      LCARS.g2d = (Graphics2D)LCARS.g2dImg.getGraphics(); 
-    }
-    return LCARS.g2d;
   }
   
   // -- Service methods --

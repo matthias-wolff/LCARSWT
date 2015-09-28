@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.GregorianCalendar;
 
+import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
 import de.tucottbus.kt.lcars.LCARS;
@@ -42,9 +43,12 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     PlaceNameService placeNameService;
     final boolean addVersionTag=true;  //true if pointing to a new wfs server
     
-    
-    final Font fntSmall = SWTUtils.toAwtFont(LCARS.getDisplay(), LCARS.getFontMeta(LCARS.EF_SMALL).getFont());
-    final Font fntNormal = SWTUtils.toAwtFont(LCARS.getDisplay(), LCARS.getFontMeta(LCARS.EF_NORMAL).getFont());
+    Display display = LCARS.getDisplay();
+    Font[] fonts = {null,null};
+    display.syncExec(() -> {
+      fonts[0] = SWTUtils.toAwtFont(display, LCARS.getFontMeta(LCARS.EF_NORMAL).getFont());
+      fonts[1] = SWTUtils.toAwtFont(display, LCARS.getFontMeta(LCARS.EF_SMALL).getFont());
+    });
     final Color colElboup = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_ELBOUP));
     final Color colElbolo = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_ELBOLO));
     final Color colPriSel = AwtSwt.toAwtColor(LCARS.getColor(LCARS.CS_MULTIDISP,LCARS.EC_PRIMARY|LCARS.ES_SELECTED));
@@ -53,7 +57,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Oceans
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_oceans", fileCachePath, Sector.FULL_SPHERE, GRID_1x1,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(new java.awt.Color(200, 200, 200));
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_A);
@@ -62,7 +66,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Continents
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_continents", fileCachePath, Sector.FULL_SPHERE,
-                GRID_1x1, fntNormal, addVersionTag);
+                GRID_1x1, fonts[0], addVersionTag);
         placeNameService.setColor(new java.awt.Color(255, 255, 240));
         placeNameService.setMinDisplayDistance(LEVEL_G);
         placeNameService.setMaxDisplayDistance(LEVEL_A);
@@ -72,7 +76,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
      // Water Bodies
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_waterbodies", fileCachePath, Sector.FULL_SPHERE,
-                GRID_4x8, fntSmall, addVersionTag);
+                GRID_4x8, fonts[1], addVersionTag);
         placeNameService.setColor(colElboup);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_B);
@@ -81,7 +85,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Trenches & Ridges
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_trenchesridges", fileCachePath, Sector.FULL_SPHERE,
-                GRID_4x8, fntSmall, addVersionTag);
+                GRID_4x8, fonts[1], addVersionTag);
         placeNameService.setColor(colElboup);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_B);
@@ -90,7 +94,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Deserts & Plains
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_desertsplains", fileCachePath, Sector.FULL_SPHERE,
-                GRID_4x8, fntSmall, addVersionTag);
+                GRID_4x8, fonts[1], addVersionTag);
         placeNameService.setColor(colElbolo);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_B);
@@ -99,7 +103,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Lakes & Rivers
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_lakesrivers", fileCachePath, Sector.FULL_SPHERE,
-                GRID_8x16, fntSmall, addVersionTag);
+                GRID_8x16, fonts[1], addVersionTag);
         placeNameService.setColor(colElboup);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_C);
@@ -108,7 +112,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Mountains & Valleys
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_mountainsvalleys", fileCachePath, Sector.FULL_SPHERE,
-                GRID_8x16,fntSmall, addVersionTag);
+                GRID_8x16,fonts[1], addVersionTag);
         placeNameService.setColor(colPriSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_C);
@@ -117,7 +121,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // Countries
     {
         placeNameService = new PlaceNameService(service, "topp:countries", fileCachePath, Sector.FULL_SPHERE, GRID_4x8,
-            fntSmall, addVersionTag);
+            fonts[1], addVersionTag);
         placeNameService.setColor(java.awt.Color.white);
         placeNameService.setMinDisplayDistance(LEVEL_G);
         placeNameService.setMaxDisplayDistance(LEVEL_D);
@@ -126,7 +130,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // GeoNet World Capitals
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_geonet_p_pplc", fileCachePath, Sector.FULL_SPHERE,
-                GRID_16x32,  fntSmall, addVersionTag);
+                GRID_16x32,  fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_D);
@@ -135,7 +139,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // World Cities >= 500k
     {
         placeNameService = new PlaceNameService(service, "topp:citiesover500k", fileCachePath, Sector.FULL_SPHERE,
-                GRID_8x16, fntSmall, addVersionTag);
+                GRID_8x16, fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0);
         placeNameService.setMaxDisplayDistance(LEVEL_D);
@@ -144,7 +148,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // World Cities >= 100k
     {
         placeNameService = new PlaceNameService(service, "topp:citiesover100k", fileCachePath, Sector.FULL_SPHERE,
-                GRID_16x32,  fntSmall, addVersionTag);
+                GRID_16x32,  fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(LEVEL_N);
         placeNameService.setMaxDisplayDistance(LEVEL_F);
@@ -153,7 +157,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // World Cities >= 50k and <100k
     {
         placeNameService = new PlaceNameService(service, "topp:citiesover50k", fileCachePath, Sector.FULL_SPHERE,
-                GRID_16x32, fntSmall, addVersionTag);
+                GRID_16x32, fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(LEVEL_N);
         placeNameService.setMaxDisplayDistance(LEVEL_H);
@@ -163,7 +167,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // World Cities >= 10k and <50k
     {
         placeNameService = new PlaceNameService(service, "topp:citiesover10k", fileCachePath, Sector.FULL_SPHERE,
-                GRID_36x72, fntSmall, addVersionTag);
+                GRID_36x72, fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_I);
@@ -173,7 +177,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // World Cities >= 1k and <10k
     {
         placeNameService = new PlaceNameService(service, "topp:citiesover1k", fileCachePath, Sector.FULL_SPHERE,
-                GRID_36x72, fntSmall, addVersionTag);
+                GRID_36x72, fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_K);
@@ -184,7 +188,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
         //values for masking sector pulled from wfs capabilities request
         Sector maskingSector = new Sector(Angle.fromDegrees(18.0), Angle.fromDegrees(70.7), Angle.fromDegrees(-176.66), Angle.fromDegrees(-66.0));
         placeNameService = new PlaceNameService(service, "topp:wpl_uscitiesover0", fileCachePath, maskingSector,
-                GRID_36x72, fntSmall, addVersionTag);
+                GRID_36x72, fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_N);
@@ -195,7 +199,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
         //values for masking sector pulled from wfs capabilities request
         Sector maskingSector = new Sector(Angle.fromDegrees(-14.4), Angle.fromDegrees(71.3), Angle.fromDegrees(-176.66), Angle.fromDegrees(178.88));
         placeNameService = new PlaceNameService(service, "topp:wpl_uscities0", fileCachePath, maskingSector,
-                GRID_288x576, fntSmall, addVersionTag);
+                GRID_288x576, fonts[1], addVersionTag);
         placeNameService.setColor(colPriSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_N);//M);
@@ -205,7 +209,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // US Anthropogenic Features
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_us_anthropogenic", fileCachePath, Sector.FULL_SPHERE, GRID_288x576,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(colPriSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_P);
@@ -215,7 +219,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // US Water Features
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_us_water", fileCachePath, Sector.FULL_SPHERE, GRID_144x288,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(java.awt.Color.cyan);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_M);
@@ -224,7 +228,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
    // US Terrain Features
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_us_terrain", fileCachePath, Sector.FULL_SPHERE, GRID_72x144,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(colPriSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_O);
@@ -233,7 +237,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // GeoNET Administrative 1st Order
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_geonet_a_adm1", fileCachePath, Sector.FULL_SPHERE, GRID_36x72,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_N);
@@ -242,7 +246,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // GeoNET Administrative 2nd Order
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_geonet_a_adm2", fileCachePath, Sector.FULL_SPHERE, GRID_36x72,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(colSecSel);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_N);
@@ -251,7 +255,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // GeoNET Populated Place Administrative
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_geonet_p_ppla", fileCachePath, Sector.FULL_SPHERE, GRID_36x72,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(colElboup);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_N);
@@ -260,7 +264,7 @@ public class LcarsPlaceNameLayer extends PlaceNameLayer
     // GeoNET Populated Place
     {
         placeNameService = new PlaceNameService(service, "topp:wpl_geonet_p_ppl", fileCachePath, Sector.FULL_SPHERE, GRID_36x72,
-                fntSmall, addVersionTag);
+                fonts[1], addVersionTag);
         placeNameService.setColor(colElboup);
         placeNameService.setMinDisplayDistance(0d);
         placeNameService.setMaxDisplayDistance(LEVEL_O);

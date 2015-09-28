@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.jfree.experimental.swt.SWTUtils;
 
+import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
@@ -152,7 +153,8 @@ public class LcarsComposite extends Composite implements PaintListener
    */
   public synchronized void clear()
   {
-    Log.info("Renderer cleared");
+    if (LCARS.SCREEN_DEBUG)
+      Log.debug("Renderer cleared");
     context = null;    
   }
 
