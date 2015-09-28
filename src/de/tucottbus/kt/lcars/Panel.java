@@ -1037,18 +1037,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     EEvent ee = new EEvent();
     ee.el = elementAt(ee.pt = new Point(event.x,event.y));    
-    if (Log.DebugMode)
-    {
-      switch (event.type)
-      {
-        case TouchEvent.UP:
-          Log.debug("TouchUp@{"+event.x+","+event.y+"}");        
-          break;
-        case TouchEvent.DOWN:
-          Log.debug("TouchDown@{"+event.x+","+event.y+"}");        
-          break;
-      }
-    }
     
     switch (event.type)
     {
