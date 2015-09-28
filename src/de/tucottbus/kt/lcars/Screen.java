@@ -564,7 +564,6 @@ public class Screen
     case SWT.TOUCHSTATE_UP:
       te.type = de.tucottbus.kt.lcars.TouchEvent.UP;
       break;
-
     default:
       return;
     }    
@@ -576,7 +575,6 @@ public class Screen
     if (component == null)
       throw new NullPointerException(); 
     if (awtFrame == null)
-    {
       LCARS.getDisplay().syncExec(() -> {
         //TODO: check awtFrame is in embedded full screen mode
         awtFrame = SWT_AWT.new_Frame(new Composite(composite, SWT.EMBEDDED | SWT.NO_BACKGROUND));
@@ -584,7 +582,6 @@ public class Screen
         awtFrame.setEnabled(true);
         awtFrame.setVisible(true);              
       });
-    }    
     awtFrame.add(component);
   }
 
