@@ -128,8 +128,8 @@ public class TestPanel extends Panel
     ELabel eLabel = new ELabel(this, x1, y1 + h, w * 2, h,
         LCARS.EC_SECONDARY | LCARS.ES_LABEL_W, null);
     els.add(eLabel);
-    eLabel.setAlpha(.5f);
-
+    eLabel.setAlpha(.5f);    
+    
     for (EElement el : els)
       add(el);
     runAtFrameRate(() -> {
@@ -147,6 +147,12 @@ public class TestPanel extends Panel
       eTimecode.setValue(String.format(Locale.ENGLISH, "%02d:%01d", sec[0] / 60,
           sec[0]++ % 60));
     });
+    
+    final int style1 = LCARS.EC_PRIMARY|LCARS.ES_SELECTED|LCARS.ES_STATIC|LCARS.ES_MODAL;
+    final int w = 1920;
+    add(new ERect(null,0,50,w-75,3,style1,null));
+    add(new ELabel(null,0,50,w-20,14,style1|LCARS.ES_LABEL_NE|LCARS.EF_TINY,"LCARS DIALOG"));
+
 
   }
 

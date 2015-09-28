@@ -160,7 +160,6 @@ public class Screen
       // TODO: sometimes an error occurs that the buffer has not been created
       // TODO: createBufferStrategy(2);
     }
-
     
     final Dimension size = getSize();
     final int w = size.width;
@@ -169,6 +168,8 @@ public class Screen
       @Override
       public void paintControl(PaintEvent e)
       {
+        long time = System.nanoTime();            
+
         // Prepare setup
         GC gc = e.gc;
         gc.setTextAntialias(SWT.ON);
@@ -180,8 +181,8 @@ public class Screen
         //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
         //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
         super.paintControl(e);
+        loadStat.add((int)((System.nanoTime()-time)/400000));
       }
-      
     };        
     composite.setTouchEnabled(true);
     composite.addTouchListener(_this);
@@ -618,9 +619,7 @@ public class Screen
       {
         if (isScreenInvalid()) {
           invoke(() -> {
-            long time = System.nanoTime();            
             composite.redraw();
-            loadStat.add((int)((System.nanoTime()-time)/400000));
           });
         }
       }
@@ -630,9 +629,7 @@ public class Screen
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
           invoke(() -> {
-            long time = System.nanoTime();
             composite.redraw();
-            loadStat.add((int)((System.nanoTime()-time)/400000));
           });
         loadStat.period();
       }

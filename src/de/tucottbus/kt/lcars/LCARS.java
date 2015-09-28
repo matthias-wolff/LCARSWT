@@ -749,7 +749,7 @@ public class LCARS implements ILcarsRemote
     switch (align % 3) // vertical alignment
     {
       case 0: // top
-        tly = ty;
+        tly = ty-tl.getLineMetrics(0).getLeading();
         break;  
       case 1: tly = ty + (th-tlBnds.height)/2; break; // middle
       case 2: tly = ty + th-tlBnds.height; break; // bottom

@@ -44,9 +44,8 @@ public class EPanelSelector extends EMessageBox
     ERect e = new ERect(null,0,64,d.width,d.height-77,LCARS.ES_STATIC|LCARS.ES_MODAL,null);
     e.setColor(new ColorMeta(0x80000000,true));
     add(e);
-    e = new ERect(null,0,d.height+3,d.width-75,3,style1,null);
-    add(e);
-    add(new ELabel(null,0,d.height+3,d.width-10,14,style1|LCARS.ES_LABEL_SE|LCARS.EF_TINY,"LCARS DIALOG"));
+    add(new ERect(null,0,d.height+3,d.width-75,3,style1,null));
+    add(new ELabel(null,0,d.height+3,d.width-10,14,style1|LCARS.ES_LABEL_NE|LCARS.EF_TINY,"LCARS DIALOG"));
 
     // Add the dismiss and exit buttons
     eDismiss = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");

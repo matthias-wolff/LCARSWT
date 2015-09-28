@@ -6,7 +6,6 @@ import java.awt.geom.Point2D;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.TextLayout;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
@@ -20,17 +19,17 @@ import de.tucottbus.kt.lcars.swt.FontMeta;
 public class GText extends AGeometry
 {
   private static final long serialVersionUID = -1724627622898883028L;
-  
+
   protected String text;
   protected int descent;
   protected int indent;
   protected FontMeta fontMeta;
-  
+
   protected int x;
   protected int y;
   protected int width;
   protected int height;
-    
+
   /**
    * Creates a new text geometry. A text geometry provides information and
    * 2D-rendering for a single line of text
@@ -51,7 +50,7 @@ public class GText extends AGeometry
    */
   public GText(String text, Rectangle bounds, FontMeta fontMeta,
       boolean foreground)
-  {    
+  {
     super(foreground);
     x = bounds.x;
     y = bounds.y;
@@ -60,27 +59,29 @@ public class GText extends AGeometry
     this.text = text;
     this.fontMeta = fontMeta;
   }
-  
+
   public Point2D.Float getPos()
   {
     return new Point2D.Float(x, y);
   }
 
   @Deprecated
-  public int getStyle() {
+  public int getStyle()
+  {
     return 0;
   }
-  
+
   @Override
   public Area getArea()
   {
     return new Area(getBounds());
   }
-  
-  public Rectangle getBounds() {
-    return new Rectangle(x,y,width,height);    
+
+  public Rectangle getBounds()
+  {
+    return new Rectangle(x, y, width, height);
   }
-  
+
   public String getText()
   {
     return this.text;
@@ -91,19 +92,21 @@ public class GText extends AGeometry
     return this.descent;
   }
 
-  
   public void setDescent(int descent)
   {
     this.descent = descent;
   }
 
-  public int getIndent() {
+  public int getIndent()
+  {
     return indent;
   }
-  
-  public void setIndent(int indent) {
+
+  public void setIndent(int indent)
+  {
     this.indent = indent;
   }
+
   /*
    * (non-Javadoc)
    * 
@@ -111,32 +114,34 @@ public class GText extends AGeometry
    */
   @Override
   public void paint2D(GC gc)
-  {    
+  {
     org.eclipse.swt.graphics.Rectangle clip = gc.getClipping();
     Color cf = gc.getForeground();
     Color cb = gc.getBackground();
     gc.setFont(fontMeta.getFont());
-    gc.setForeground(cb);      
+    gc.setForeground(cb);
     gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height));
-    gc.drawString(text, x, y, true);
+    gc.drawString(text, x + indent, y + descent, true);
     gc.setClipping(clip);
-    
+
     if (LCARS.SCREEN_DEBUG) // draw bounds
-    {      
-      gc.setForeground(ColorMeta.RED.getColor());      
+    {
+      gc.setForeground(ColorMeta.RED.getColor());
       Rectangle b = getBounds();
-      gc.drawRectangle(b.x, b.y, b.width-1, b.height-1);
+      gc.drawRectangle(b.x, b.y, b.width - 1, b.height - 1);
     }
-    gc.setForeground(cf);      
+    gc.setForeground(cf);
     cf.dispose();
     cb.dispose();
   }
-  
+
   @Override
-  public String toString() {
-    return getClass().getSimpleName() + " text=\"" + text+"\" bounds=("+x+","+y+","+width+","+height+") fontmeta=" + fontMeta;
+  public String toString()
+  {
+    return getClass().getSimpleName() + " text=\"" + text + "\" bounds=(" + x
+        + "," + y + "," + width + "," + height + ") fontmeta=" + fontMeta;
   }
-  
+
 }
 
 // EOF
