@@ -115,14 +115,14 @@ public class GText extends AGeometry
   @Override
   public void paint2D(GC gc)
   {
-    org.eclipse.swt.graphics.Rectangle clip = gc.getClipping();
+    //org.eclipse.swt.graphics.Rectangle clip = gc.getClipping();
     Color cf = gc.getForeground();
     Color cb = gc.getBackground();
     gc.setFont(fontMeta.getFont());
     gc.setForeground(cb);
-    gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height+2));
+    //gc.setClipping(new org.eclipse.swt.graphics.Rectangle(x, y, width, height+2));
     gc.drawString(text, x + indent, y + descent, true);
-    gc.setClipping(clip);
+    //gc.setClipping(clip);
 
     if (LCARS.SCREEN_DEBUG) // draw bounds
     {

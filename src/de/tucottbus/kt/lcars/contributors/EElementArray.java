@@ -464,8 +464,7 @@ public class EElementArray extends ElementContributor implements EEventListener
       firstItem = -1;
       return;
     }
-
-
+    
     synchronized (eList)
     {
       final int n = eList.size();
