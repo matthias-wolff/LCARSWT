@@ -1,15 +1,26 @@
 package de.tucottbus.kt.lcars.util;
 
+import gov.nasa.worldwind.BasicModel;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+
+import java.awt.BorderLayout;
+import java.awt.Rectangle;
 import java.rmi.RemoteException;
+
+import javax.media.nativewindow.util.Point;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.widgets.Composite;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.elements.EEvent;
+import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ERect;
-import de.tucottbus.kt.lcars.speech.ESpeechInput;
-import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 public class TestPanel extends Panel
 {
@@ -24,8 +35,86 @@ public class TestPanel extends Panel
   {
     super.init();
     setTitle("TEST PANEL");
+
+    // WorldWind test
+    final Composite swtCmpsWwj = new Composite(((Screen)getScreen()).getLcarsComposite(),SWT.EMBEDDED);
+    swtCmpsWwj.setBounds(100,100,640,480);
+    final java.awt.Frame awtFrameWwj = SWT_AWT.new_Frame(swtCmpsWwj);
+    final java.awt.Panel awtPanelWwj = new java.awt.Panel(new java.awt.BorderLayout());
+    awtFrameWwj.add(awtPanelWwj);
+
+    final WorldWindowGLCanvas wwj = new WorldWindowGLCanvas();
+    wwj.setModel(new BasicModel());
+    awtPanelWwj.add(wwj, BorderLayout.CENTER);
+
+    // Push and drag test
+    ERect eRect = new ERect(this,1209,152,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"PUSH ME");
+    eRect.addEEventListener(new EEventListener()
+    {
+      
+      @Override
+      public void touchUp(EEvent ee)
+      {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void touchHold(EEvent ee)
+      {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void touchDrag(EEvent ee)
+      {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void touchDown(EEvent ee)
+      {
+        // TODO Auto-generated method stub
+        
+      }
+    });
+    add(eRect);
+
+    final Point dragOffset = new Point();
+    eRect = new ERect(this,1420,152,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,"DRAG ME");
+    eRect.addEEventListener(new EEventListener()
+    {
+      @Override
+      public void touchDown(EEvent ee)
+      {
+        dragOffset.set(ee.pt.x,ee.pt.y);
+      }
+      
+      @Override
+      public void touchUp(EEvent ee)
+      {
+      }
+      
+      @Override
+      public void touchHold(EEvent ee)
+      {
+      }
+      
+      @Override
+      public void touchDrag(EEvent ee)
+      {
+        Rectangle r = ee.el.getBounds();
+        r = new Rectangle(r.x+ee.pt.x-dragOffset.getX(),r.y+ee.pt.y-dragOffset.getY(),r.width,r.height);
+        ee.el.setBounds(r);
+      }
+      
+    });
+    add(eRect);
     
-    ERect eRect = new ERect(this,1209,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"HELP");
+    // Other buttons
+    eRect = new ERect(this,1209,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"HELP");
     eRect.addEEventListener(new EEventListenerAdapter()
     {
       @Override
@@ -44,25 +133,16 @@ public class TestPanel extends Panel
         try
         {
           getScreen().exit();
-        } catch (RemoteException e)
+        } 
+        catch (RemoteException e)
         {
+          e.printStackTrace();
         }
       }
     });
     add(eRect);
-    
-    int x = 300;
-    int y = 300;
-    int w = 1000;
-    int h = 100;
-    
-    eRect = new ERect(this,x-1,y-1,w+2,h+2,LCARS.ES_STATIC|LCARS.ES_OUTLINE,null);
-    eRect.setColor(new ColorMeta(0x404040));
-    add(eRect);
-   
-    ESpeechInput.EFvrValue eFvr = new ESpeechInput.EFvrValue(this,x,y,w,h,LCARS.ES_STATIC,null);
-    eFvr.setLabel("SWITCH[switch[on]][MCID[CN2[o[1]]]][MCID[-]][MCID[CN2[o[0]][t[1]]]][MCID[CN2[t[2]]]][MCID[CN2[o[8]][t[2]]]][MCID[CN2[o[4]][t[4]]]]");
-    add(eFvr);
+
+  
   }
 
   /**

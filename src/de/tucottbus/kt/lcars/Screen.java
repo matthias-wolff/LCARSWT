@@ -292,9 +292,17 @@ public class Screen
    */
   public Display getSwtDisplay()
   {
-    return Display.getDefault();
+    return shell.getDisplay();//Display.getDefault();
   }
 
+  /**
+   * Returns the top composite of the LCARS SWT screen.
+   */
+  public LcarsComposite getLcarsComposite()
+  {
+    return composite;
+  }
+  
   // -- 2D rendering --
 
   /**
@@ -545,7 +553,7 @@ public class Screen
   {
     if (e.touches.length <= 0)
       return;
-    Log.info(e.touches[0].toString());
+    //Log.info(e.touches[0].toString());
     Touch touch = e.touches[0];
 
     if (!(e.widget instanceof Control))  
