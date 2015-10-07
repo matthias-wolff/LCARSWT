@@ -1,10 +1,12 @@
 package de.tucottbus.kt.lcars.j2d;
 
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
+import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 import java.net.URL;
 import java.util.HashMap;
@@ -27,7 +29,8 @@ public class GImage extends Geometry
   private Point                   pos;
   private Image                   cachedImg;
   private boolean                 resNotFound = false;
-  
+  private Dimension               size;
+
   /**
    * Creates a new image geometry.
    * 
@@ -37,10 +40,24 @@ public class GImage extends Geometry
    */
   public GImage(String resourceName, Point pos, ImageObserver imageObeserver)
   {
+    this(resourceName, pos, null, imageObeserver);
+  }
+
+  /**
+   * Creates a new image geometry.
+   *
+   * @param resourceName
+   * @param pos
+   * @param size
+   * @param imageObeserver
+   */
+  public GImage(String resourceName, Point pos, Dimension size, ImageObserver imageObeserver)
+  {
     super(false);
     this.resourceName  = resourceName;
     this.imageObserver = imageObeserver;
     this.pos           = pos;
+    this.size          = size;
   }
 
   @Override
@@ -49,10 +66,15 @@ public class GImage extends Geometry
     Image image = getImage();
     if(image == null)
       return new Area();
-    
-    int   w     = image.getWidth(this.imageObserver);
-    int   h     = image.getHeight(this.imageObserver);
-    return new Area(new Rectangle(pos.x,pos.y,w,h));
+
+    if(size == null)
+    {
+      int   w     = image.getWidth(this.imageObserver);
+      int   h     = image.getHeight(this.imageObserver);
+      return new Area(new Rectangle(pos.x,pos.y,w,h));
+    }
+
+  return new Area(new Rectangle(pos.x,pos.y,size.width,size.height));
   }
   
   
@@ -75,7 +97,14 @@ public class GImage extends Geometry
       //LCARS.err("GImage", "Image not found at Location: "+ this.resourceName);
       return;
     }
-    g2d.drawImage(image,this.pos.x,this.pos.y,this.imageObserver);
+    if(size == null)
+      g2d.drawImage(image,this.pos.x,this.pos.y,this.imageObserver);
+    else
+    {
+      float   w     = (float)size.width/image.getWidth(this.imageObserver);
+      float   h     = (float)size.height/image.getHeight(this.imageObserver);
+      g2d.drawImage(image,new AffineTransform(w,0f,0f,h,this.pos.x,this.pos.y), this.imageObserver);
+    }
   }
 
   // -- The image cache --

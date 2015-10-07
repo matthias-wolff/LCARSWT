@@ -27,6 +27,7 @@
 		<!-- TODO: only enable next property after all java classes are prepared 
 			to be UTF8 encoded -->
 		<!-- <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> -->
+		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		
 		<!-- MAIN CLASS -->
 		<mainClass>de.tucottbus.kt.lcars.LCARS</mainClass>

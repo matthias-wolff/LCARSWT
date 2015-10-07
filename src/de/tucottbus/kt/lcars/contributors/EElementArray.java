@@ -15,6 +15,7 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.elements.EScaledImage;
 
 /**
  * An array of equally sized {@link ERect}s, {@link EValue}s or {@link ELabel}s.
@@ -88,7 +89,8 @@ public class EElementArray extends ElementContributor implements EEventListener
     (
       !this.elemClass.equals(ERect .class) &&
       !this.elemClass.equals(EValue.class) &&
-      !this.elemClass.equals(ELabel.class)
+      !this.elemClass.equals(ELabel.class) &&
+      !this.elemClass.equals(EScaledImage.class)
     )
     {
       throw new IllegalArgumentException("Class cannot be used");
@@ -198,6 +200,8 @@ public class EElementArray extends ElementContributor implements EEventListener
     }
     else if (this.elemClass.equals(ELabel.class))
       e = new ELabel(null,x,y,w,h,this.elemStyle,label);
+    else if (this.elemClass.equals(EScaledImage.class))
+      e = new EScaledImage(null,x,y,w,h,this.elemStyle,name);
     e.addEEventListener(this);
     e.setData(name);
     eList.add(e);
@@ -309,6 +313,8 @@ public class EElementArray extends ElementContributor implements EEventListener
       return (String)e.getData();
     if (e instanceof EValue)
       return ((EValue)e).getValue();
+    if (e instanceof EScaledImage)
+      return ((EScaledImage)e).getImageFile();
     return e.getLabel();
   }
   

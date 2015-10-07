@@ -105,7 +105,7 @@ public class EBrace extends EElementArray
     }
 
     x = this.x+elemSize.width-braceH;
-    eRectU = new ERect(null,x,y,braceH,braceH,LCARS.EC_ELBOLO|LCARS.ES_RECT_RND_E,null);
+    eRectU = new ERect(null,x,y,braceH,braceH,LCARS.EC_ELBOLO|LCARS.ES_RECT_RND_E|LCARS.ES_STATIC,null);
 
     // -- The tip
     x = this.x-space-braceW-tipW;
@@ -137,7 +137,7 @@ public class EBrace extends EElementArray
     }
 
     x = this.x+elemSize.width-braceH;
-    eRectL = new ERect(null,x,y,braceH,braceH,LCARS.EC_ELBOLO|LCARS.ES_RECT_RND_E,null);
+    eRectL = new ERect(null,x,y,braceH,braceH,LCARS.EC_ELBOLO|LCARS.ES_RECT_RND_E|LCARS.ES_STATIC,null);
     
     // Add brace elements
     add(eElboU1,false);
