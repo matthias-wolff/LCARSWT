@@ -288,6 +288,14 @@ public class Screen
   }
 
   /**
+   * Returns this screen's shell.
+   */
+  public Shell getShell()
+  {
+    return shell;
+  }
+  
+  /**
    * Returns the SWT display this screen is running on.
    */
   public Display getSwtDisplay()
@@ -411,6 +419,8 @@ public class Screen
   @Override
   public void setPanel(String className) throws ClassNotFoundException
   {
+    if (className==null)
+      className = "de.tucottbus.kt.lcars.Panel";
     setPanel(Panel.createPanel(className, this));
   }
 
@@ -445,7 +455,8 @@ public class Screen
   public void exit()
   {
     //running = false;
-    System.exit(0);
+    shell.dispose();
+    //System.exit(0);
   }
 
   // -- Implementation of the MouseInputListener interface --
@@ -456,7 +467,8 @@ public class Screen
     }
     try
     {
-      panel.processTouchEvent(touchEvent);
+      if (panel!=null)
+        panel.processTouchEvent(touchEvent);
     } catch (RemoteException e1)
     {
       int t = touchEvent.type;
@@ -616,6 +628,7 @@ public class Screen
 
   private void invoke(Runnable action)
   {
+    if (shell.isDisposed()) return;
     shell.getDisplay().syncExec(action);
   }
 
@@ -636,9 +649,7 @@ public class Screen
       {
         if (isScreenInvalid()) {
           invalid = false;
-          invoke(() -> {
-            composite.redraw();
-          });
+          invoke(() -> { composite.redraw(); });
         }
       }
 
@@ -646,9 +657,7 @@ public class Screen
       if (ctr % 25 == 0)
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
-          invoke(() -> {
-            composite.redraw();
-          });
+          invoke(() -> { composite.redraw(); });
         loadStat.period();
       }
 

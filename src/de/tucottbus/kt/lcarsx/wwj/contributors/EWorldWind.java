@@ -16,6 +16,7 @@ import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -30,6 +31,7 @@ import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
 import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 
@@ -119,32 +121,31 @@ public class EWorldWind extends ElementContributor implements RenderingListener
       Screen screen = Screen.getLocal(panel.getScreen());
       if (wwd==null)
       {
-        screen.getSwtDisplay().syncExec(new Runnable()
+        screen.getSwtDisplay().syncExec(() ->
         {
-          @Override
-          public void run()
-          {
-            swtCmpsWwd = new Composite(screen.getLcarsComposite(),SWT.EMBEDDED);
-            Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
-            Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
-            swtCmpsWwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
-            java.awt.Frame awtFrameWwd = SWT_AWT.new_Frame(swtCmpsWwd);
-            
-            // NOTE: WorldWind need to be embedded in an java.awt.Panel!
-            java.awt.Panel awtPanelWwd = new java.awt.Panel(new java.awt.BorderLayout());
-            awtFrameWwd.add(awtPanelWwd);
-
-            wwd = new WorldWindowGLCanvas();
-            setModel(initialModel);
-            setView(initialView);
-            wwd.addRenderingListener(EWorldWind.this);
-            awtPanelWwd.add(wwd, BorderLayout.CENTER);
-
-            animator = new Animator();
-            animator.add(wwd);
-            animator.start();
-            wwd.redrawNow();
-          }
+          swtCmpsWwd = new Composite(screen.getLcarsComposite(),SWT.EMBEDDED);
+          swtCmpsWwd.setBackground(ColorMeta.BLACK.getColor());
+          Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
+          Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
+          swtCmpsWwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+          java.awt.Frame awtFrameWwd = SWT_AWT.new_Frame(swtCmpsWwd);
+          awtFrameWwd.setBackground(Color.BLACK);
+          
+          // NOTE: WorldWind need to be embedded in an java.awt.Panel!
+          java.awt.Panel awtPanelWwd = new java.awt.Panel(new java.awt.BorderLayout());
+          awtPanelWwd.setBackground(Color.BLACK);
+          awtFrameWwd.add(awtPanelWwd);
+  
+          wwd = new WorldWindowGLCanvas();
+          setModel(initialModel);
+          setView(initialView);
+          wwd.addRenderingListener(EWorldWind.this);
+          awtPanelWwd.add(wwd, BorderLayout.CENTER);
+  
+          animator = new Animator();
+          animator.add(wwd);
+          animator.start();
+          wwd.redrawNow();
         });
       }
     }
@@ -168,16 +169,11 @@ public class EWorldWind extends ElementContributor implements RenderingListener
         animator.stop();
       }
       if (wwd!=null)
-        screen.getSwtDisplay().syncExec(new Runnable()
+        screen.getSwtDisplay().syncExec(() ->
         {
-          @Override
-          public void run()
-          {
-            wwd.destroy();
-            swtCmpsWwd.dispose();
-            wwd = null;
-            swtCmpsWwd = null;
-          }
+          swtCmpsWwd.dispose();
+          swtCmpsWwd = null;
+          wwd = null;
         });
     }
     catch (ClassCastException e)

@@ -106,7 +106,7 @@ public abstract class WorldWindPanel extends MainPanel
     
     // The top bar
     add(new ERect(this,23,23,58,58,style|LCARS.ES_STATIC|LCARS.ES_RECT_RND_W,null));
-    eDate = new EValue(this,85,23,288,58,style|LCARS.ES_LABEL_SE,"LCARS");
+    eDate = new EValue(this,85,23,288,58,style|LCARS.ES_LABEL_SW,"LCARS");
     eDate.setValueMargin(0);
     eDate.addEEventListener(new EEventListenerAdapter()
     {
@@ -380,7 +380,7 @@ public abstract class WorldWindPanel extends MainPanel
   protected void fps25()
   {
     displayTime();
-    //displayWorldWindState();
+    displayWorldWindState();
   }
 
   @Override

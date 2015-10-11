@@ -16,10 +16,10 @@ import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.swt.AwtSwt;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
-import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
@@ -687,9 +687,9 @@ public abstract class EElement
     public HoldThread()
     {
       super(HoldThread.class.getSimpleName() + " of EElement#" + data.serialNo);
+      setDaemon(true);
     }
-    
-    
+
     @Override
     public void run()
     {

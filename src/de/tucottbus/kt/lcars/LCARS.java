@@ -66,8 +66,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
 import org.jfree.experimental.swt.SWTUtils;
 
-import de.tucottbus.kt.lcars.geometry.GText;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
+import de.tucottbus.kt.lcars.geometry.GText;
 import de.tucottbus.kt.lcars.logging.ILogObserver;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.net.ILcarsRemote;
@@ -77,8 +77,8 @@ import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
 import de.tucottbus.kt.lcars.net.RmiSecurityManager;
 import de.tucottbus.kt.lcars.net.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
-import de.tucottbus.kt.lcars.swt.FontMeta;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.FontMeta;
 
 /**
  * The LCARS main class. Includes the main method, constants, static service methods, and the panel
@@ -1713,20 +1713,27 @@ public class LCARS implements ILcarsRemote
 
       // Run SWT event loop 
       while (true)
+      {
         try
         {
-          while (true)
-            if (!Display.getDefault().readAndDispatch())
-              Display.getDefault().sleep();
+          if (!getDisplay().readAndDispatch())
+            getDisplay().sleep();
         }
         catch (Exception e)
         {
           Log.err("Error in screen execution.", e);
         }
+        if (iscreen instanceof Screen)
+          if (((Screen)iscreen).getShell().isDisposed())
+            break;
+      }
     }
     catch (Exception e)
     {
       Log.err("", e);
     }
+    
+    Log.info("END OF LCARS MAIN");
+    //System.exit(0); // HACK: Hard off; should not be necessary!
   }
 }
