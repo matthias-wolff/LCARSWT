@@ -296,10 +296,8 @@ public abstract class WorldWindPanel extends MainPanel
     // Initialize
     setBarMode(BARMODE_NAVI);
 
-    // Schedule fatInit()
-    // NOTE: invokeLater() is more responsive that EventQueue.invokeLater
+    // Fat initialization
     invokeLater(new Runnable()
-    //EventQueue.invokeLater(new Runnable()
     {
       @Override
       public void run()
@@ -378,12 +376,11 @@ public abstract class WorldWindPanel extends MainPanel
     }
   }
 
-
   @Override
   protected void fps25()
   {
     displayTime();
-    displayWorldWindState();
+    //displayWorldWindState();
   }
 
   @Override
@@ -393,7 +390,10 @@ public abstract class WorldWindPanel extends MainPanel
     {
       eWw.removeFromPanel();
     }
-    catch (Exception e) {}
+    catch (Exception e) 
+    {
+      e.printStackTrace();
+    }
     super.stop();
   }
 

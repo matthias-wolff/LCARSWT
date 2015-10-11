@@ -15,8 +15,13 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 
+import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.widgets.Composite;
 
 import com.jogamp.opengl.util.Animator;
 
@@ -39,9 +44,9 @@ import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 public class EWorldWind extends ElementContributor implements RenderingListener
 {  
   /**
-   * The LCARS screen this World Wind wrapper is on.
+   * The SWT composite embedding the WorldWind canvas (via SWT-AWT bridge).
    */
-  private Screen screen;
+  private Composite swtCmpsWwd;
   
   /**
    * The World Wind canvas.
@@ -109,53 +114,77 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   {
     super.addToPanel(panel);
     
-    final Panel __panel = panel;
-//    EventQueue.invokeLater(new Runnable()
-//    {
-//      @Override
-//      public void run()
-//      {
-        try
+    try
+    {
+      Screen screen = Screen.getLocal(panel.getScreen());
+      if (wwd==null)
+      {
+        screen.getSwtDisplay().syncExec(new Runnable()
         {
-          screen = Screen.getLocal(__panel.getScreen());
-          if (wwd==null)
+          @Override
+          public void run()
           {
+            swtCmpsWwd = new Composite(screen.getLcarsComposite(),SWT.EMBEDDED);
+            Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
+            Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
+            swtCmpsWwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+            java.awt.Frame awtFrameWwd = SWT_AWT.new_Frame(swtCmpsWwd);
+            
+            // NOTE: WorldWind need to be embedded in an java.awt.Panel!
+            java.awt.Panel awtPanelWwd = new java.awt.Panel(new java.awt.BorderLayout());
+            awtFrameWwd.add(awtPanelWwd);
+
             wwd = new WorldWindowGLCanvas();
             setModel(initialModel);
             setView(initialView);
             wwd.addRenderingListener(EWorldWind.this);
+            awtPanelWwd.add(wwd, BorderLayout.CENTER);
+
+            animator = new Animator();
+            animator.add(wwd);
+            animator.start();
+            wwd.redrawNow();
           }
-          screen.add(wwd);
-          Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
-          Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
-          wwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
-          
-          animator = new Animator();
-          animator.add(wwd);
-          animator.start();
-          wwd.redrawNow();
-        }
-        catch (ClassCastException e)
-        {
-          Log.err("LCARS: Function not supported on remote screens.", e);
-        }
-//      }
-//    });
+        });
+      }
+    }
+    catch (ClassCastException e)
+    {
+      Log.err("LCARS: Function not supported on remote screens.", e);
+    }
   }
 
   @Override
   public void removeFromPanel()
   {
     if (panel==null) return;
-    if (screen!=null && wwd!=null)
+    
+    try
     {
-      screen.remove(wwd);
+      Screen screen = Screen.getLocal(panel.getScreen());
+      if (animator!=null)
+      {
+        animator.remove(wwd);
+        animator.stop();
+      }
+      if (wwd!=null)
+        screen.getSwtDisplay().syncExec(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            wwd.destroy();
+            swtCmpsWwd.dispose();
+            wwd = null;
+            swtCmpsWwd = null;
+          }
+        });
     }
-    if (animator!=null)
+    catch (ClassCastException e)
     {
-      animator.remove(wwd);
-      animator.stop();
+      Log.err("LCARS: Function not supported on remote screens.", e);
     }
+
     super.removeFromPanel();
   }
 
