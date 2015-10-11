@@ -163,12 +163,14 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   throws ClassNotFoundException
   {
     Panel panel;
-    if(className == null) return null;
-                
-    if(className == Panel.class.getName()) {
+
+    if(className==null || className == Panel.class.getName()) 
+    {
       panel = new Panel(iscreen);
       panel.panelSelectionDialog();
-    } else {
+    } 
+    else 
+    {
       Class<?> panelClass = Panel.class;
       if (className!=null) panelClass = Class.forName(className);
       try

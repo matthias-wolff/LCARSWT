@@ -419,8 +419,6 @@ public class Screen
   @Override
   public void setPanel(String className) throws ClassNotFoundException
   {
-    if (className==null)
-      className = "de.tucottbus.kt.lcars.Panel";
     setPanel(Panel.createPanel(className, this));
   }
 

@@ -297,13 +297,9 @@ public abstract class WorldWindPanel extends MainPanel
     setBarMode(BARMODE_NAVI);
 
     // Fat initialization
-    invokeLater(new Runnable()
+    invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        fatInit();
-      }
+      fatInit();
     });
   }
 
