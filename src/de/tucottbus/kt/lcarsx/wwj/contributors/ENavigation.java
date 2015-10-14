@@ -438,9 +438,10 @@ public class ENavigation extends ElementContributor
     boolean sky = this.worldWindPanel.getTitle().startsWith("SKY");
 
     // Display actual view
-    eWw.setView(null);
+    //eWw.setView(null);
     View view = eWw.getView();
     Position pos = view.getEyePosition();
+    if (pos==null) return;
     Angle angle = pos.getLatitude();
     v = angle.getDegrees();
     s = String.format(Locale.US,"%05.2f",Math.abs(v))+(v<0?"S":"N");

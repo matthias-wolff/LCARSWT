@@ -106,7 +106,7 @@ public abstract class WorldWindPanel extends MainPanel
     
     // The top bar
     add(new ERect(this,23,23,58,58,style|LCARS.ES_STATIC|LCARS.ES_RECT_RND_W,null));
-    eDate = new EValue(this,85,23,288,58,style|LCARS.ES_LABEL_SE,"LCARS");
+    eDate = new EValue(this,85,23,288,58,style|LCARS.ES_LABEL_SW,"LCARS");
     eDate.setValueMargin(0);
     eDate.addEEventListener(new EEventListenerAdapter()
     {
@@ -296,16 +296,10 @@ public abstract class WorldWindPanel extends MainPanel
     // Initialize
     setBarMode(BARMODE_NAVI);
 
-    // Schedule fatInit()
-    // NOTE: invokeLater() is more responsive that EventQueue.invokeLater
-    invokeLater(new Runnable()
-    //EventQueue.invokeLater(new Runnable()
+    // Fat initialization
+    invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        fatInit();
-      }
+      fatInit();
     });
   }
 
@@ -378,7 +372,6 @@ public abstract class WorldWindPanel extends MainPanel
     }
   }
 
-
   @Override
   protected void fps25()
   {
@@ -393,7 +386,10 @@ public abstract class WorldWindPanel extends MainPanel
     {
       eWw.removeFromPanel();
     }
-    catch (Exception e) {}
+    catch (Exception e) 
+    {
+      e.printStackTrace();
+    }
     super.stop();
   }
 

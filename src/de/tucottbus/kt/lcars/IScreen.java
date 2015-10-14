@@ -38,7 +38,8 @@ public interface IScreen extends Remote
    * discarded.
    * 
    * @param className
-   *          The new {@link Panel}'s class name.
+   *          The new {@link Panel}'s class name, or {@code null} to display
+   *          a panel selector.
    * @throws ClassNotFoundException
    *           If <code>className</code> is invalid.
    */
