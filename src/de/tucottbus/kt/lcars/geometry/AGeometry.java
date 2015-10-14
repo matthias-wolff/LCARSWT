@@ -74,7 +74,7 @@ public abstract class AGeometry implements Serializable
    * Called when the visibility of the {@link GC} changed.
    * @param visibility
    */
-  public void onVisibilityChanged(boolean visibility)
+  public void update(boolean visibility)
   {
     // ignored
   }     

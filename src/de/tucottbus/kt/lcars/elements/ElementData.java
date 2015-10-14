@@ -11,7 +11,7 @@ import org.eclipse.swt.graphics.GC;
 
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
-import de.tucottbus.kt.lcars.geometry.AHeavyGeometry;
+import de.tucottbus.kt.lcars.geometry.HeavyGeometry;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.logging.Log;
 
@@ -171,8 +171,8 @@ public final class ElementData implements Serializable
       {
         other.geometry = new ArrayList<AGeometry>(geometry.size());
         for (AGeometry geom : geometry)
-          other.geometry.add(geom instanceof AHeavyGeometry
-              ? ((AHeavyGeometry) geom).getUpdate(incremental) : geom);
+          other.geometry.add(geom instanceof HeavyGeometry
+              ? ((HeavyGeometry<?>) geom).getUpdate(incremental) : geom);
       } catch (Exception e)
       {
         // TODO: synchronization problem, exception should never occur
@@ -239,8 +239,8 @@ public final class ElementData implements Serializable
       {
         this.geometry = new ArrayList<AGeometry>(other.geometry);
         for (AGeometry geom : this.geometry)
-          if (geom instanceof AHeavyGeometry)
-            ((AHeavyGeometry) geom).applyUpdate();
+          if (geom instanceof HeavyGeometry)
+            ((HeavyGeometry<?>) geom).update(true);
         this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea)
             : null;
         // TODO: make a copy
@@ -322,7 +322,7 @@ public final class ElementData implements Serializable
   public void onVisibilityChanged(boolean visible)
   {
     for (AGeometry g : geometry)
-      g.onVisibilityChanged(visible);
+      g.update(visible);
   }
 
   @Override

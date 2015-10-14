@@ -484,7 +484,7 @@ public class TestPanel extends Panel
       initDimmed();
     if (LCARS.getArg("--noStats") == null)
       initStatistics();
-    if (LCARS.getArg("--noAnimation") == null)
+    if (LCARS.getArg("--testAnimation") == null)
       initEElementArrayAnimation();
     
   }

@@ -450,10 +450,11 @@ public class Screen
 
   // -- Implementation of the MouseInputListener interface --
   protected void processTouchEvent(TouchEvent touchEvent) {
-    if (touchEvent == null) {
+    if (touchEvent == null) {      
       Log.warn("Touch event ignored");
       return;
     }
+    //Log.debug(touchEvent.toString());
     try
     {
       panel.processTouchEvent(touchEvent);
@@ -466,6 +467,7 @@ public class Screen
   
 
   protected TouchEvent toTouchEvent(MouseEvent e, int eventType) {
+    //Log.debug(e.toString());
     if (!(e.widget instanceof Control)) return null;
     org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
     Point pt = screenToPanel(absPos.x, absPos.y);
@@ -486,6 +488,7 @@ public class Screen
   @Override
   public void mouseDown(MouseEvent e)
   {
+    if(e.button==3) return; // ignore, because of touch events
     if(mouseButton != 0) {
       mouseButton = 0;
       return;
@@ -497,6 +500,7 @@ public class Screen
   @Override
   public void mouseUp(MouseEvent e)
   {
+    if(e.button==3) return; // ignore, because of touch events
     if(mouseButton != e.button)
       return;
     mouseButton = 0;
@@ -506,6 +510,7 @@ public class Screen
   @Override
   public void mouseMove(MouseEvent e)
   {
+    if(e.button==3) return; // ignore, because of touch events
     if(mouseButton != 0)
       processTouchEvent(toTouchEvent(e, TouchEvent.DRAG));
   }
@@ -553,6 +558,8 @@ public class Screen
   {
     if (e.touches.length <= 0)
       return;
+    
+    Log.info(e.toString());
     //Log.info(e.touches[0].toString());
     Touch touch = e.touches[0];
 

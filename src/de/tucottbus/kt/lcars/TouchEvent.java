@@ -16,6 +16,8 @@ public class TouchEvent implements Serializable
   public static final int UP   = 2;
   public static final int DRAG = 3;
   
+  public static final String[] TYPE_NAMES = {"", "down", "up", "drag"};
+  
   /**
    * The event type: {@link #DOWN}, {@link #UP}, or {@link #DRAG}.
    */
@@ -31,6 +33,10 @@ public class TouchEvent implements Serializable
    */
   public int y;
   
+  @Override
+  public String toString() {
+    return TouchEvent.class.getSimpleName() +"@("+x+","+y+")"+ " type="+ TYPE_NAMES[type];        
+  }
 }
 
 // EOF
