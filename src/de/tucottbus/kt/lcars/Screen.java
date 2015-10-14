@@ -288,6 +288,14 @@ public class Screen
   }
 
   /**
+   * Returns this screen's shell.
+   */
+  public Shell getShell()
+  {
+    return shell;
+  }
+  
+  /**
    * Returns the SWT display this screen is running on.
    */
   public Display getSwtDisplay()
@@ -445,19 +453,20 @@ public class Screen
   public void exit()
   {
     //running = false;
-    System.exit(0);
+    shell.dispose();
+    //System.exit(0);
   }
 
   // -- Implementation of the MouseInputListener interface --
   protected void processTouchEvent(TouchEvent touchEvent) {
-    if (touchEvent == null) {      
+    if (touchEvent == null) {
       Log.warn("Touch event ignored");
       return;
     }
-    //Log.debug(touchEvent.toString());
     try
     {
-      panel.processTouchEvent(touchEvent);
+      if (panel!=null)
+        panel.processTouchEvent(touchEvent);
     } catch (RemoteException e1)
     {
       int t = touchEvent.type;
@@ -467,7 +476,6 @@ public class Screen
   
 
   protected TouchEvent toTouchEvent(MouseEvent e, int eventType) {
-    //Log.debug(e.toString());
     if (!(e.widget instanceof Control)) return null;
     org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
     Point pt = screenToPanel(absPos.x, absPos.y);
@@ -558,8 +566,6 @@ public class Screen
   {
     if (e.touches.length <= 0)
       return;
-    
-    Log.info(e.toString());
     //Log.info(e.touches[0].toString());
     Touch touch = e.touches[0];
 
@@ -623,6 +629,7 @@ public class Screen
 
   private void invoke(Runnable action)
   {
+    if (shell.isDisposed()) return;
     shell.getDisplay().syncExec(action);
   }
 
@@ -643,9 +650,7 @@ public class Screen
       {
         if (isScreenInvalid()) {
           invalid = false;
-          invoke(() -> {
-            composite.redraw();
-          });
+          invoke(() -> { composite.redraw(); });
         }
       }
 
@@ -653,9 +658,7 @@ public class Screen
       if (ctr % 25 == 0)
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
-          invoke(() -> {
-            composite.redraw();
-          });
+          invoke(() -> { composite.redraw(); });
         loadStat.period();
       }
 
