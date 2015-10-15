@@ -183,7 +183,7 @@ public final class ElementData implements Serializable
         Log.err(
             CLASSKEY,
             "Caught exception " + e.toString() + " at "
-                + e.getStackTrace()[0].toString());
+                + (e.getStackTrace().length > 0 ? e.getStackTrace()[0].toString() : "no stack trace information"));
       }
 
     state.clearChanged();
