@@ -62,7 +62,7 @@ public final class ElementData implements Serializable
    * The graphical representation of the {@link EElement} described by this
    * instance.
    */
-  public ArrayList<AGeometry> geometry;
+  ArrayList<AGeometry> geometry;
 
   /**
    * Bounds of the area of this element.
@@ -340,7 +340,12 @@ public final class ElementData implements Serializable
     return geometry == null
         ? (state == null ? ElementState.FLAG_MASK | GEOMETRY_FLAG : GEOMETRY_FLAG) 
         : (state == null ? ElementState.FLAG_MASK                 : 0);
-  }  
+  }
+  
+  public void updateGeometries(ArrayList<AGeometry> geos) {
+    geometry = (geos != null) ? new ArrayList<AGeometry>(geos) : null;
+    cachedArea = null;
+  }
 }
 
 // EOF

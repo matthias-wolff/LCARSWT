@@ -1,41 +1,83 @@
 package de.tucottbus.kt.lcars;
 
+import java.awt.Point;
 import java.io.Serializable;
 
+
 /**
- * A touch event to be transferred from the {@linkplain IScreen LCARS screen} to the
- * {@linkplain IPanel LCARS panel}.
+ * A touch event to be transferred from the {@linkplain IScreen LCARS screen} to
+ * the {@linkplain IPanel LCARS panel}.
  * 
  * @author Matthias Wolff
  */
 public class TouchEvent implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  
+
   public static final int DOWN = 1;
   public static final int UP   = 2;
   public static final int DRAG = 3;
-  
-  public static final String[] TYPE_NAMES = {"", "down", "up", "drag"};
-  
+
+  public static final String[] TYPE_NAMES =
+  { "", "down", "up", "drag" };
+
   /**
    * The event type: {@link #DOWN}, {@link #UP}, or {@link #DRAG}.
    */
-  public int type;
-  
+  public final int type;
+
   /**
    * The x-coordinate of the touch event (in panel coordinates).
    */
-  public int x;
-  
+  public final int x;
+
   /**
    * The y-coordinate of the touch event (in panel coordinates).
    */
-  public int y;
+  public final int y;
+
+  /**
+   * Indicates if this event was introduced by a mouse event
+   */
+  public final boolean isMouseEvent;
   
+  /**
+   * 
+   */
+  public final boolean primary;
+  
+  
+  /**
+   * 
+   * @param type
+   * @param position
+   * @param isMouseEvent
+   */
+
+  public TouchEvent(int type, Point position, boolean isMouseEvent, boolean primary)
+  {
+    this.type = type;
+    this.x = position.x;
+    this.y = position.y;
+    this.isMouseEvent = isMouseEvent;
+    this.primary = primary;
+  }
+
+  public TouchEvent(int type, int x, int y, boolean isMouseEvent, boolean primary)
+  {
+    this.type = type;
+    this.x = x;
+    this.y = y;
+    this.isMouseEvent = isMouseEvent;
+    this.primary = primary;
+  }
+
   @Override
-  public String toString() {
-    return TouchEvent.class.getSimpleName() +"@("+x+","+y+")"+ " type="+ TYPE_NAMES[type];        
+  public String toString()
+  {
+    return TouchEvent.class.getSimpleName() + "@(" + x + "," + y + ")"
+        + " type=" + TYPE_NAMES[type] + " isMouseEvent="
+        + Boolean.toString(isMouseEvent);
   }
 }
 

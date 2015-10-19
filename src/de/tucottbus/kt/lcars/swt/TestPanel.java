@@ -13,18 +13,27 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.TouchEvent;
+import org.eclipse.swt.events.TouchListener;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
@@ -48,7 +57,6 @@ import de.tucottbus.kt.lcarsx.al.ELevelsDisplay;
 
 public class TestPanel extends Panel
 {
-
   private static final int m = 10;
   private static final int w = 200;
   private static final int h = 100;
@@ -379,16 +387,85 @@ public class TestPanel extends Panel
   }
 
   public static void initShell()
-  {
-    final int l = 400;
+  {  
+    final int w = 2200;
+    final int h = 1200;
 
     Display display = Display.getDefault();
     Shell shell = new Shell(display);
-    shell.setSize(l, l);
+    shell.setSize(w, h);
     shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
-    addComp(shell, SWT.COLOR_CYAN, SWT.COLOR_BLUE, 0);
-    addComp(shell, SWT.COLOR_RED, SWT.COLOR_DARK_RED, 300);
+    //addComp(shell, SWT.COLOR_CYAN, SWT.COLOR_BLUE, 0);
+    //addComp(shell, SWT.COLOR_RED, SWT.COLOR_DARK_RED, 300);
 
+    final Text text = new Text(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+    text.setSize(w-32, (int)(h*.75)-32);
+    text.setLayoutData(new FillLayout());
+    text.setVisible(true);
+    
+    final Button clear = new Button(shell, SWT.NONE);
+    clear.setLocation(0, text.getSize().y);
+    clear.setText("Clear");
+    clear.setSize(200,50);
+    clear.setVisible(true);
+    clear.addMouseListener(new MouseListener()
+    {
+      @Override
+      public void mouseUp(MouseEvent e)
+      {
+        text.setText("");
+      }
+      
+      @Override
+      public void mouseDown(MouseEvent e){}
+      
+      @Override
+      public void mouseDoubleClick(MouseEvent e){}
+    });
+    
+    Consumer<TypedEvent> log = (e) -> {text.append(e.toString()+"\n");};
+    
+    shell.addTouchListener(new TouchListener()
+    {
+      @Override
+      public void touch(TouchEvent e)
+      {
+        //if (e.touches[0].state == SWT.TOUCHSTATE_MOVE) return;
+        log.accept(e);
+      }
+    });
+    
+    shell.addMouseListener(new MouseListener()
+    {      
+      @Override
+      public void mouseUp(MouseEvent e)
+      {
+        log.accept(e);
+      }
+      
+      @Override
+      public void mouseDown(MouseEvent e)
+      {
+        log.accept(e);
+      }
+      
+      @Override
+      public void mouseDoubleClick(MouseEvent e)
+      {
+        log.accept(e);
+      }
+    });
+    
+    shell.addMouseMoveListener(new MouseMoveListener()
+    {
+      @Override
+      public void mouseMove(MouseEvent e)
+      {
+        log.accept(e);
+      }
+    });
+    
+    shell.setTouchEnabled(true);
     shell.open();
 
     // Run SWT event loop
@@ -498,7 +575,7 @@ public class TestPanel extends Panel
   public static void main(String[] args)
   {
     //LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
-    // initShell();
-    initAwtSwtBridge();
+    initShell();
+    //initAwtSwtBridge();
   }
 }

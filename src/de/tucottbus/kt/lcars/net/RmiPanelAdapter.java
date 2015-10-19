@@ -143,9 +143,9 @@ implements IPanel, IRmiPanelAdapterRemote
   }
 
   @Override
-  public void processTouchEvent(TouchEvent event)
+  public void processTouchEvents(TouchEvent[] events)
   {
-    panel.processTouchEvent(event);
+    panel.processTouchEvents(events);
   }
 
   @Override

@@ -49,8 +49,8 @@ import de.tucottbus.kt.lcars.util.LoadStatistics;
  * @see IScreen
  * @author Matthias Wolff
  */
-public class Screen
-    implements IScreen, MouseListener, MouseMoveListener, TouchListener, KeyListener
+public class Screen implements IScreen, MouseListener, MouseMoveListener,
+    TouchListener, KeyListener
 {
   // -- Constants --
 
@@ -58,6 +58,11 @@ public class Screen
   private static final int preferedHeight = 560;
 
   // -- Fields --
+
+  /**
+   * The window, where the screen is shown
+   */
+  protected Shell shell;
 
   /**
    * The panel this screen is displaying.
@@ -89,17 +94,21 @@ public class Screen
    * The screen rendering load statistics.
    */
   protected LoadStatistics loadStat;
-  
-  /**
-   * 
-   */
 
-  protected Shell shell;
-  
-  private int mouseButton = 0;
-  
+  /**
+   * The list contains done touch events to ignore the corresponding mouse
+   * event.
+   */
+  private Integer touchCount = 0;
+
+  /**
+   * Composite where all lcars geometries will be drawn
+   */
   protected final LcarsComposite composite;
-  
+
+  /**
+   * Map of all awt components added to this swt shell
+   */
   protected HashMap<Component, Frame> awtComponents = new HashMap<>(5);
 
   // -- Constructors --
@@ -120,20 +129,20 @@ public class Screen
    */
   public Screen(Display display, String panelClass, boolean fullScreen)
       throws ClassNotFoundException
-  {    
+  {
     shell = new Shell(display, SWT.NO_TRIM);
-    
+
     loadStat = new LoadStatistics(25);
     // Create Swings widgets
     shell.setText("LCARS");
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    
+
     final Screen _this = this;
-        
+
     fullScreenMode = fullScreen;// && device.isFullScreenSupported();
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
-    
+
     if (fullScreenMode && !"maximized".equals(LCARS.getArg("--mode=")))
     {
       // Full-screen mode
@@ -154,7 +163,7 @@ public class Screen
       } catch (NumberFormatException e)
       {
       }
-      
+
       shell.setLocation(nXPos, 200);
       shell.pack();
       shell.setVisible(true);
@@ -164,42 +173,49 @@ public class Screen
       // TODO: sometimes an error occurs that the buffer has not been created
       // TODO: createBufferStrategy(2);
     }
-    
+
     final Dimension size = getSize();
     final int w = size.width;
     final int h = size.height;
-    composite = new LcarsComposite(shell, /*SWT.NO_BACKGROUND |*/ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED){
+    composite = new LcarsComposite(shell,
+        /* SWT.NO_BACKGROUND | */ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
+    {
       @Override
       public void paintControl(PaintEvent e)
       {
-        long time = System.nanoTime();            
+        long time = System.nanoTime();
 
         // Prepare setup
         GC gc = e.gc;
         gc.setTextAntialias(SWT.ON);
         gc.setInterpolation(SWT.LOW);
         gc.setAntialias(SWT.ON);
-        
-        //TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        //TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-        //TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-        //TODO: gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+
+        // TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING,
+        // RenderingHints.VALUE_RENDER_QUALITY);
+        // TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+        // RenderingHints.VALUE_STROKE_NORMALIZE);
+        // TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
+        // RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+        // TODO:
+        // gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+        // 1.0f));
         super.paintControl(e);
-        loadStat.add((int)((System.nanoTime()-time)/400000));
+        loadStat.add((int) ((System.nanoTime() - time) / 400000));
       }
     };
     composite.setTouchEnabled(true);
     composite.addTouchListener(_this);
     composite.addMouseListener(_this);
-    composite.addMouseMoveListener(_this);   
+    composite.addMouseMoveListener(_this);
     composite.setBackground(ColorMeta.BLACK.getColor());
     composite.setSize(w, h);
-    composite.setLayout(new FillLayout());          
+    composite.setLayout(new FillLayout());
     composite.setVisible(true);
-    
-    if (LCARS.getArg("--nomouse")!=null)
+
+    if (LCARS.getArg("--nomouse") != null)
       composite.setCursor(LCARS.createBlankCursor(display));
-        
+
     // The user feedback player
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
     {
@@ -209,7 +225,7 @@ public class Screen
         // Does not give visual feedback
       }
     };
-    
+
     setPanel(panelClass);
 
     // Window event handlers
@@ -257,15 +273,13 @@ public class Screen
 
     // Keyboard event handlers
     // addKeyListener(this);
-    //canvas.pack();
-    //shell.pack();
+    // canvas.pack();
+    // shell.pack();
     shell.open();
-    
-    // The screen timer
-    screenTimer = new Timer("ScreenTimerTask", true);    
-    screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
-    //screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
 
+    // The screen timer
+    screenTimer = new Timer("ScreenTimerTask", true);
+    screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
   }
 
   // -- Getters and setters --
@@ -294,13 +308,13 @@ public class Screen
   {
     return shell;
   }
-  
+
   /**
    * Returns the SWT display this screen is running on.
    */
   public Display getSwtDisplay()
   {
-    return shell.getDisplay();//Display.getDefault();
+    return shell.getDisplay();// Display.getDefault();
   }
 
   /**
@@ -310,7 +324,7 @@ public class Screen
   {
     return composite;
   }
-  
+
   // -- 2D rendering --
 
   /**
@@ -328,7 +342,7 @@ public class Screen
   {
     invalid = true;
   }
-  
+
   /**
    * Converts component (LCARS screen) to panel coordinates.
    * 
@@ -341,7 +355,7 @@ public class Screen
   protected Point screenToPanel(int x, int y)
   {
     Point2D.Float scale = composite.getScale();
-    return new Point((int) (x/scale.x + .5f), (int) (y/scale.y + .5f));
+    return new Point((int) (x / scale.x + .5f), (int) (y / scale.y + .5f));
   }
 
   /**
@@ -356,7 +370,8 @@ public class Screen
   public Point panelToScreen(Point pt)
   {
     Point2D.Float scale = composite.getScale();
-    return new Point((int) (pt.x*scale.x + .5f), (int) (pt.y*scale.y + .5f));
+    return new Point((int) (pt.x * scale.x + .5f),
+        (int) (pt.y * scale.y + .5f));
   }
 
   // -- Getters and setters --
@@ -384,7 +399,7 @@ public class Screen
       }
 
     // Set and start new panel
-    if(this.panel != null && composite != null)
+    if (this.panel != null && composite != null)
       composite.clear();
     this.panel = ipanel;
 
@@ -431,7 +446,7 @@ public class Screen
   @Override
   public void update(PanelData data, boolean incremental)
   {
-    //TODO: remove incremental
+    // TODO: remove incremental
     composite.applyUpdate(data, incremental);
     invalidateScreen();
   }
@@ -452,75 +467,79 @@ public class Screen
   @Override
   public void exit()
   {
-    //running = false;
+    // running = false;
     shell.dispose();
-    //System.exit(0);
+    // System.exit(0);
   }
 
   // -- Implementation of the MouseInputListener interface --
-  protected void processTouchEvent(TouchEvent touchEvent) {
-    if (touchEvent == null) {
+  protected void processTouchEvents(TouchEvent[] touchEvent)
+  {
+    if (touchEvent == null)
+    {
       Log.warn("Touch event ignored");
       return;
     }
     try
     {
-      if (panel!=null)
-        panel.processTouchEvent(touchEvent);
+      if (panel != null)
+        panel.processTouchEvents(touchEvent);
     } catch (RemoteException e1)
     {
-      int t = touchEvent.type;
-      Log.err("Error while transmission of touch "+(t==TouchEvent.DOWN ? "down" : (t==TouchEvent.UP ? "up" : "drag"))+" event", e1);
-    }    
+      Log.err("Error while transmission of touch events" + touchEvent);
+    }
   }
-  
 
-  protected TouchEvent toTouchEvent(MouseEvent e, int eventType) {
-    if (!(e.widget instanceof Control)) return null;
-    org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
+  protected TouchEvent[] toTouchEvents(MouseEvent e, int eventType)
+  {
+    if (!(e.widget instanceof Control))
+      return null;
+    org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x,
+        e.y);
     Point pt = screenToPanel(absPos.x, absPos.y);
-    TouchEvent te = new TouchEvent();
-    te.type = eventType;
-    te.x = pt.x;
-    te.y = pt.y;
-    return te;
+    return new TouchEvent[]
+    { new TouchEvent(eventType, pt, true, true) };
   }
-  
-  
+
   @Override
   public void mouseDoubleClick(MouseEvent e)
   {
-    // ignored   
   }
 
   @Override
   public void mouseDown(MouseEvent e)
   {
-    if(e.button==3) return; // ignore, because of touch events
-    if(mouseButton != 0) {
-      mouseButton = 0;
-      return;
-    }    
-    mouseButton = e.button;    
-    processTouchEvent(toTouchEvent(e, TouchEvent.DOWN));
+    synchronized (touchCount)
+    {
+      if (touchCount > 0)
+        return;
+      touchCount--;
+    }
+    processTouchEvents(toTouchEvents(e, TouchEvent.DOWN));
   }
 
   @Override
   public void mouseUp(MouseEvent e)
   {
-    if(e.button==3) return; // ignore, because of touch events
-    if(mouseButton != e.button)
-      return;
-    mouseButton = 0;
-    processTouchEvent(toTouchEvent(e, TouchEvent.UP));
+    synchronized (touchCount)
+    {
+      if (touchCount < 0)
+        touchCount++;
+      else
+      {
+        if (e.count == 1)
+          touchCount--;
+        return;
+      }
+    }
+    processTouchEvents(toTouchEvents(e, TouchEvent.UP));
   }
-  
+
   @Override
   public void mouseMove(MouseEvent e)
   {
-    if(e.button==3) return; // ignore, because of touch events
-    if(mouseButton != 0)
-      processTouchEvent(toTouchEvent(e, TouchEvent.DRAG));
+    if (touchCount < 0)
+      processTouchEvents(toTouchEvents(e, TouchEvent.DRAG));
   }
 
   // -- Implementation of the KeyListener interface --
@@ -534,6 +553,7 @@ public class Screen
         panel.processKeyEvent(e);
       } catch (RemoteException e1)
       {
+        Log.warn("Sending key typed event to panel failed.");
       }
   }
 
@@ -546,6 +566,7 @@ public class Screen
         panel.processKeyEvent(e);
       } catch (RemoteException e1)
       {
+        Log.warn("Sending key pressed event to panel failed.");
       }
   }
 
@@ -558,51 +579,67 @@ public class Screen
         panel.processKeyEvent(e);
       } catch (RemoteException e1)
       {
+        Log.warn("Sending key released event to panel failed.");
       }
   }
-  
+
   @Override
   public void touch(org.eclipse.swt.events.TouchEvent e)
   {
-    if (e.touches.length <= 0)
-      return;
-    //Log.info(e.touches[0].toString());
-    Touch touch = e.touches[0];
-
-    if (!(e.widget instanceof Control))  
-      return;
-    
-    org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x, e.y);
-    Point pt = screenToPanel(absPos.x, absPos.y);
-    de.tucottbus.kt.lcars.TouchEvent te = new de.tucottbus.kt.lcars.TouchEvent();
-    te.x = pt.x;
-    te.y = pt.y;
-    switch (touch.state)
+    TouchEvent[] touches;
+    synchronized (touchCount)
     {
-    case SWT.TOUCHSTATE_DOWN:
-      te.type = de.tucottbus.kt.lcars.TouchEvent.DOWN;
-      break;
-    case SWT.TOUCHSTATE_MOVE:
-      te.type = de.tucottbus.kt.lcars.TouchEvent.DRAG;
-      break;
-    case SWT.TOUCHSTATE_UP:
-      te.type = de.tucottbus.kt.lcars.TouchEvent.UP;
-      break;
-    default:
-      return;
-    }    
-    processTouchEvent(te);
+      if (touchCount < 0)
+        return;
+
+      if (!(e.widget instanceof Control))
+        return;
+
+      Control ctrl = (Control) e.widget;
+
+      touches = new TouchEvent[e.touches.length];
+      int i = 0;
+
+      for (Touch touch : e.touches)
+      {
+        org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(e.x, e.y);
+        Point pt = screenToPanel(absPos.x, absPos.y);
+        int eventType;
+        switch (touch.state)
+        {
+        case SWT.TOUCHSTATE_DOWN:
+          eventType = de.tucottbus.kt.lcars.TouchEvent.DOWN;
+          touchCount++;
+          break;
+        case SWT.TOUCHSTATE_MOVE:
+          eventType = de.tucottbus.kt.lcars.TouchEvent.DRAG;
+          break;
+        case SWT.TOUCHSTATE_UP:
+          eventType = de.tucottbus.kt.lcars.TouchEvent.UP;
+          break;
+        default:
+          return;
+        }
+        touches[i++] = new de.tucottbus.kt.lcars.TouchEvent(eventType, pt,
+            false, touch.primary);
+        // if (touch.primary)
+        // mouseIgnores.add(touch);
+      }
+    }
+    processTouchEvents(touches);
   }
 
   public synchronized void add(Component component)
   {
     if (component == null)
-      throw new NullPointerException("component");    
-        
-    if (awtComponents.containsKey(component)) return;
+      throw new NullPointerException("component");
+
+    if (awtComponents.containsKey(component))
+      return;
     LCARS.getDisplay().syncExec(() -> {
-      //TODO: check awtFrame is in embedded full screen mode
-      if (awtComponents.containsKey(component)) return;
+      // TODO: check awtFrame is in embedded full screen mode
+      if (awtComponents.containsKey(component))
+        return;
       Frame awtFrame = SWT_AWT.new_Frame(composite);
       awtComponents.put(component, awtFrame);
       awtFrame.setBounds(component.getBounds());
@@ -629,7 +666,8 @@ public class Screen
 
   private void invoke(Runnable action)
   {
-    if (shell.isDisposed()) return;
+    if (shell.isDisposed())
+      return;
     shell.getDisplay().syncExec(action);
   }
 
@@ -648,9 +686,12 @@ public class Screen
     {
       // Every 40 milliseconds...
       {
-        if (isScreenInvalid()) {
+        if (isScreenInvalid())
+        {
           invalid = false;
-          invoke(() -> { composite.redraw(); });
+          invoke(() -> {
+            composite.redraw();
+          });
         }
       }
 
@@ -658,7 +699,9 @@ public class Screen
       if (ctr % 25 == 0)
       {
         if (!isScreenInvalid() && loadStat.getEventCount() == 0)
-          invoke(() -> { composite.redraw(); });
+          invoke(() -> {
+            composite.redraw();
+          });
         loadStat.period();
       }
 
@@ -684,8 +727,8 @@ public class Screen
   public void setArea(Area area) throws RemoteException
   {
     Rectangle bnds = area.getBounds();
-    shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);    
-  }  
+    shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);
+  }
 }
 
 // EOF

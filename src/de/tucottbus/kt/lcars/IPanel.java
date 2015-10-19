@@ -33,7 +33,7 @@ public interface IPanel extends Remote
    * @param event
    *          The event.
    */
-  public void processTouchEvent(TouchEvent event) throws RemoteException;
+  public void processTouchEvents(TouchEvent[] events) throws RemoteException;
 
   /**
    * Called by the {@linkplain Screen LCARS screen} displaying this panel when keyboard input events

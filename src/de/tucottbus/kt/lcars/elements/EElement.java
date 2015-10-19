@@ -798,8 +798,8 @@ public abstract class EElement
           ((GArea)geo).setOutline(isOutline);
       for (EGeometryModifier gm : modifiers)
         gm.modify(geos);
-      data.geometry = geos;      
-      return geoState = GEO_UPDATED;
+      data.updateGeometries(geos);
+      return this.geoState = GEO_UPDATED;
     }
   }
   

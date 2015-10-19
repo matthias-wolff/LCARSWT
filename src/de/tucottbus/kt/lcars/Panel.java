@@ -1041,49 +1041,52 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   @Override
-  public void processTouchEvent(TouchEvent event)
+  public synchronized void processTouchEvents(TouchEvent[] events)
   {
-    EEvent ee = new EEvent();
-    ee.el = elementAt(ee.pt = new Point(event.x,event.y));    
+    TouchEvent event = events[0];
+    if (!event.primary) return;
     
+    EEvent ee = new EEvent();
+    ee.pt = new Point(event.x,event.y);
     switch (event.type)
     {
     case TouchEvent.DOWN:
       ee.id = EEvent.TOUCH_DOWN;
-      dragElement = ee.el;
+      dragElement = ee.el = elementAt(ee.pt);
       
       if (ee.el==null)
       {
         if (!isSilent())
-        {
           try { getScreen().userFeedback(UserFeedback.Type.DENY); }
-          catch (RemoteException e){}
-          catch (NullPointerException e){}
-        }
+          catch (RemoteException|NullPointerException e){
+            Log.err("Performing an audio-visual user feedback failed",e);
+          }
         return;
       }
 
       ee.pt = ee.el.panelToElement(ee.pt);
       UserFeedback.Type ft = ee.el.fireEEvent(ee);
       if (!isSilent() && getScreen()!=null)
-      {
         try { getScreen().userFeedback(ft); }
-        catch (RemoteException e){}
-      }
+        catch (RemoteException e){
+          Log.err("Performing an audio-visual user feedback failed",e);
+        }
       break;
     case TouchEvent.UP:
       ee.id = EEvent.TOUCH_UP;
-      if (dragElement==null) return;
-      if (dragElement.isOverDrag())
+      
+      EElement de = dragElement;
+      dragElement = null;
+      if (de==null) return;
+      if (de.isOverDrag())
       {
-        ee.el = dragElement;
+        ee.el = de;
         ee.pt = ee.el.panelToElement(ee.pt);
-        dragElement.fireEEvent(ee);
-        dragElement = null;
+        de.fireEEvent(ee);
       }
       else
       {
-        dragElement = null;
+        ee.el = elementAt(ee.pt);
         if (ee.el==null) return;
         ee.pt = ee.el.panelToElement(ee.pt);
         ee.el.fireEEvent(ee);
@@ -1158,7 +1161,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void touchDown(EEvent ee)
   {
     if      (ee.el==eLight) touchHold(ee);
-    else if (ee.el==eLight) touchHold(ee);
+    else if (ee.el==eLight) touchHold(ee); //FIXME: remove?
     else if (ee.el==eSilent) setSilent(!isSilent());
   }
 
