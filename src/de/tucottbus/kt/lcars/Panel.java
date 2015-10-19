@@ -65,7 +65,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   /**
    * The list of {@linkplain EElement elements} on this panel.
    */
-  private ArrayList<EElement> elements = new ArrayList<EElement>(); 
+  private final ArrayList<EElement> elements; 
 
   /**
    * The panel state.
@@ -75,7 +75,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   /**
    * The list of key listeners registered with this panel.
    */
-  private Vector<KeyListener> keyListeners;
+  private final Vector<KeyListener> keyListeners;
   
   /**
    * Time of the last full screen update (as obtained by {@link System#nanoTime()}.
@@ -490,13 +490,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public void setLocked(boolean locked)
   {
-    for (int i=0; i<elements.size(); i++)
-      elements.get(i).clearTouch();
+    clearTouch();
     this.state.locked = locked;
     if (locked && this.state.autoRelockTime>0)
       this.state.autoRelock = this.state.autoRelockTime; 
   }
-
+    
   /**
    * Enables or disabled automatic re-locking after unlocking a panel.
    * 
@@ -572,8 +571,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public void setModal(boolean modal)
   {
-    for (int i=0; i<elements.size(); i++)
-      elements.get(i).clearTouch();
+    clearTouch();
     this.state.modal = modal;
   }
   
@@ -626,13 +624,28 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
   
   /**
+   * Calls {@link EElement#clearTouch()} of all {@link Panel#elements} to reset the touch state to not touched
+   */
+  protected void clearTouch() {
+    synchronized (elements)
+    {
+      for (EElement el : elements)
+        el.clearTouch();
+    }    
+  }
+
+  
+  /**
    * Returns a vector of the LCARS GUI {@link EElement}s contained in this panel. 
    * 
    * @return the vector
    */
-  public synchronized Vector<EElement> getElements()
+  public Vector<EElement> getElements()
   {
-    return new Vector<EElement>(elements);
+    synchronized (elements)
+    {
+      return new Vector<EElement>(elements);
+    }
   }
 
   /**
@@ -674,9 +687,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * 
    * @param el the element
    */
-  public synchronized <T extends EElement> T  add(T el)
+  public <T extends EElement> T  add(T el)
   {
-    if (!elements.contains(el)) elements.add(el);
+    synchronized (elements)
+    {
+      if (!elements.contains(el)) elements.add(el);
+    }
     return el;
   }
 
@@ -686,9 +702,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * 
    * @param el the element
    */
-  public synchronized void remove(EElement el)
+  public void remove(EElement el)
   {
-    elements.remove(el);
+    synchronized (elements)
+    {
+      elements.remove(el);
+    }
   }
   
   /**
@@ -849,14 +868,18 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       if (runc%25==0)
       {
         state.blink=(runc>0)?LCARS.ES_SELECTED:0x00000000;
-        for (int i=0; i<elements.size(); i++)
+
+        synchronized (elements)
         {
-          try
+          for (int i=0; i<elements.size(); i++)
           {
-            EElement e = elements.get(i);
-            if (e.isBlinking()) e.invalidate(false);
+            try
+            {
+              EElement e = elements.get(i);
+              if (e.isBlinking()) e.invalidate(false);
+            }
+            catch (Exception e) {}
           }
-          catch (Exception e) {}
         }
       }
       
@@ -980,10 +1003,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     
     // Make update data
     PanelData data = new PanelData();
-    synchronized (this)
+    data.panelState = state; // TODO: better make a copy?
+    synchronized (elements)
     {
-      data.panelState = state; // TODO: better make a copy?
-
       //GImage.beginCacheRun();
       data.elementData = new ArrayList<ElementData>(elements.size());
       if (Log.DebugMode)            
