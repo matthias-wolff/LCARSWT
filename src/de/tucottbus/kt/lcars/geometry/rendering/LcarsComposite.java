@@ -173,7 +173,7 @@ public class LcarsComposite extends Composite implements PaintListener
       this.paintCount = this.updateCount = 0;
       if(updateCount > paintCount) {
         int skipped = updateCount-paintCount;
-        Log.debug(skipped + " of " + updateCount +  " Frame(s) skipped (" + String.format("%.2f", skipped*100f/updateCount) + "%)");        
+        Log.debug(skipped + " of " + updateCount +  " Frame(s) skipped (" + String.format("%.2f", skipped*100f/updateCount) + "%, lower is better)");        
       }         
     }
   }

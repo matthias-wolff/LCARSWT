@@ -165,7 +165,8 @@ public class AudioTrack
     if (file==null || !file.exists() || !file.isFile())
       throw new IllegalArgumentException();
     
-    this.file     = file;
+    this.win    = new Vector<AudioBuffer>();
+    this.file   = file;
     this.length = Float.NaN;
     
     // Get the song's audio stream format
@@ -436,7 +437,7 @@ public class AudioTrack
    * EXPERIMENTAL: A window of 40 milliseconds audio frames representing a certain
    * {@linkplain #history history} and {@linkplain #future future} of audio data.
    */
-  Vector<AudioBuffer> win;
+  final Vector<AudioBuffer> win;
   
   /**
    * EXPERIMENTAL: Index in {@link #win} of the next buffer to deliver by {@link #fetch()}.
@@ -542,7 +543,6 @@ public class AudioTrack
     try
     {
       ais = getAudioInputStream();
-      win = new Vector<AudioBuffer>();
       synchronized (win)
       {
         while (win.size()<s2b(this.future))
@@ -628,7 +628,7 @@ public class AudioTrack
         e.printStackTrace();
       }
     ais      = null;
-    win      = null;
+    win.clear();
     winPtr   = 0;
     prefetch = 0;
   }
