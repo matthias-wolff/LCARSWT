@@ -1,7 +1,5 @@
 package de.tucottbus.kt.lcars.contributors;
 
-import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.File;
@@ -11,7 +9,6 @@ import java.net.MalformedURLException;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -21,13 +18,12 @@ import org.eclipse.swt.browser.StatusTextEvent;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.widgets.Shell;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
+import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 /**
  * Wraps an SWT web {@link Browser browser} in an {@link ElementContributor}. 
@@ -36,10 +32,10 @@ import de.tucottbus.kt.lcars.Screen;
  */
 public class EBrowser extends ElementContributor
 {
+  public static final String cssFile = "de/tucottbus/kt/lcars/resources/LCARS.css"; 
+  
   private Rectangle bounds;
   private Screen    screen;
-  private Canvas    canvas;
-  private String    canvasText;
   private Browser   browser;
   private String    browserTitleText;
   private String    browserStatusText;
@@ -99,119 +95,91 @@ public class EBrowser extends ElementContributor
   {
     super.addToPanel(panel);
     if (panel==null) return;
-    if (canvas!=null || browser!=null) return; // FIXME: What if only one is non-null? 
+    if (browser!=null) return;
+    
+    //TODO: add some loading message before the page appears 
+    
     try
     {
-      if (canvas!=null) throw new IllegalStateException("AWT canvas already existing");
-      if (browser!=null) throw new IllegalStateException("Browser already existing");
-
-      screen = Screen.getLocal(panel.getScreen());
-      canvasText = "LOADING HTML ...";
-      canvas = new Canvas();
-      canvas.setBackground(Color.BLACK);
-      screen.add(canvas);
-      tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
-      br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
-      canvas.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
-      screen.getSwtDisplay().asyncExec(new Runnable()
+      if (browser!=null) throw new IllegalStateException("Browser already existing"); // FIXME: not reachable
+      
+      final Screen scr = screen = Screen.getLocal(panel.getScreen());
+      tl = scr.panelToScreen(bounds.x,bounds.y);
+      br = scr.panelToScreen(bounds.x+bounds.width,bounds.y+bounds.height);
+      scr.getSwtDisplay().syncExec(()->
       {
-        public void run()
+        browser = new Browser(scr.getLcarsComposite(),SWT.NONE);
+        browser.setBackground(ColorMeta.GREEN.getColor());
+        browser.setVisible(false);
+        browser.setLocation(tl.x, tl.y);
+        browser.setSize(br.x-tl.x+28/*<- this "hides" the scroll bar*/,br.y-tl.y);
+        if (EBrowser.this.browserText!=null)
+          browser.setText(EBrowser.this.browserText);
+        else if (EBrowser.this.browserUrl!=null)
+          browser.setUrl(EBrowser.this.browserUrl);
+        browser.addTitleListener(new TitleListener()
         {
-          Shell swtShell = SWT_AWT.new_Shell(screen.getSwtDisplay(),canvas);
-          swtShell.setBackground(screen.getSwtDisplay().getSystemColor(SWT.COLOR_BLACK));
-          swtShell.setSize(br.x-tl.x,br.y-tl.y);
-          swtShell.addPaintListener(new PaintListener()
+          public void changed(TitleEvent event)
           {
-            public void paintControl(PaintEvent e)
-            {
-              org.eclipse.swt.graphics.Color color =
-                new org.eclipse.swt.graphics.Color(e.gc.getDevice(),0xFF,0x99,0x00);
-              org.eclipse.swt.graphics.Font font =
-                new org.eclipse.swt.graphics.Font(e.gc.getDevice(),LCARS.getInstalledFont(LCARS.FN_COMPACTA),56,0); 
-              e.gc.setForeground(color);
-              e.gc.setFont(font);
-              int x = (br.x-tl.x-e.gc.stringExtent(canvasText).x)/2;
-              int y = (br.y-tl.y-e.gc.stringExtent(canvasText).y)/2;
-              e.gc.drawText(canvasText,x,y);
-              color.dispose();
-              font.dispose();
-            }
-          });
-          browser = new Browser(swtShell,SWT.NONE);
-          browser.setBackground(screen.getSwtDisplay().getSystemColor(SWT.COLOR_BLACK));
-          browser.setVisible(false);
-          browser.setSize(br.x-tl.x+28/*<- this "hides" the scroll bar*/,br.y-tl.y);
-          if (EBrowser.this.browserText!=null)
-            browser.setText(EBrowser.this.browserText);
-          else if (EBrowser.this.browserUrl!=null)
-            browser.setUrl(EBrowser.this.browserUrl);
-          browser.addTitleListener(new TitleListener()
+            EBrowser.this.browserTitleText = event.title;
+            fireTitleChanged(event.title);
+          }
+        });
+        browser.addStatusTextListener(new StatusTextListener()
+        {
+          public void changed(StatusTextEvent event)
           {
-            public void changed(TitleEvent event)
+            synchronized(EBrowser.this)
             {
-              EBrowser.this.browserTitleText = event.title;
-              fireTitleChanged(event.title);
+              browserStatusText = event.text;
+              fireStatusTextChanged(event.text);
             }
-          });
-          browser.addStatusTextListener(new StatusTextListener()
+          }
+        });
+        browser.addProgressListener(new ProgressListener()
+        {
+          public void changed(ProgressEvent event)
           {
-            public void changed(StatusTextEvent event)
-            {
-              synchronized(EBrowser.this)
-              {
-                browserStatusText = event.text;
-                fireStatusTextChanged(event.text);
-              }
-            }
-          });
-          browser.addProgressListener(new ProgressListener()
+          }
+          public void completed(ProgressEvent event)
           {
-            public void changed(ProgressEvent event)
+            if (!isNoRestyleHtml())
             {
-            }
-            public void completed(ProgressEvent event)
-            {
-              if (!isNoRestyleHtml())
-              {
-                try
-                {
-                  String script = LCARS.loadTextResource("de/tucottbus/kt/lcars/resources/LCARS-css.js");
-                  browser.execute(script);
-                }
-                catch (Exception e)
-                {
-                  e.printStackTrace();
-                }
-              }
-              browser.setVisible(true);
-            }
-          });
-          browser.addLocationListener(new LocationListener()
-          {
-            public void changed(LocationEvent event)
-            {
-              
-            }
-            public void changing(LocationEvent event)
-            {
-              /* WHY??
+              final String jsFile = "de/tucottbus/kt/lcars/resources/LCARS-css.js";
               try
               {
-                EBrowser.this.panel.getScreen().userFeedback(UserFeedback.Type.TOUCH); 
+                String script = LCARS.loadTextResource(jsFile);
+                browser.execute(script);
               }
-              catch (RemoteException e)
+              catch (Exception e)
               {
-              } 
-              */
+                Log.err("Could not load javascript \"" + jsFile + "\"", e);
+              }
             }
-          });
-        }
+            browser.setVisible(true);
+          }
+        });
+        browser.addLocationListener(new LocationListener()
+        {
+          public void changed(LocationEvent event) {}
+          public void changing(LocationEvent event)
+          {
+            /* WHY??
+            try
+            {
+              EBrowser.this.panel.getScreen().userFeedback(UserFeedback.Type.TOUCH); 
+            }
+            catch (RemoteException e)
+            {
+            } 
+            */
+          }
+        });
       });
     }
     catch (ClassCastException e)
     {
-      System.err.println("LCARS: Function not supported on remote screens.");
-      e.printStackTrace();
+      Log.err("Function not supported on remote screens.", e);
     }
   }
   
@@ -223,26 +191,19 @@ public class EBrowser extends ElementContributor
   public void removeFromPanel()
   {
     if (panel==null) return;
-    if (screen!=null)
-    {
-      if (canvas!=null)
+    if (screen!=null && browser != null)
+      screen.getSwtDisplay().asyncExec(() ->
       {
-        screen.remove(canvas);
-        canvas = null;
-      }
-      if (browser!=null) screen.getSwtDisplay().asyncExec(new Runnable()
-      {
-        public void run()
+        try
         {
-          try
-          {
-            browser.dispose();
-          }
-          catch (Exception e){}
-          browser = null;
+          browser.dispose();
         }
+        catch (Exception e)
+        {
+          Log.err("Removing composite from screen failed.", e);
+        }
+        browser = null;
       });
-    }
     super.removeFromPanel();
   }
 
@@ -257,7 +218,10 @@ public class EBrowser extends ElementContributor
    */
   public void setVisible(boolean visible)
   {
-    canvas.setVisible(visible);
+    if (browser != null)
+      browser.setVisible(visible);
+    else
+      throw new UnsupportedOperationException("Cannot set browser to visible add to a panel.", new NullPointerException("browser"));
   }
   
   /**
@@ -267,8 +231,7 @@ public class EBrowser extends ElementContributor
    */
   public boolean isVisible()
   {
-    if (canvas==null) return false;
-    return canvas.isVisible();
+    return (browser != null) && browser.isVisible();
   }
   
   /**
@@ -278,19 +241,16 @@ public class EBrowser extends ElementContributor
    */
   public String getCss()
   {
-    if (css==null)
+    if (css!=null) return css;
+    try
     {
-      try
-      {
-        css = LCARS.loadTextResource("de/tucottbus/kt/lcars/resources/LCARS.css");
-      }
-      catch (Exception e)
-      {
-        e.printStackTrace();
-        css = "";
-      } 
+      return css = LCARS.loadTextResource(cssFile);
     }
-    return css;
+    catch (Exception e)
+    {
+      Log.err("Cannot find css file: \""+cssFile+"\"");
+      return css = "";
+    } 
   }
   
   public String getTitleText()
@@ -400,13 +360,10 @@ public class EBrowser extends ElementContributor
     this.setText_    = false;
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
-    screen.getSwtDisplay().asyncExec(new Runnable()
+    screen.getSwtDisplay().syncExec(() ->
     {
-      public void run()
-      {
-        browser.setVisible(false);
-        EBrowser.this.setText_ = browser.setText(EBrowser.this.browserText);
-      }
+      browser.setVisible(false);
+      EBrowser.this.setText_ = browser.setText(EBrowser.this.browserText);
     });
     return this.setText_;
   }
@@ -429,10 +386,7 @@ public class EBrowser extends ElementContributor
     try
     {
       if (tmpHtmlFile==null)
-      {
-        tmpHtmlFile = File.createTempFile("Lcarswt",null);
-        tmpHtmlFile.deleteOnExit();
-      }
+        (tmpHtmlFile = File.createTempFile("Lcarswt",null)).deleteOnExit();
   
       FileOutputStream fos = new FileOutputStream(tmpHtmlFile);
       fos.write(text.getBytes());
@@ -441,21 +395,18 @@ public class EBrowser extends ElementContributor
     }
     catch (IOException e)
     {
-      e.printStackTrace();
+      Log.err("Cannot set text via temporary file.", e);
     }
-    screen.getSwtDisplay().asyncExec(new Runnable()
+    screen.getSwtDisplay().asyncExec(() ->
     {
-      public void run()
+      //browser.setVisible(false);
+      try
       {
-        //browser.setVisible(false);
-        try
-        {
-          browser.setUrl(tmpHtmlFile.toURI().toURL().toString());
-        }
-        catch (MalformedURLException e)
-        {
-          e.printStackTrace();
-        }
+        browser.setUrl(tmpHtmlFile.toURI().toURL().toString());
+      }
+      catch (MalformedURLException e)
+      {
+        Log.err("Cannot set text via temporary file.", e);
       }
     });
   }
@@ -473,13 +424,10 @@ public class EBrowser extends ElementContributor
     this.setUrl_    = false;
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
-    screen.getSwtDisplay().asyncExec(new Runnable()
+    screen.getSwtDisplay().asyncExec(() ->
     {
-      public void run()
-      {
-        browser.setVisible(false);
-        EBrowser.this.setUrl_ = browser.setUrl(EBrowser.this.browserUrl);
-      }
+      browser.setVisible(false);
+      EBrowser.this.setUrl_ = browser.setUrl(EBrowser.this.browserUrl);
     });
     return this.setUrl_;
   }
@@ -509,15 +457,15 @@ public class EBrowser extends ElementContributor
     else
       style &= ~LCARS.ES_BROWSER_NORESTYLEHTML;
 
-    screen.getSwtDisplay().asyncExec(new Runnable()
+    screen.getSwtDisplay().asyncExec(() ->
     {
-      public void run()
+      try
       {
-        try
-        {
-          browser.refresh();
-        }
-        catch (Exception e) {}
+        browser.refresh();
+      }
+      catch (Exception e)
+      {
+        Log.err("Cannot refresh browser.", e);
       }
     });  
   }

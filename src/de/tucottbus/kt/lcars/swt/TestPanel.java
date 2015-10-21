@@ -19,6 +19,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -38,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.contributors.EBrowser;
 import de.tucottbus.kt.lcars.contributors.EElementArray;
 import de.tucottbus.kt.lcars.elements.EElbo;
 import de.tucottbus.kt.lcars.elements.EElement;
@@ -481,6 +483,53 @@ public class TestPanel extends Panel
       }
   }
 
+  public static void initBrowserShell()
+  {  
+    final int w = 1600;
+    final int h = 1000;
+
+    Display display = Display.getDefault();
+    Shell shell = new Shell(display);
+    shell.setSize(w, h);
+
+    Composite composite = new Composite(shell, SWT.NONE);
+    composite.setSize(w,h);
+    
+    Browser browser = new Browser(composite, SWT.NONE);
+    String html
+    = "<html>\n"
+    + "  <head>\n"
+    + "    <title>UNAVAILABLE</title>\n"
+    + "  </head>\n"
+    + "  <body>\n"
+    + "    <table width=100% height=100%><tr>\n"
+    + "      <td style='vertical-align:middle; text-align:center'>\n"
+    + "        fsdjghdjghd\n"
+    + "      </td>\n"
+    + "    </tr></table>\n"
+    + "  </body>\n"
+    + "</html>\n";
+    browser.setSize(w,h);
+
+    browser.setText(html);
+    //browser.setUrl("http://www.w3schools.com/website/");
+    
+    
+    shell.open();
+
+    // Run SWT event loop
+    while (!shell.isDisposed())
+      try
+      {
+        while (!shell.isDisposed())
+          if (!Display.getDefault().readAndDispatch())
+            Display.getDefault().sleep();
+      } catch (Exception e)
+      {
+        Log.err("Error in screen execution.", e);
+      }
+  }
+
   private static void initAwtSwtBridge() {
     final Display display = new Display();
     final Shell shell = new Shell(display, SWT.NO_TRIM);
@@ -496,7 +545,8 @@ public class TestPanel extends Panel
     shell.setLayout(new FillLayout());
     shell.setFullScreen(true);
         
-    Composite composite = new LcarsComposite(shell, /*SWT.NO_BACKGROUND |*/ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED){
+    Composite composite = new LcarsComposite(shell, /*SWT.NO_BACKGROUND |*/ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
+    {
       @Override
       public void paintControl(PaintEvent e)
       {
@@ -540,6 +590,30 @@ public class TestPanel extends Panel
     display.dispose();
   }
   
+  public void initEBrowser() {
+    EBrowser browser = new EBrowser(0, 0, 1920, 1080, LCARS.ES_NONE);
+    browser.addToPanel(this);
+    browser.setVisible(true);
+
+    String html
+    = "<html>\n"
+    + "  <head>\n"
+    + "    <title>UNAVAILABLE</title>\n"
+    + "  </head>\n"
+    + "  <body>\n"
+    + "    <table width=100% height=100%><tr>\n"
+    + "      <td style='vertical-align:middle; text-align:center'>\n"
+    + "jdgjdhdjjggsf\n"
+    + "      </td>\n"
+    + "    </tr></table>\n"
+    + "  </body>\n"
+    + "</html>\n";
+
+    browser.setText(html);
+  }
+  
+  
+  
   @Override
   public void init()
   {
@@ -559,11 +633,15 @@ public class TestPanel extends Panel
       initEImage();
     if (LCARS.getArg("--testDim") != null)
       initDimmed();
+    if (LCARS.getArg("--testAnimation") != null)
+      initEElementArrayAnimation();
+    if (LCARS.getArg("--testHelp") != null)
+      help();
+    if (LCARS.getArg("--testBrowser") != null)
+      initEBrowser();
+    
     if (LCARS.getArg("--noStats") == null)
       initStatistics();
-    if (LCARS.getArg("--testAnimation") == null)
-      initEElementArrayAnimation();
-    
   }
   
   /**
@@ -574,8 +652,9 @@ public class TestPanel extends Panel
    */
   public static void main(String[] args)
   {
-    //LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
-    initShell();
+    LCARS.main(LCARS.setArg(args, "--panel=", TestPanel.class.getName()));
+    //initShell();
+    //initBrowserShell();
     //initAwtSwtBridge();
   }
 }

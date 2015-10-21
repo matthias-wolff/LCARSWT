@@ -6,6 +6,7 @@ BODY
   font-family: Compacta LT Light, Swiss911 UCm BT, sans-serif;
   font-size: 20pt;
   text-transform: uppercase;
+  overflow:hidden;
 }
 P,TD,LI,I,B
 {

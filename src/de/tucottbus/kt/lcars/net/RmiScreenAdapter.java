@@ -22,6 +22,7 @@ import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcars.util.ObjectSize;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * RMI network adapter for an {@linkplain Screen LCARS screen}.
@@ -182,9 +183,10 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   {
     screen.exit();
   }
-
   
-  // -- Error Screens --
+  /**
+   * Displays all occured RMI errors on the screen.
+   */
  
   public void showRmiErrors()
   {    
@@ -212,7 +214,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
       {
         String newMsg = getServerMsg();
         
-        if ((lastMsg == null && newMsg != null) || (lastMsg != null && !lastMsg.equals(newMsg))) {
+        if (!Objectt.equals(lastMsg, newMsg)) {
           EElement el = new ELabel(null, x, y, w, h, style, newMsg);
 
           elData.clear();
@@ -220,16 +222,19 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
 
           lastMsg = newMsg;
         }
-        
         screen.update(data, false);
-        
-        
       }
     };
     
     Timer timer = new Timer(true);
     timer.scheduleAtFixedRate(timerTask, 0, 1000/25);  
-  }  
+  }
+
+  @Override
+  public boolean isDisposed()
+  {
+    return screen.isDisposed();
+  }
 }
 
 // EOF

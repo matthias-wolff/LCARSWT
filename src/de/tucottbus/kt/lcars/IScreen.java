@@ -89,6 +89,12 @@ public interface IScreen extends Remote
    * Terminates the LCARS session displaying the screen.
    */
   public void exit() throws RemoteException;
+  
+  /**
+   * Returns true if the screen is disposed, otherwise false.
+   * @return
+   */
+  public boolean isDisposed();  
 }
 
 // EOF

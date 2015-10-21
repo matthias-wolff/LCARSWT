@@ -171,8 +171,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     } 
     else 
     {
-      Class<?> panelClass = Panel.class;
-      if (className!=null) panelClass = Class.forName(className);
+      Class<?> panelClass = (className!=null) ? Class.forName(className)
+                                              : Panel.class;
       try
       {
         Object[] args = { iscreen };
@@ -180,7 +180,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       }
       catch (Exception e)
       {
-        Log.err("Could not create panel.", e);
+        Log.err("Could not create panel \"" + className + "\".", e);
         return null;
       }      
     }
@@ -215,7 +215,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Cannot initiate panel.", e);
     }
 
     setBackground(new ImageMeta.Resource(LCARS.getArg("--wallpaper=")));
@@ -247,11 +247,10 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       hp.setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
       hp.loadDoc();
     }
-    catch (ClassNotFoundException e)
+    catch (ClassNotFoundException|RemoteException e)
     {
-      e.printStackTrace();
+      Log.err("Cannot display the documentation root for the panel.",e);
     }
-    catch (RemoteException e){}
   }
 
   /**
@@ -277,11 +276,10 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       hp.setDocs(this.getClass(),getDocIndex(),noRestyleHtml);
       hp.loadHelp();
     }
-    catch (ClassNotFoundException e)
+    catch (ClassNotFoundException|RemoteException e)
     {
-      e.printStackTrace();
+      Log.err("Cannot load help panel",e);
     }
-    catch (RemoteException e){}
   }
   
   // -- Getters and setters --
@@ -337,8 +335,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       }
       catch (Throwable e)
       {
-        // TODO: Auto-generated catch block
-        e.printStackTrace();
+        Log.err("Cannot load speech engine.", e);
       }
       Log.info("Speech engine found.");
     }
@@ -640,11 +637,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * 
    * @return the vector
    */
-  public Vector<EElement> getElements()
+  public ArrayList<EElement> getElements()
   {
     synchronized (elements)
     {
-      return new Vector<EElement>(elements);
+      return new ArrayList<EElement>(elements);
     }
   }
 
@@ -753,21 +750,14 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       for (int i=elements.size()-1; i>=0; i--)
       {
-        try
-        {
-          EElement el = elements.get(i);
-          if (el.isModal()!=modal) continue;
-          if (el.isStatic()) continue;
+        EElement el = elements.get(i);
+        if (el.isModal()!=modal) continue;
+        if (el.isStatic()) continue;
 
-          Area     es = new Area();
-          el.getArea(es);
-          if (es.contains(pt))
-            return el;
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-          return null;
-        }
+        Area     es = new Area();
+        el.getArea(es);
+        if (es.contains(pt))
+          return el;
       }
       return null;
     }
@@ -871,15 +861,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
         synchronized (elements)
         {
-          for (int i=0; i<elements.size(); i++)
-          {
-            try
-            {
-              EElement e = elements.get(i);
-              if (e.isBlinking()) e.invalidate(false);
-            }
-            catch (Exception e) {}
-          }
+          for (EElement el : elements)
+            if (el.isBlinking())
+              el.invalidate(false);
         }
       }
       

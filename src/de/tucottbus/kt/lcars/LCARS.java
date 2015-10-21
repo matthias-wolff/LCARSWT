@@ -799,18 +799,17 @@ public class LCARS implements ILcarsRemote
     try
     {
       for (Class<?> cl : getClassesInPackage("",null))
-        try
-        {
-          Class<? extends Panel> clazz = cl.asSubclass(subclass);
-          if (clazz.equals(Panel.class)) continue;
-          if (Modifier.isAbstract(clazz.getModifiers())) continue;
-          l.add(clazz);
-        }
-        catch (Exception e) {}
+      {
+        if (!subclass.isAssignableFrom(cl)) continue;
+        Class<? extends Panel> clazz = cl.asSubclass(subclass);
+        if (clazz.equals(Panel.class)) continue;
+        if (Modifier.isAbstract(clazz.getModifiers())) continue;
+        l.add(clazz);
+      }
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Creating list of all loadable LCARS main panels failed.", e);
     }
     return l;
   }
@@ -834,7 +833,7 @@ public class LCARS implements ILcarsRemote
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Cannot get any loadable speech engine implementation.", e);
     }
     return l;
   }
@@ -868,9 +867,8 @@ public class LCARS implements ILcarsRemote
       }
       TreeSet<String> classes = new TreeSet<String>();
       for (String directory : dirs)
-      {
         classes.addAll(findClasses(directory, packageName, regex));
-      }
+
       ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
       for (String clazz : classes)
         try
@@ -879,7 +877,7 @@ public class LCARS implements ILcarsRemote
         }
         catch (ClassNotFoundException e)
         {
-          LCARS.err("SYS","Class \""+clazz+"\" is not accessible");
+          Log.err("Class \""+clazz+"\" is not accessible", e);
         }
 
       // FIXME: empty base package name does not work for JAR files!
@@ -891,7 +889,7 @@ public class LCARS implements ILcarsRemote
       return classList.toArray(new Class[classes.size()]);
     } catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Cannot get class from package \"" + packageName + "\" using the regular expression \"" + regexFilter + "\"");
       return null;
     }
   }
@@ -1056,7 +1054,7 @@ public class LCARS implements ILcarsRemote
   public static String loadTextResource(String name) throws FileNotFoundException
   {
     InputStream is = LCARS.class.getClassLoader().getResourceAsStream(name);
-    if (is==null) throw new FileNotFoundException();
+    if (is==null) throw new FileNotFoundException(name);
     StringBuilder text = new StringBuilder();
     String NL = System.getProperty("line.separator");
     Scanner scanner = new Scanner(is);
@@ -1136,7 +1134,7 @@ public class LCARS implements ILcarsRemote
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+        Log.err("Cannot perform HTTP GET on \"" + url + "\"", e);
       }
     }
     return result;
@@ -1712,7 +1710,7 @@ public class LCARS implements ILcarsRemote
         }
 
       // Run SWT event loop 
-      while (true)
+      while (!iscreen.isDisposed())
       {
         try
         {
@@ -1723,9 +1721,6 @@ public class LCARS implements ILcarsRemote
         {
           Log.err("Error in screen execution.", e);
         }
-        if (iscreen instanceof Screen)
-          if (((Screen)iscreen).getShell().isDisposed())
-            break;
       }
     }
     catch (Exception e)

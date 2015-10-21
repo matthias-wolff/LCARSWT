@@ -157,12 +157,16 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       shell.setSize(preferedWidth, preferedHeight);
       // TODO: setPreferredSize(new Dimension(950,560));
       int nXPos = 200;
-      try
-      {
-        nXPos = Integer.parseInt(LCARS.getArg("--xpos="));
-      } catch (NumberFormatException e)
-      {
-      }
+      final String argPfx = "--xpos=";
+      String arg = LCARS.getArg(argPfx);
+      if (arg != null)
+        try
+        {
+          nXPos = Integer.parseInt(arg);
+        } catch (NumberFormatException e)
+        {
+          Log.warn("Cannot parse lcars argument for \"" + argPfx + arg + "\"");
+        }
 
       shell.setLocation(nXPos, 200);
       shell.pack();
@@ -266,15 +270,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     // public void componentHidden(ComponentEvent e){}
     // });
 
-    // Mouse handlers
-    // TODO: canvas.addMouseListener(this);
-    // getContentPane().addMouseListener(this);
-    // getContentPane().addMouseMotionListener(this);
-
-    // Keyboard event handlers
-    // addKeyListener(this);
-    // canvas.pack();
-    // shell.pack();
     shell.open();
 
     // The screen timer
@@ -299,14 +294,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   public static Screen getLocal(IScreen screen)
   {
     return (Screen) screen;
-  }
-
-  /**
-   * Returns this screen's shell.
-   */
-  public Shell getShell()
-  {
-    return shell;
   }
 
   /**
@@ -374,6 +361,24 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         (int) (pt.y * scale.y + .5f));
   }
 
+  /**
+   * Converts panel to component (LCARS screen) coordinates.out
+   * 
+   * @param x
+   *          The LCARS panel x-coordinate.
+   * @param y
+   *          The LCARS panel y-coordinate.
+   * @return The AWT component coordinates.
+   * 
+   * @see #componentToPanel(Point)
+   */
+  public Point panelToScreen(int x, int y)
+  {
+    Point2D.Float scale = composite.getScale();
+    return new Point((int) (x * scale.x + .5f),
+        (int) (y * scale.y + .5f));
+  }
+
   // -- Getters and setters --
 
   /**
@@ -396,6 +401,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         this.panel.stop();
       } catch (RemoteException e)
       {
+        Log.err("Could not stop the previous panel while setting a new panel.", e);
       }
 
     // Set and start new panel
@@ -467,9 +473,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public void exit()
   {
-    // running = false;
     shell.dispose();
-    // System.exit(0);
+    System.exit(0);
   }
 
   // -- Implementation of the MouseInputListener interface --
@@ -484,9 +489,9 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     {
       if (panel != null)
         panel.processTouchEvents(touchEvent);
-    } catch (RemoteException e1)
+    } catch (RemoteException e)
     {
-      Log.err("Error while transmission of touch events" + touchEvent);
+      Log.err("Error while transmission of touch events" + touchEvent, e);
     }
   }
 
@@ -553,7 +558,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         panel.processKeyEvent(e);
       } catch (RemoteException e1)
       {
-        Log.warn("Sending key typed event to panel failed.");
+        Log.err("Error while transmission of a key typed event" + e, e1);
       }
   }
 
@@ -566,7 +571,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         panel.processKeyEvent(e);
       } catch (RemoteException e1)
       {
-        Log.warn("Sending key pressed event to panel failed.");
+        Log.err("Error while transmission of a key pressed event" + e, e1);
       }
   }
 
@@ -579,7 +584,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         panel.processKeyEvent(e);
       } catch (RemoteException e1)
       {
-        Log.warn("Sending key released event to panel failed.");
+        Log.err("Error while transmission of a key released event" + e, e1);
       }
   }
 
@@ -728,6 +733,12 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   {
     Rectangle bnds = area.getBounds();
     shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);
+  }
+  
+  @Override
+  public boolean isDisposed()
+  {
+    return shell.isDisposed();
   }
 }
 

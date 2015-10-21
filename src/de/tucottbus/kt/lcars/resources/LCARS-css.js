@@ -12,6 +12,7 @@ function bodyCss(doc,tagName)
  			fontSize        = "18pt";
  			textTransform   = "uppercase";
 			backgroundImage = "";
+			overflow        = "hidden";
  		}
 }
 

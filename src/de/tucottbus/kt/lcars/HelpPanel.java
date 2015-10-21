@@ -10,6 +10,7 @@ import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * EXPERIMENTAL class; do not use!
@@ -281,7 +282,7 @@ public class HelpPanel extends Panel
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Cannot load documentation.", e);
       loadBlank();
       return false;
     }
@@ -291,19 +292,20 @@ public class HelpPanel extends Panel
   {
     eCaption.setLabel("HELP");
     if (this.helpFor==null) return false;
+    final String name = this.helpFor.getName().replace(".","/")+".html";
     try
     {
-      String name = this.helpFor.getName().replace(".","/")+".html";
       String html = LCARS.loadTextResource(name);
-      if (html==null) throw new FileNotFoundException(name);
-      return eBrowser.setText(html);
+      if (html!=null)
+        return eBrowser.setText(html);
     }
-    catch (Exception e)
+    catch (FileNotFoundException e)
     {
-      System.out.println("ERROR: Cannot load \""+e.getMessage()+"\"");
-      loadBlank();
-      return false;
-     }
+      // handled after catch block
+    }
+    Log.warn("Loading default blank help panel because file not found: " + name);
+    loadBlank();
+    return false;
   }
   
   protected void loadBlank()
