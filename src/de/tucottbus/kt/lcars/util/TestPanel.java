@@ -56,28 +56,28 @@ public class TestPanel extends Panel
       public void touchUp(EEvent ee)
       {
         // TODO Auto-generated method stub
-        
+        System.err.println("UP");
       }
       
       @Override
       public void touchHold(EEvent ee)
       {
         // TODO Auto-generated method stub
-        
+        System.err.println("HOLD");
       }
       
       @Override
       public void touchDrag(EEvent ee)
       {
         // TODO Auto-generated method stub
-        
+        System.err.println("DRAG");
       }
       
       @Override
       public void touchDown(EEvent ee)
       {
         // TODO Auto-generated method stub
-        
+        System.err.println("DOWN");
       }
     });
     add(eRect);
@@ -90,21 +90,25 @@ public class TestPanel extends Panel
       public void touchDown(EEvent ee)
       {
         dragOffset.set(ee.pt.x,ee.pt.y);
+        System.err.println("DOWN");
       }
       
       @Override
       public void touchUp(EEvent ee)
       {
+        System.err.println("UP");
       }
       
       @Override
       public void touchHold(EEvent ee)
       {
+        System.err.println("HOLD");
       }
       
       @Override
       public void touchDrag(EEvent ee)
       {
+        System.err.println("DRAG");
         Rectangle r = ee.el.getBounds();
         r = new Rectangle(r.x+ee.pt.x-dragOffset.getX(),r.y+ee.pt.y-dragOffset.getY(),r.width,r.height);
         ee.el.setBounds(r);

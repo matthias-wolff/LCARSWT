@@ -1084,32 +1084,34 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       EElement de = dragElement;
       dragElement = null;
       if (de==null) return;
-      if (de.isOverDrag())
-      {
+//      if (de.isOverDrag())
+//      {
         ee.el = de;
         ee.pt = ee.el.panelToElement(ee.pt);
         de.fireEEvent(ee);
-      }
-      else
-      {
-        ee.el = elementAt(ee.pt);
-        if (ee.el==null) return;
-        ee.pt = ee.el.panelToElement(ee.pt);
-        ee.el.fireEEvent(ee);
-      }
+//      }
+//      else
+//      {
+//        ee.el = elementAt(ee.pt);
+//        if (ee.el==null) return;
+//        ee.pt = ee.el.panelToElement(ee.pt);
+//        ee.el.fireEEvent(ee);
+//      }
       break;
     case TouchEvent.DRAG:
       if (dragElement==null) return;
       if (dragElement.isOverDrag())
       {
+        // TODO: TOUCH_DRAG and, if in bounds also TOUCH_HOLD!
         ee.el = dragElement;
         ee.id = EEvent.TOUCH_DRAG;
         ee.pt = ee.el.panelToElement(ee.pt);
-        dragElement.fireEEvent(ee);      
+        dragElement.fireEEvent(ee);
       }
       else
       {
-        ee.id = ee.el==dragElement?EEvent.TOUCH_DRAG:EEvent.TOUCH_UP;
+        // TODO: TOUCH_DRAG & TOUCH_HOLD if in bounds!
+        ee.id = ee.el==dragElement?EEvent.TOUCH_DRAG:EEvent.TOUCH_HOLD;
         ee.el = dragElement;
         ee.pt = ee.el.panelToElement(ee.pt);
         dragElement.fireEEvent(ee);
