@@ -140,7 +140,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     this.thisPanel    = this;
     this.iscreen      = iscreen;
-    this.elements     = new ArrayList<EElement>();
+    this.elements     = new ArrayList<EElement>(200);
     this.state        = new PanelState(getDimension());
     this.keyListeners = new Vector<KeyListener>();
     this.loadStat     = new LoadStatistics(25);
@@ -1084,38 +1084,31 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       EElement de = dragElement;
       dragElement = null;
       if (de==null) return;
-//      if (de.isOverDrag())
-//      {
-        ee.el = de;
-        ee.pt = ee.el.panelToElement(ee.pt);
-        de.fireEEvent(ee);
-//      }
-//      else
-//      {
-//        ee.el = elementAt(ee.pt);
-//        if (ee.el==null) return;
-//        ee.pt = ee.el.panelToElement(ee.pt);
-//        ee.el.fireEEvent(ee);
-//      }
+      ee.el = de;
+      ee.pt = ee.el.panelToElement(ee.pt);
+      de.fireEEvent(ee);
       break;
     case TouchEvent.DRAG:
+      EElement dragElement = this.dragElement;
       if (dragElement==null) return;
-      if (dragElement.isOverDrag())
+      boolean inBounds = ee.el == dragElement;
+      
+      if (inBounds || dragElement.isOverDrag())
       {
-        // TODO: TOUCH_DRAG and, if in bounds also TOUCH_HOLD!
         ee.el = dragElement;
         ee.id = EEvent.TOUCH_DRAG;
         ee.pt = ee.el.panelToElement(ee.pt);
         dragElement.fireEEvent(ee);
-      }
-      else
-      {
-        // TODO: TOUCH_DRAG & TOUCH_HOLD if in bounds!
-        ee.id = ee.el==dragElement?EEvent.TOUCH_DRAG:EEvent.TOUCH_HOLD;
-        ee.el = dragElement;
-        ee.pt = ee.el.panelToElement(ee.pt);
-        dragElement.fireEEvent(ee);
-        dragElement=ee.el;
+        
+        if (inBounds)
+        {
+          ee = new EEvent();
+          ee.el = dragElement;
+          ee.id = EEvent.TOUCH_HOLD;
+          ee.pt = ee.el.panelToElement(ee.pt);
+          dragElement.fireEEvent(ee);
+        }
+        this.dragElement = ee.el;
       }
       break;
     }

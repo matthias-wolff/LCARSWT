@@ -62,11 +62,11 @@ class FrameData
   }
 
   /**
-   * Called to update the background image of the screen.
+   * Indicates if the background has changed comparing to previous {@link FrameData}.
    * 
    * @param pred
-   *          - previous context
-   * @return has background changed since the previous context
+   *          - previous {@link FrameData}
+   * @return true if background changed, otherwise false
    */
   private boolean updateBgImage(FrameData pred)
   {
@@ -84,7 +84,7 @@ class FrameData
   }
 
   /**
-   * Applies changes from previous to this context. See
+   * Applies changes from previous {@link FrameData} to this. See
    * {@link #apply(FrameData, BiFunction)} method.
    * 
    * @param pred
@@ -96,11 +96,11 @@ class FrameData
   }
 
   /**
-   * Applies missing data from the previous frame context and calculates changes
-   * from previous to this context.
+   * Applies missing data from the previous {@link FrameData} and calculates changes
+   * from previous to this {@link FrameData}.
    * 
    * @param pred
-   *          - previous context
+   *          - previous {@link FrameData}
    * @param applyUpdate
    *          - Function class that applies missing data and return the changes
    *          flag. The signature is similar to
@@ -184,7 +184,7 @@ class FrameData
             .forEach((serialNo, edp) -> dirtyArea.add(new Area(edp.getBounds())));
       } catch (Exception e)
       {
-        e.printStackTrace();
+        Log.err("Cannot create dirty area.", e);
       }
       dirtyArea.intersect(new Area(new Rectangle(getRenderWidth(), getRenderHeight())));
       this.dirtyArea = dirtyArea;
