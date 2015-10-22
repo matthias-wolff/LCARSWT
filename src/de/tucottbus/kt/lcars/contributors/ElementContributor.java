@@ -163,45 +163,55 @@ public abstract class ElementContributor implements EEventListener
 
   // -- Timers --
   
-  public synchronized void scheduleTimerTask(TimerTask task, String name, long firstTime, long period)
+  public void scheduleTimerTask(TimerTask task, String name, long firstTime, long period)
   {
-    if (timer==null) timer = new Timer(true);
-    cancelTimerTask(name);
-    if (period>0)
-      timer.schedule(task,firstTime,period);
-    else
-      timer.schedule(task,firstTime);
-    timerTasks.put(name,task);
+    synchronized (timerTasks)
+    {
+      if (timer==null) timer = new Timer(true);
+      cancelTimerTask(name);
+      if (period>0)
+        timer.schedule(task,firstTime,period);
+      else
+        timer.schedule(task,firstTime);
+      timerTasks.put(name,task);      
+    }
   }
   
-  public synchronized void cancelTimerTask(String name)
+  public void cancelTimerTask(String name)
   {
-    cancelTimerTask(timerTasks.get(name));
+    synchronized (timerTasks)
+    {
+      cancelTimerTask(timerTasks.get(name));
+    }
   }
   
-  public synchronized void cancelTimerTask(TimerTask task)
+  public void cancelTimerTask(TimerTask task)
   {
     if (task==null) return;
     task.cancel();
-    Iterator<TimerTask> i = timerTasks.values().iterator();
-    while (i.hasNext())
+    
+    synchronized (timerTasks)
     {
-      TimerTask tt = i.next();
-      if (tt.equals(task)) i.remove();
+      for (Iterator<TimerTask> i = timerTasks.values().iterator(); i.hasNext();)
+      {
+        TimerTask tt = i.next();
+        if (tt.equals(task)) i.remove();
+      }
+      if (timer!=null) timer.purge();      
     }
-    if (timer!=null) timer.purge();
   }
   
-  public synchronized void cancelAllTimerTasks()
+  public void cancelAllTimerTasks()
   {
-    Iterator<TimerTask> i = timerTasks.values().iterator();
-    while (i.hasNext())
+    synchronized (timerTasks)
     {
-      TimerTask tt = i.next();
-      tt.cancel();
-      i.remove();
+      for (Iterator<TimerTask> i = timerTasks.values().iterator(); i.hasNext();)
+      {
+        TimerTask tt = i.next();
+        tt.cancel();
+        i.remove();
+      }
+      if (timer!=null) timer.purge();      
     }
-    if (timer!=null) timer.purge();
   }
-  
 }

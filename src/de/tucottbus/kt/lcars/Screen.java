@@ -37,6 +37,7 @@ import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
+import de.tucottbus.kt.lcars.util.Objectt;
 
 /**
  * An LCARS screen. A screen is the representation of a physical unit with a
@@ -153,6 +154,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       // TODO: createBufferStrategy(1);
     } else
     {
+      //FIXME: window mode not  working
+      
       // Windowed mode
       shell.setSize(preferedWidth, preferedHeight);
       // TODO: setPreferredSize(new Dimension(950,560));
@@ -389,9 +392,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    */
   public void setPanel(IPanel ipanel)
   {
-    if (ipanel == null && this.panel == null)
-      return;
-    if (ipanel != null && ipanel.equals(this.panel))
+    if (Objectt.equals(ipanel, this.panel))
       return;
 
     // Stop current panel (if any)
@@ -409,12 +410,12 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       composite.clear();
     this.panel = ipanel;
 
-    if (this.panel != null)
+    if (ipanel != null)
       try
       {
         Log.info(
-            "Starting panel " + this.panel.getClass().getSimpleName() + "...");
-        this.panel.start();
+            "Starting panel " + ipanel.getClass().getSimpleName() + "...");
+        ipanel.start();
         Log.info("...Panel started");
       } catch (RemoteException e)
       {
