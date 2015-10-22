@@ -112,7 +112,7 @@ public class EBrowser extends ElementContributor
         browser.setBackground(ColorMeta.GREEN.getColor());
         browser.setVisible(false);
         browser.setLocation(tl.x, tl.y);
-        browser.setSize(br.x-tl.x+28/*<- this "hides" the scroll bar*/,br.y-tl.y);
+        browser.setSize(br.x-tl.x,br.y-tl.y);
         if (EBrowser.this.browserText!=null)
           browser.setText(EBrowser.this.browserText);
         else if (EBrowser.this.browserUrl!=null)

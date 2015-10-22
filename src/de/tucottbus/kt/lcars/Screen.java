@@ -607,7 +607,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
       for (Touch touch : e.touches)
       {
-        org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(e.x, e.y);
+        org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(touch.x, touch.y);
         Point pt = screenToPanel(absPos.x, absPos.y);
         int eventType;
         switch (touch.state)

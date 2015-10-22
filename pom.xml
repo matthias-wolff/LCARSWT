@@ -358,7 +358,7 @@
 	<repositories>
 		<repository>
 			<id>swt-repo</id>
-			<url>https://swt-repo.googlecode.com/svn/repo/</url>
+			<url>http://maven-eclipse.github.io/maven</url>
 		</repository>
 		<repository>
 			<id>agile2d.sf.net</id>
@@ -381,7 +381,7 @@
 			<dependency>
 				<groupId>org.eclipse.swt</groupId>
 				<artifactId>${swt.artifactId}</artifactId>
-				<version>4.4</version>
+				<version>4.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>gov.nasa</groupId>
