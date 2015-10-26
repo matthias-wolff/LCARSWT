@@ -26,6 +26,7 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
+import de.tucottbus.kt.lcars.geometry.rendering.RenderingTest;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 import de.tucottbus.kt.lcars.speech.ISpeechEventListener;
@@ -830,7 +831,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
-   * Removes a range and adds a range of LCARS GUI elements from the panel. This does <em>not</em> trigger
+   * Removes a range and adds a range of LCARS GUI elements synchronous from/to the panel. This does <em>not</em> trigger
    * a repaint of the panel!
    * @param remove
    * @param add

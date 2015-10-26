@@ -681,7 +681,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
   public void setMode(int mode)
   {
     if (mode<0)
-      if (eBrace1.isDisplayed()) mode=1; else mode=0;
+      mode= eBrace1.isDisplayed() ? 1 : 0;
     
     switch (mode)
     {

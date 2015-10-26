@@ -2,6 +2,7 @@ package de.tucottbus.kt.lcars.geometry.rendering;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,7 +51,7 @@ public class RenderingTest
     return result;
   }
   
-  private static void doEvalAllInRange(HashMap<String, AtomicInteger> ctrs, int from, int to)
+  private static void doEvalAllCountInRange(HashMap<String, AtomicInteger> ctrs, int from, int to)
   {
     for (AtomicInteger ctr : ctrs.values())
       if (ctr.get() < from || ctr.get() > to)
@@ -99,15 +100,25 @@ public class RenderingTest
   public static void checkAudioLibraryBraceCountEE(Collection<EElement> elements)
   {
     HashMap<String, AtomicInteger> ctrs = countEE(elements, alBraces);
-    doEvalAllInRange(ctrs, 1, 1);
+    doEvalAllCountInRange(ctrs, 1, 1);
     doEvalAllSameCount(ctrs);
   }
 
   public static void checkAudioLibraryBraceCountED(Collection<ElementData> elements)
   {
     HashMap<String, AtomicInteger> ctrs = countED(elements, alBraces);
-    doEvalAllInRange(ctrs, 0, 1);
+    doEvalAllCountInRange(ctrs, 0, 1);
     doEvalAllSameCount(ctrs);
+  }
+  
+  public static void ensureUnique(Collection<EElement> elements)
+  {
+    HashSet<Long> known = new HashSet<Long>(elements.size());
+    for (EElement el : elements)
+      if (known.contains(el.getSerialNo()))
+        Log.err("EElement found more than ones. " + el);
+      else
+        known.add(el.getSerialNo());
   }
 
 //int count = strCount.get("U2|735").get() > 0 ? 1 : 0;
