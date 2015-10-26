@@ -55,6 +55,7 @@ public abstract class EElement
   protected transient Vector<EGeometryModifier> modifiers  = new Vector<EGeometryModifier>(); 
   private   transient Object                    userData   = null;
   private   transient int                       geoState   = GEO_RECOMPUTE;
+  private   final transient long                serialNo;
   
   // -- Constructors --
 
@@ -80,8 +81,8 @@ public abstract class EElement
   {
     this.panel         = panel;
     this.label         = label;
-    this.data          = new ElementData(serialNumber.getAndIncrement(), new Rectangle(x,y,w,h),style);
-    //this.data.geometry = null;
+    this.serialNo      = serialNumber.getAndIncrement();
+    this.data          = new ElementData(this, new Rectangle(x,y,w,h),style);
   }
   
   // -- Geometry getters and setters --
@@ -875,7 +876,7 @@ public abstract class EElement
   }
   
   public long getSerialNo() {
-    return data.serialNo;
+    return serialNo;
   }
 }
 

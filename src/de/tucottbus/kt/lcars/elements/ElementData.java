@@ -91,9 +91,9 @@ public final class ElementData implements Serializable
    *          The unique serial number of the {@link EElement} described by this
    *          instance.
    */
-  public ElementData(long serialNo, Rectangle bounds, int style)
+  public ElementData(EElement element, Rectangle bounds, int style)
   {
-    this.serialNo = serialNo;
+    this.serialNo = element.getSerialNo();
     this.state = new ElementState(bounds, style);
     this.geometry = null;
   }

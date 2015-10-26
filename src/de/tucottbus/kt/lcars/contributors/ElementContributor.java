@@ -61,10 +61,11 @@ public abstract class ElementContributor implements EEventListener
     {
       this.elements.remove(el);
       this.elements.add(el);      
-      if (this.panel!=null)
+      Panel panel = this.panel;
+      if (panel!=null)
       {
-        el.setPanel(this.panel);
-        this.panel.add(el);
+        panel.add(el);
+        el.setPanel(panel);
       }
     }
     return el;
@@ -75,31 +76,42 @@ public abstract class ElementContributor implements EEventListener
     return add(el,true);
   }
 
+  private void doReposition(Collection<EElement> elements)
+  {
+    int x = this.x;
+    int y = this.y;
+    for (EElement el : elements)
+    {
+      Rectangle bounds = el.getBounds();
+      bounds.x += x;
+      bounds.y += y;
+      el.setBounds(bounds);
+    }
+  }
+  
+  private void doAddAll(Collection<EElement> elements)
+  {
+    this.elements.removeAll(elements);
+    this.elements.addAll(elements);
+
+    Panel panel = this.panel;
+    if (panel == null) return;
+    panel.addAll(elements);
+    for (EElement el : elements)
+      el.setPanel(panel);
+    
+  }
+  
   protected void addAll(Collection<EElement> elements, boolean reposition)
   {
     if (elements==null) return;
     
     if (reposition)
-    {
-      int x = this.x;
-      int y = this.y;
-      for (EElement el : elements)
-      {
-        Rectangle bounds = el.getBounds();
-        bounds.x += x;
-        bounds.y += y;
-        el.setBounds(bounds);
-      }
-    }
+      doReposition(elements);
     
     synchronized (this.elements)
     {
-      this.elements.removeAll(elements);
-      this.elements.addAll(elements);
-      Panel panel = this.panel;
-      panel.addAll(elements);
-      for (EElement el : elements)
-       el.setPanel(panel);
+      doAddAll(elements);
     }
   }
   
@@ -128,15 +140,20 @@ public abstract class ElementContributor implements EEventListener
     }
   }
   
+  private void doRemoveAll(Collection<EElement> elements)
+  {
+    this.elements.removeAll(elements);
+    Panel panel = this.panel;
+    if (panel!=null)
+      panel.removeAll(elements);
+    elements.clear();
+  }
+  
   protected void removeAll(Collection<EElement> elements)
   {
     synchronized (this.elements)
     {
-      this.elements.removeAll(elements);
-      Panel panel = this.panel;
-      if (panel!=null)
-        panel.removeAll(elements);
-      elements.clear();
+      doRemoveAll(elements);
     }
   }
   
@@ -157,6 +174,23 @@ public abstract class ElementContributor implements EEventListener
     {
       this.elements.removeIf(filter);
     }
+  }
+  
+  protected void removeAllAndAddAll(Collection<EElement> remove, Collection<EElement> add, boolean repositionAdd)
+  {
+    if(repositionAdd)
+      doReposition(add);
+    
+    synchronized (this.elements)
+    {
+      doRemoveAll(remove);
+      doAddAll(add);
+    }
+  }
+  
+  protected void removeAllAndAddAll(Collection<EElement> remove, Collection<EElement> add)
+  {
+    removeAllAndAddAll(remove, add, true);
   }
   
   protected int size()

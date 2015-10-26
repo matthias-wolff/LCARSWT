@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars.contributors;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.elements.EElbo;
@@ -137,28 +138,33 @@ public class EBrace extends EElementArray
 
     x = this.x+elemSize.width-braceH;
     ERect eRectL = new ERect(null,x,y,braceH,braceH,LCARS.EC_ELBOLO|LCARS.ES_RECT_RND_E,null);
-        
+    
+    
     // Remove brace elements
-    remove(this.eElboU1);
-    remove(this.eElboU2);
-    remove(this.eElboL1);
-    remove(this.eElboL2);
-    remove(this.eRectU);
-    remove(this.eRectL);
-    remove(this.eLock);
-    remove(this.ePrev);
-    remove(this.eNext);
+    ArrayList<EElement> remove = new ArrayList<EElement>(9);
+    remove.add(this.eElboU1);
+    remove.add(this.eElboU2);
+    remove.add(this.eElboL1);
+    remove.add(this.eElboL2);
+    remove.add(this.eRectU);
+    remove.add(this.eRectL);
+    remove.add(this.eLock);
+    remove.add(this.ePrev);
+    remove.add(this.eNext);
     
     // Add brace elements
-    add(this.eElboU1=eElboU1,false);
-    add(this.eElboU2=eElboU2,false);
-    add(this.eElboL1=eElboL1,false);
-    add(this.eElboL2=eElboL2,false);
-    add(this.eRectU=eRectU,false);
-    add(this.eRectL=eRectL,false);
-    add(this.eLock=eLock,false);
-    add(this.ePrev=ePrev,false);
-    add(this.eNext=eNext,false);
+    ArrayList<EElement> add = new ArrayList<EElement>(9);
+    add.add(this.eElboU1=eElboU1);
+    add.add(this.eElboU2=eElboU2);
+    add.add(this.eElboL1=eElboL1);
+    add.add(this.eElboL2=eElboL2);
+    add.add(this.eRectU=eRectU);
+    add.add(this.eRectL=eRectL);
+    add.add(this.eLock=eLock);
+    add.add(this.ePrev=ePrev);
+    add.add(this.eNext=eNext);
+
+    removeAllAndAddAll(remove, add, false);
   }
   
   // -- Overrides --

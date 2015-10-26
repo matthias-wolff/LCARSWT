@@ -830,6 +830,23 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
+   * Removes a range and adds a range of LCARS GUI elements from the panel. This does <em>not</em> trigger
+   * a repaint of the panel!
+   * @param remove
+   * @param add
+   */
+  public void removeAllAndAddAll(Collection<EElement> remove, Collection<EElement> add)
+  {
+    synchronized (this.elements)
+    {
+      for (EElement el : remove)
+        doRemove(el);
+      for (EElement el : add)
+        doAdd(el);
+    }
+  }
+  
+  /**
    * Return the LCARS GUI element at the specified position (panel coordinates).
    * Use {@link Screen#componentToPanel(Point)} to convert screen coordinates
    * (e.g. from mouse events) to panel coordinates.

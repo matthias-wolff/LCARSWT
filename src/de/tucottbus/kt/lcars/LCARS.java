@@ -859,7 +859,7 @@ public class LCARS implements ILcarsRemote
     {
       String path = packageName.replace('.', '/');
       Enumeration<URL> resources = ClassLoader.getSystemResources(path);
-      List<String> dirs = new ArrayList<String>();
+      List<String> dirs = new ArrayList<String>(1000);
       while (resources.hasMoreElements())
       {
         URL resource = resources.nextElement();
@@ -869,7 +869,7 @@ public class LCARS implements ILcarsRemote
       for (String directory : dirs)
         classes.addAll(findClasses(directory, packageName, regex));
 
-      ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
+      ArrayList<Class<?>> classList = new ArrayList<Class<?>>(1000);
       for (String clazz : classes)
         try
         {
@@ -882,7 +882,7 @@ public class LCARS implements ILcarsRemote
 
       // FIXME: empty base package name does not work for JAR files!
       //    --> Find at least system classes in package(s) de.* -->
-      if (path.length()==0 && classList.size()==0)
+      if (path.isEmpty() && classList.isEmpty())
         return getClassesInPackage("de",regexFilter);
       // <--
 
@@ -1625,7 +1625,10 @@ public class LCARS implements ILcarsRemote
   	          if (panel!=null)
   	            panel.stop();
   	        }
-  	        catch (RemoteException e) {}
+  	        catch (RemoteException e)
+  	        {
+  	          Log.err("Cannot shut down panel.", e);
+  	        }
   	
   	        // Shut-down RMI screen adapter
   	        if (iscreen instanceof RmiScreenAdapter)
@@ -1646,7 +1649,7 @@ public class LCARS implements ILcarsRemote
             }
             catch (Exception e)
             {
-              e.printStackTrace();
+              Log.err("Cannot shut down RMI panel adapters", e);
             }
           }
 

@@ -15,6 +15,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 
 public class EPanelSelector extends EMessageBox
@@ -101,10 +102,13 @@ public class EPanelSelector extends EMessageBox
             }
             catch (ClassNotFoundException e)
             {
-              e.printStackTrace();
+              Log.err("Cannot start panel.", e);
             }
           }
-          catch (RemoteException e){}
+          catch (RemoteException e)
+          {
+            Log.err("Cannot stop panel.", e);
+          }
         }
       });
       add(btn); veList.add(btn);
@@ -128,10 +132,8 @@ public class EPanelSelector extends EMessageBox
   {
     if (panel==null) return;
     for (EElement el : veList)
-    {
       el.removeAllEEventListeners();
-      panel.remove(el);
-    }
+    panel.removeAll(veList);
     veList.clear();
     panel.dim(1f);
     panel.setModal(false);
@@ -167,6 +169,7 @@ public class EPanelSelector extends EMessageBox
       }
       catch (Exception e)
       {
+        Log.err("Cannot get 'de.tucottbus.kt.lcars.net.ServerPanel'", e);
       }
     if (Panel.getSpeechEngine()!=null)
       try
@@ -175,6 +178,7 @@ public class EPanelSelector extends EMessageBox
       }
       catch (Exception e)
       {
+        Log.err("Cannot get 'de.tucottbus.kt.lcars.speech.SpeechEnginePanel'", e);
       }
     return list;
   }
