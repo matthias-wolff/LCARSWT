@@ -56,7 +56,7 @@ public class ElementState implements Serializable
   /**
    * Flag indicating that this instance has been changed.
    */
-  private transient boolean changed;
+  private int changed;
 
   /**
    * The bounding rectangle of the element.
@@ -106,7 +106,7 @@ public class ElementState implements Serializable
    */
   public ElementState(Rectangle bounds, int style)
   {
-    this.changed     = true;
+    this.changed     = FLAG_MASK;
     this.bounds      = bounds;
     this.color       = null;
     this.alpha       = 1.f;
@@ -122,7 +122,7 @@ public class ElementState implements Serializable
    * @param other
    *          The element state to copy.
    */
-  public ElementState(ElementState other)
+  private ElementState(ElementState other)
   {
     this.changed     = other.changed;
     this.bounds      = other.bounds!=null?new Rectangle(other.bounds):null;
@@ -134,6 +134,25 @@ public class ElementState implements Serializable
     this.touch       = other.touch;
   }
   
+  /**
+   * Copies this {@ElementState} and sets this element state to unchanged, which becomes changed again when any setter is invoked. If parameter incremental is true and there are no changes, it returns null
+   *
+   * @param incremental
+   *          Get copy for incremental or full update.
+   * @return Copy of this {@ElementState} or null if incremental and unchanged.
+   * 
+   * @see #isChanged()
+   */
+  public synchronized ElementState getUpdate(boolean incremental)
+  {
+    if (incremental && this.changed == 0) return null;
+    ElementState result = new ElementState(this);
+    this.changed = 0;
+    return result;
+  }
+  
+  
+  
   // -- Geometry getters and setters --
 
   /**
@@ -144,7 +163,8 @@ public class ElementState implements Serializable
    */
   public void setBounds(Rectangle bounds)
   {
-    this.bounds = bounds;
+    //TODO: set changed to true?
+    this.bounds = new Rectangle(bounds);
   }
 
   /**
@@ -152,7 +172,7 @@ public class ElementState implements Serializable
    */
   public Rectangle getBounds()
   {
-    return this.bounds;
+    return new Rectangle(this.bounds);
   }
   
   // -- Color getters and setters --
@@ -173,10 +193,10 @@ public class ElementState implements Serializable
    * @param alpha
    *          The new opacity (0: transparent ... 1: opaque).
    */
-  public void setAlpha(float alpha)
+  public synchronized void setAlpha(float alpha)
   {
-    changed |= (this.alpha!=alpha);
-    this.alpha = alpha;
+    if (this.alpha != (this.alpha = alpha))
+      changed |= ALPHA;
   }
 
   /**
@@ -197,7 +217,7 @@ public class ElementState implements Serializable
    */
   public float getBgAlpha(PanelState panelState)
   {
-    return (getStyle(LCARS.ES_MODAL)==0 && panelState!=null) ? alpha * panelState.alpha : alpha;
+    return (panelState!=null && getStyle(LCARS.ES_MODAL)==0) ? alpha * panelState.alpha : alpha;
   }
 
   /**
@@ -219,12 +239,15 @@ public class ElementState implements Serializable
    *          The new custom background color. If <code>null</code> the background geometries will
    *          be painted in their "natural" color defined by the {@linkplain #style style}.
    */
-  public void setColor(ColorMeta color)
-  {    
-    changed |= !Objectt.equals(this.color, color);
-    this.color = color;// != null ? color : SwtColor.BLACK;
+  public synchronized void setColor(ColorMeta color)
+  {
+    if (!Objectt.equals(this.color, this.color = color))
+      changed |= COLOR;
     if (color != null && color.HasAlpha)
+    {
       this.alpha = color.getAlpha()/255f;
+      changed |= ALPHA;
+    }
   }
 
   /**
@@ -247,8 +270,9 @@ public class ElementState implements Serializable
   {
     boolean blinking = getStyle(LCARS.ES_BLINKING)!=0;
     int     blink    = panelState!=null?panelState.blink:0;
-
-    if (this.color!=null && (!blinking || blink!=0)) return color;
+    ColorMeta color = this.color;
+    
+    if (color!=null && (!blinking || blink!=0)) return color;
     if (highlighted) return ColorMeta.WHITE;
     return LCARS.getColor(panelState.colorScheme,style^touch^(blinking?blink:0));
   }
@@ -280,10 +304,10 @@ public class ElementState implements Serializable
    * @param style
    *          The new style.
    */
-  public void setStyle(int style)
+  public synchronized void setStyle(int style)
   {
-    changed |= (this.style!=style);
-    this.style = style;
+    if (this.style!=(this.style = style))
+      changed |= STYLE;
   }
 
   /**
@@ -294,12 +318,10 @@ public class ElementState implements Serializable
    * @param set
    *          <code>true</code> to set, <code>false</code> to clear.
    */
-  public void setStyle(int mask, boolean set)
+  public synchronized void setStyle(int mask, boolean set)
   {
-    if (set)
-      setStyle(this.style | mask);
-    else
-      setStyle(this.style & ~mask);
+    if (this.style!=(this.style = set ? this.style | mask : this.style & ~mask))
+      changed |= STYLE;
   }
 
   // -- State getters and setters --
@@ -312,27 +334,25 @@ public class ElementState implements Serializable
    */
   public boolean isChanged()
   {
-    return this.changed;
+    return this.changed != 0;
   }
   
   /**
    * Marks this element state changed.
    */
-  public void setChanged()
+  public synchronized void setChanged()
   {
-    this.changed = true;
+    this.changed = FLAG_MASK;
   }
   
   /**
-   * Sets this element state unchanged. It becomes changed again when any setter is invoked.
-   * 
-   * @see #isChanged()
+   * Marks this element state changed.
    */
-  public void clearChanged()
+  public synchronized int setChanged(int changedFlags)
   {
-    this.changed = false;
+    return this.changed |= (changedFlags&FLAG_MASK);
   }
-  
+    
   /**
    * Returns the highlight state.
    */
@@ -347,10 +367,10 @@ public class ElementState implements Serializable
    * @param highlight
    *          The new highlight state.
    */
-  public void setHighlighted(boolean highlight)
+  public synchronized void setHighlighted(boolean highlight)
   {
-    changed |= (this.highlighted!=highlight);
-    this.highlighted = highlight;
+    if (this.highlighted!=(this.highlighted!=highlight))
+      changed |= HIGHLIGHT;
   }
 
   /**
@@ -359,10 +379,10 @@ public class ElementState implements Serializable
    * @param touch
    *          The new touch state.
    */
-  public void setTouch(int touch)
+  public synchronized void setTouch(int touch)
   {
-    changed |= (this.touch!=touch);
-    this.touch = touch;
+    if (this.touch!=(this.touch = touch))
+      changed |= TOUCH;
   }
 
   /**
@@ -379,25 +399,18 @@ public class ElementState implements Serializable
    * @param visible
    *          The visibility.
    */
-  public void setVisible(boolean visible)
+  public synchronized void setVisible(boolean visible)
   {
-    changed |= (this.visible!=visible); 
-    this.visible = visible;
+    if (this.visible!=(this.visible = visible))
+      changed |= VISIBLE; 
   }
 
   /**
    * Returns the flags that indicates the changed parts of this PanelState and another.
    */  
-  public int getUpdateFlags(ElementState other) {
-    if (other == null) throw new NullPointerException();
-    int result = !Objectt.equals(bounds,        other.bounds) ?              BOUNDS : 0;    
-    if (         !Objectt.equals(color,         other.color))      result |= COLOR;
-    if (                         alpha       != other.alpha)       result |= ALPHA;
-    if (                         style       != other.style)       result |= STYLE;
-    if (                         visible     != other.visible)     result |= VISIBLE;
-    if (                         highlighted != other.highlighted) result |= HIGHLIGHT;
-    if (                         alpha       != other.alpha)       result |= ALPHA;
-    return                       touch       != other.touch ?      result |  TOUCH : result;
+  public int getChanged()
+  {
+    return changed;
   }
 }
 

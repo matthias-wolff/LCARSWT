@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -200,11 +199,13 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
     int y = (screenHeight-h)/2;
     int style = LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT;
     
-    PanelData data = new PanelData();
-    data.panelState = new PanelState(new Dimension(screenWidth, screenHeight));
-    data.elementData = new ArrayList<ElementData>();
-    ArrayList<ElementData> elData = data.elementData;
+    PanelData data = new PanelData(screen.getPanel(),
+        new PanelState(new Dimension(screenWidth, screenHeight)),
+        new ElementData[1]);
     
+    EElement el = new ELabel(null, x, y, w, h, style, "");
+    
+    Timer timer = new Timer(true);
     TimerTask timerTask = new TimerTask()
     {
       private String lastMsg = "";
@@ -215,18 +216,21 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
         String newMsg = getServerMsg();
         
         if (!Objectt.equals(lastMsg, newMsg)) {
-          EElement el = new ELabel(null, x, y, w, h, style, newMsg);
-
-          elData.clear();
-          elData.add(el.getUpdateData(false));
-
+          el.setLabel(newMsg);
+          data.elementData[0] = el.getUpdateData(false); 
           lastMsg = newMsg;
         }
-        screen.update(data, false);
+        
+        if (data.panelId == screen.getPanel().serialNo())
+          screen.update(data, false);
+        else
+        {
+          timer.cancel();
+          timer.purge();
+        }
       }
     };
     
-    Timer timer = new Timer(true);
     timer.scheduleAtFixedRate(timerTask, 0, 1000/25);  
   }
 

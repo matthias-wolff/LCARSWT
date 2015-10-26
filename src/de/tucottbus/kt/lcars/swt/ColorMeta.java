@@ -173,7 +173,11 @@ public final class ColorMeta implements Serializable
   }
   
   public int getAlpha() {
-    return HasAlpha ? Alpha & 0xFF : 0xFF;
+    return Alpha & 0xFF;
+  }
+  
+  public float getAlphaF() {
+    return (Alpha & 0xFF)/255f;
   }
   
   public Color getColor() {

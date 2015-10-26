@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -237,7 +236,7 @@ public class ESpeechInput extends ElementContributor
     level = Math.max(level,-63);
     int curLevel = (int)((level+63f)/66f*numBars);
     
-    Vector<EElement> els = getElements();
+    ArrayList<EElement> els = createElementList();
     for (int i=0; i<numBars; i++)
     {
       ERect bar = (ERect)els.get(i);      

@@ -51,6 +51,11 @@ public interface IPanel extends Remote
    */
   public void panelSelectionDialog() throws RemoteException;
   
+  /**
+   * The unique serial number of the {@link IPanel} described by this
+   * instance.
+   */
+  public int serialNo();
 }
 
 // EOF

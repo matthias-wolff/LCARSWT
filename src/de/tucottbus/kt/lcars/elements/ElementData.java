@@ -14,7 +14,6 @@ import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.geometry.HeavyGeometry;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.logging.Log;
-
 /**
  * The serializable data of an {@linkplain EElement LCARS GUI element}. An
  * element data instance stores the {@link #state} and the {@link #geometry} of
@@ -51,12 +50,12 @@ public final class ElementData implements Serializable
    * The unique serial number of the {@link EElement} described by this
    * instance.
    */
-  public long serialNo;
+  public final long serialNo;
 
   /**
    * The state of the {@link EElement} described by this instance.
    */
-  public ElementState state;
+  ElementState state;
 
   /**
    * The graphical representation of the {@link EElement} described by this
@@ -65,10 +64,10 @@ public final class ElementData implements Serializable
   ArrayList<AGeometry> geometry;
 
   /**
-   * Bounds of the area of this element.
+   * Area of this element.
    */
   private transient Area cachedArea;
-
+  
   // -- Constructors --
 
   /**
@@ -78,49 +77,42 @@ public final class ElementData implements Serializable
    *          The unique serial number of the {@link EElement} described by this
    *          instance.
    */
-  public ElementData(long serialNo)
+  private ElementData(long serialNo, ElementState state)
   {
     this.serialNo = serialNo;
-    this.state = null;
+    this.state = state;
     this.geometry = null;
   }
 
   /**
-   * Creates a copy of the element data stored in an {@linkplain EElement LCARS
-   * GUI element}.
+   * Creates a new element data instance.
    * 
-   * @param element
-   *          The GUI element to copy the data from
+   * @param serialNo
+   *          The unique serial number of the {@link EElement} described by this
+   *          instance.
    */
-  public ElementData(EElement element)
+  public ElementData(long serialNo, Rectangle bounds, int style)
   {
-    this.serialNo = element.data.serialNo;
-    this.state = new ElementState(element.data.state);
-    this.geometry = new ArrayList<AGeometry>(element.data.geometry);
+    this.serialNo = serialNo;
+    this.state = new ElementState(bounds, style);
+    this.geometry = null;
   }
+
+//  /**
+//   * Creates a copy of the element data stored in an {@linkplain EElement LCARS
+//   * GUI element}.
+//   * 
+//   * @param element
+//   *          The GUI element to copy the data from
+//   */
+//  public ElementData(EElement element)
+//  {
+//    this.serialNo = element.data.serialNo;
+//    this.state = new ElementState(element.data.state);
+//    this.geometry = new ArrayList<AGeometry>(element.data.geometry);
+//  }
 
   // -- Getters and setters --
-
-  /**
-   * Determines if the {@link #state element state} has changed since its
-   * creation or the last call to {@link ElementState#clearChanged()}.
-   */
-  public boolean isStateChanged()
-  {
-    return state.isChanged();
-  }
-
-  /**
-   * Determines if the {@link #geometry geometry} (i.e. the graphical
-   * representation of this element) is valid or needs to be recomputed.
-   * 
-   * @see #invalidateGeometry()
-   * @see #validateGeometry()
-   */
-  public boolean isGeometryValid()
-  {
-    return geometry != null;
-  }
 
   /**
    * Returns the {@link Area area} covered by all background geometries.
@@ -132,16 +124,19 @@ public final class ElementData implements Serializable
     if (cachedArea == null)
     {
       Area ar = new Area();
-      try
+      synchronized (this)
       {
-        for (AGeometry gi : geometry)
-          if (!gi.isForeground())
-            ar.add(gi.getArea());
-        cachedArea = ar;
-      } catch (NullPointerException e)
-      {
-        cachedArea = new Area(state.getBounds());
-        Log.warn("Missing geometries in ElementData #" + serialNo);
+        try
+        {
+          for (AGeometry gi : geometry)
+            if (!gi.isForeground())
+              ar.add(gi.getArea());
+          cachedArea = ar;
+        } catch (NullPointerException e)
+        {
+          cachedArea = new Area(state.getBounds());
+          Log.warn("Missing geometries in ElementData #" + serialNo);
+        }
       }
     }
     area.add((Area) cachedArea.clone());
@@ -162,13 +157,11 @@ public final class ElementData implements Serializable
    */
   public ElementData getUpdate(boolean incremental, boolean updateGeometry)
   {
-    ElementData other = new ElementData(serialNo);
-    boolean stateChanged = isStateChanged();
-    if (stateChanged || !incremental)
-      other.state = new ElementState(this.state);
+    ElementData other = new ElementData(serialNo, this.state.getUpdate(incremental));
     if (updateGeometry || !incremental)
       try
       {
+        ArrayList<AGeometry> geometry = this.geometry;
         other.geometry = new ArrayList<AGeometry>(geometry.size());
         for (AGeometry geom : geometry)
           other.geometry.add(geom instanceof HeavyGeometry
@@ -176,12 +169,9 @@ public final class ElementData implements Serializable
       } catch (Exception e)
       {
         // TODO: synchronization problem, exception should never occur
-        other.geometry = new ArrayList<AGeometry>();
-        Log.err("Error while extracting updated data from ElementData with #"
-            + serialNo, e);
+        Log.err("Error while getting update of " + toString(), e);
+        other.geometry = null;
       }
-
-    state.clearChanged();
     return other;
   }
 
@@ -208,7 +198,7 @@ public final class ElementData implements Serializable
    *           <code>other.</code>{@link #state} is <code>null</code>).
    *           </ol>
    */
-  public int applyUpdate(ElementData other, boolean detailedFlags)
+  public int applyUpdate(ElementData other)
   {
     // if (serialNo == 25)
     // Log.debug("#" + serialNo + ": geometry is " + (geometry == null ? "NULL"
@@ -229,21 +219,21 @@ public final class ElementData implements Serializable
     if (state == null)
     {
       if (other.state != null)
-        state = new ElementState(other.state);
+        state = other.state;
+      else
+        Log.err("Cannot get any element state in ElementData#"+serialNo+", nether in this ElementData nor in the other (previous) ElementData because they are null.");
     } else
-      ret |= detailedFlags ? state.getUpdateFlags(other.state) : ElementState.FLAG_MASK;
+      ret |= state.setChanged(other.state.getChanged());
 
     if (geometry == null)
     {
       if (other.geometry != null)
       {
-        this.geometry = new ArrayList<AGeometry>(other.geometry);
-        for (AGeometry geom : this.geometry)
+        for (AGeometry geom : this.geometry = other.geometry)
           if (geom instanceof HeavyGeometry)
             ((HeavyGeometry<?>) geom).update(true);
         this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea)
-            : null;
-        // TODO: make a copy
+            : null; // TODO: correct, if bounds was updated (i.e. by translation)
       }
     } else
       ret |= GEOMETRY_FLAG;
@@ -336,13 +326,15 @@ public final class ElementData implements Serializable
    * Indicates missing data by returning the flags {@link #GEOMETRY_FLAG} and {@link ElementState#FLAG_MASK} as xor combined integer.
    * @return
    */
-  public int getMissing() {
+  public int getMissing()
+  {
     return geometry == null
         ? (state == null ? ElementState.FLAG_MASK | GEOMETRY_FLAG : GEOMETRY_FLAG) 
         : (state == null ? ElementState.FLAG_MASK                 : 0);
   }
   
-  public void updateGeometries(ArrayList<AGeometry> geos) {
+  public void updateGeometries(ArrayList<AGeometry> geos)
+  {
     geometry = (geos != null) ? new ArrayList<AGeometry>(geos) : null;
     cachedArea = null;
   }

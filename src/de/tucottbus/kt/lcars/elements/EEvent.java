@@ -91,6 +91,15 @@ public class EEvent
     ee2.pt = ee.pt;
     return ee2;
   }
+  
+  @Override
+  public String toString()
+  {
+    return EEvent.class.getSimpleName() + "#" + id
+        + "@" + (pt != null ? "("+pt.x+","+pt.y+")" : "(?,?)")
+        + " counter=" + ct
+        + " element=" + el;
+  }
 }
 
 // EOF

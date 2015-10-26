@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,6 +30,7 @@ import org.eclipse.swt.events.TouchEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.internal.ole.win32.VARDESC;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -67,10 +69,12 @@ public class TestPanel extends Panel
   private static final int x1 = x0 + w + m;
   private static final int x2 = x1 + w + m;
   private static final int x3 = x2 + w + m;
+  private static final int x4 = x2 + w + m;
   private static final int y0 = m;
   private static final int y1 = y0 + h + m;
   private static final int y2 = y1 + h + m;
   private static final int y3 = y2 + h + m;
+  private static final int y4 = y2 + h + m;
 
   private Timer timer;
 
@@ -134,6 +138,8 @@ public class TestPanel extends Panel
         text));
     add(new ERect(this, x3, y3, w, h, LCARS.EC_SECONDARY | LCARS.ES_LABEL_SE,
         text));
+    
+    add(new EElbo(this,23,23,268,146,LCARS.EC_ELBOUP|LCARS.ES_LABEL_SE,"LCARS"));
   }
 
   private void initLabels()
@@ -148,7 +154,7 @@ public class TestPanel extends Panel
     ELabel eLabel = new ELabel(this, x1, y1 + h, w * 2, h,
         LCARS.EC_TEXT | LCARS.EF_SMALL | LCARS.ES_LABEL_W, null);
     els.add(eLabel);
-    eLabel.setAlpha(.5f);    
+    eLabel.setAlpha(.5f);
     
     for (EElement el : els)
       add(el);
@@ -158,14 +164,32 @@ public class TestPanel extends Panel
         el.setLabel(dt);
     });
 
-    EValue eTimecode = add(
-        new EValue(this, m, 991, 278, 66, LCARS.EC_PRIMARY | LCARS.ES_STATIC
-            | LCARS.ES_VALUE_W | LCARS.ES_LABEL_SE, "TIME INDEX"));
-    int[] sec =
+    ArrayList<ArrayList<EValue>> values = new ArrayList<ArrayList<EValue>>();
+    
+    int wVal = 50;
+    int hVal = 30;
+    
+    for (int y = 400; y < 1080-hVal; y+=hVal) {
+      ArrayList<EValue> line = new ArrayList<>();
+      values.add(line);
+      for (int x = 0; x < 1920-wVal; x+=wVal)
+        line.add(add(new EValue(this, x, y, wVal, hVal, LCARS.EC_PRIMARY | LCARS.ES_STATIC
+            | LCARS.ES_VALUE_W | LCARS.ES_LABEL_SE | LCARS.EF_SMALL, "TIME INDEX")));
+    }
+    
+    int[] secArr =
     { 0 };
+    String str = String.format(Locale.ENGLISH, "%02d:%01d", secArr[0] / 60, secArr[0] % 60);
     runAtFrameRate(() -> {
-      eTimecode.setValue(String.format(Locale.ENGLISH, "%02d:%01d", sec[0] / 60,
-          sec[0]++ % 60));
+      int sec = secArr[0]++;
+      for (ArrayList<EValue> line : values)
+      {
+        boolean visible = (sec++ % 8) == 0;
+        for (EValue value : line) {
+          value.setValue(str);
+          value.setVisible(visible);
+        }
+      }
     });
     
     

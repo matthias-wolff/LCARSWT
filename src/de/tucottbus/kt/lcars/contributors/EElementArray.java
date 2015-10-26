@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.util.function.Consumer;
@@ -16,6 +17,7 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * An array of equally sized {@link ERect}s, {@link EValue}s or {@link ELabel}s.
@@ -32,7 +34,7 @@ public class EElementArray extends ElementContributor implements EEventListener
   protected int elemStyle;
   protected Point[] elemPos;
   protected boolean lock;
-  protected final Vector<EElement> eList;
+  protected final ArrayList<EElement> eList;
   protected ELabel eTitle;
   protected EElement ePrev;
   protected EElement eNext;
@@ -72,7 +74,7 @@ public class EElementArray extends ElementContributor implements EEventListener
     this.rows = rows;
     this.cols = cols;
     this.elemStyle = elemStyle;
-    this.eList = new Vector<EElement>();
+    this.eList = new ArrayList<EElement>();
     this.firstItem = 0;
 
     // Check class
@@ -123,12 +125,14 @@ public class EElementArray extends ElementContributor implements EEventListener
    * @param list
    *          the list
    */
-  public synchronized void setList(String[] list)
+  public void setList(String[] list)
   {
-    this.firstItem = -1;
-
     // Remove old elements
-    eList.clear();
+    synchronized (eList)
+    {
+      this.firstItem = -1;
+      eList.clear();
+    }
     if (list == null || list.length == 0)
       return;
 
@@ -164,8 +168,11 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void removeAll()
   {
-    this.firstItem = -1;
-    eList.clear();
+    synchronized (eList)
+    {
+      this.firstItem = -1;
+      eList.clear();
+    }
   }
 
   /**
@@ -177,27 +184,30 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public EElement add(String name)
   {
-    int index = eList.size();
-    int ePos = index % (this.cols * this.rows);
-    int x = this.x + this.elemPos[ePos].x;
-    int y = this.y + this.elemPos[ePos].y;
-    int w = this.elemSize.width;
-    int h = this.elemSize.height;
-    String label = name.toUpperCase();
     EElement e = null;
-    if (this.elemClass.equals(ERect.class))
-      e = new ERect(null, x, y, w, h, this.elemStyle, label);
-    else if (this.elemClass.equals(EValue.class))
+    synchronized (eList)
     {
-      e = new EValue(null, x, y, w, h, this.elemStyle, null);
-      ((EValue) e).setValue(label);
-    } else if (this.elemClass.equals(ELabel.class))
-      e = new ELabel(null, x, y, w, h, this.elemStyle, label);
-    e.addEEventListener(this);
-    e.setData(name);
-    eList.add(e);
-    if (this.firstItem < 0)
-      setFirstVisibleItemIndex(0);
+      int index = eList.size();
+      int ePos = index % (this.cols * this.rows);
+      int x = this.x + this.elemPos[ePos].x;
+      int y = this.y + this.elemPos[ePos].y;
+      int w = this.elemSize.width;
+      int h = this.elemSize.height;
+      String label = name.toUpperCase();
+      if (this.elemClass.equals(ERect.class))
+        e = new ERect(null, x, y, w, h, this.elemStyle, label);
+      else if (this.elemClass.equals(EValue.class))
+      {
+        e = new EValue(null, x, y, w, h, this.elemStyle, null);
+        ((EValue) e).setValue(label);
+      } else if (this.elemClass.equals(ELabel.class))
+        e = new ELabel(null, x, y, w, h, this.elemStyle, label);
+      e.addEEventListener(this);
+      e.setData(name);
+      eList.add(e);
+      if (this.firstItem < 0)
+        setFirstVisibleItemIndex(0);
+    }
     return e;
   }
 
@@ -209,8 +219,10 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void remove(int index)
   {
-    super.remove(getItemElement(index));
-    eList.remove(index);
+    synchronized (eList)
+    {
+      super.remove(eList.remove(index));
+    }
   }
 
   /**
@@ -222,9 +234,12 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void setFirstVisibleItemIndex(int first)
   {
-    if (this.firstItem == first)
-      return;
-    this.firstItem = first;
+    synchronized (eList)
+    {
+      if (this.firstItem == first)
+        return;
+      this.firstItem = first;      
+    }
     animate();
     autopage();
   }
@@ -309,14 +324,17 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public String getItem(int index)
   {
-    if (index < 0 || index >= eList.size())
-      return null;
-    EElement e = eList.get(index);
-    if (e.getData() instanceof String)
-      return (String) e.getData();
-    if (e instanceof EValue)
-      return ((EValue) e).getValue();
-    return e.getLabel();
+    synchronized (eList)
+    {
+      if (index < 0 || index >= eList.size())
+        return null;
+      EElement e = eList.get(index);
+      if (e.getData() instanceof String)
+        return (String) e.getData();
+      if (e instanceof EValue)
+        return ((EValue) e).getValue();
+      return e.getLabel();
+    }
   }
 
   /**
@@ -329,7 +347,10 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public EElement getItemElement(int index)
   {
-    return eList.get(index);
+    synchronized (eList)
+    {
+      return eList.get(index);
+    }
   }
 
   /**
@@ -338,7 +359,10 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public Vector<EElement> getItemElements()
   {
-    return new Vector<EElement>(eList);
+    synchronized (eList)
+    {
+      return new Vector<EElement>(eList);
+    }
   }
 
   /**
@@ -346,7 +370,10 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public int getItemCount()
   {
-    return eList.size();
+    synchronized (eList)
+    {
+      return eList.size();
+    }
   }
 
   /**
@@ -377,12 +404,15 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void nextPage(boolean turnOver)
   {
-    if (eList == null)
-      return;
-    firstItem += rows * cols;
-    if (turnOver && firstItem >= eList.size())
-      firstItem = 0;
-    animate();
+    synchronized (eList)
+    {
+      if (eList == null)
+        return;
+      firstItem += rows * cols;
+      if (turnOver && firstItem >= eList.size())
+        firstItem = 0;
+      animate();
+    }
   }
 
   /**
@@ -393,12 +423,15 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void prevPage(boolean turnOver)
   {
-    if (eList == null)
-      return;
-    this.firstItem -= rows * cols;
-    if (turnOver && firstItem < 0)
-      firstItem = eList.size() - rows * cols;
-    animate();
+    synchronized (eList)
+    {
+      if (eList == null)
+        return;
+      this.firstItem -= rows * cols;
+      if (turnOver && firstItem < 0)
+        firstItem = eList.size() - rows * cols;
+      animate();
+    }
   }
 
   /**
@@ -411,13 +444,16 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void hiliteItem(int item)
   {
-    for (int i = 0; i < this.eList.size(); i++)
+    synchronized (eList)
     {
-      EElement e = this.eList.get(i);
-      e.setHighlighted(i == item);
+      for (int i = 0; i < this.eList.size(); i++)
+      {
+        EElement e = this.eList.get(i);
+        e.setHighlighted(i == item);
+      }
+      if (this.panel != null)
+        this.panel.invalidate();
     }
-    if (this.panel != null)
-      this.panel.invalidate();
   }
 
   /**
@@ -432,11 +468,14 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void hiliteItem(int item, int time)
   {
-    EElement e = this.eList.get(item);
-    e.setHighlighted(true);
-    scheduleTimerTask(new UnhiliteTask(e), TT_UNHILITE + e.hashCode(), time, 0);
-    if (this.panel != null)
-      this.panel.invalidate();
+    synchronized (eList)
+    {
+      EElement e = this.eList.get(item);
+      e.setHighlighted(true);
+      scheduleTimerTask(new UnhiliteTask(e), TT_UNHILITE + e.hashCode(), time, 0);
+      if (this.panel != null)
+        this.panel.invalidate();
+    }
   }
 
   /**
@@ -449,24 +488,21 @@ public class EElementArray extends ElementContributor implements EEventListener
 
     // Remove old elements
     final EElement eTitle = this.eTitle;
-    getElements().removeIf((el) -> {
-      if (el != eTitle)
-      {
-        el.clearTouch();
-        return true;
-      }
-      return false;
+    removeIf((el) -> {
+      if (el == eTitle) return false;
+      el.clearTouch();
+      return true;
     });
 
-    // Do nothing of there are no items
-    if (eList.isEmpty())
-    {
-      firstItem = -1;
-      return;
-    }
-    
     synchronized (eList)
     {
+      // Do nothing of there are no items
+      if (eList.isEmpty())
+      {
+        firstItem = -1;
+        return;
+      }
+    
       final int n = eList.size();
 
       if (first > n)
@@ -493,22 +529,22 @@ public class EElementArray extends ElementContributor implements EEventListener
         } else
           eList.get(i).setVisible(false);
 
+      // GUI reflection
+      EElement e;
+      Panel p;
+      if ((e = ePrev) != null)
+      {
+        e.clearTouch();
+        e.setDisabled(first <= 0);
+      }
+      if ((e = eNext) != null)
+      {
+        e.clearTouch();
+        e.setDisabled(first >= eList.size() - rows * cols);
+      }
+      if ((p = panel) != null)
+        p.invalidate();
     }
-    // GUI reflection
-    EElement e;
-    Panel p;
-    if ((e = ePrev) != null)
-    {
-      e.clearTouch();
-      e.setDisabled(first <= 0);
-    }
-    if ((e = eNext) != null)
-    {
-      e.clearTouch();
-      e.setDisabled(first >= eList.size() - rows * cols);
-    }
-    if ((p = panel) != null)
-      p.invalidate();
   }
 
   // -- Overrides --
@@ -548,13 +584,13 @@ public class EElementArray extends ElementContributor implements EEventListener
   public void removeFromPanel()
   {
     cancelAllTimerTasks();
-    Consumer<EElement> remove = e -> {
-      if (e != null)
-        e.removeAllEEventListeners();
-    };
-    remove.accept(ePrev);
-    remove.accept(eNext);
-    remove.accept(eLock);
+    
+    if (ePrev != null)
+      ePrev.removeAllEEventListeners();
+    if (eNext != null)
+      eNext.removeAllEEventListeners();
+    if (eLock != null)
+      eLock.removeAllEEventListeners();
     super.removeFromPanel();
   }
 
@@ -657,7 +693,7 @@ public class EElementArray extends ElementContributor implements EEventListener
       scheduleTimerTask(new AnimationTask(), TT_ANIMATION, 1, 100);
     } catch (IllegalStateException e)
     {
-      e.printStackTrace();
+      Log.err("Cannot animate EElementArray", e);
     }
   }
 
@@ -688,7 +724,13 @@ public class EElementArray extends ElementContributor implements EEventListener
         cancel();
         return;
       }
-      ctr++;
+      int ctr;
+      int firstItem;
+      synchronized (eList)
+      {
+        ctr = ++this.ctr;
+        firstItem = EElementArray.this.firstItem;
+      }
       showItemsInt(firstItem, ctr);
       hiliteItem(firstItem + ctr - 1);
     }
@@ -734,7 +776,7 @@ public class EElementArray extends ElementContributor implements EEventListener
           panel.invalidate();
       } catch (NullPointerException e)
       {
-        e.printStackTrace();
+        Log.err("NullPointerException", e);
       }
     }
   }

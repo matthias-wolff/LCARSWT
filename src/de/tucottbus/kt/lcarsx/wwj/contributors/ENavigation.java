@@ -8,7 +8,6 @@ import java.util.Locale;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
-import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ERect;
@@ -414,8 +413,9 @@ public class ENavigation extends ElementContributor
   
   public void setDisabled(boolean disabled)
   {
-    for (EElement e:getElements())
-      e.setDisabled(disabled);
+    forAllElements((el) -> {
+      el.setDisabled(disabled);
+    });
   }
   
   public void displayCurrentState(EWorldWind eWw)

@@ -2,6 +2,7 @@ package de.tucottbus.kt.lcarsx.al;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -159,7 +160,7 @@ public class ELevelsDisplay extends ElementContributor
       audio = new Vector<AudioBuffer>(audio);
     int b = barF;
     
-    Vector<EElement> els = getElements();
+    ArrayList<EElement> els = createElementList();
     synchronized(els) {
       for (AudioBuffer abuf : audio)
       {
@@ -284,7 +285,7 @@ public class ELevelsDisplay extends ElementContributor
     add(l);
 
     // The bars
-    barF = getElements().size();
+    barF = size();
     for (int b=barC-1; b>=0; b--)
     {
       float alpha = 1;
@@ -335,12 +336,13 @@ public class ELevelsDisplay extends ElementContributor
     eHistory = new Vector<ELabel>();
     eFuture  = new Vector<ELabel>();
     Point2D.Float pt = null;
+    
     for (int b=barZ-25; b>=0; b-=25)
     {
-      float alpha = getElements().get((barC-b-25)+barF).getAlpha();
+      float alpha = getElement((barC-b-25)+barF).getAlpha();
       addScaleSection(b*barH,24*barH,Integer.toString((barZ-b)/25),0,alpha);
       pt = addScaleSection(b*barH,24*barH,"",-34,alpha);
-      eHistory.add((ELabel)getElements().get(getElements().size()-1));
+      eHistory.add((ELabel)getElement(size()-1));
     }
     int style = LCARS.EC_SECONDARY|LCARS.ES_STATIC|LCARS.EF_SMALL|LCARS.ES_LABEL_SW;
     eDuration = new ELabel(null,(int)pt.x-36,(int)pt.y-33,0,18,style,"00:00.0");
@@ -348,7 +350,7 @@ public class ELevelsDisplay extends ElementContributor
     add(eDuration,false);
     for (int b=barZ; b<barC; b+=25)
     {
-      float alpha = getElements().get((barC-b)+barF).getAlpha();
+      float alpha = getElement((barC-b)+barF).getAlpha();
       int c = Math.min(24,barC-b);
       String label = Integer.toString((barZ-b)/25);
       if ("0".equals(label)) label+=" s";
@@ -360,7 +362,7 @@ public class ELevelsDisplay extends ElementContributor
         add(eTimecode,false);
       }
       else
-        eFuture.add((ELabel)getElements().get(getElements().size()-1));
+        eFuture.add((ELabel)getElement(size()-1));
     }
   }
   

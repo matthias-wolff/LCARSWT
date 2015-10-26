@@ -1,11 +1,15 @@
 package de.tucottbus.kt.lcars.contributors;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.elements.EElement;
@@ -22,7 +26,7 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 public abstract class ElementContributor implements EEventListener
 {
   protected Panel                            panel;
-  private   final Vector<EElement>           elements;
+  private   final ArrayList<EElement>        elements;
   protected final int                        x;
   protected final int                        y;
   private   final Vector<EEventListener>     listeners;
@@ -33,7 +37,7 @@ public abstract class ElementContributor implements EEventListener
   
   public ElementContributor(int x, int y)
   {
-    elements   = new Vector<EElement>();
+    elements   = new ArrayList<EElement>();
     this.x     = x;
     this.y     = y;
     listeners  = new Vector<EEventListener>();
@@ -52,12 +56,16 @@ public abstract class ElementContributor implements EEventListener
       bounds.y += this.y;
       el.setBounds(bounds);
     }
-    elements.remove(el);
-    elements.add(el);
-    if (this.panel!=null)
+    
+    synchronized (this.elements)
     {
-      el.setPanel(this.panel);
-      this.panel.add(el);
+      this.elements.remove(el);
+      this.elements.add(el);      
+      if (this.panel!=null)
+      {
+        el.setPanel(this.panel);
+        this.panel.add(el);
+      }
     }
     return el;
   }
@@ -67,48 +75,183 @@ public abstract class ElementContributor implements EEventListener
     return add(el,true);
   }
 
+  protected void addAll(Collection<EElement> elements, boolean reposition)
+  {
+    if (elements==null) return;
+    
+    if (reposition)
+    {
+      int x = this.x;
+      int y = this.y;
+      for (EElement el : elements)
+      {
+        Rectangle bounds = el.getBounds();
+        bounds.x += x;
+        bounds.y += y;
+        el.setBounds(bounds);
+      }
+    }
+    
+    synchronized (this.elements)
+    {
+      this.elements.removeAll(elements);
+      this.elements.addAll(elements);
+      Panel panel = this.panel;
+      panel.addAll(elements);
+      for (EElement el : elements)
+       el.setPanel(panel);
+    }
+  }
+  
+  protected void addAll(Collection<EElement> elements)
+  {
+    addAll(elements, true);
+  }
+
   protected void remove(EElement el)
   {
     if (el==null) return;
-    elements.remove(el);
-    if (this.panel!=null) this.panel.remove(el);
+    synchronized (this.elements)
+    {
+      this.elements.remove(el);
+      if (this.panel!=null) this.panel.remove(el);
+    }
+  }
+  
+  protected void remove(int i)
+  {
+    EElement el;
+    synchronized (this.elements)
+    {
+      el = this.elements.remove(i);
+      if (this.panel!=null) this.panel.remove(el);
+    }
+  }
+  
+  protected void removeAll(Collection<EElement> elements)
+  {
+    synchronized (this.elements)
+    {
+      this.elements.removeAll(elements);
+      Panel panel = this.panel;
+      if (panel!=null)
+        panel.removeAll(elements);
+      elements.clear();
+    }
   }
   
   protected void removeAll()
   {
-    if (this.panel!=null)
-      for (EElement el : elements)
-        panel.remove(el);
-    elements.clear();;
+    synchronized (this.elements)
+    {
+      Panel panel = this.panel;
+      if (panel!=null)
+        panel.removeAll(this.elements);
+      this.elements.clear();
+    }
   }
   
-  protected Vector<EElement> getElements()
+  protected void removeIf(Predicate<EElement> filter)
   {
-    return this.elements;
+    synchronized (this.elements)
+    {
+      this.elements.removeIf(filter);
+    }
+  }
+  
+  protected int size()
+  {
+    synchronized (this.elements)
+    {
+      return this.elements.size();
+    }
+  }
+  
+  protected EElement getElement(int i) 
+  {
+    synchronized (this.elements)
+    {
+      return this.elements.get(i);
+    }
+  }
+  
+  protected ArrayList<EElement> createElementList()
+  {
+    synchronized (this.elements)
+    {
+      return new ArrayList<>(this.elements);
+    }
+  }
+  
+  /**
+   * Iterates over the elements list in the given bounds
+   * @param fromInclusive - lower bound, index is included
+   * @param toExclusive - higher bound, index is excluded
+   * @param action - method with the parameters (int index, EElement element)
+   */
+  protected void forAllElements(int fromInclusive, int toExclusive, Consumer<EElement> action)
+  {
+    synchronized (this.elements)
+    {
+      if (fromInclusive < 0 || fromInclusive >= toExclusive || toExclusive > this.elements.size())
+        throw new IllegalArgumentException("iteration limits out of bounds.");
+      for(;fromInclusive < toExclusive; fromInclusive++)
+        action.accept(this.elements.get(fromInclusive));
+    }
+  }
+  
+  /**
+   * Iterates over the elements list in the given bounds
+   * @param fromInclusive - lower bound, index is included
+   * @param toExclusive - higher bound, index is excluded
+   * @param action - method with the parameters (int index, EElement element)
+   */
+  protected void forAllElements(Consumer<EElement> action)
+  {
+    synchronized (this.elements)
+    {
+      for(EElement el : this.elements)
+        action.accept(el);
+    }
+  }
+  
+  /**
+   * Return true if the element list is empty, otherwise false.
+   * @return
+   */
+  public final boolean isEmpty()
+  {
+    return this.elements.isEmpty();
   }
   
   public void addToPanel(Panel panel)
   {
-    if (panel==null || this.panel==panel) return;
-    this.panel = panel;
-    elements.forEach((el) -> {
-      this.panel.add(el).setPanel(this.panel);
-    });
-    this.panel.invalidate();
+    if (panel==null) return;
+    synchronized (this.elements)
+    {
+      if (this.panel==panel) return;
+      this.panel = panel;
+      panel.addAll(this.elements);
+      this.elements.forEach((el) -> {
+        el.setPanel(this.panel);
+      });
+      this.panel.invalidate();
+    }
   }
   
   public void removeFromPanel()
   {
-    if (this.panel==null) return;
-    for (int i=0; i<elements.size(); i++)
+    synchronized (this.elements)
     {
-      EElement el = elements.get(i);
-      el.setPanel(null);
-      this.panel.remove(el);
+      Panel panel = this.panel;
+      if (panel==null) return;
+      this.panel = null;
+
+      for (EElement el : this.elements)
+        el.setPanel(null);
+      panel.removeAll(this.elements);
+      panel.invalidate();
     }
-       
-    this.panel.invalidate();
-    this.panel = null;
   }
 
   public boolean isDisplayed()
@@ -125,7 +268,7 @@ public abstract class ElementContributor implements EEventListener
 
   public void removeEEventListener(EEventListener listener)
   {
-    this.listeners.add(listener);
+    this.listeners.remove(listener);
   }
 
   public void fireEEvent(EEvent ee)

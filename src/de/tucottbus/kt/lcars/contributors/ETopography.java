@@ -18,6 +18,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.EImage;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.ImageMeta;
 
@@ -503,7 +504,7 @@ public class ETopography extends ElementContributor
   protected void layout()
   {
     if (panel==null || pTx==null) return;
-    while (!getElements().isEmpty()) remove(getElements().get(0));
+    while (!isEmpty()) remove(0);
     
     Point tl = pToL(pBounds.x,pBounds.y+pBounds.height);
     Point br = pToL(pBounds.x+pBounds.width,pBounds.y);
@@ -538,6 +539,7 @@ public class ETopography extends ElementContributor
     }
     catch (IllegalStateException e)
     {
+      Log.warn("Illegal state found while layouting");
     }
     
     final ColorMeta transparent = new ColorMeta(0, true);

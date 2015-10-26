@@ -130,13 +130,14 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
   public AbstractList<Key> findKeys(int keyCode)
   {
     Vector<Key> keys = new Vector<Key>();
-    for (EElement e : getElements())
-      if (e.getData()!=null && (e.getData() instanceof Key))
+    forAllElements((el) -> {
+      if (el.getData()!=null && (el.getData() instanceof Key))
       {
-        Key key = (Key)e.getData();
+        Key key = (Key)el.getData();
         if (key.code==keyCode)
           keys.add(key);
-      }    
+      }          
+    });
     return keys;
   }
   
@@ -148,7 +149,7 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
   
   public boolean isKeySelected(int keyCode)
   {
-    for (EElement e : getElements())
+    for (EElement e : createElementList())
       if (e.getData()!=null && (e.getData() instanceof Key))
       {
         Key key = (Key)e.getData();
@@ -160,23 +161,23 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
   
   public void modify()
   {
-    
-    for (EElement e : getElements())
-      if (e.getData()!=null && (e.getData() instanceof Key))
+    forAllElements((el) -> {
+      if (el.getData()!=null && (el.getData() instanceof Key))
       {
-        Key key = (Key)e.getData();
+        Key key = (Key)el.getData();
         String label = key.label;
         if (label==null)
           label = String.valueOf(keyMap.map(key.code,getModifiers())).toUpperCase();
         if (label.equals(String.valueOf('\0')))
         {
-          e.setDisabled(true);
+          el.setDisabled(true);
           label="";
         }
         else
-          e.setDisabled(false);
-        e.setLabel(label);
+          el.setDisabled(false);
+        el.setLabel(label);
       }
+    });
     if (panel!=null) panel.invalidate();
   }
   

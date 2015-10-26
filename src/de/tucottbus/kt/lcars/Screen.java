@@ -16,6 +16,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -68,8 +69,13 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   /**
    * The panel this screen is displaying.
    */
-  protected IPanel panel;
-
+  private IPanel panel;
+  
+  /**
+   * Serial number of the panel.
+   */
+  private int panelId = -1;
+  
   /**
    * Full screen mode flag.
    */
@@ -78,7 +84,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   /**
    * The cache for the 2D rendering transform.
    */
-  protected boolean invalid;
+  protected AtomicBoolean invalid = new AtomicBoolean(false);
 
   /**
    * The screen timer. Blocks the screen saver and keeps the
@@ -322,7 +328,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    */
   protected boolean isScreenInvalid()
   {
-    return invalid;
+    return invalid.get();
   }
 
   /**
@@ -330,7 +336,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    */
   public synchronized void invalidateScreen()
   {
-    invalid = true;
+    invalid.set(true);
   }
 
   /**
@@ -405,12 +411,17 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         Log.err("Could not stop the previous panel while setting a new panel.", e);
       }
 
-    // Set and start new panel
-    if (this.panel != null && composite != null)
-      composite.clear();
+    
     this.panel = ipanel;
 
     if (ipanel != null)
+      this.panelId = ipanel.serialNo();
+    
+    // Set and start new panel
+    composite.clear();
+
+    if (ipanel != null)
+    {
       try
       {
         Log.info(
@@ -421,6 +432,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       {
         Log.err("...Panel start FAILED", e);
       }
+    }
   }
 
   // -- Implementation of the IScreen interface --
@@ -453,8 +465,13 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public void update(PanelData data, boolean incremental)
   {
+    if (panel != null && data.panelId != panelId) return;
+    
     // TODO: remove incremental
-    composite.applyUpdate(data, incremental);
+    synchronized (composite)
+    {
+      composite.applyUpdate(data, incremental);
+    }
     invalidateScreen();
   }
 
@@ -692,13 +709,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     {
       // Every 40 milliseconds...
       {
-        if (isScreenInvalid())
-        {
-          invalid = false;
+        if (invalid.getAndSet(false))
           invoke(() -> {
             composite.redraw();
           });
-        }
       }
 
       // Every second...

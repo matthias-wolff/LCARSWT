@@ -51,8 +51,10 @@ public class EImage extends EElement implements ImageObserver
     if ((infoflags & (ALLBITS|SOMEBITS)) >0)
     {
       Rectangle rect = img.getBounds();
-      getBounds().width  = rect.width;
-      getBounds().height = rect.height;
+      java.awt.Rectangle b = getBounds();
+      b.width = rect.width;
+      b.height = rect.height;
+      setBounds(b);
       invalidate(true);
     }
     return true;

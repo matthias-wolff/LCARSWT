@@ -236,7 +236,7 @@ public class ESpeechPostproc extends ElementContributor
     add(eFwd);
     
     // All elements instantiated until now are not to be cleared
-    clearSize = getElements().size();
+    clearSize = size();
   }
 
   /**
@@ -336,8 +336,8 @@ public class ESpeechPostproc extends ElementContributor
   
   protected void clear()
   {
-    while (getElements().size()>clearSize)
-      remove(getElements().get(clearSize));
+    while (size()>clearSize)
+      remove(getElement(clearSize));
   }
   
   protected void addMarker(int track, String label, int bar, float nll)

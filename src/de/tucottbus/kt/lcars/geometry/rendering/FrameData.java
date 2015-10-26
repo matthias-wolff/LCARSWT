@@ -4,14 +4,12 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Vector;
-import java.util.function.BiFunction;
 
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.elements.ElementData;
-import de.tucottbus.kt.lcars.elements.ElementState;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.util.Objectt;
@@ -29,9 +27,9 @@ class FrameData
   public static final String CLASSKEY = "FrmDt";
   
   private boolean selectiveRepaint;
-  private boolean incremental;
+  private final boolean incremental;
   private PanelState panelState;
-  private ArrayList<ElementData> elements;
+  private ElementData[] elements;
   private ArrayList<ElementData> elementsToPaint;
   private Shape dirtyArea;
   private boolean fullRepaint;
@@ -83,17 +81,6 @@ class FrameData
     return true;
   }
 
-  /**
-   * Applies changes from previous {@link FrameData} to this. See
-   * {@link #apply(FrameData, BiFunction)} method.
-   * 
-   * @param pred
-   */
-  public void apply(FrameData pred)
-  {
-    apply(pred, incremental ? ((edu, edp) -> edu.applyUpdate(edp, false))
-        : ((edu, __) -> ElementData.FLAG_MASK | ElementState.FLAG_MASK));
-  }
 
   /**
    * Applies missing data from the previous {@link FrameData} and calculates changes
@@ -106,13 +93,12 @@ class FrameData
    *          flag. The signature is similar to
    *          "Integer applyUpdate(ElementData this, ElementData pred);"
    */
-  private void apply(FrameData pred,
-      BiFunction<ElementData, ElementData, Integer> applyUpdate)
+  public void apply(FrameData pred)
   {
     if (pred == null)
     {
       dirtyArea = new Rectangle(getRenderWidth(), getRenderHeight());
-      elementsToPaint = elements;
+      elementsToPaint = new ArrayList<ElementData>(Arrays.asList(elements));
       bgChanged = updateBgImage(null);
       return;
     }
@@ -124,54 +110,60 @@ class FrameData
                     || !selectiveRepaint;
     //fullRepaint = true;
 
-    int elCount = elements.size();
+    int elCount = elements.length;
 
     // 1. Create a hash map of the current ElementData
-    HashMap<Long, ElementData> hPred = createHashMap(pred.elements);
-
-    for (ElementData edp : pred.elements)
-      hPred.put(edp.serialNo, edp);
-
+    HashMap<Long, ElementData> hPred = incremental ? createHashMap(pred.elements) : null;
+    if (incremental)
+      for (ElementData edp : pred.elements)
+        hPred.put(edp.serialNo, edp);
+    
     // 2. Complete the received ElementData with the present information
     //
     if (this.fullRepaint)
     {
-      elementsToPaint = elements;
-      for (ElementData edu : elements)
-        try
-        {
-          ElementData edp = hPred.get(edu.serialNo);
-          if (edp != null)
-            applyUpdate.apply(edu, edp);
-        } catch (Exception e)
-        {
-          Log.err("Update failed on element #" + edu.serialNo + ": "
-                  + e.getMessage());
-        }
+      elementsToPaint = new ArrayList<ElementData>(Arrays.asList(elements));
+      if (incremental)
+        for (ElementData edu : elements)
+          try
+          {
+            ElementData edp = hPred.get(edu.serialNo);
+            if (edp != null)
+              hPred.remove(edp);
+            edu.applyUpdate(edp);          
+          } catch (Exception e)
+          {
+            if (edu != null)
+              Log.err("Cannot apply frame update on " + edu + ".", e);
+            else
+              Log.err("Cannot apply frame update because of illegal null ElementData.");
+          }
       dirtyArea = new Area(new Rectangle(getRenderWidth(), getRenderHeight()));
     } else
     {
       ArrayList<ElementData> elementsToPaint = new ArrayList<ElementData>(elCount);
-      Vector<ElementData> elsWithoutChanges = new Vector<ElementData>(elCount);
+      ArrayList<ElementData> elsWithoutChanges = new ArrayList<ElementData>(elCount);
       Area dirtyArea = new Area();
 
       for (ElementData edu : elements)
         try
         {
-          ElementData edp = hPred.get(edu.serialNo);
-          if (edp != null)
-          {
-            if (applyUpdate.apply(edu, edp) == 0)
-            {
-              elsWithoutChanges.addElement(edu);
-              continue;
+            if (incremental) {
+              ElementData edp = hPred.get(edu.serialNo);
+              if (edp != null)
+                hPred.remove(edp);
+              
+              if (edu.applyUpdate(edp) == 0)
+              {
+                elsWithoutChanges.add(edu);
+                continue;                
+              }
+              
+              dirtyArea.add(new Area(edp.getBounds()));
             }
-            hPred.remove(edp);
-            dirtyArea.add(new Area(edp.getBounds()));
-          }
+            dirtyArea.add(new Area(edu.getBounds()));
+            elementsToPaint.add(edu);
 
-          dirtyArea.add(new Area(edu.getBounds()));
-          elementsToPaint.add(edu);
         } catch (Exception e)
         {
           Log.err("Update failed on element #" + edu.serialNo + ": "
@@ -222,7 +214,7 @@ class FrameData
       {
         ElementData thisEl = hThis.get(predEl.serialNo);
         if (thisEl == null) continue;
-        thisEl.applyUpdate(predEl, false);
+        thisEl.applyUpdate(predEl);
         if (thisEl.getMissing() == 0)
         {
           hThis.remove(thisEl.serialNo);
@@ -239,10 +231,10 @@ class FrameData
    * @return
    */
   private static HashMap<Long, ElementData> createHashMap(
-      ArrayList<ElementData> elements)
+      ElementData[] elements)
   {
     HashMap<Long, ElementData> result = new HashMap<Long, ElementData>(
-        elements.size());
+        elements.length);
     for (ElementData edp : elements)
       result.put(edp.serialNo, edp);
     return result;
@@ -254,10 +246,10 @@ class FrameData
    * @return
    */
   private static HashMap<Long, ElementData> createHashMapOnlyIncomplete(
-      ArrayList<ElementData> elements)
+      ElementData[] elements)
   {
     HashMap<Long, ElementData> result = new HashMap<Long, ElementData>(
-        elements.size());
+        elements.length);
     for (ElementData edu : elements)
       if (edu.getMissing() != 0)
         result.put(edu.serialNo, edu);

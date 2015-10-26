@@ -1,7 +1,6 @@
 package de.tucottbus.kt.lcars;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ElementData;
@@ -15,19 +14,30 @@ import de.tucottbus.kt.lcars.elements.ElementData;
 public class PanelData implements Serializable
 {
   /**
-   * The default serial version ID. 
+   * The default serial version UID. 
    */
-  private static final long serialVersionUID = 1L;
-
+  private static final long serialVersionUID = -7703907295943231273L;
+  
+  /**
+   * The serial number of the panel that is associated to this {@link PanelData}.
+   */
+  public final long panelId;
+  
   /**
    * The panel state.
    */
-  public PanelState panelState;
+  public final PanelState panelState;
   
   /**
    * The rendering data of the {@linkplain EElement LCARS GUI elements} on the panel.
    */
-  public ArrayList<ElementData> elementData;
+  public final ElementData[] elementData;
+  
+  public PanelData(IPanel panel, PanelState state, ElementData[] elementData) {
+    this.panelId = panel.serialNo();
+    this.panelState = state;
+    this.elementData = elementData;
+  }
   
   @Override
   public String toString() {

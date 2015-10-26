@@ -632,23 +632,24 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
 
   protected void selectTrack(AudioTrack track)
   {
+    final AudioPlayer player = AudioPlayer.getInstance();
     switch (trackMode)
     {
     case 1:
       // Next
       track.setExcluded(false);
-      if (!AudioPlayer.getInstance().isPlaying())
+      if (!player.isPlaying())
         try
         {
-          AudioPlayer.getInstance().setCurrentTrack(track);
-          AudioPlayer.getInstance().play();
+          player.setCurrentTrack(track);
+          player.play();
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          Log.err("Cannot play track " + track + ".", e);
         }
       else
-        AudioPlayer.getInstance().setNextTrack(/*player.getNextTrack()==track?null:*/track);
+        player.setNextTrack(/*player.getNextTrack()==track?null:*/track);
       break;
     case 2:
       // Exclude
@@ -657,15 +658,15 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     default:
       // Current
       track.setExcluded(false);
-      AudioPlayer.getInstance().stop();
+      player.stop();
       try
       {
-        AudioPlayer.getInstance().setCurrentTrack(track);
-        AudioPlayer.getInstance().play();
+        player.setCurrentTrack(track);
+        player.play();
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+        Log.err("Cannot play track " + track + ".", e);
       }
       break;
     }

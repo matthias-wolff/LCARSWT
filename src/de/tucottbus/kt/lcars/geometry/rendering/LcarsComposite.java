@@ -83,20 +83,18 @@ public class LcarsComposite extends Composite implements PaintListener
    */
   public void applyUpdate(PanelData data, boolean incremental)
   {
-    FrameData nextContext;
-    synchronized (this)
-    {
-      nextContext = FrameData.create(data, incremental, this.selectiveRepaint);    
-      nextContext.apply(context);
-      context = nextContext;
-    }
-    
-    Image bg = nextContext.isBgChanged() ? nextContext.getBackgroundImage().getImage() : null;
-    display.asyncExec(() -> {
-      if (nextContext.isBgChanged())
-        setBackgroundImage(bg);
-    });
+    FrameData nextContext = FrameData.create(data, incremental, this.selectiveRepaint);    
+    nextContext.apply(context);
+    context = nextContext;
     onUpdate();
+    
+    if (nextContext.isBgChanged())
+    {      
+      Image bg = nextContext.isBgChanged() ? nextContext.getBackgroundImage().getImage() : null;
+      display.asyncExec(() -> {
+        setBackgroundImage(bg);
+      });
+    }
   }
   
   /**
@@ -111,6 +109,7 @@ public class LcarsComposite extends Composite implements PaintListener
     GC gc = e.gc;
     onPaint();
     FrameData context = this.context;
+    
     if (context == null) // null -> reset
     {
       if (scale.x != 1 || scale.y != 1)
@@ -140,13 +139,17 @@ public class LcarsComposite extends Composite implements PaintListener
     try
     {
       for (ElementData el : context.getElementsToPaint())
-        el.render2D(gc, state);      
+      {
+        if (el.serialNo == -1)
+          Log.debug(el.toString());
+        el.render2D(gc, state);
+      }
     } catch (Throwable ex)
     {
       Log.err("error drawing elements to the screen", ex);
     }
-  }
-
+  }  
+  
   /**
    * Clears the painter and fills the screen with the default background color (
    * {@value #DEFAULT_BG_COLOR}).

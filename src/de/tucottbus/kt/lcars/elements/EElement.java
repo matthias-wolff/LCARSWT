@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import org.jfree.util.Log;
@@ -40,7 +41,7 @@ public abstract class EElement
   public static final int GEO_UPDATED   = 0x0020;
   
   // -- Static fields --
-  private static long serialNumber     = 0;
+  private static final AtomicLong serialNumber     = new AtomicLong(0);
 
   // -- Fields --
   ElementData data;
@@ -79,8 +80,7 @@ public abstract class EElement
   {
     this.panel         = panel;
     this.label         = label;
-    this.data          = new ElementData(EElement.serialNumber++);
-    this.data.state    = new ElementState(new Rectangle(x,y,w,h),style);
+    this.data          = new ElementData(serialNumber.getAndIncrement(), new Rectangle(x,y,w,h),style);
     //this.data.geometry = null;
   }
   
@@ -114,7 +114,7 @@ public abstract class EElement
    */
   public void setBounds(Rectangle bounds)
   {
-    synchronized (data.state)
+    synchronized (data)
     {
       //if(Objectt.equals(bounds, data.state.getBounds())) return;
       data.state.setBounds(bounds);
@@ -830,15 +830,20 @@ public abstract class EElement
    * @see #getPanel()
    */
   public synchronized void setPanel(Panel panel)
-  {    
+  {
+    if (this.panel == panel) return;
     this.panel = panel;
+    if (panel == null) return;
     data.state.setChanged();
     geoState |= GEO_RECOMPUTE;
   }
   
   @Override
   public String toString() {
-    return this.getClass().getSimpleName()+"#"+data.serialNo + (label != null ? ",label=\""+label + "\"" : "");
+    Rectangle b = data.state.getBounds();
+    return this.getClass().getSimpleName()+"#"+data.serialNo
+        + (b != null ? " bounds=("+b.x + ","+b.y + "," + b.width + "," + b.height + ")" : "")
+        + (label != null ? " label=\""+label + "\"" : "");
   }
   
   public boolean checkValidation() {
@@ -871,10 +876,6 @@ public abstract class EElement
   
   public long getSerialNo() {
     return data.serialNo;
-  }
-  
-  public boolean isGeometryValid() {
-    return data.isGeometryValid();
   }
 }
 

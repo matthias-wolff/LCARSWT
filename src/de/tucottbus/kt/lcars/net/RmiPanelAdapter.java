@@ -159,6 +159,13 @@ implements IPanel, IRmiPanelAdapterRemote
   {
     panel.panelSelectionDialog();
   }
+
+  @Override
+  public int serialNo()
+  {
+    // TODO Auto-generated method stub
+    return (panel != null) ? panel.serialNo : -1;
+  }
 }
 
 // EOF

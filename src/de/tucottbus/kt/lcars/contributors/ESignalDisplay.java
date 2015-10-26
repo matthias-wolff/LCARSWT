@@ -1,9 +1,9 @@
 package de.tucottbus.kt.lcars.contributors;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -87,7 +87,7 @@ public class ESignalDisplay extends ElementContributor
   public synchronized void layout()
   {
     // Remove all current elements
-    getElements().removeAllElements();
+    removeAll();
 
     // The Samples
     if ((mode&MODE_NOSAMPLES)==0)
@@ -213,7 +213,7 @@ public class ESignalDisplay extends ElementContributor
   {
     if (sample<0 || sample>=sampleCount) return;
     if ((mode&MODE_NOSAMPLES)!=0) return;
-    EElement el = getElements().get(sample);
+    EElement el = getElement(sample);
     Rectangle bounds = el.getBounds();
     int min = ampToDisplay((int)value.min);
     int max = ampToDisplay((int)value.max);
@@ -226,7 +226,7 @@ public class ESignalDisplay extends ElementContributor
   @Override
   public void addToPanel(Panel panel)
   {
-    if (getElements().isEmpty()) layout();
+    if (isEmpty()) layout();
     super.addToPanel(panel);
     //reset();
     animate();
@@ -264,7 +264,7 @@ public class ESignalDisplay extends ElementContributor
     curSample++;
     if (curSample>=sampleCount) curSample=0;
     
-    Vector<EElement> els = getElements();
+    ArrayList<EElement> els = createElementList();
     els.get(curSample).setColor(ColorMeta.WHITE);
     for (int i=0; i<sampleCount; i++)
     {
@@ -306,7 +306,7 @@ public class ESignalDisplay extends ElementContributor
   {
     if (sample<0 || sample>=sampleCount) return null;
     if ((mode&MODE_NOSAMPLES)!=0) return null;
-    return getElements().get(sample);
+    return getElement(sample);
   }
   
   class AnimationTask extends TimerTask
