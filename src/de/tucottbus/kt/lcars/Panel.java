@@ -24,6 +24,7 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
+import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.logging.Log;
@@ -764,7 +765,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   
   private void doAdd(EElement el)
   {
-    doRemove(el);
+    boolean removed = doRemove(el);
+    if (!removed && (el instanceof ERect) && "CAPTAIN'S LOUNGE".equals(el.getLabel()))
+      Log.debug("Add El. " + el);
+    
+    
     addedElements.add(el);
   }
   
@@ -792,10 +797,16 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * <em>NOT SYNCHRONIZED</em> variant of {@link Panel#remove(EElement)}
    * @param el
    */
-  private void doRemove(EElement el)
+  private boolean doRemove(EElement el)
   {
-    if (!elements.remove(el))
-      addedElements.remove(el);
+    return elements.remove(el) || addedElements.remove(el);
+  }
+  
+  private boolean ddoRemove(EElement el)
+  {
+    if ("CAPTAIN'S LOUNGE".equals(el.getLabel()))
+      Log.debug("Remove El. " + el);
+    return doRemove(el);
   }
   
   /**
@@ -805,11 +816,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * @param el
    *          the element
    */
-  public void remove(EElement el)
+  public boolean remove(EElement el)
   {
     synchronized (elements)
     {
-      doRemove(el);
+      return ddoRemove(el);
     }
   }
 
@@ -825,7 +836,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     synchronized (this.elements)
     {
       for (EElement el : elements)
-        doRemove(el);
+        ddoRemove(el);
     }
   }
 
@@ -840,7 +851,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     synchronized (this.elements)
     {
       for (EElement el : remove)
-        doRemove(el);
+        ddoRemove(el);
       for (EElement el : add)
         doAdd(el);
     }
@@ -1172,7 +1183,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     boolean invalid = screenInvalid.getAndSet(false);
     if (!invalid) return;
 
-
     // Decide on incremental update
 
     boolean incremental = !(getScreen() instanceof Screen);
@@ -1194,6 +1204,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       for (EElement el : addedElements)
         els[i++] = el.getUpdateData(false);
       
+      if (Log.DebugMode)
+        for (EElement el : addedElements)
+          if (elements.contains(el))
+            Log.err("Double existing element: " + el);
+      
       elements.addAll(addedElements);
       addedElements.clear();
     }
@@ -1207,7 +1222,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
     catch (RemoteException e)
     {
-      Log.err("Error while sending update to screen.", e);
+      Log.err("Cannot sending update to screen.", e);
     }
     time = System.nanoTime() - time;
     loadStat.add((int) (time / 400000));
@@ -1219,10 +1234,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void start()
   {
     if (runt == null)
-    {
-      runt = new Timer("Panel timer", true);
-      runt.scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
-    }
+      (runt = new Timer("Panel timer", true)).scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
     if (getSpeechEngine() != null)
       getSpeechEngine().addSpeechEventListener(this);
     invalidate();

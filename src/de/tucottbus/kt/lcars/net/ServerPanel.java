@@ -18,6 +18,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -184,6 +185,7 @@ public class ServerPanel extends Panel
               }
               catch (RemoteException e1)
               {
+                Log.err("Cannot exit peer.", e1);
               }
             }
           eCscShutdown.setData(null);
@@ -395,12 +397,6 @@ public class ServerPanel extends Panel
           eCscLd.setLabel("SCR LOAD");
           eCscSize.setLabel(null);
         }
-        try
-        {
-        }
-        catch (Exception e)
-        {
-        }
         eCscPnlUrl.setLabel(rpa.getRmiUrl());
         eCscScrUrl.setLabel(rpa.getRmiPeerUrl());
       }
@@ -457,7 +453,10 @@ public class ServerPanel extends Panel
         {
           return (RmiPanelAdapter)e.getData(); 
         }
-        catch (Exception e1){}
+        catch (Exception e1)
+        {
+          Log.err("Cannot get selected panel adapter.", e1);
+        }
     return null;
   }
   

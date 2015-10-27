@@ -518,16 +518,19 @@ public class EElementArray extends ElementContributor implements EEventListener
         count = this.cols * this.rows;
 
       final int fromIn = first;
-      final int toEx = first + Math.min(count, cols * rows);
+      final int toEx = Math.min(first + Math.min(count, cols * rows), n);
 
-      for (int i = 0; i < n; i++)
-        if (i >= fromIn && i < toEx)
-        {
-          EElement el = eList.get(i);
-          el.clearTouch();
-          add(el, false).setVisible(true);
-        } else
-          eList.get(i).setVisible(false);
+      int i = 0;
+      for (;i < fromIn; i++)
+        eList.get(i).setVisible(false);      
+      for (;i < toEx; i++)
+      {
+        EElement el = eList.get(i);
+        el.clearTouch();
+        add(el, false).setVisible(true);
+      }      
+      for (;i < n; i++)
+        eList.get(i).setVisible(false);
 
       // GUI reflection
       EElement e;
@@ -540,7 +543,7 @@ public class EElementArray extends ElementContributor implements EEventListener
       if ((e = eNext) != null)
       {
         e.clearTouch();
-        e.setDisabled(first >= eList.size() - rows * cols);
+        e.setDisabled(first >= n - rows * cols);
       }
       if ((p = panel) != null)
         p.invalidate();

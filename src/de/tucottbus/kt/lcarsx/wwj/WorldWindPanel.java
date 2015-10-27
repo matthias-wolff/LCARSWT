@@ -25,6 +25,7 @@ import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcarsx.wwj.contributors.EArrayControls;
 import de.tucottbus.kt.lcarsx.wwj.contributors.ENavigation;
@@ -119,7 +120,7 @@ public abstract class WorldWindPanel extends MainPanel
         } catch (ClassNotFoundException | RemoteException e)
         {
           // TODO Auto-generated catch block
-          e.printStackTrace();
+          Log.err("Cannot reset panel on screen.", e);
         }
       }
     });
@@ -215,9 +216,9 @@ public abstract class WorldWindPanel extends MainPanel
           out.close();
           Runtime.getRuntime().exec("notepad.exe "+temp.getAbsolutePath());
         }
-        catch (IOException e)
+        catch (IOException|SecurityException|IllegalArgumentException e)
         {
-          e.printStackTrace();
+          Log.err("Cannot show file.", e);
         }
       }
     });
@@ -388,7 +389,7 @@ public abstract class WorldWindPanel extends MainPanel
     }
     catch (Exception e) 
     {
-      e.printStackTrace();
+      Log.err("Cannot remove world wind from panel.", e);
     }
     super.stop();
   }
@@ -646,7 +647,7 @@ public abstract class WorldWindPanel extends MainPanel
             setBarMode(BARMODE_NAVI);
           } catch (InstantiationException | IllegalAccessException e)
           {
-            e.printStackTrace();
+            Log.err("Cannot set orbit.", e);
           }
         }
       });

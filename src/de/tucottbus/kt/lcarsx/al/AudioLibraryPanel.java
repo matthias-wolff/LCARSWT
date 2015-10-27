@@ -602,7 +602,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          Log.err("Cannot add track to list. " + trackFile, e);
         }
       Collections.sort(trackList, new Comparator<AudioTrack>()
       {
