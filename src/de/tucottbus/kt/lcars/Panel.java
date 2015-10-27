@@ -24,7 +24,6 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
-import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.logging.Log;
@@ -765,11 +764,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   
   private void doAdd(EElement el)
   {
-    boolean removed = doRemove(el);
-    if (!removed && (el instanceof ERect) && "CAPTAIN'S LOUNGE".equals(el.getLabel()))
-      Log.debug("Add El. " + el);
-    
-    
+    doRemove(el);
     addedElements.add(el);
   }
   
@@ -802,13 +797,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     return elements.remove(el) || addedElements.remove(el);
   }
   
-  private boolean ddoRemove(EElement el)
-  {
-    if ("CAPTAIN'S LOUNGE".equals(el.getLabel()))
-      Log.debug("Remove El. " + el);
-    return doRemove(el);
-  }
-  
   /**
    * Removes an LCARS GUI element from the panel. This does <em>not</em> trigger
    * a repaint of the panel!
@@ -820,7 +808,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     synchronized (elements)
     {
-      return ddoRemove(el);
+      return doRemove(el);
     }
   }
 
@@ -836,7 +824,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     synchronized (this.elements)
     {
       for (EElement el : elements)
-        ddoRemove(el);
+        doRemove(el);
     }
   }
 
@@ -851,7 +839,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     synchronized (this.elements)
     {
       for (EElement el : remove)
-        ddoRemove(el);
+        doRemove(el);
       for (EElement el : add)
         doAdd(el);
     }

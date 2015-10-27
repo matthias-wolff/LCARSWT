@@ -485,7 +485,6 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   protected void showItemsInt(int first, int count)
   {
-
     // Remove old elements
     final EElement eTitle = this.eTitle;
     removeIf((el) -> {

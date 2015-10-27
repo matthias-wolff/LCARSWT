@@ -170,11 +170,32 @@ public abstract class ElementContributor implements EEventListener
     }
   }
   
+  /**
+   * Removes those elements from this {@link ElementConstributor} and from the panel where the filter returns true.
+   * @param filter - mapping of EElement to boolean (see {@link Predicate})
+   */
   protected void removeIf(Predicate<EElement> filter)
   {
     synchronized (this.elements)
     {
-      this.elements.removeIf(filter);
+      Panel panel = this.panel;
+      Iterator<EElement> it = this.elements.iterator();
+      
+      if (panel != null)
+        while(it.hasNext())
+        {
+          EElement el = it.next();
+          if (!filter.test(el)) return;
+          it.remove();          
+          panel.remove(el);
+        }
+      else
+        while(it.hasNext())
+        {
+          EElement el = it.next();
+          if (!filter.test(el)) return;
+          it.remove();
+        }
     }
   }
   
