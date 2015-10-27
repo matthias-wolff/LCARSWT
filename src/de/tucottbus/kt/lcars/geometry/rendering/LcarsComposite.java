@@ -29,7 +29,7 @@ public class LcarsComposite extends Composite implements PaintListener
   /**
    * Number of updates between two debug logs 
    */
-  public static final int DEBUG_INTERVAL = 500; // 1500 updates ~ 60 sec
+  public static final int DEBUG_INTERVAL = 1500; // 1500 updates ~ 60 sec
 
   /**
    * Count of updates between to paints

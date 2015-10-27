@@ -839,14 +839,6 @@ public abstract class EElement
     geoState |= GEO_RECOMPUTE;
   }
   
-  @Override
-  public String toString() {
-    Rectangle b = data.state.getBounds();
-    return this.getClass().getSimpleName()+"#"+data.serialNo
-        + (b != null ? " bounds=("+b.x + ","+b.y + "," + b.width + "," + b.height + ")" : "")
-        + (label != null ? " label=\""+label + "\"" : "");
-  }
-  
   public boolean checkValidation() {
     Boolean[] valid = {true};
     Consumer<String> invalid = (msg) -> {
@@ -875,9 +867,19 @@ public abstract class EElement
     return valid[0];   
   }
   
-  public final long getSerialNo() {
+  public final long getSerialNo()
+  {
     return serialNo;
   }
+
+  @Override
+  public String toString()
+  {
+    Rectangle b = data.state.getBounds();
+    return this.getClass().getSimpleName()+"#"+serialNo
+        + (b != null ? " bounds=("+b.x + ","+b.y + "," + b.width + "," + b.height + ")" : "")
+        + (label != null ? " label=\""+label + "\"" : "");
+  }  
 }
 
 // EOF

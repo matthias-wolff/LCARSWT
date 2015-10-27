@@ -296,43 +296,47 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     
     // Display current and next track
     EElementArray ea = getPlaylistElementArray();
-    if (ea!=null)      
-      for (int i=0; i<ea.getItemCount(); i++)
+    if (ea==null) return;
+    
+    AudioPlayer player = AudioPlayer.getInstance();
+    
+    if (player == null || !player.isPlaying())
+    {
+      ea.forAllElements(el ->
       {
-        EElement   e  = ea.getItemElement(i);
-        if (!(e.getData() instanceof AudioTrack)) continue;
-        AudioTrack at = (AudioTrack)e.getData();
-        if (AudioPlayer.getInstance()!=null && AudioPlayer.getInstance().isPlaying())
+        if (!(el.getData() instanceof AudioTrack)) return;
+        el.setSelected(false);
+        el.setBlinking(false);
+        el.setAlpha(((AudioTrack)el.getData()).isExcluded()?0.33f:1f);
+      });
+      return;
+    }
+    
+    ea.forAllElements((i, e) ->
+    {
+      if (!(e.getData() instanceof AudioTrack)) return;
+      AudioTrack at = (AudioTrack)e.getData();
+      if (player.getCurrentTrack()==at && at.isExcluded())
+        player.stop();
+      if (player.getNextTrack()==at && at.isExcluded())
+        player.setNextTrack(null);
+      
+      e.setSelected(player.getCurrentTrack()==at);
+      e.setBlinking(player.getNextTrack()   ==at);
+      
+      // - Automatically set next track
+      if (player.getCurrentTrack()==at && player.getNextTrack()==null)      
+        ea.forAllElements(i+1, e2 ->
         {
-          if (AudioPlayer.getInstance().getCurrentTrack()==at && at.isExcluded())
-            AudioPlayer.getInstance().stop();
-          if (AudioPlayer.getInstance().getNextTrack()==at && at.isExcluded())
-            AudioPlayer.getInstance().setNextTrack(null);
-          
-          e.setSelected(AudioPlayer.getInstance().getCurrentTrack()==at);
-          e.setBlinking(AudioPlayer.getInstance().getNextTrack()   ==at);
-          
-          // - Automatically set next track
-          if (AudioPlayer.getInstance().getCurrentTrack()==at && AudioPlayer.getInstance().getNextTrack()==null)
-            for (int j=i+1; j<ea.getItemCount(); j++)
-            {
-              Object data = ea.getItemElement(j).getData();
-              if (!(data instanceof AudioTrack)) continue;              
-              AudioTrack at2 = (AudioTrack)data;
-              if (!at2.isExcluded())
-              {
-                AudioPlayer.getInstance().setNextTrack(at2);
-                break;
-              }
-            }
-        }
-        else
-        {
-          e.setSelected(false);
-          e.setBlinking(false);
-        }
-        e.setAlpha(at.isExcluded()?0.33f:1f);
-      }
+          Object data = e2.getData();
+          if (!(data instanceof AudioTrack) || ((AudioTrack)data).isExcluded())
+            return false;              
+    
+          player.setNextTrack((AudioTrack)data);
+          return true;
+        });
+      e.setAlpha(at.isExcluded()?0.33f:1f);
+    });    
   }
 
   @Override

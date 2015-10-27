@@ -8,7 +8,9 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import de.tucottbus.kt.lcars.Panel;
@@ -223,7 +225,7 @@ public abstract class ElementContributor implements EEventListener
    * @param toExclusive - higher bound, index is excluded
    * @param action - method with the parameters (int index, EElement element)
    */
-  protected void forAllElements(int fromInclusive, int toExclusive, Consumer<EElement> action)
+  public void forAllElements(int fromInclusive, int toExclusive, Consumer<EElement> action)
   {
     synchronized (this.elements)
     {
@@ -237,15 +239,50 @@ public abstract class ElementContributor implements EEventListener
   /**
    * Iterates over the elements list in the given bounds
    * @param fromInclusive - lower bound, index is included
-   * @param toExclusive - higher bound, index is excluded
-   * @param action - method with the parameters (int index, EElement element)
+   * @param pradicate - method with the parameters (EElement element) and boolean as return type to break loop if true
    */
-  protected void forAllElements(Consumer<EElement> action)
+  public void forAllElements(int fromInclusive, Function<EElement, Boolean> action)
+  {
+    synchronized (this.elements)
+    {
+      int toExclusive = this.elements.size();
+      if (fromInclusive >= toExclusive) return;
+      if (fromInclusive < 0)
+        throw new IllegalArgumentException("iteration limits out of bounds.");
+      for(; fromInclusive < toExclusive; fromInclusive++)
+        if(action.apply(this.elements.get(fromInclusive)))
+          break;
+    }
+  }
+  
+  /**
+   * Iterates over the elements list in the given bounds
+   * @param fromInclusive - lower bound, index is included
+   * @param toExclusive - higher bound, index is excluded
+   * @param action - method with the parameters (EElement element)
+   */
+  public void forAllElements(Consumer<EElement> action)
   {
     synchronized (this.elements)
     {
       for(EElement el : this.elements)
         action.accept(el);
+    }
+  }
+  
+  /**
+   * Iterates over the elements list in the given bounds
+   * @param fromInclusive - lower bound, index is included
+   * @param toExclusive - higher bound, index is excluded
+   * @param action - method with the parameters (int index, EElement element)
+   */
+  public void forAllElements(BiConsumer<Integer, EElement> action)
+  {
+    synchronized (this.elements)
+    {
+      Integer i = 0;
+      for(EElement el : this.elements)
+        action.accept(i++, el);
     }
   }
   
