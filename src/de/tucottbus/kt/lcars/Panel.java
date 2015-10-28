@@ -11,6 +11,7 @@ import java.rmi.RemoteException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -85,7 +86,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   /**
    * The set of elements known by the screen
    */
-  private final ArrayList<EElement> addedElements;
+  private final HashSet<EElement> addedElements;
 
   /**
    * The panel state.
@@ -168,7 +169,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     this.thisPanel      = this;
     this.iscreen        = iscreen;
     this.elements       = new ArrayList<EElement>(200);
-    this.addedElements  = new ArrayList<EElement>(20);
+    this.addedElements  = new HashSet<EElement>(20);
     this.state          = new PanelState(getDimension());
     this.keyListeners   = new Vector<KeyListener>();
     this.loadStat       = new LoadStatistics(25);
@@ -764,8 +765,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   
   private void doAdd(EElement el)
   {
-    doRemove(el);
-    addedElements.add(el);
+    if (!doRemove(el))
+      addedElements.add(el);
+    elements.add(el);
   }
   
   /**
@@ -794,7 +796,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   private boolean doRemove(EElement el)
   {
-    return elements.remove(el) || addedElements.remove(el);
+    addedElements.remove(el);
+    return elements.remove(el);
   }
   
   /**
@@ -1185,19 +1188,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     ElementData[] els;
     synchronized (elements)
     {
-      els = new ElementData[elements.size()+addedElements.size()];
+      els = new ElementData[elements.size()];
       int i = 0;
       for (EElement el : elements)
-        els[i++] = el.getUpdateData(incremental);
-      for (EElement el : addedElements)
-        els[i++] = el.getUpdateData(false);
-      
-      if (Log.DebugMode)
-        for (EElement el : addedElements)
-          if (elements.contains(el))
-            Log.err("Double existing element: " + el);
-      
-      elements.addAll(addedElements);
+        els[i++] = el.getUpdateData(incremental && !addedElements.contains(el));
+            
       addedElements.clear();
     }
 
