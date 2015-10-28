@@ -112,6 +112,14 @@ public final class ColorMeta implements Serializable
     HasAlpha = true;
   }
   
+  public ColorMeta(ColorMeta color, int alpha) {
+    Red = color.Red;
+    Green = color.Green;
+    Blue = color.Blue;
+    Alpha = alpha <= 0 ? 0 : (alpha >= 1 ? -1 : (byte)alpha);
+    HasAlpha = true;
+  }
+  
   public ColorMeta(int argb, boolean hasTransparence) {
     Red = (byte)((argb >> R_SHIFT) & 0xFF);
     Green = (byte)((argb >> G_SHIFT) & 0xFF);
