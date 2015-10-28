@@ -97,6 +97,17 @@ public abstract class EElement
   }
   
   /**
+   * Returns the {@link Area area} covered by all background geometries.
+   */
+  public Area getArea()
+  {
+    validateGeometry();
+    Area result = new Area();
+    data.getArea(result);
+    return result;
+  }
+  
+  /**
    * Returns the rectangular bounds of this LCARS GUI element.
    * 
    * @see #setBounds(Rectangle)

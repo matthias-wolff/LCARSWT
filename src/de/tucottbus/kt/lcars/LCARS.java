@@ -221,8 +221,6 @@ public class LCARS implements ILcarsRemote
     });
   }
   
-    
-  
   public static void setPanelDimension(Dimension dim)
   {
     LCARS.panelDim = dim==null?new Dimension(1920,1080):dim;

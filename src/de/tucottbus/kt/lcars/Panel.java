@@ -64,11 +64,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public final int serialNo;
 
   /**
-   * This panel for nested classes.
-   */
-  protected Panel thisPanel;
-
-  /**
    * The screen this panel is running on.
    */
   private IScreen iscreen;
@@ -118,7 +113,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * Flag indicating that the screen needs to be redrawn.
    */
   private final AtomicBoolean screenInvalid;
-
+  
   private EMessageBox eMsgBox;
   private EPanelSelector ePnlSel;
   private ELabel eTitle;
@@ -165,16 +160,15 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public Panel(IScreen iscreen)
   {
-    this.serialNo       = serialGenCount.getAndIncrement();
-    this.thisPanel      = this;
-    this.iscreen        = iscreen;
-    this.elements       = new ArrayList<EElement>(200);
-    this.addedElements  = new HashSet<EElement>(20);
-    this.state          = new PanelState(getDimension());
-    this.keyListeners   = new Vector<KeyListener>();
-    this.loadStat       = new LoadStatistics(25);
-    this.touchEventSync = new Object();
-    this.screenInvalid  = new AtomicBoolean(true);
+    this.serialNo        = serialGenCount.getAndIncrement();
+    this.iscreen         = iscreen;
+    this.elements        = new ArrayList<EElement>(200);
+    this.addedElements   = new HashSet<EElement>(20);
+    this.state           = new PanelState(getDimension());
+    this.keyListeners    = new Vector<KeyListener>();
+    this.loadStat        = new LoadStatistics(25);
+    this.touchEventSync  = new Object();
+    this.screenInvalid   = new AtomicBoolean(true);
     LCARS.setPanelDimension(getDimension());
     init();
   }
@@ -1186,15 +1180,15 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
     // Make update data
     ElementData[] els;
+    int i = 0;
     synchronized (this.elements)
     {
       els = new ElementData[this.elements.size()];
-      int i = 0;
       for (EElement el : this.elements)
         els[i++] = el.getUpdateData(incremental && !this.addedElements.contains(el));
       this.addedElements.clear();
     }
-
+    
     PanelData data = new PanelData(this, state, els); // TODO: better make a
                                                       // copy of state?
     // Update screen
@@ -1236,7 +1230,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     // owner anymore, can cause inconsistent screen data
     runt.cancel();
   }
-
+  
   @Override
   public void processTouchEvents(TouchEvent[] events)
   {
@@ -1254,7 +1248,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       case TouchEvent.DOWN:
         ee.id = EEvent.TOUCH_DOWN;
         dragElement = ee.el = elementAt(ee.pt);
-
+        
         if (ee.el == null)
         {
           if (!isSilent())
