@@ -137,9 +137,8 @@ public abstract class EElement
    */
   public void setColor(ColorMeta color)
   {
-    if (de.tucottbus.kt.lcars.util.Objectt.equals(color, data.state.getColor())) return;
-    data.state.setColor(color);
-    invalidate(false);
+    if (data.state.setColor(color))
+      invalidate(false);
   }
 
   /**
@@ -214,9 +213,8 @@ public abstract class EElement
   {
     if (alpha<0) alpha=0;
     if (alpha>1) alpha=1;
-    if (data.state.getAlpha()==alpha) return;
-    data.state.setAlpha(alpha);
-    invalidate(false);
+    if(data.state.setAlpha(alpha))
+      invalidate(false);
   }
 
   //-- Style getters and setters --
@@ -240,8 +238,8 @@ public abstract class EElement
    */
   public void setStyle(int style)
   {
-    data.state.setStyle(style);
-    invalidate(false);
+    if(data.state.setStyle(style))
+      invalidate(false);
   }
 
   /**
@@ -261,9 +259,8 @@ public abstract class EElement
    */
   public void setBlinking(boolean blinking)
   {
-    if (isBlinking()==blinking) return;
-    data.state.setStyle(LCARS.ES_BLINKING,blinking);
-    invalidate(false);
+    if (data.state.setStyle(LCARS.ES_BLINKING,blinking))
+      invalidate(false);
   }
   
   /**
@@ -276,10 +273,8 @@ public abstract class EElement
    */
   public void setColorStyle(int style)
   {
-    int s = (data.state.getStyle()&~LCARS.ES_STYLE) | (style&LCARS.ES_STYLE);
-    if (s==data.state.getStyle()) return;
-    data.state.setStyle(s);
-    invalidate(false);
+    if(data.state.setStyle((data.state.getStyle()&~LCARS.ES_STYLE) | (style&LCARS.ES_STYLE)))
+      invalidate(false);
   }
   
   /**
@@ -780,7 +775,7 @@ public abstract class EElement
   }
 
   /**
-   * Recomputes the {@link ElementData#geometry geometry} if necessary. If the geometry is still valid.
+   * Recomputes the {@link ElementData#geometries geometry} if necessary. If the geometry is still valid.
    * 
    * @return the current geoState
    *
@@ -852,11 +847,11 @@ public abstract class EElement
     if (data == null)
       invalid.accept("data == null");
     else
-      if (data.geometry == null)
+      if (data.geometries == null)
         invalid.accept("data.geometry == null");
       else {
         int i = 0;
-        for(AGeometry g : data.geometry) {
+        for(AGeometry g : data.geometries) {
           if (g == null)
             invalid.accept("geometry["+i+"] == null");   
           i++;

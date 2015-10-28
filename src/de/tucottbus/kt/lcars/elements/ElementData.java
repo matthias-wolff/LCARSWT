@@ -16,7 +16,7 @@ import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.logging.Log;
 /**
  * The serializable data of an {@linkplain EElement LCARS GUI element}. An
- * element data instance stores the {@link #state} and the {@link #geometry} of
+ * element data instance stores the {@link #state} and the {@link #geometries} of
  * a GUI element. Element data instances are also used to transfer rendering
  * information from the {@linkplain Panel LCARS panel} to the {@linkplain Screen
  * screen}.
@@ -35,7 +35,7 @@ public final class ElementData implements Serializable
 
   /**
    * Bit in the return value of {@link #applyUpdate(ElementData)} indicating
-   * that the {@linkplain #geometry geometry} has been updated.
+   * that the {@link #geometries} has been updated.
    */
   public static final int GEOMETRY_FLAG = 0x01;
 
@@ -61,7 +61,7 @@ public final class ElementData implements Serializable
    * The graphical representation of the {@link EElement} described by this
    * instance.
    */
-  ArrayList<AGeometry> geometry;
+  ArrayList<AGeometry> geometries;
 
   /**
    * Area of this element.
@@ -81,7 +81,7 @@ public final class ElementData implements Serializable
   {
     this.serialNo = serialNo;
     this.state = state;
-    this.geometry = null;
+    this.geometries = null;
   }
 
   /**
@@ -93,9 +93,7 @@ public final class ElementData implements Serializable
    */
   public ElementData(EElement element, Rectangle bounds, int style)
   {
-    this.serialNo = element.getSerialNo();
-    this.state = new ElementState(bounds, style);
-    this.geometry = null;
+    this(element.getSerialNo(), new ElementState(bounds, style));
   }
 
 //  /**
@@ -128,7 +126,7 @@ public final class ElementData implements Serializable
       {
         try
         {
-          for (AGeometry gi : geometry)
+          for (AGeometry gi : geometries)
             if (!gi.isForeground())
               ar.add(gi.getArea());
           cachedArea = ar;
@@ -152,7 +150,7 @@ public final class ElementData implements Serializable
    * @param incremental
    *          Get copy for incremental or full update.
    * @param updateGeometry
-   *          Include {@link #geometry geometry} in the update (always included
+   *          Include {@link #geometries} in the update (always included
    *          if <code>incremental</code> is <code>false</code>).
    */
   public ElementData getUpdate(boolean incremental, boolean updateGeometry)
@@ -161,16 +159,16 @@ public final class ElementData implements Serializable
     if (updateGeometry || !incremental)
       try
       {
-        ArrayList<AGeometry> geometry = this.geometry;
-        other.geometry = new ArrayList<AGeometry>(geometry.size());
+        ArrayList<AGeometry> geometry = this.geometries;
+        other.geometries = new ArrayList<AGeometry>(geometry.size());
         for (AGeometry geom : geometry)
-          other.geometry.add(geom instanceof HeavyGeometry
+          other.geometries.add(geom instanceof HeavyGeometry
               ? ((HeavyGeometry<?>) geom).getUpdate(incremental) : geom);
       } catch (Exception e)
       {
         // TODO: synchronization problem, exception should never occur
         Log.err("Error while getting update of " + toString(), e);
-        other.geometry = null;
+        other.geometries = null;
       }
     return other;
   }
@@ -205,7 +203,7 @@ public final class ElementData implements Serializable
     // : "not null"));
     if (other == null)
     {
-      if (geometry == null)
+      if (geometries == null)
         throw new IllegalArgumentException("geometry required");
       if (state == null)
         throw new IllegalArgumentException("state required");
@@ -225,11 +223,11 @@ public final class ElementData implements Serializable
     } else
       ret |= state.setChanged(other.state.getChanged());
 
-    if (geometry == null)
+    if (geometries == null)
     {
-      if (other.geometry != null)
+      if (other.geometries != null)
       {
-        for (AGeometry geom : this.geometry = other.geometry)
+        for (AGeometry geom : this.geometries = other.geometries)
           if (geom instanceof HeavyGeometry)
             ((HeavyGeometry<?>) geom).update(true);
         this.cachedArea = other.cachedArea != null ? new Area(other.cachedArea)
@@ -260,7 +258,7 @@ public final class ElementData implements Serializable
     if (!state.isVisible())
       return;
     
-    Iterator<AGeometry> geoIt = geometry.iterator();
+    Iterator<AGeometry> geoIt = geometries.iterator();
     if (!geoIt.hasNext())
       return;
 
@@ -300,18 +298,18 @@ public final class ElementData implements Serializable
    */
   public Rectangle getBounds()
   {
-    if (geometry == null || geometry.isEmpty())
+    if (geometries == null || geometries.isEmpty())
       return state.getBounds();
-    Rectangle result = geometry.get(0).getBounds();
-    int n = geometry.size();
+    Rectangle result = geometries.get(0).getBounds();
+    int n = geometries.size();
     for (int i = 1; i < n; i++)
-      result.add(geometry.get(i).getBounds());
+      result.add(geometries.get(i).getBounds());
     return result;
   }
 
   public void onVisibilityChanged(boolean visible)
   {
-    for (AGeometry g : geometry)
+    for (AGeometry g : geometries)
       g.update(visible);
   }
 
@@ -319,7 +317,7 @@ public final class ElementData implements Serializable
   public String toString()
   {
     return this.getClass().getSimpleName() + "#" + serialNo
-        + (state != null && state.isVisible() ? " " : "!INVISIBLE ") + geometry;
+        + (state != null && state.isVisible() ? " " : "!INVISIBLE ") + geometries;
   }
 
   /**
@@ -328,16 +326,16 @@ public final class ElementData implements Serializable
    */
   public int getMissing()
   {
-    return geometry == null
+    return geometries == null
         ? (state == null ? ElementState.FLAG_MASK | GEOMETRY_FLAG : GEOMETRY_FLAG) 
         : (state == null ? ElementState.FLAG_MASK                 : 0);
   }
   
   public void updateGeometries(ArrayList<AGeometry> geos)
   {
-    geometry = (geos != null) ? new ArrayList<AGeometry>(geos) : null;
+    geometries = (geos != null) ? new ArrayList<AGeometry>(geos) : null;
     cachedArea = null;
-  }
+  }  
 }
 
 // EOF

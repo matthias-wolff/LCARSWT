@@ -1186,14 +1186,13 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
     // Make update data
     ElementData[] els;
-    synchronized (elements)
+    synchronized (this.elements)
     {
-      els = new ElementData[elements.size()];
+      els = new ElementData[this.elements.size()];
       int i = 0;
-      for (EElement el : elements)
-        els[i++] = el.getUpdateData(incremental && !addedElements.contains(el));
-            
-      addedElements.clear();
+      for (EElement el : this.elements)
+        els[i++] = el.getUpdateData(incremental && !this.addedElements.contains(el));
+      this.addedElements.clear();
     }
 
     PanelData data = new PanelData(this, state, els); // TODO: better make a

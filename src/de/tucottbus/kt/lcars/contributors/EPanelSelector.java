@@ -64,7 +64,14 @@ public class EPanelSelector extends EMessageBox
     {
       public void touchDown(EEvent ee)
       {
-        try { panel.getScreen().exit(); } catch (RemoteException e) {}
+        try
+        {
+          panel.getScreen().exit();
+        }
+        catch (RemoteException e)
+        {
+          Log.err("Cannot exit screen.", e);
+        }
         removeFromPanel();
       }
     });
@@ -102,7 +109,7 @@ public class EPanelSelector extends EMessageBox
             }
             catch (ClassNotFoundException e)
             {
-              Log.err("Cannot start panel.", e);
+              Log.err("Cannot set panel to screen.", e);
             }
           }
           catch (RemoteException e)

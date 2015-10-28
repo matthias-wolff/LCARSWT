@@ -42,8 +42,8 @@ public class PanelData implements Serializable
   @Override
   public String toString() {
     return PanelData.class.getSimpleName()
-        + " panelState="+(panelState != null ? panelState.toString() : "null")
-        + " elementData="+(elementData != null ? elementData.toString() : "null");
+        + " panelState="+panelState
+        + " elementData="+elementData;
   }
   
 }

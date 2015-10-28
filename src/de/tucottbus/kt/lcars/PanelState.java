@@ -150,6 +150,20 @@ public class PanelState implements Serializable
         && alpha       == other.alpha
         && locked      == other.locked;
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() +
+           " size=("+width+","+height+")" +
+           " bgImage=" + bgImage + 
+           " colorScheme=" + colorScheme +
+           " alpha=" + alpha +
+           " blink=" + blink +
+           " locked=" + locked +
+           " silent=" + silent +
+           " modal=" + modal;
+  }
 }
 
 // EOF

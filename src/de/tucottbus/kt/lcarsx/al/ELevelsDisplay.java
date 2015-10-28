@@ -216,7 +216,7 @@ public class ELevelsDisplay extends ElementContributor
     String s = String.format(Locale.ENGLISH,"%1.0f",level);
     if (suffix!=null && suffix.length()>0) s+=" "+suffix;
     int a = right?LCARS.ES_LABEL_NW:LCARS.ES_LABEL_NE;
-    l = new ELabel(null,x,barC*barH,0,0,LCARS.EC_SECONDARY|LCARS.EF_TINY|a,s);
+    l = new ELabel(null,x,barC*barH,50,20,LCARS.EC_SECONDARY|LCARS.EF_TINY|a,s);
     l.addGeometryModifier(perspective); l.setAlpha(0.5f);
     l.setColor(cGrid);
     add(l);
@@ -249,7 +249,7 @@ public class ELevelsDisplay extends ElementContributor
     if (label!=null)
     {
       style |= LCARS.ES_LABEL_SW|LCARS.EF_TINY;
-      ELabel eLabel = new ELabel(null,x+labelOffset,y-13,0,13,style,label);
+      ELabel eLabel = new ELabel(null,x+labelOffset,y,50,13,style,label);
       eLabel.setAlpha(alpha);
       eLabel.setColor(cGrid);
       add(eLabel);
