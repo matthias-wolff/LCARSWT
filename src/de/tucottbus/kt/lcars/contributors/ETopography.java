@@ -578,7 +578,7 @@ public class ETopography extends ElementContributor
     if (this.gridStyle!=-1)
       gs = this.gridStyle & (LCARS.ES_COLOR|LCARS.ES_FONT);
       
-    ColorMeta color = new ColorMeta(LCARS.getColor(panel.getColorScheme(),gs), (int)(255*gridMajorAlpha));
+    ColorMeta color = new ColorMeta(LCARS.getColor(panel.getColorScheme(),gs), gridMajorAlpha);
     ELabel unitLabel = null;
     if (pGridMajor!=null)
     {
