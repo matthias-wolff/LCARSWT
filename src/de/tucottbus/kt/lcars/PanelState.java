@@ -109,8 +109,8 @@ public class PanelState implements Serializable
    */
   public PanelState(Dimension dimension)
   {
-    width = dimension.width;
-    height = dimension.height;
+    width  = dimension!=null ? dimension.width  : -1;
+    height = dimension!=null ? dimension.height : -1;
   }
 
   /**

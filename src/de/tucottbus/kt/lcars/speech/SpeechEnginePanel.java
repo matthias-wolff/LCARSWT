@@ -317,28 +317,33 @@ public class SpeechEnginePanel extends Panel
     
     // Speech input level events
     if (event instanceof LevelEvent)
-    {
-      int  amp = ((LevelEvent)event).getAmp();
-      long frm = event.frame;
-      
-      // Feed signal display
-      if (!eLock.isSelected())
-        synchronized (cSpeechSig)
-        {
-          int   smp = cSpeechSig.addSample(new Range(-amp,amp),
-              event.spe.getListenMode()<0
-                ? ColorMeta.GRAY
-                : (event.spe.getVoiceActivity()
-                    ? cRed
-                    : null));
-          cSpeechSig.getSampleElement(smp).setData(new Long(frm));
-        }
-      
-      // Feed speech I/O contributor
-      cSpeechIo.setLevel(((LevelEvent)event).level);
-
-      return;
-    }
+      try
+      {
+        int  amp = ((LevelEvent)event).getAmp();
+        long frm = event.frame;
+        
+        // Feed signal display
+        if (!eLock.isSelected())
+          synchronized (cSpeechSig)
+          {
+            int   smp = cSpeechSig.addSample(new Range(-amp,amp),
+                event.spe.getListenMode()<0
+                  ? ColorMeta.GRAY
+                  : (event.spe.getVoiceActivity()
+                      ? cRed
+                      : null));
+            cSpeechSig.getSampleElement(smp).setData(new Long(frm));
+          }
+        
+        // Feed speech I/O contributor
+        cSpeechIo.setLevel(((LevelEvent)event).level);
+  
+        return;
+      }
+      catch (Exception e)
+      {
+        Log.err("Error processing speech level event", e);
+      }
     
     // Speech recognition events
     if (event instanceof RecognitionEvent)

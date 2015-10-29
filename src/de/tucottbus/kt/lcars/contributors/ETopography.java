@@ -472,7 +472,22 @@ public class ETopography extends ElementContributor
   {
     return new Vector<ERect>(points);
   }
-  
+
+  /**
+   * Returns the position of a point in physical units.
+   * 
+   * @param ePoint
+   *          The point whose position is to be retrieved.
+   * @return The position.
+   */
+  public Point2D getPointPos(ERect ePoint)
+  {
+    if (points.indexOf(ePoint)<0) return null;
+    int lx = (int)Math.round(ePoint.getBounds().getCenterX())-this.x;
+    int ly = (int)Math.round(ePoint.getBounds().getCenterY())-this.y;
+    return lToP(new Point(lx,ly));
+  }
+
   /**
    * Instantly moves a point to a new position on the map. If <code>ePoint</code> is <code>null</code> or
    * no point on the map, the method does nothing.
