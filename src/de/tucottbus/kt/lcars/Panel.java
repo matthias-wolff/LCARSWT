@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.AbstractList;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 import de.tucottbus.kt.lcars.contributors.EMessageBox;
 import de.tucottbus.kt.lcars.contributors.EMessageBoxListener;
@@ -25,6 +28,9 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
+import de.tucottbus.kt.lcars.j2d.rendering.ARenderer;
+import de.tucottbus.kt.lcars.j2d.rendering.AdvGraphics2D;
+import de.tucottbus.kt.lcars.j2d.rendering.Renderer;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 import de.tucottbus.kt.lcars.speech.ISpeechEventListener;
@@ -91,6 +97,10 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * Flag indicating that the screen needs to be redrawn.
    */
   private boolean screenInvalid;
+  
+  private IPanelCaptureListener captureListener = null;
+  
+  private ARenderer captureRenderer = null;
   
   private   EMessageBox    eMsgBox;
   private   EPanelSelector ePnlSel;
@@ -944,6 +954,26 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     screenInvalid = true;
   }
   
+  private synchronized PanelData preparePanelData(boolean incremental)
+  {
+    // Make update data
+    PanelData data = new PanelData();
+    synchronized (this)
+    {
+      data.panelState = state; // TODO: better make a copy?
+
+      //GImage.beginCacheRun();
+      data.elementData = new Vector<ElementData>(elements.size());
+      for (EElement element : elements)
+      {
+        ElementData ed = element.getUpdateData(incremental);
+        data.elementData.add(ed);
+      }
+      //GImage.endCacheRun();
+    }
+	return data;  
+  }
+  
   /**
    * Updates the screen with the current panel and GUI elements state.
    */
@@ -964,21 +994,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       //incremental = false;
     }
 
-    // Make update data
-    PanelData data = new PanelData();
-    synchronized (this)
-    {
-      data.panelState = state; // TODO: better make a copy?
-
-      //GImage.beginCacheRun();
-      data.elementData = new Vector<ElementData>(elements.size());
-      for (EElement element : elements)
-      {
-        ElementData ed = element.getUpdateData(incremental);
-        data.elementData.add(ed);
-      }
-      //GImage.endCacheRun();
-    }
+    PanelData data = preparePanelData(incremental);
     
     // Update screen
     try
@@ -991,6 +1007,31 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
     time = System.nanoTime()-time;
     loadStat.add((int)(time/400000));
+    
+    IPanelCaptureListener cl = this.captureListener;
+    if(cl == null) return;
+    
+    // generate screen capture
+    
+    FutureTask<BufferedImage> callbackCapture = new FutureTask<BufferedImage>(new Callable<BufferedImage>()
+    		{
+    	@Override
+        public BufferedImage call() throws Exception {
+    		BufferedImage capture = new BufferedImage(data.panelState.dimension.width, data.panelState.dimension.height, BufferedImage.TYPE_INT_RGB);
+    		AdvGraphics2D g = new AdvGraphics2D(100);
+    		g.setGraphics(capture.createGraphics());
+    		
+    		// create and render panel data
+    		ARenderer rend = Panel.this.captureRenderer;
+    		rend.update(incremental ? preparePanelData(false) : data, false);
+    		Panel.this.captureRenderer.paint2D(g);
+    		
+    		return capture;
+        }
+    		});
+    
+    callbackCapture.run();
+    Panel.this.captureListener.onScreenUpdate(callbackCapture);
   }
   
   // -- Implementation of the IPanel interface --
@@ -1137,18 +1178,21 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
   // -- Implementation of the EEventListener interface --
 
-  public void touchDown(EEvent ee)
+  @Override
+public void touchDown(EEvent ee)
   {
     if      (ee.el==eLight) touchHold(ee);
     else if (ee.el==eLight) touchHold(ee);
     else if (ee.el==eSilent) setSilent(!isSilent());
   }
 
-  public void touchDrag(EEvent ee)
+  @Override
+public void touchDrag(EEvent ee)
   {
   }
 
-  public void touchHold(EEvent ee)
+  @Override
+public void touchHold(EEvent ee)
   {
     if (ee.el==eLight)
     {
@@ -1164,8 +1208,17 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
   }
 
-  public void touchUp(EEvent ee)
+  @Override
+public void touchUp(EEvent ee)
   {
+  }
+  
+  @Override
+  public void setCaptureListener(IPanelCaptureListener listener)
+  {
+	  if(listener != null && this.captureRenderer != null)
+		  this.captureRenderer = new Renderer(getDimension());
+	  this.captureListener = listener;
   }
   
 }

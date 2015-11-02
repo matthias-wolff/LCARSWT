@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 
 import de.tucottbus.kt.lcars.IPanel;
+import de.tucottbus.kt.lcars.IPanelCaptureListener;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -159,6 +160,12 @@ implements IPanel, IRmiPanelAdapterRemote
   {
     panel.panelSelectionDialog();
   }
+
+@Override
+public void setCaptureListener(IPanelCaptureListener listener) {
+	// TODO Auto-generated method stub
+	
+}
 }
 
 // EOF
