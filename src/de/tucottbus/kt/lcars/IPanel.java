@@ -55,7 +55,7 @@ public interface IPanel extends Remote
    * Register a screen capture listener.
    * @param listener
    */
-  public void setCaptureListener(IPanelCaptureListener listener);
+  public void setCaptureListener(IPanelCaptureListener listener) throws RemoteException;
 }
 
 // EOF
