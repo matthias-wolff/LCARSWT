@@ -1031,7 +1031,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     		});
     
     callbackCapture.run();
-    Panel.this.captureListener.onScreenUpdate(callbackCapture);
+    try {
+		Panel.this.captureListener.onScreenUpdate(callbackCapture);
+	} catch (RemoteException e) {
+		// TODO Auto-generated catch block
+		Log.err("Cannot trigger screen capture event.", e);
+	}
   }
   
   // -- Implementation of the IPanel interface --
