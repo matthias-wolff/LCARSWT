@@ -138,7 +138,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       throws ClassNotFoundException
   {
     shell = new Shell(display, SWT.NO_TRIM);
-
+    shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
     loadStat = new LoadStatistics(25);
     // Create Swings widgets
     shell.setText("LCARS");
@@ -191,7 +191,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     final int w = size.width;
     final int h = size.height;
     composite = new LcarsComposite(shell,
-        /* SWT.NO_BACKGROUND | */ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
+        SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
     {
       @Override
       public void paintControl(PaintEvent e)

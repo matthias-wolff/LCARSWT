@@ -704,7 +704,7 @@ public class LCARS implements ILcarsRemote
     int tlx;
     int tly;
         
-    if (tw <= 0 || th <= 0) return geos;
+    //if (tw <= 0 || th <= 0) return geos;
     
     switch (align / 3) // horizontal alignment
     {
@@ -742,12 +742,12 @@ public class LCARS implements ILcarsRemote
     for (int i=0; i<n; i++)
     {
       org.eclipse.swt.graphics.Rectangle linBnds = tl.getLineBounds(i);
-      if (linBnds.y > th) break; // line out of vertical bounds
+      //if (linBnds.y > th) break; // line out of vertical bounds
       int x = linBnds.x+tlx;
       int y = linBnds.y+tly;
       
       Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
-      if (b.width <= 0 || b.height <=0) continue;
+      //if (b.width <= 0 || b.height <=0) continue;
       
       GText gt = new GText(
           s[i],

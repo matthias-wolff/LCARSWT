@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,7 +29,6 @@ import org.eclipse.swt.events.TouchEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.internal.ole.win32.VARDESC;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -409,7 +407,7 @@ public class TestPanel extends Panel
 
   public void initEImage()
   {
-    add(new EImage(this, 7, 650, LCARS.ES_STATIC,new ImageMeta.Resource("resources/images/flare.png")));
+    add(new EImage(this, 7, 650, LCARS.ES_STATIC,new ImageMeta.Resource("lcars/resources/images/flare.png")));
   }
 
   public static void initShell()
@@ -593,6 +591,7 @@ public class TestPanel extends Panel
           Frame frame = SWT_AWT.new_Frame(composite);
           Canvas canvas = new Canvas() {
             private static final long serialVersionUID = -8288002304817297959L;
+            @Override
             public void paint(Graphics g) {
               Dimension d = getSize();
               g.setColor(Color.RED);
