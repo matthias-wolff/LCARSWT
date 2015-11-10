@@ -1221,7 +1221,7 @@ public void touchUp(EEvent ee)
   @Override
   public void setCaptureListener(IPanelCaptureListener listener)
   {
-	  if(listener != null && this.captureRenderer != null)
+	  if(listener != null)
 		  this.captureRenderer = new Renderer(getDimension());
 	  this.captureListener = listener;
   }
