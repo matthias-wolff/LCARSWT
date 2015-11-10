@@ -190,8 +190,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     final Dimension size = getSize();
     final int w = size.width;
     final int h = size.height;
-    composite = new LcarsComposite(shell,
-        SWT.NO_BACKGROUND | SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
+    composite = new LcarsComposite(shell, SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
     {
       @Override
       public void paintControl(PaintEvent e)
