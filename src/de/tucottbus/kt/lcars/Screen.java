@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.MouseInfo;
@@ -8,8 +9,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.rmi.RemoteException;
@@ -18,8 +17,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.KeyStroke;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -71,12 +74,12 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    * The panel this screen is displaying.
    */
   private IPanel panel;
-  
+
   /**
    * Serial number of the panel.
    */
   private int panelId = -1;
-  
+
   /**
    * Full screen mode flag.
    */
@@ -119,6 +122,12 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    */
   protected HashMap<Component, Composite> awtComponents = new HashMap<>(5);
 
+  /**
+   * Used to convert {@link org.eclipse.swt.events.KeyEvent} to
+   * {@link java.awt.event.KeyEvent}
+   */
+  private final Component keyEventDummy = new Container();
+
   // -- Constructors --
 
   /**
@@ -145,8 +154,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     shell.setText("LCARS");
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    final Screen _this = this;
-
     fullScreenMode = fullScreen;// && device.isFullScreenSupported();
     // TODO: setUndecorated(fullScreen);
     // TODO: setResizable(!fullScreen);
@@ -161,8 +168,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       // TODO: createBufferStrategy(1);
     } else
     {
-      //FIXME: window mode not  working
-      
+      // FIXME: window mode not working
+
       // Windowed mode
       shell.setSize(preferedWidth, preferedHeight);
       // TODO: setPreferredSize(new Dimension(950,560));
@@ -218,9 +225,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       }
     };
     composite.setTouchEnabled(true);
-    composite.addTouchListener(_this);
-    composite.addMouseListener(_this);
-    composite.addMouseMoveListener(_this);
+    composite.addTouchListener(this);
+    composite.addMouseListener(this);
+    composite.addMouseMoveListener(this);
+    composite.addKeyListener(this);
     composite.setBackground(ColorMeta.BLACK.getColor());
     composite.setSize(w, h);
     composite.setLayout(new FillLayout());
@@ -384,8 +392,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   public Point panelToScreen(int x, int y)
   {
     Point2D.Float scale = composite.getScale();
-    return new Point((int) (x * scale.x + .5f),
-        (int) (y * scale.y + .5f));
+    return new Point((int) (x * scale.x + .5f), (int) (y * scale.y + .5f));
   }
 
   // -- Getters and setters --
@@ -408,15 +415,15 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         this.panel.stop();
       } catch (RemoteException e)
       {
-        Log.err("Could not stop the previous panel while setting a new panel.", e);
+        Log.err("Could not stop the previous panel while setting a new panel.",
+            e);
       }
 
-    
     this.panel = ipanel;
 
     if (ipanel != null)
       this.panelId = ipanel.serialNo();
-    
+
     // Set and start new panel
     composite.clear();
 
@@ -424,8 +431,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     {
       try
       {
-        Log.info(
-            "Starting panel " + ipanel.getClass().getSimpleName() + "...");
+        Log.info("Starting panel " + ipanel.getClass().getSimpleName() + "...");
         ipanel.start();
         Log.info("...Panel started");
       } catch (RemoteException e)
@@ -465,8 +471,9 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public void update(PanelData data, boolean incremental)
   {
-    if (panel != null && data.panelId != panelId) return;
-    
+    if (panel != null && data.panelId != panelId)
+      return;
+
     // TODO: remove incremental
     synchronized (composite)
     {
@@ -568,25 +575,17 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   // -- Implementation of the KeyListener interface --
 
   @Override
-  public void keyTyped(KeyEvent e)
-  {
-    if (panel != null)
-      try
-      {
-        panel.processKeyEvent(e);
-      } catch (RemoteException e1)
-      {
-        Log.err("Error while transmission of a key typed event" + e, e1);
-      }
-  }
-
-  @Override
   public void keyPressed(KeyEvent e)
   {
     if (panel != null)
       try
       {
-        panel.processKeyEvent(e);
+        
+        //FIXME: wrong keyCode mapping from swt to awt, also with de.tucottbus.kt.lcars.swt.SwtKeyMapper
+        java.awt.event.KeyEvent ke = new java.awt.event.KeyEvent(keyEventDummy,
+            java.awt.event.KeyEvent.KEY_PRESSED, e.time, preferedHeight,
+            KeyStroke.getKeyStroke(e.character).getKeyCode(), e.character);
+        panel.processKeyEvent(ke);
       } catch (RemoteException e1)
       {
         Log.err("Error while transmission of a key pressed event" + e, e1);
@@ -599,7 +598,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     if (panel != null)
       try
       {
-        panel.processKeyEvent(e);
+        //FIXME: see at keyPressed(KeyEvent)
+        panel.processKeyEvent(new java.awt.event.KeyEvent(keyEventDummy,
+            java.awt.event.KeyEvent.KEY_RELEASED, e.time, preferedHeight,
+            KeyStroke.getKeyStroke(e.character).getKeyCode(), e.character));
       } catch (RemoteException e1)
       {
         Log.err("Error while transmission of a key released event" + e, e1);
@@ -625,7 +627,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
       for (Touch touch : e.touches)
       {
-        org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(touch.x, touch.y);
+        org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(touch.x,
+            touch.y);
         Point pt = screenToPanel(absPos.x, absPos.y);
         int eventType;
         switch (touch.state)
@@ -660,33 +663,37 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     if (awtComponents.containsKey(component))
       return;
     Display display = LCARS.getDisplay();
-    
+
     int w = component.getWidth();
     int h = component.getHeight();
-    
+
     if (w == 0 || h == 0)
-      Log.warn("Component has zero width/height and size updates are not applied in the awt swt bridge.");
-    
+      Log.warn(
+          "Component has zero width/height and size updates are not applied in the awt swt bridge.");
+
     display.syncExec(() -> {
       // TODO: check awtFrame is in embedded full screen mode
       Composite composite = awtComponents.get(display);
-      if (composite != null ){
+      if (composite != null)
+      {
         composite.moveAbove(null);
         return;
       }
-      
-      composite = new Composite(this.composite, SWT.DOUBLE_BUFFERED | SWT.EMBEDDED);
-      
-      composite.setBounds(component.getX(), component.getY(), component.getWidth(), component.getHeight());      
+
+      composite = new Composite(this.composite,
+          SWT.DOUBLE_BUFFERED | SWT.EMBEDDED);
+
+      composite.setBounds(component.getX(), component.getY(),
+          component.getWidth(), component.getHeight());
       composite.moveAbove(null);
-      component.setBounds(0, 0, component.getWidth(), component.getHeight());        
-      
+      component.setBounds(0, 0, component.getWidth(), component.getHeight());
+
       Frame awtFrame = SWT_AWT.new_Frame(composite);
       awtComponents.put(component, composite);
       awtFrame.setBounds(component.getBounds());
       awtFrame.add(component);
       shell.redraw();
-    });    
+    });
   }
 
   public void remove(Component component)
@@ -768,12 +775,13 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     Rectangle bnds = area.getBounds();
     shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);
   }
-  
+
   @Override
   public boolean isDisposed()
   {
     return shell.isDisposed();
   }
+
 }
 
 // EOF
