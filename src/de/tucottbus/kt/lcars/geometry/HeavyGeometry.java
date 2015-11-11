@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 
 import de.tucottbus.kt.lcars.geometry.rendering.ARemotePaintListener;
 

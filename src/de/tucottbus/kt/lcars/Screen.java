@@ -27,6 +27,9 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -116,7 +119,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   /**
    * Map of all awt components added to this swt shell
    */
-  protected HashMap<Component, Frame> awtComponents = new HashMap<>(5);
+  protected HashMap<Component, Composite> awtComponents = new HashMap<>(5);
 
   // -- Constructors --
 
@@ -658,21 +661,40 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
     if (awtComponents.containsKey(component))
       return;
-    LCARS.getDisplay().syncExec(() -> {
+    Display display = LCARS.getDisplay();
+    
+    int w = component.getWidth();
+    int h = component.getHeight();
+    
+    if (w == 0 || h == 0)
+      Log.warn("Component has zero width/height and size updates are not applied in the awt swt bridge.");
+    
+    display.syncExec(() -> {
       // TODO: check awtFrame is in embedded full screen mode
-      if (awtComponents.containsKey(component))
+      Composite composite = awtComponents.get(display);
+      if (composite != null ){
+        composite.moveAbove(null);
         return;
+      }
+      
+      composite = new Composite(this.composite, SWT.DOUBLE_BUFFERED | SWT.EMBEDDED);
+      
+      composite.setBounds(component.getX(), component.getY(), component.getWidth(), component.getHeight());      
+      composite.moveAbove(null);
+      component.setBounds(0, 0, component.getWidth(), component.getHeight());        
+      
       Frame awtFrame = SWT_AWT.new_Frame(composite);
-      awtComponents.put(component, awtFrame);
+      awtComponents.put(component, composite);
       awtFrame.setBounds(component.getBounds());
+      awtFrame.add(component);
       shell.redraw();
-    });
+    });    
   }
 
   public void remove(Component component)
   {
-    Frame frame = awtComponents.remove(component);
-    frame.dispose();
+    Composite composite = awtComponents.remove(component);
+    composite.dispose();
   }
 
   public Dimension getSize()
