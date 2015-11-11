@@ -27,8 +27,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
