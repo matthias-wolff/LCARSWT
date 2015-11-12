@@ -166,7 +166,7 @@ public class WorldClockPanel extends PaddMainPanel
     
     if (onWeTab())
     {
-      e = new EImage(this,wb-7,650,LCARS.ES_STATIC,new ImageMeta.Resource("padd/WePaddLogo.png"));
+      e = new EImage(this,wb-7,650,LCARS.ES_STATIC,new ImageMeta.Resource("lcars/padd/WePaddLogo.png"));
       add(e);
     }
     
@@ -223,7 +223,7 @@ public class WorldClockPanel extends PaddMainPanel
     eTimeZone.setLabel(now.getTimeZone().getDisplayName(daylight,TimeZone.LONG,Locale.US).toUpperCase());
     
     int zo = now.get(Calendar.ZONE_OFFSET)/60000;
-    eGmtOffs.setLabel(String.format("GMT%s%02d:%02d",zo>0?"+":"\u2013",(int)Math.abs(zo)/60,Math.abs(zo)%60));
+    eGmtOffs.setLabel(String.format("GMT%s%02d:%02d",zo>0?"+":"\u2013",Math.abs(zo)/60,Math.abs(zo)%60));
 
     boolean home = Calendar.getInstance().getTimeZone().getDisplayName().equals(timezone.getDisplayName());
     eHome.setSelected(home);

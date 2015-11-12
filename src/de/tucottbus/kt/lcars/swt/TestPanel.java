@@ -5,12 +5,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,7 +30,7 @@ import org.eclipse.swt.events.TouchEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.internal.ole.win32.VARDESC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Text;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.contributors.EBrowser;
 import de.tucottbus.kt.lcars.contributors.EElementArray;
 import de.tucottbus.kt.lcars.elements.EElbo;
@@ -69,12 +70,10 @@ public class TestPanel extends Panel
   private static final int x1 = x0 + w + m;
   private static final int x2 = x1 + w + m;
   private static final int x3 = x2 + w + m;
-  private static final int x4 = x2 + w + m;
   private static final int y0 = m;
   private static final int y1 = y0 + h + m;
   private static final int y2 = y1 + h + m;
   private static final int y3 = y2 + h + m;
-  private static final int y4 = y2 + h + m;
 
   private Timer timer;
 
@@ -324,39 +323,68 @@ public class TestPanel extends Panel
     dim(.3f);
   }
   
-  private static void addComp(Composite parent, int fg, int bg, int xOff)
+  private static class LineAnimation{
+    private final int xMax;
+    private final int h;
+    private int x;
+    private final Runnable action;
+    
+    
+    public LineAnimation(Dimension size, int x0, Runnable tickAction) {
+      xMax = size.width*2;
+      h = size.height;
+      x = (x0+size.width) % xMax;
+      this.action = tickAction;
+      new Timer().schedule(new TimerTask()
+      {
+        @Override
+        public void run()
+        {
+          Runnable action = LineAnimation.this.action;
+          if (action == null) return;
+          x = (x + 5) % xMax;
+          action.run();
+        }
+      }, 40, 40);
+
+    }
+    
+    public LineAnimation(Point size, int x0, Runnable tickAction) {
+      this(new Dimension(size.x, size.y), x0, tickAction);
+    }
+    
+    public Line2D getLine() {
+      return new Line2D.Float(Math.abs(x-xMax/2), 0, xMax/4, h);
+    }    
+  }
+  
+  private static Composite createLineAnimationComposite(Composite parent, int fg, int bg, int xOff)
   {
-    int h = parent.getSize().y;
     Display display = parent.getDisplay();
     Composite composite = new Composite(parent, SWT.TRANSPARENT);
     composite.setLayout(new FillLayout());
     composite.setEnabled(true);
-    composite.setSize(parent.getSize());
+    Point size = parent.getSize();
+    composite.setSize(size);
     composite.setBackground(parent.getDisplay().getSystemColor(bg));
     composite.addPaintListener(new PaintListener()
     {
-      final int xMax = parent.getSize().x * 2;
-      int x = xOff % h;
-
-      @Override
-      public void paintControl(PaintEvent e)
-      {
-        e.gc.setForeground(e.gc.getDevice().getSystemColor(fg));
-        e.gc.drawLine(xMax / 4, h, Math.abs((x = (x + 5) % xMax) - h), 0);
-        // shell.redraw();
-      }
-    });
-    Timer timer = new Timer();
-    timer.schedule(new TimerTask()
-    {
-      @Override
-      public void run()
-      {
+      LineAnimation la = new LineAnimation(size, 0, () -> {
         display.asyncExec(() -> {
           composite.redraw();
         });
+      });
+      
+      @Override
+      public void paintControl(PaintEvent e)
+      {
+        Line2D line = la.getLine();
+        e.gc.setForeground(e.gc.getDevice().getSystemColor(fg));
+        e.gc.drawLine((int)line.getX1(), (int)line.getY1(), (int)line.getX2(), (int)line.getY2());
+        // shell.redraw();
       }
-    }, 40, 40);
+    });
+    return composite;
   }
 
   private void initAudioPlayer()
@@ -409,7 +437,7 @@ public class TestPanel extends Panel
 
   public void initEImage()
   {
-    add(new EImage(this, 7, 650, LCARS.ES_STATIC,new ImageMeta.Resource("resources/images/flare.png")));
+    add(new EImage(this, 7, 650, LCARS.ES_STATIC,new ImageMeta.Resource("lcars/resources/images/flare.png")));
   }
 
   public static void initShell()
@@ -582,7 +610,7 @@ public class TestPanel extends Panel
     };
     composite.setTouchEnabled(true);
     composite.setBackground(ColorMeta.BLACK.getColor());
-    //composite.setSize(size.x, size.y);
+    composite.setSize(500, 500);
     composite.setLayout(new FillLayout());
     new Timer().schedule(new TimerTask()
     {
@@ -593,6 +621,7 @@ public class TestPanel extends Panel
           Frame frame = SWT_AWT.new_Frame(composite);
           Canvas canvas = new Canvas() {
             private static final long serialVersionUID = -8288002304817297959L;
+            @Override
             public void paint(Graphics g) {
               Dimension d = getSize();
               g.setColor(Color.RED);
@@ -600,10 +629,11 @@ public class TestPanel extends Panel
             }
           };
           canvas.setBackground(Color.BLACK);
+          canvas.setSize(500, 500);
           frame.add(canvas);
         });
       }
-    }, 3000,3000);
+    }, 1000,1000);
         
     shell.layout();
     shell.open();
@@ -636,6 +666,42 @@ public class TestPanel extends Panel
     browser.setText(html);
   }
   
+  public void initComponent() {
+    Screen src = (Screen)getScreen();
+    Canvas canvas = new Canvas() {
+      private static final long serialVersionUID = -8288002304817297959L;
+      @Override
+      public void paint(Graphics g) {
+        Dimension d = getSize();
+        g.setColor(Color.RED);
+        g.drawLine(0, 0, d.width, d.height);
+      }
+    };
+    canvas.setSize(600, 600);
+    src.add(canvas);
+    canvas.setBackground(Color.BLACK);
+
+    new Timer().schedule(new TimerTask()
+    {
+      @Override
+      public void run()
+      {
+        Canvas canvas = new Canvas() {
+          private static final long serialVersionUID = -8288002304817297959L;
+          @Override
+          public void paint(Graphics g) {
+            Dimension d = getSize();
+            g.setColor(Color.BLUE);
+            g.drawLine(0, 0, d.width, d.height);
+          }
+        };
+        canvas.setSize(500, 500);
+        src.add(canvas);
+        canvas.setBackground(Color.BLACK);
+      }
+    }, 1000,1000);
+
+  }
   
   
   @Override
@@ -645,6 +711,8 @@ public class TestPanel extends Panel
     setTitle("TEST PANEL");
     if (LCARS.getArg("--testLayout") != null)
       initLayout();
+    if (LCARS.getArg("--testComponent") != null)
+      initComponent();
     if (LCARS.getArg("--testSpeechInput") != null)
       initSpeechInputPanel();
     if (LCARS.getArg("--testELabel") != null)

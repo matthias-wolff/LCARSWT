@@ -516,7 +516,7 @@ public class LCARS implements ILcarsRemote
       
       int    h = 1200;/*LCARS.panelDim.height;*/
       
-      fonts = new FontMeta.Explicit[EF_COUNT];
+      FontMeta.Explicit[] fonts = new FontMeta.Explicit[EF_COUNT];
       final Function<Integer, FontMeta.Explicit> newFont = (height) -> {       
         return new FontMeta.Explicit(f[0], (int)(height*fontScale), java.awt.Font.PLAIN);
       };
@@ -532,7 +532,7 @@ public class LCARS implements ILcarsRemote
       fonts[EF_NORMAL >>EF_SHIFT] = newFont.apply((int)(h/37.5));
       fonts[EF_SMALL >>EF_SHIFT] = newFont.apply((int)(h/50.0));
       fonts[EF_TINY >>EF_SHIFT] = newFont.apply((int)(h/65.0));                                
-      
+      LCARS.fonts = fonts;
     }
     int font = (style & ES_FONT) >> EF_SHIFT;
     if (font<0 || font>=fonts.length) return fonts[0];
@@ -704,7 +704,7 @@ public class LCARS implements ILcarsRemote
     int tlx;
     int tly;
         
-    if (tw <= 0 || th <= 0) return geos;
+    //if (tw <= 0 || th <= 0) return geos;
     
     switch (align / 3) // horizontal alignment
     {
@@ -742,12 +742,12 @@ public class LCARS implements ILcarsRemote
     for (int i=0; i<n; i++)
     {
       org.eclipse.swt.graphics.Rectangle linBnds = tl.getLineBounds(i);
-      if (linBnds.y > th) break; // line out of vertical bounds
+      //if (linBnds.y > th) break; // line out of vertical bounds
       int x = linBnds.x+tlx;
       int y = linBnds.y+tly;
       
       Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
-      if (b.width <= 0 || b.height <=0) continue;
+      //if (b.width <= 0 || b.height <=0) continue;
       
       GText gt = new GText(
           s[i],
@@ -1022,6 +1022,7 @@ public class LCARS implements ILcarsRemote
    * @return the contents
    * @deprecated Use {@link #loadTextResource(String)} instead!
    */
+  @Deprecated
   public static String loadTextFile(File file) throws FileNotFoundException
   {
     if (file==null) return null;
@@ -1610,6 +1611,7 @@ public class LCARS implements ILcarsRemote
       // Install shut-down hook
       Runtime.getRuntime().addShutdownHook(new Thread()
       {
+        @Override
         public void run()
         {
           Log.info("Shutting down ...");

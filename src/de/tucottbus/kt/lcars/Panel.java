@@ -1336,22 +1336,32 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   @Override
   public void processKeyEvent(KeyEvent event)
   {
-    for (KeyListener listener : keyListeners)
+    switch (event.getID())
     {
-      switch (event.getID())
+    case KeyEvent.KEY_PRESSED:
+      for (KeyListener listener : keyListeners)
       {
-      case KeyEvent.KEY_TYPED:
-        listener.keyTyped(event);
-        break;
-      case KeyEvent.KEY_PRESSED:
         listener.keyPressed(event);
-        break;
-      case KeyEvent.KEY_RELEASED:
-        listener.keyReleased(event);
-        break;
+        if (event.isConsumed())
+          return;
       }
-      if (event.isConsumed())
-        break;
+      break;
+    case KeyEvent.KEY_RELEASED:
+      for (KeyListener listener : keyListeners)
+      {
+        listener.keyReleased(event);
+        if (event.isConsumed())
+          return;
+      }
+      break;
+    case KeyEvent.KEY_TYPED: //TODO: never occurs because not supported in swt, see Screen
+      for (KeyListener listener : keyListeners)
+      {
+        listener.keyTyped(event);
+        if (event.isConsumed())
+          return;
+      }
+      break;
     }
   }
 

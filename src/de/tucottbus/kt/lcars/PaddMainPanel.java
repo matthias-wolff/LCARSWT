@@ -73,7 +73,7 @@ public abstract class PaddMainPanel extends Panel
     // On WeTab: add a close button
     if ("wetab".equals(LCARS.getArg("--device=")))
     {
-      e = new EImage(this,dim.width-50,20,0,new ImageMeta.Resource("padd/WeTabRemoveButton.png"));
+      e = new EImage(this,dim.width-50,20,0,new ImageMeta.Resource("lcars/padd/WeTabRemoveButton.png"));
       e.addEEventListener(new EEventListenerAdapter()
       {
         @Override
