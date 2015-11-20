@@ -233,10 +233,10 @@ public final class ColorMeta implements Serializable
     if ( g > 0 && g < i ) g = i;
     if ( b > 0 && b < i ) b = i;
     
-    return new ColorMeta(Math.min((int)(r*scale), 255),
-                        Math.min((int)(g*scale), 255),
-                        Math.min((int)(b*scale), 255),
-                        Alpha);
+    return new ColorMeta((int)(r*scale),
+                        (int)(g*scale),
+                        (int)(b*scale),
+                        Alpha & 0xFF);
   }
 
   /**
@@ -257,10 +257,10 @@ public final class ColorMeta implements Serializable
    * @see        de.tucottbus.kt.lcars.swt.ColorMeta#brighter
    */
   public ColorMeta darker() {
-    return new ColorMeta(Math.max((int)((Red & 0xFF)*BRIGHT_SCALE), 0),
-                        Math.max((int)((Green & 0xFF)*BRIGHT_SCALE), 0),
-                        Math.max((int)((Blue & 0xFF) *BRIGHT_SCALE), 0),
-                        Alpha);
+    return new ColorMeta((int)((Red & 0xFF)*BRIGHT_SCALE),
+                         (int)((Green & 0xFF)*BRIGHT_SCALE),
+                         (int)((Blue & 0xFF) *BRIGHT_SCALE),
+                         Alpha & 0xFF);
   }
   
   @Override
@@ -294,6 +294,6 @@ public final class ColorMeta implements Serializable
   
   @Override
   public String toString() {
-    return ColorMeta.class.getSimpleName() + " rgba="+Integer.toHexString(getValue());
+    return ColorMeta.class.getSimpleName() + " rgba="+Integer.toHexString(getValue()) + " hasAlpha=" + (HasAlpha?1:0);
   }
 }

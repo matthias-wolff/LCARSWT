@@ -198,8 +198,9 @@ public class EElementArray extends ElementContributor implements EEventListener
         e = new ERect(null, x, y, w, h, this.elemStyle, label);
       else if (this.elemClass.equals(EValue.class))
       {
-        e = new EValue(null, x, y, w, h, this.elemStyle, null);
-        ((EValue) e).setValue(label);
+        EValue ev =  new EValue(null, x, y, w, h, this.elemStyle, null);
+        ev.setValue(label);
+        e = ev;
       } else if (this.elemClass.equals(ELabel.class))
         e = new ELabel(null, x, y, w, h, this.elemStyle, label);
       e.addEEventListener(this);
