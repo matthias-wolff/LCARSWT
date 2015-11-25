@@ -16,11 +16,13 @@ import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListener;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
+import de.tucottbus.kt.lcars.elements.EScaledImage;
 import de.tucottbus.kt.lcars.elements.EValue;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
- * An array of equally sized {@link ERect}s, {@link EValue}s or {@link ELabel}s.
+ * An array of equally sized {@link ERect}s, {@link EValue}s, {@link ELabel}s or {@link EScaledImage}s..
  * 
  * @author Matthias Wolff
  */
@@ -52,8 +54,8 @@ public class EElementArray extends ElementContributor implements EEventListener
    * @param y
    *          the y-coordinate of the top left corner (LCARS panel coordinates)
    * @param elemClass
-   *          the class of the elements; {@link ERect}, {@link EValue} or
-   *          {@link ELabel}
+   *          the class of the elements; {@link ERect}, {@link EValue},
+   *          {@link ELabel} or {@link EScaledImage}
    * @param elemSize
    *          the size of one element
    * @param rows
@@ -80,7 +82,8 @@ public class EElementArray extends ElementContributor implements EEventListener
     // Check class
     if (!this.elemClass.equals(ERect.class)
         && !this.elemClass.equals(EValue.class)
-        && !this.elemClass.equals(ELabel.class))
+        && !this.elemClass.equals(ELabel.class)
+				&& !this.elemClass.equals(EScaledImage.class))
     {
       throw new IllegalArgumentException("Class cannot be used");
     }
@@ -203,6 +206,8 @@ public class EElementArray extends ElementContributor implements EEventListener
         e = ev;
       } else if (this.elemClass.equals(ELabel.class))
         e = new ELabel(null, x, y, w, h, this.elemStyle, label);
+			else if (this.elemClass.equals(EScaledImage.class))
+				e = new EScaledImage(null, x, y, w, h, this.elemStyle, new ImageMeta.File(name));
       e.addEEventListener(this);
       e.setData(name);
       eList.add(e);
@@ -334,6 +339,8 @@ public class EElementArray extends ElementContributor implements EEventListener
         return (String) e.getData();
       if (e instanceof EValue)
         return ((EValue) e).getValue();
+			if (e instanceof EScaledImage)
+				return ((EScaledImage) e).getImagePath();
       return e.getLabel();
     }
   }
