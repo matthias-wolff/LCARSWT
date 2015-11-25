@@ -31,7 +31,12 @@ public abstract class ImageMeta implements Serializable
         && other instanceof ImageMeta
         && Objectt.equals(path, ((ImageMeta)other).path);
   }
-  
+
+	public String getPath()
+	{
+		return path;
+	}
+
   //--Nested classes
   
   public static class Resource extends ImageMeta {
