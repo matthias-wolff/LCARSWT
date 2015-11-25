@@ -17,8 +17,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.KeyStroke;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -41,6 +39,7 @@ import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.SwtKeyMapper;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcars.util.Objectt;
 
@@ -580,11 +579,11 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     if (panel != null)
       try
       {
-        
+        int keycode = SwtKeyMapper.swt2AwtKeycode(e);
         //FIXME: wrong keyCode mapping from swt to awt, also with de.tucottbus.kt.lcars.swt.SwtKeyMapper
         java.awt.event.KeyEvent ke = new java.awt.event.KeyEvent(keyEventDummy,
-            java.awt.event.KeyEvent.KEY_PRESSED, e.time, preferedHeight,
-            KeyStroke.getKeyStroke(e.character).getKeyCode(), e.character);
+            java.awt.event.KeyEvent.KEY_PRESSED, e.time, SwtKeyMapper.transformStatemask(e),
+            keycode, e.character);
         panel.processKeyEvent(ke);
       } catch (RemoteException e1)
       {
@@ -599,9 +598,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       try
       {
         //FIXME: see at keyPressed(KeyEvent)
+        int keycode = SwtKeyMapper.swt2AwtKeycode(e);
         panel.processKeyEvent(new java.awt.event.KeyEvent(keyEventDummy,
-            java.awt.event.KeyEvent.KEY_RELEASED, e.time, preferedHeight,
-            KeyStroke.getKeyStroke(e.character).getKeyCode(), e.character));
+            java.awt.event.KeyEvent.KEY_RELEASED, e.time, SwtKeyMapper.transformStatemask(e),
+            keycode, e.character));
       } catch (RemoteException e1)
       {
         Log.err("Error while transmission of a key released event" + e, e1);

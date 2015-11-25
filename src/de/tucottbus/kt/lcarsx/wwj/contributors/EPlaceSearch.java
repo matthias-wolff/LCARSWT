@@ -83,10 +83,6 @@ public class EPlaceSearch extends ElementContributor implements KeyListener
 
   public void keyReleased(KeyEvent e)
   {
-  }
-
-  public void keyTyped(KeyEvent e)
-  {
     String q = eQuery.isBlinking()?"":eQuery.getValue();
     char   c = e.getKeyChar(); 
     if (c==KeyEvent.VK_TAB) return;
@@ -120,6 +116,10 @@ public class EPlaceSearch extends ElementContributor implements KeyListener
     eQuery.setColorStyle(LCARS.EC_PRIMARY);
     eQuery.setValue(q.toUpperCase());
     this.worldWindPanel.fillPlacesArray("" /*Clear places array*/);
+  }
+
+  public void keyTyped(KeyEvent e)
+  {
   }
   
   protected void Ok()
