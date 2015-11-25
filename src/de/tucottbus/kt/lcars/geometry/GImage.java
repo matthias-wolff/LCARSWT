@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcars.geometry;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -21,7 +22,8 @@ public class GImage extends AGeometry
   
   public  final ImageMeta   meta;
   private final Point       pos;  
-  
+  private final Dimension   size;
+
   /**
    * Creates a new image geometry.
    * 
@@ -29,13 +31,27 @@ public class GImage extends AGeometry
    * @param pos
    * @param imageObeserver
    */
-  public GImage(ImageMeta imageMeta, Point pos, ImageObserver imageObeserver)
+  public GImage(ImageMeta imageMeta, Point pos, ImageObserver imageObserver)
+  {
+    this(imageMeta, pos, null, imageObserver);
+  }
+
+  /**
+   * Creates a new image geometry.
+   * 
+   * @param resourceName
+   * @param pos
+   * @param size
+   * @param imageObeserver
+   */
+  public GImage(ImageMeta imageMeta, Point pos, Dimension size, ImageObserver imageObserver)
   {
     super(false);
     meta  = imageMeta;
     //TODO check observer
-    //this.imageObserver = imageObeserver;
+    //this.imageObserver = imageObserver;
     this.pos           = pos;
+		this.size          = size;
   }
 
   @Override
@@ -46,6 +62,9 @@ public class GImage extends AGeometry
   
   @Override
   public Rectangle getBounds() {
+		if (size != null)
+			return new Rectangle(pos.x,pos.y,size.width,size.height);
+
     Image image = meta.getImage(); 
     return image != null
         ? new java.awt.Rectangle(pos.x,pos.y,image.getImageData().width,image.getImageData().height)
@@ -63,11 +82,17 @@ public class GImage extends AGeometry
     if (meta == null) return;
     Image image = meta.getImage();
     if (image!= null)
-      gc.drawImage(image, pos.x, pos.y);
+			if (size!=null)
+				gc.drawImage(image, 0, 0, image.getImageData().width, image.getImageData().height, pos.x, pos.y, size.width, size.height);
+			else
+				gc.drawImage(image, pos.x, pos.y);
   }
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") meta=" + meta;
+		if (size != null)
+			return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") size=(" + size.width + "," + size.height +") meta=" + meta;
+		else
+			return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") meta=" + meta;
   }  
 }
