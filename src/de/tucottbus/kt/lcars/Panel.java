@@ -1288,7 +1288,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
             this.dragMouse = null;
           }
           else
-            de = this.dragTouch.remove(i-touchUps--);
+            de = this.dragTouch.remove(i-touchUps++);
 
           if (de == null)
             return;

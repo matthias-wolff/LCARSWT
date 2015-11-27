@@ -119,7 +119,7 @@ public class TestPanel extends Panel
 
   private ERect createDragButton(String label, int x, int y) {
     final Point dragOffset = new Point();
-    ERect eRect = new ERect(this,x,y,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,"DRAG ME");
+    ERect eRect = new ERect(this,x,y,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,label);
     eRect.addEEventListener(new EEventListener()
     {
       @Override
