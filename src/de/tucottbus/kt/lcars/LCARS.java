@@ -1714,7 +1714,6 @@ public class LCARS implements ILcarsRemote
 
       // Run SWT event loop 
       while (!iscreen.isDisposed())
-      {
         try
         {
           if (!getDisplay().readAndDispatch())
@@ -1724,7 +1723,6 @@ public class LCARS implements ILcarsRemote
         {
           Log.err("Error in screen execution.", e);
         }
-      }
     }
     catch (Exception e)
     {

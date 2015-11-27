@@ -11,6 +11,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Timer;
@@ -18,6 +19,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -27,6 +29,7 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -34,11 +37,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Touch;
 
+import de.tucottbus.kt.Root;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
+import de.tucottbus.kt.lcars.swt.SWTResourceManager;
 import de.tucottbus.kt.lcars.swt.SwtKeyMapper;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcars.util.Objectt;
@@ -61,7 +67,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
   private static final int preferedWidth = 950;
   private static final int preferedHeight = 560;
-
+  private static final String defaultIcon = "lcars/resources/images/lcars.png";
+  
   // -- Fields --
 
   /**
@@ -150,7 +157,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
     loadStat = new LoadStatistics(25);
     // Create Swings widgets
-    shell.setText("LCARS");
+    shell.setText("LCARS");    
+    shell.setImage(SWTResourceManager.getImage(Root.class, defaultIcon));
+    
+    
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     fullScreenMode = fullScreen;// && device.isFullScreenSupported();
@@ -777,7 +787,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   }
 
   @Override
-  public boolean isDisposed()
+  public boolean isDisposed() throws RemoteException
   {
     return shell.isDisposed();
   }

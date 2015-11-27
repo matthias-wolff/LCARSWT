@@ -235,7 +235,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   }
 
   @Override
-  public boolean isDisposed()
+  public boolean isDisposed() throws RemoteException
   {
     return screen.isDisposed();
   }

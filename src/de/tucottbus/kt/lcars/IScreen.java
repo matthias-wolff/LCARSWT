@@ -94,7 +94,7 @@ public interface IScreen extends Remote
    * Returns true if the screen is disposed, otherwise false.
    * @return
    */
-  public boolean isDisposed();  
+  public boolean isDisposed() throws RemoteException;
 }
 
 // EOF
