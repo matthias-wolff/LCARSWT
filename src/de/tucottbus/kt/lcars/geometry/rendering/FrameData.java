@@ -42,6 +42,13 @@ class FrameData
     this.selectiveRepaint = selectiveRepaint;
     this.panelState = panelData.panelState;
     this.elements = panelData.elementData;
+    
+    if (Log.DebugMode) //Debug: check if all elements not null
+      for (ElementData ed : this.elements)
+        if (ed == null){
+          Log.warn("Illegal null ElementData found");
+          return;
+        }
   }
 
   /**

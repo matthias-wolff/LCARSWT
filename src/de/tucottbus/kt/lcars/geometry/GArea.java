@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars.geometry;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -19,14 +20,14 @@ public class GArea extends AGeometry
 {
   private static final long serialVersionUID = 254038909353270177L;
 
-  protected Area            area;
+  protected GeneralPath     area;
   protected boolean         outline;  
   private transient Path    cachedPath;
   
   public GArea(Area area, boolean foreground)
   {
     super(foreground);
-    this.area = new Area(area);
+    this.area = new GeneralPath(area);
   }
   
   @Override
@@ -50,7 +51,7 @@ public class GArea extends AGeometry
   }
   
   public void setShape(Shape shape) {
-    area = new Area(shape);
+    area = new GeneralPath(shape);
   }
     
   /*

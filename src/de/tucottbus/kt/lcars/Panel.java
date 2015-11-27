@@ -1188,8 +1188,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         els[i++] = el.getUpdateData(incremental && !this.addedElements.contains(el));
       this.addedElements.clear();
     }
-    
-                                                      // copy of state?
+
     // Update screen
     try
     {
