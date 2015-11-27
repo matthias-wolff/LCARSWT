@@ -48,7 +48,7 @@ public class TestPanel extends Panel
     awtPanelWwj.add(wwj, BorderLayout.CENTER);
 
     // Push and drag test
-    ERect eRect = new ERect(this,1209,152,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"PUSH ME");
+    ERect eRect = new ERect(this,990,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"PUSH ME");
     eRect.addEEventListener(new EEventListener()
     {
       
@@ -83,10 +83,9 @@ public class TestPanel extends Panel
     add(eRect);
 
     // Drag buttons
-    add(createDragButton("DRAG ME", 1420, 152));
-    add(createDragButton("ME TOO", 1420, 252));
-    add(createDragButton("AND ME", 1420, 352));
-    
+    for (int i = 0, x = 500; i < 10; i++, x+=111)
+      add(createDragButton("DRAG ME", x, 152));
+        
     // Other buttons
     eRect = new ERect(this,1209,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"HELP");
     eRect.addEEventListener(new EEventListenerAdapter()
@@ -119,7 +118,7 @@ public class TestPanel extends Panel
 
   private ERect createDragButton(String label, int x, int y) {
     final Point dragOffset = new Point();
-    ERect eRect = new ERect(this,x,y,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,label);
+    ERect eRect = new ERect(this,x,y,100,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,label);
     eRect.addEEventListener(new EEventListener()
     {
       @Override

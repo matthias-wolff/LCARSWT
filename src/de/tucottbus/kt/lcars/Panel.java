@@ -78,7 +78,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * The list of {@linkplain EElement elements} on this panel.
    */
   private final ArrayList<EElement> elements;
-  
+
   /**
    * The set of elements known by the screen
    */
@@ -105,20 +105,20 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   private LoadStatistics loadStat;
 
-  //--Dragged elements--//
-  
+  // --Dragged elements--//
+
   /**
    * Used to synchronize touch events
    */
   private final ArrayList<EElement> dragTouch = new ArrayList<>();
-  
+
   private EElement dragMouse;
 
   /**
    * Flag indicating that the screen needs to be redrawn.
    */
   private final AtomicBoolean screenInvalid;
-  
+
   private EMessageBox eMsgBox;
   private EPanelSelector ePnlSel;
   private ELabel eTitle;
@@ -141,21 +141,24 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public static String guessName(Class<?> clazz)
   {
-    if (clazz==null) return null;
+    if (clazz == null)
+      return null;
     String n = "";
     String s = clazz.getSimpleName();
-    if (s.endsWith("Panel")) s = s.substring(0,s.length()-5);
-    for (int i=0; i<s.length(); i++)
+    if (s.endsWith("Panel"))
+      s = s.substring(0, s.length() - 5);
+    for (int i = 0; i < s.length(); i++)
     {
       char c = s.charAt(i);
-      if (i>0 && Character.isUpperCase(c)) n+=" ";
-      n+=c;
+      if (i > 0 && Character.isUpperCase(c))
+        n += " ";
+      n += c;
     }
     return n;
   }
-  
+
   // -- Constructors --
-  
+
   /**
    * Creates a new LCARS panel.
    * 
@@ -164,18 +167,18 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public Panel(IScreen iscreen)
   {
-    this.serialNo        = serialGenCount.getAndIncrement();
-    this.iscreen         = iscreen;
-    this.elements        = new ArrayList<EElement>(200);
-    this.addedElements   = new HashSet<EElement>(20);
-    this.state           = new PanelState(getDimension());
-    this.keyListeners    = new Vector<KeyListener>();
-    this.loadStat        = new LoadStatistics(25);
-    this.screenInvalid   = new AtomicBoolean(true);
+    this.serialNo = serialGenCount.getAndIncrement();
+    this.iscreen = iscreen;
+    this.elements = new ArrayList<EElement>(200);
+    this.addedElements = new HashSet<EElement>(20);
+    this.state = new PanelState(getDimension());
+    this.keyListeners = new Vector<KeyListener>();
+    this.loadStat = new LoadStatistics(25);
+    this.screenInvalid = new AtomicBoolean(true);
     LCARS.setPanelDimension(getDimension());
     init();
   }
-  
+
   /**
    * Creates a panel of the specified class.
    * 
@@ -188,37 +191,36 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    *           If <code>className</code> is invalid.
    */
   public static Panel createPanel(String className, IScreen iscreen)
-  throws ClassNotFoundException
+      throws ClassNotFoundException
   {
     Panel panel;
 
-    if(className==null || className == Panel.class.getName())
+    if (className == null || className == Panel.class.getName())
     {
       panel = new Panel(iscreen);
       panel.panelSelectionDialog();
-    }
-    else 
+    } else
     {
-      Class<?> panelClass = (className!=null) ? Class.forName(className)
-                                              : Panel.class;
+      Class<?> panelClass = (className != null) ? Class.forName(className)
+          : Panel.class;
       try
       {
-        Object[] args = { iscreen };
-        panel = (Panel)panelClass.getConstructors()[0].newInstance(args);
-      }
-      catch (Exception e)
+        Object[] args =
+        { iscreen };
+        panel = (Panel) panelClass.getConstructors()[0].newInstance(args);
+      } catch (Exception e)
       {
         Log.err("Could not create panel \"" + className + "\".", e);
         return null;
-      }      
+      }
     }
     LCARS.setPanelDimension(panel.getDimension());
     panel.start();
     return panel;
   }
-  
+
   // -- Overrides --
-  
+
   public String getDocIndex()
   {
     return null;
@@ -230,26 +232,28 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void init()
   {
     Dimension dim = getDimension();
-    
-    int style = LCARS.EC_HEADLINE|LCARS.EF_HEAD1|LCARS.ES_LABEL_NE|LCARS.ES_STATIC;
-    if (eTitle==null)
+
+    int style = LCARS.EC_HEADLINE | LCARS.EF_HEAD1 | LCARS.ES_LABEL_NE
+        | LCARS.ES_STATIC;
+    if (eTitle == null)
     {
-      eTitle = new ELabel(this,dim.width-523,6,500,0,style,null); 
+      eTitle = new ELabel(this, dim.width - 523, 6, 500, 0, style, null);
       add(eTitle);
     }
     try
     {
       eTitle.setLabel(guessName(getClass()).toUpperCase());
-    }
-    catch (Exception e)
+    } catch (Exception e)
     {
       Log.err("Cannot initiate panel.", e);
     }
 
     setBackground(new ImageMeta.Resource(LCARS.getArg("--wallpaper=")));
-    
-    eMsgBox = new EMessageBox((dim.width-600)/2,(dim.height-280)/2,600,280);
-    ePnlSel = new EPanelSelector((dim.width-800)/2,(dim.height-480)/2,800,480);
+
+    eMsgBox = new EMessageBox((dim.width - 600) / 2, (dim.height - 280) / 2,
+        600, 280);
+    ePnlSel = new EPanelSelector((dim.width - 800) / 2, (dim.height - 480) / 2,
+        800, 480);
   }
 
   /**
@@ -751,7 +755,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   public <T extends EElement> T add(T el)
   {
-    if (el == null) return null;
+    if (el == null)
+      return null;
     synchronized (elements)
     {
       doAdd(el);
@@ -759,17 +764,16 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     return el;
   }
 
-  
   private void doAdd(EElement el)
   {
     if (!doRemove(el))
       addedElements.add(el);
     elements.add(el);
   }
-  
+
   /**
-   * Adds a range of new LCARS GUI elements to the panel. This does <em>not</em> trigger a
-   * repaint of the panel!
+   * Adds a range of new LCARS GUI elements to the panel. This does <em>not</em>
+   * trigger a repaint of the panel!
    * 
    * @param el
    *          the element
@@ -778,17 +782,19 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     if (elements == null)
       throw new NullPointerException("elements");
-    if (elements.isEmpty()) return;
-    
+    if (elements.isEmpty())
+      return;
+
     synchronized (this.elements)
     {
-      for(EElement el: elements)
+      for (EElement el : elements)
         doAdd(el);
     }
   }
 
   /**
    * <em>NOT SYNCHRONIZED</em> variant of {@link Panel#remove(EElement)}
+   * 
    * @param el
    */
   private boolean doRemove(EElement el)
@@ -796,7 +802,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     addedElements.remove(el);
     return elements.remove(el);
   }
-  
+
   /**
    * Removes an LCARS GUI element from the panel. This does <em>not</em> trigger
    * a repaint of the panel!
@@ -813,8 +819,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
-   * Removes a range of LCARS GUI elements from the panel. This does <em>not</em> trigger
-   * a repaint of the panel!
+   * Removes a range of LCARS GUI elements from the panel. This does
+   * <em>not</em> trigger a repaint of the panel!
    * 
    * @param el
    *          the element
@@ -829,12 +835,14 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
-   * Removes a range and adds a range of LCARS GUI elements synchronous from/to the panel. This does <em>not</em> trigger
-   * a repaint of the panel!
+   * Removes a range and adds a range of LCARS GUI elements synchronous from/to
+   * the panel. This does <em>not</em> trigger a repaint of the panel!
+   * 
    * @param remove
    * @param add
    */
-  public void removeAllAndAddAll(Collection<EElement> remove, Collection<EElement> add)
+  public void removeAllAndAddAll(Collection<EElement> remove,
+      Collection<EElement> add)
   {
     synchronized (this.elements)
     {
@@ -844,7 +852,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         doAdd(el);
     }
   }
-  
+
   /**
    * Return the LCARS GUI element at the specified position (panel coordinates).
    * Use {@link Screen#componentToPanel(Point)} to convert screen coordinates
@@ -861,7 +869,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       if (isModal())
         return doElementAt(pt, true);
-      
+
       EElement el = doElementAt(pt, true);
       if (el == null)
         el = doElementAt(pt, false);
@@ -870,7 +878,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
-   * <em>NOT SYNCHRONIZED</em> variant of {@link Panel#elementAt(Point, boolean)}
+   * <em>NOT SYNCHRONIZED</em> variant of
+   * {@link Panel#elementAt(Point, boolean)}
+   * 
    * @param pt
    * @param modal
    * @return
@@ -1169,7 +1179,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     if (iscreen == null || runt == null)
       return;
     boolean invalid = screenInvalid.getAndSet(false);
-    if (!invalid) return;
+    if (!invalid)
+      return;
 
     // Decide on incremental update
 
@@ -1188,7 +1199,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       els = new ElementData[this.elements.size()];
       for (EElement el : this.elements)
-        els[i++] = el.getUpdateData(incremental && !this.addedElements.contains(el));
+        els[i++] = el
+            .getUpdateData(incremental && !this.addedElements.contains(el));
       this.addedElements.clear();
     }
 
@@ -1197,8 +1209,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       PanelData data = new PanelData(this, state, els); // TODO: better make a
       iscreen.update(data, incremental);
-    }
-    catch (RemoteException e)
+    } catch (RemoteException e)
     {
       Log.err("Cannot sending update to screen.", e);
     }
@@ -1212,7 +1223,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void start()
   {
     if (runt == null)
-      (runt = new Timer("Panel timer", true)).scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
+      (runt = new Timer("Panel timer", true))
+          .scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
     if (getSpeechEngine() != null)
       getSpeechEngine().addSpeechEventListener(this);
     invalidate();
@@ -1232,19 +1244,24 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     // owner anymore, can cause inconsistent screen data
     runt.cancel();
   }
-  
+
   @Override
   public void processTouchEvents(TouchEvent[] events)
   {
+    if (events.length == 0) return;
     int touchUps = 0;
-    for (int i = 0; i < events.length; i++)
-    {
-      TouchEvent event = events[i];
-      EEvent ee = new EEvent();
-      ee.pt = new Point(event.x, event.y);
 
-      synchronized (dragTouch)
+    synchronized (dragTouch)
+    {
+      if (events[0].type == TouchEvent.DOWN)
+        dragTouch.clear();  // clean up if first touch
+      
+      for (int i = 0; i < events.length; i++)
       {
+        TouchEvent event = events[i];
+        EEvent ee = new EEvent();
+        ee.pt = new Point(event.x, event.y);
+
         switch (event.type)
         {
         case TouchEvent.DOWN:
@@ -1254,7 +1271,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
             this.dragMouse = ee.el;
           else
             this.dragTouch.add(ee.el);
-          
+
           if (ee.el == null)
           {
             if (!isSilent())
@@ -1286,9 +1303,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           {
             de = this.dragMouse;
             this.dragMouse = null;
+          } else{
+            int ii = i - touchUps++;            
+            if (ii >= this.dragTouch.size()) return; //TODO: should never occur
+            de = this.dragTouch.remove(ii);
           }
-          else
-            de = this.dragTouch.remove(i-touchUps++);
 
           if (de == null)
             return;
@@ -1297,9 +1316,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           de.fireEEvent(ee);
           break;
         case TouchEvent.DRAG:
-          EElement dragElement = event.isMouseEvent
-                               ? this.dragMouse
-                               : this.dragTouch.get(i-touchUps);
+          EElement dragElement = event.isMouseEvent ? this.dragMouse
+              : this.dragTouch.get(i - touchUps);
           if (dragElement == null)
             return;
           boolean inBounds = ee.el == dragElement;
@@ -1370,7 +1388,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           return;
       }
       break;
-    case KeyEvent.KEY_TYPED: //TODO: never occurs because not supported in swt, see Screen
+    case KeyEvent.KEY_TYPED: // TODO: never occurs because not supported in swt,
+                             // see Screen
       for (KeyListener listener : keyListeners)
       {
         listener.keyTyped(event);
@@ -1425,15 +1444,13 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   @Override
-  public final int serialNo()
-      throws RemoteException
+  public final int serialNo() throws RemoteException
   {
     return serialNo;
   }
-  
+
   @Override
-  public String getElementInfo(int serialNo)
-      throws RemoteException
+  public String getElementInfo(int serialNo) throws RemoteException
   {
     synchronized (this.elements)
     {
