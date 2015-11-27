@@ -166,6 +166,15 @@ implements IPanel, IRmiPanelAdapterRemote
     // TODO Auto-generated method stub
     return (panel != null) ? panel.serialNo : -1;
   }
+
+  @Override
+  public String getElementInfo(int serialNo)
+      throws RemoteException
+  {
+    return panel.getElementInfo(serialNo);
+  }
+  
+  
 }
 
 // EOF

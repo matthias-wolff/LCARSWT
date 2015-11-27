@@ -19,6 +19,7 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcars.util.ObjectSize;
 import de.tucottbus.kt.lcars.util.Objectt;
@@ -199,9 +200,17 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
     int y = (screenHeight-h)/2;
     int style = LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT;
     
-    PanelData data = new PanelData(screen.getPanel(),
-        new PanelState(new Dimension(screenWidth, screenHeight)),
-        new ElementData[1]);
+    PanelData data;
+    try
+    {
+      data = new PanelData(screen.getPanel(),
+          new PanelState(new Dimension(screenWidth, screenHeight)),
+          new ElementData[1]);
+    } catch (RemoteException e1)
+    {
+      Log.err("Cannot collect rmi errors.", e1);
+      return;
+    }
     
     EElement el = new ELabel(null, x, y, w, h, style, "");
     
@@ -221,13 +230,18 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
           lastMsg = newMsg;
         }
         
-        if (data.panelId == screen.getPanel().serialNo())
-          screen.update(data, false);
-        else
+        try
         {
-          timer.cancel();
-          timer.purge();
+          if (data.panelId == screen.getPanel().serialNo()){
+            screen.update(data, false);
+            return;
+          }          
+        } catch (RemoteException e)
+        {
+          Log.err("Cannot collect rmi errors.", e);
         }
+        timer.cancel();
+        timer.purge();
       }
     };
     

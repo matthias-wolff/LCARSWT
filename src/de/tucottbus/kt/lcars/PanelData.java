@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ElementData;
@@ -33,7 +34,9 @@ public class PanelData implements Serializable
    */
   public final ElementData[] elementData;
   
-  public PanelData(IPanel panel, PanelState state, ElementData[] elementData) {
+  public PanelData(IPanel panel, PanelState state, ElementData[] elementData)
+      throws RemoteException
+  {
     this.panelId = panel.serialNo();
     this.panelState = state;
     this.elementData = elementData;

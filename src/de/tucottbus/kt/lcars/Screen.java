@@ -11,7 +11,6 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Timer;
@@ -19,7 +18,6 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -29,7 +27,6 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.TouchListener;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -43,7 +40,6 @@ import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
-import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.swt.SWTResourceManager;
 import de.tucottbus.kt.lcars.swt.SwtKeyMapper;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
@@ -430,23 +426,33 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
     this.panel = ipanel;
 
-    if (ipanel != null)
+    if (ipanel == null)
+    {
+      // Set and start new panel
+      composite.clear();
+      return;
+    }
+    
+    try
+    {
       this.panelId = ipanel.serialNo();
+    } catch (RemoteException e)
+    {
+      Log.err("Cannot set panel to screen, because of getting serial number from panel failed.", e);
+      return;
+    }
 
     // Set and start new panel
     composite.clear();
 
-    if (ipanel != null)
+    try
     {
-      try
-      {
-        Log.info("Starting panel " + ipanel.getClass().getSimpleName() + "...");
-        ipanel.start();
-        Log.info("...Panel started");
-      } catch (RemoteException e)
-      {
-        Log.err("...Panel start FAILED", e);
-      }
+      Log.info("Starting panel " + ipanel.getClass().getSimpleName() + "...");
+      ipanel.start();
+      Log.info("...Panel started");
+    } catch (RemoteException e)
+    {
+      Log.err("...Panel start FAILED", e);
     }
   }
 

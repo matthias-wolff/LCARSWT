@@ -1189,11 +1189,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       this.addedElements.clear();
     }
     
-    PanelData data = new PanelData(this, state, els); // TODO: better make a
                                                       // copy of state?
     // Update screen
     try
     {
+      PanelData data = new PanelData(this, state, els); // TODO: better make a
       iscreen.update(data, incremental);
     }
     catch (RemoteException e)
@@ -1410,8 +1410,23 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
   @Override
   public final int serialNo()
+      throws RemoteException
   {
     return serialNo;
+  }
+  
+  @Override
+  public String getElementInfo(int serialNo)
+      throws RemoteException
+  {
+    synchronized (this.elements)
+    {
+      for (EElement el : this.elements)
+        if (el.getSerialNo() == serialNo)
+          return el.toString();
+    }
+    return null;
+
   }
 }
 

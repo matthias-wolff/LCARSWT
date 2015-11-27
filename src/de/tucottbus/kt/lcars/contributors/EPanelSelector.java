@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 
+import de.tucottbus.kt.lcars.IPanel;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.MainPanel;
@@ -102,7 +103,9 @@ public class EPanelSelector extends EMessageBox
           if (cancel) return;
           try
           {
-            screen.getPanel().stop();
+            IPanel panel = screen.getPanel();
+            if (panel != null)
+              panel.stop();
             try
             {
               screen.setPanel(className);

@@ -55,7 +55,14 @@ public interface IPanel extends Remote
    * The unique serial number of the {@link IPanel} described by this
    * instance.
    */
-  public int serialNo();
+  public int serialNo() throws RemoteException;
+  
+  /**
+   * Returns information of the element by calling its toString() method. If the element is not in the list it return null.
+   * @param serialNo - serial number of the element
+   * @return
+   */
+  public String getElementInfo(int serialNo) throws RemoteException;
 }
 
 // EOF

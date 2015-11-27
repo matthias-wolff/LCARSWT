@@ -219,7 +219,7 @@ public final class ElementData implements Serializable
       if (other.state != null)
         state = other.state;
       else
-        Log.err("Cannot get any element state in ElementData#"+serialNo+", nether in this ElementData nor in the other (previous) ElementData because they are null.");
+        Log.err("Missing state in ElementData#"+serialNo+", cannot apply state from previous ElementData because its null too.");
     } else
       ret |= state.setChanged(other.state.getChanged());
 

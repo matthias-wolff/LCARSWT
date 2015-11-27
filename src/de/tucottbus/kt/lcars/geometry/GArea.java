@@ -3,7 +3,6 @@ package de.tucottbus.kt.lcars.geometry;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
-import java.io.Serializable;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -16,7 +15,7 @@ import de.tucottbus.kt.lcars.swt.AwtSwt;
  * 
  * @author Matthias Wolff
  */
-public class GArea extends AGeometry implements Serializable
+public class GArea extends AGeometry
 {
   private static final long serialVersionUID = 254038909353270177L;
 
