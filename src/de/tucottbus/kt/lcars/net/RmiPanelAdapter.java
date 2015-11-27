@@ -114,9 +114,18 @@ implements IPanel, IRmiPanelAdapterRemote
     panel = Panel.createPanel(className,(IScreen)getPeer());
     if (panel==null)
     {
-      panel = Panel.createPanel(null,(IScreen)getPeer());
-      String s = "cannot be created on a remote screen.";
-      panel.messageBox("ERROR",className+"\n"+s.toUpperCase(),"OK",null,null);
+      IScreen src = (IScreen)getPeer();
+      panel = Panel.createPanel(null,src);
+      try
+      {
+        src.setPanelId(panel.serialNo);
+        String s = "cannot be created on a remote screen.";
+        panel.messageBox("ERROR",className+"\n"+s.toUpperCase(),"OK",null,null);
+      } catch (RemoteException e)
+      {
+        err("... Panel set failed");
+        return;
+      }
     }
     log("... Panel set");
   }
@@ -163,7 +172,6 @@ implements IPanel, IRmiPanelAdapterRemote
   @Override
   public int serialNo()
   {
-    // TODO Auto-generated method stub
     return (panel != null) ? panel.serialNo : -1;
   }
 

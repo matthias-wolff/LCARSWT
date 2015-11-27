@@ -141,6 +141,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
     try
     {
       rpanel.setPanel(className);
+      screen.setPanelId(rpanel.serialNo());
     }
     catch (RemoteException e)
     {
@@ -252,6 +253,12 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   public boolean isDisposed() throws RemoteException
   {
     return screen.isDisposed();
+  }
+
+  @Override
+  public void setPanelId(int panelId) throws RemoteException
+  {
+    screen.setPanelId(panelId);
   }
 }
 

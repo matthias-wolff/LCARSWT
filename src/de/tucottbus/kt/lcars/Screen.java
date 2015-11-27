@@ -476,6 +476,11 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   {
     setPanel(Panel.createPanel(className, this));
   }
+  
+  @Override
+  public void setPanelId(int panelId) {
+    this.panelId = panelId;
+  }
 
   @Override
   public IPanel getPanel()

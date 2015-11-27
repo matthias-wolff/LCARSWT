@@ -95,6 +95,13 @@ public interface IScreen extends Remote
    * @return
    */
   public boolean isDisposed() throws RemoteException;
+
+  /**
+   * Sets the current panel, which the screen reacts on
+   * @param panelId
+   */
+  @Deprecated
+  public void setPanelId(int panelId) throws RemoteException;
 }
 
 // EOF
