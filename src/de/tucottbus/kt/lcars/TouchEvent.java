@@ -47,21 +47,6 @@ public class TouchEvent implements Serializable
   public final boolean primary;
   
   
-  /**
-   * 
-   * @param type
-   * @param position
-   * @param isMouseEvent
-   */
-
-  public TouchEvent(int type, Point position, boolean isMouseEvent, boolean primary)
-  {
-    this.type = type;
-    this.x = position.x;
-    this.y = position.y;
-    this.isMouseEvent = isMouseEvent;
-    this.primary = primary;
-  }
 
   public TouchEvent(int type, int x, int y, boolean isMouseEvent, boolean primary)
   {
@@ -70,6 +55,11 @@ public class TouchEvent implements Serializable
     this.y = y;
     this.isMouseEvent = isMouseEvent;
     this.primary = primary;
+  }
+
+  public TouchEvent(int type, Point position, boolean isMouseEvent, boolean primary)
+  {
+    this(type, position.x, position.y, isMouseEvent, primary);
   }
 
   @Override

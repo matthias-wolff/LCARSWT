@@ -11,6 +11,7 @@ import java.rmi.RemoteException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -104,10 +105,14 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   private LoadStatistics loadStat;
 
+  //--Dragged elements--//
+  
   /**
    * Used to synchronize touch events
    */
-  private final Object touchEventSync;
+  private final ArrayList<EElement> dragTouch = new ArrayList<>();
+  
+  private EElement dragMouse;
 
   /**
    * Flag indicating that the screen needs to be redrawn.
@@ -120,7 +125,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   private EElement eLight;
   private EElement eDim;
   private EElement eSilent;
-  private EElement dragElement;
   private Timer runt;
   private int runc;
   private int dimc;
@@ -167,7 +171,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     this.state           = new PanelState(getDimension());
     this.keyListeners    = new Vector<KeyListener>();
     this.loadStat        = new LoadStatistics(25);
-    this.touchEventSync  = new Object();
     this.screenInvalid   = new AtomicBoolean(true);
     LCARS.setPanelDimension(getDimension());
     init();
@@ -1233,82 +1236,96 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   @Override
   public void processTouchEvents(TouchEvent[] events)
   {
-    TouchEvent event = events[0];
-    if (!event.primary)
-      return;
-
-    EEvent ee = new EEvent();
-    ee.pt = new Point(event.x, event.y);
-
-    synchronized (touchEventSync)
+    int touchUps = 0;
+    for (int i = 0; i < events.length; i++)
     {
-      switch (event.type)
+      TouchEvent event = events[i];
+      EEvent ee = new EEvent();
+      ee.pt = new Point(event.x, event.y);
+
+      synchronized (dragTouch)
       {
-      case TouchEvent.DOWN:
-        ee.id = EEvent.TOUCH_DOWN;
-        dragElement = ee.el = elementAt(ee.pt);
-        
-        if (ee.el == null)
+        switch (event.type)
         {
-          if (!isSilent())
+        case TouchEvent.DOWN:
+          ee.id = EEvent.TOUCH_DOWN;
+          ee.el = elementAt(ee.pt);
+          if (event.isMouseEvent)
+            this.dragMouse = ee.el;
+          else
+            this.dragTouch.add(ee.el);
+          
+          if (ee.el == null)
+          {
+            if (!isSilent())
+              try
+              {
+                getScreen().userFeedback(UserFeedback.Type.DENY);
+              } catch (RemoteException | NullPointerException e)
+              {
+                Log.err("Cannot perform audio-visual user feedback.", e);
+              }
+            return;
+          }
+
+          ee.pt = ee.el.panelToElement(ee.pt);
+          UserFeedback.Type ft = ee.el.fireEEvent(ee);
+          if (!isSilent() && getScreen() != null)
             try
             {
-              getScreen().userFeedback(UserFeedback.Type.DENY);
-            } catch (RemoteException | NullPointerException e)
+              getScreen().userFeedback(ft);
+            } catch (RemoteException e)
             {
               Log.err("Performing an audio-visual user feedback failed", e);
             }
-          return;
-        }
-
-        ee.pt = ee.el.panelToElement(ee.pt);
-        UserFeedback.Type ft = ee.el.fireEEvent(ee);
-        if (!isSilent() && getScreen() != null)
-          try
+          break;
+        case TouchEvent.UP:
+          ee.id = EEvent.TOUCH_UP;
+          EElement de;
+          if (event.isMouseEvent)
           {
-            getScreen().userFeedback(ft);
-          } catch (RemoteException e)
-          {
-            Log.err("Performing an audio-visual user feedback failed", e);
+            de = this.dragMouse;
+            this.dragMouse = null;
           }
-        break;
-      case TouchEvent.UP:
-        ee.id = EEvent.TOUCH_UP;
+          else
+            de = this.dragTouch.remove(i-touchUps--);
 
-        EElement de = dragElement;
-        dragElement = null;
-        if (de == null)
-          return;
-        ee.el = de;
-        ee.pt = ee.el.panelToElement(ee.pt);
-        de.fireEEvent(ee);
-        break;
-      case TouchEvent.DRAG:
-        EElement dragElement = this.dragElement;
-        if (dragElement == null)
-          return;
-        boolean inBounds = ee.el == dragElement;
-
-        if (inBounds || dragElement.isOverDrag())
-        {
-          ee.el = dragElement;
-          ee.id = EEvent.TOUCH_DRAG;
+          if (de == null)
+            return;
+          ee.el = de;
           ee.pt = ee.el.panelToElement(ee.pt);
-          dragElement.fireEEvent(ee);
+          de.fireEEvent(ee);
+          break;
+        case TouchEvent.DRAG:
+          EElement dragElement = event.isMouseEvent
+                               ? this.dragMouse
+                               : this.dragTouch.get(i-touchUps);
+          if (dragElement == null)
+            return;
+          boolean inBounds = ee.el == dragElement;
 
-          if (inBounds)
+          if (inBounds || dragElement.isOverDrag())
           {
-            ee = new EEvent();
             ee.el = dragElement;
-            ee.id = EEvent.TOUCH_HOLD;
+            ee.id = EEvent.TOUCH_DRAG;
             ee.pt = ee.el.panelToElement(ee.pt);
             dragElement.fireEEvent(ee);
+
+            if (inBounds)
+            {
+              ee = new EEvent();
+              ee.el = dragElement;
+              ee.id = EEvent.TOUCH_HOLD;
+              ee.pt = ee.el.panelToElement(ee.pt);
+              dragElement.fireEEvent(ee);
+            }
+            this.dragMouse = ee.el;
           }
-          this.dragElement = ee.el;
+          break;
         }
-        break;
       }
     }
+
   }
 
   /**

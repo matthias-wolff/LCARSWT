@@ -548,7 +548,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         e.y);
     Point pt = screenToPanel(absPos.x, absPos.y);
     return new TouchEvent[]
-    { new TouchEvent(eventType, pt, true, true) };
+      { new TouchEvent(eventType, pt, true, e.count==0) };
   }
 
   @Override

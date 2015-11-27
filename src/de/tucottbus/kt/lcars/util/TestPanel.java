@@ -82,8 +82,44 @@ public class TestPanel extends Panel
     });
     add(eRect);
 
+    // Drag buttons
+    add(createDragButton("DRAG ME", 1420, 152));
+    add(createDragButton("ME TOO", 1420, 252));
+    add(createDragButton("AND ME", 1420, 352));
+    
+    // Other buttons
+    eRect = new ERect(this,1209,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"HELP");
+    eRect.addEEventListener(new EEventListenerAdapter()
+    {
+      @Override
+      public void touchDown(EEvent ee)
+      {
+        help();
+      }
+    });
+    add(eRect);
+    eRect = new ERect(this,1420,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"EXIT");
+    eRect.addEEventListener(new EEventListenerAdapter()
+    {
+      @Override
+      public void touchDown(EEvent ee)
+      {
+        try
+        {
+          getScreen().exit();
+        } 
+        catch (RemoteException e)
+        {
+          e.printStackTrace();
+        }
+      }
+    });
+    add(eRect);
+  }
+
+  private ERect createDragButton(String label, int x, int y) {
     final Point dragOffset = new Point();
-    eRect = new ERect(this,1420,152,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,"DRAG ME");
+    ERect eRect = new ERect(this,x,y,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND|LCARS.EB_OVERDRAG,"DRAG ME");
     eRect.addEEventListener(new EEventListener()
     {
       @Override
@@ -115,40 +151,9 @@ public class TestPanel extends Panel
       }
       
     });
-    add(eRect);
-    
-    // Other buttons
-    eRect = new ERect(this,1209,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"HELP");
-    eRect.addEEventListener(new EEventListenerAdapter()
-    {
-      @Override
-      public void touchDown(EEvent ee)
-      {
-        help();
-      }
-    });
-    add(eRect);
-    eRect = new ERect(this,1420,22,208,80,LCARS.EC_ELBOUP|LCARS.ES_LABEL_E|LCARS.ES_RECT_RND,"EXIT");
-    eRect.addEEventListener(new EEventListenerAdapter()
-    {
-      @Override
-      public void touchDown(EEvent ee)
-      {
-        try
-        {
-          getScreen().exit();
-        } 
-        catch (RemoteException e)
-        {
-          e.printStackTrace();
-        }
-      }
-    });
-    add(eRect);
-
-  
+    return eRect;
   }
-
+  
   /**
    * Convenience method: Runs the test panel.
    * 
