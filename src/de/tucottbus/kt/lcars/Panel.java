@@ -1249,16 +1249,13 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void processTouchEvents(TouchEvent[] events)
   {
     if (events.length == 0) return;
-    int touchUps = 0;
+    int i = 0;
 
     synchronized (dragTouch)
     {
-      if (events[0].type == TouchEvent.DOWN)
-        dragTouch.clear();  // clean up if first touch
-      
-      for (int i = 0; i < events.length; i++)
+      boolean clearDragTouch = true;
+      for (TouchEvent event : events)
       {
-        TouchEvent event = events[i];
         EEvent ee = new EEvent();
         ee.pt = new Point(event.x, event.y);
 
@@ -1267,10 +1264,13 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         case TouchEvent.DOWN:
           ee.id = EEvent.TOUCH_DOWN;
           ee.el = elementAt(ee.pt);
-          if (event.isMouseEvent)
+          if (event.isMouseEvent){
             this.dragMouse = ee.el;
-          else
+          }
+          else{
+            clearDragTouch = false;
             this.dragTouch.add(ee.el);
+          }
 
           if (ee.el == null)
           {
@@ -1304,9 +1304,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
             de = this.dragMouse;
             this.dragMouse = null;
           } else{
-            int ii = i - touchUps++;            
-            if (ii >= this.dragTouch.size()) return; //TODO: should never occur
-            de = this.dragTouch.remove(ii);
+            if (i >= this.dragTouch.size()) continue; //TODO: should never occur
+            de = this.dragTouch.remove(i);
           }
 
           if (de == null)
@@ -1316,8 +1315,16 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           de.fireEEvent(ee);
           break;
         case TouchEvent.DRAG:
-          EElement dragElement = event.isMouseEvent ? this.dragMouse
-              : this.dragTouch.get(i - touchUps);
+          EElement dragElement;
+          if (event.isMouseEvent)
+           dragElement = this.dragMouse;
+          else {
+            if (i > this.dragTouch.size())
+              continue;
+            dragElement = this.dragTouch.get(i++);
+          }
+          clearDragTouch &= event.isMouseEvent;
+          
           if (dragElement == null)
             return;
           boolean inBounds = ee.el == dragElement;
@@ -1342,6 +1349,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           break;
         }
       }
+      if (clearDragTouch)
+        dragTouch.clear();
     }
 
   }

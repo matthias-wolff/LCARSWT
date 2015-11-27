@@ -578,7 +578,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       else
       {
         if (e.count == 1)
-          touchCount--;
+          touchCount = 0;
         return;
       }
     }
