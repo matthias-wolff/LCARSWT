@@ -206,8 +206,8 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
     long time = System.currentTimeMillis();
     int  code = key.code;
     int  modi = getModifiers();
-    int  vkun = KeyEvent.VK_UNDEFINED;
-    char chun = KeyEvent.CHAR_UNDEFINED;
+//    int  vkun = KeyEvent.VK_UNDEFINED;
+//    char chun = KeyEvent.CHAR_UNDEFINED;
     char chr  = keyMap.map(key.code,modi);
     if (chr=='\0') chr = (char)key.code;
     
@@ -215,19 +215,21 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
     {
       @SuppressWarnings("serial")
       Component c = new Component(){};
-      KeyEvent ep = new KeyEvent(c,KeyEvent.KEY_PRESSED,time,modi,code,chun);
-      KeyEvent et = new KeyEvent(c,KeyEvent.KEY_TYPED  ,time,modi,vkun,chr);
+      KeyEvent ep = new KeyEvent(c,KeyEvent.KEY_PRESSED,time,modi,code,chr);
+//      KeyEvent et = new KeyEvent(c,KeyEvent.KEY_TYPED  ,time,modi,vkun,chr);
       for (KeyListener listener : listeners)
       {
         listener.keyPressed(ep);
-        listener.keyTyped(et);
+        //listener.keyTyped(et);
       }
     }
     else if (eeid==EEvent.TOUCH_UP)
     {
-      KeyEvent er = new KeyEvent(null,KeyEvent.KEY_RELEASED,time,modi,code,chun);
+      @SuppressWarnings("serial")
+      Component c = new Component(){};
+      KeyEvent er = new KeyEvent(c,KeyEvent.KEY_RELEASED,time,modi,code,chr);
       for (KeyListener listener : listeners)
-        listener.keyPressed(er);
+        listener.keyReleased(er);
     }
   }
   
@@ -314,6 +316,24 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
   @Override
   public void touchUp(EEvent ee)
   {
+    Key key = (Key)ee.el.getData(); 
+
+    if (key.code==KeyEvent.VK_SHIFT)
+    {
+      selectKeys(KeyEvent.VK_SHIFT,!isKeySelected(KeyEvent.VK_SHIFT));
+      selectKeys(KeyEvent.VK_CAPS_LOCK,false);      
+    }
+    else if (key.code==KeyEvent.VK_ALT_GRAPH)
+      selectKeys(KeyEvent.VK_ALT_GRAPH,!isKeySelected(KeyEvent.VK_ALT_GRAPH));
+    else if (key.code==KeyEvent.VK_CAPS_LOCK)
+      selectKeys(KeyEvent.VK_CAPS_LOCK,!isKeySelected(KeyEvent.VK_CAPS_LOCK));
+    else
+    {
+      fireKey(key,ee.id);
+      selectKeys(KeyEvent.VK_SHIFT    ,false);
+      selectKeys(KeyEvent.VK_ALT_GRAPH,false);
+    }
+    modify();   
   }
 
   // -- Class Key --
