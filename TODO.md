@@ -8,4 +8,4 @@
 * a browser-"`GShape`" acting as the screen-side front end of `EBrowser` (which 
     would then become an `EElement`)
   * comm. screen->panel: `BrowserEvent`
-  * comm. panel->screen: fields in browser-"`GShape`"(?)
+  * comm. panel->screen: fields in browser-"`GShape`"(?) 
