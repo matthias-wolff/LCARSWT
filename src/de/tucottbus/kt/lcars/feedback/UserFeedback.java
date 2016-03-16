@@ -10,6 +10,15 @@ import de.tucottbus.kt.lcars.swt.ColorMeta;
  */
 public class UserFeedback
 {
+  //-- static final fields
+  private static final String EARCON_FILE_BASE = "de/tucottbus/kt/lcars/resources/audio";
+  private static final String EARCON_TOUCH = EARCON_FILE_BASE+"/earcon-touch.wav";
+  private static final String EARCON_DENY = EARCON_FILE_BASE+"/earcon-deny.wav";
+  private static final String EARCON_REC_LISTENING = EARCON_FILE_BASE+"/earcon-rec-listening.wav";
+  private static final String EARCON_REC_SLEEPING= EARCON_FILE_BASE+"/earcon-rec-sleeping.wav";
+  private static final String EARCON_REC_ACCEPTED= EARCON_FILE_BASE+"/earcon-rec-accepted.wav";
+  private static final String EARCON_REC_REJECTED= EARCON_FILE_BASE+"/earcon-rec-rejected.wav";
+  
   /**
    * The user feedback types.
    */
@@ -39,7 +48,6 @@ public class UserFeedback
    */
   public static UserFeedback getInstance(UserFeedback.Type type)
   {
-    String earconFileBase = "de/tucottbus/kt/lcars/resources/audio";
     UserFeedback signal = new UserFeedback();
     
     switch (type)
@@ -52,18 +60,18 @@ public class UserFeedback
     }
     case TOUCH:
       signal.earcon = new Earcon();
-      signal.earcon.resourceFile = earconFileBase+"/earcon-touch.wav";
+      signal.earcon.resourceFile = EARCON_TOUCH;
       return signal;
     case DENY:
       signal.earcon = new Earcon();
-      signal.earcon.resourceFile = earconFileBase+"/earcon-deny.wav";
+      signal.earcon.resourceFile = EARCON_DENY;
       return signal;
     case REC_LISTENING:
     {
       signal.eyecon = new Eyecon();
       signal.eyecon.setSamples(new ColorMeta[]{ new ColorMeta(0x0099CC) });
       signal.earcon = new Earcon();
-      signal.earcon.resourceFile = earconFileBase+"/earcon-rec-listening.wav";
+      signal.earcon.resourceFile = EARCON_REC_LISTENING;
       return signal;
     }
     case REC_SLEEPING:
@@ -71,7 +79,7 @@ public class UserFeedback
       signal.eyecon = new Eyecon();
       signal.eyecon.setSamples(new ColorMeta[] {new ColorMeta(0x0000FF)});
       signal.earcon = new Earcon();
-      signal.earcon.resourceFile = earconFileBase+"/earcon-rec-sleeping.wav";
+      signal.earcon.resourceFile = EARCON_REC_SLEEPING;
       return signal;
     }
     case REC_ACCEPTED:
@@ -79,14 +87,12 @@ public class UserFeedback
       ColorMeta c = new ColorMeta(0x00FF66);
       ColorMeta[] samples = new ColorMeta[13];
       for (int i=0; i<4; i++)
-      {
-        samples[i]=c;
-        samples[i+8]=c;
-      }
+        samples[i+8]=samples[i]=c;
+
       signal.eyecon = new Eyecon();
       signal.eyecon.setSamples(samples);
       signal.earcon = new Earcon();
-      signal.earcon.resourceFile = earconFileBase+"/earcon-rec-accepted.wav";
+      signal.earcon.resourceFile = EARCON_REC_ACCEPTED;
       return signal;
     }
     case REC_REJECTED:
@@ -97,7 +103,7 @@ public class UserFeedback
       signal.eyecon = new Eyecon();
       signal.eyecon.setSamples(samples);
       signal.earcon = new Earcon();
-      signal.earcon.resourceFile = earconFileBase+"/earcon-rec-rejected.wav";
+      signal.earcon.resourceFile = EARCON_REC_REJECTED;
       return signal;
     }
     default:

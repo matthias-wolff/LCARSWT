@@ -36,7 +36,8 @@ public class GArea extends AGeometry
     return new Area(this.area);
   }
   
-  public Rectangle getBounds() {
+  public Rectangle getBounds()
+  {
     return area.getBounds();
   }
   
@@ -50,7 +51,8 @@ public class GArea extends AGeometry
     this.outline = outline;
   }
   
-  public void setShape(Shape shape) {
+  public void setShape(Shape shape)
+  {
     area = new GeneralPath(shape);
   }
     

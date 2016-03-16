@@ -3,6 +3,7 @@ package de.tucottbus.kt.lcars.feedback;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
@@ -166,7 +167,7 @@ public abstract class UserFeedbackPlayer
       try
       {
         // Initialize play-back
-        synchronized (this)
+        synchronized (this) //TODO: WARNING: CA2002: Do not lock on objects with weak identity
         {
           // - Skip to last sample of currently played signal
           if (eyeconSamples!=null && eyeconSamples.length>0)
@@ -197,7 +198,7 @@ public abstract class UserFeedbackPlayer
             {
               try
               {
-                synchronized (UserFeedbackPlayer.this)
+                synchronized (UserFeedbackPlayer.this) //TODO: WARNING: CA2002: Do not lock on objects with weak identity
                 {
                   if (eyeconSamples!=null&&eyeconSample<eyeconSamples.length)
                   {
@@ -217,7 +218,7 @@ public abstract class UserFeedbackPlayer
               }
               catch (Exception e)
               {
-                e.printStackTrace();
+                Log.err("Some error in " + UserFeedback.class.getSimpleName() + "occured while playing eyecon samples.", e);
               }
             }
           },period,period);
@@ -225,7 +226,7 @@ public abstract class UserFeedbackPlayer
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+        Log.err("Some error in " + UserFeedback.class.getSimpleName() + "occured while playing eyecon samples.", e);
       }
     
     // Play earcon
@@ -238,7 +239,7 @@ public abstract class UserFeedbackPlayer
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+        Log.err("Some error in " + UserFeedback.class.getSimpleName() + "occured while playing earcon samples.", e);
       }
     }
   }

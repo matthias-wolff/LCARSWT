@@ -287,6 +287,7 @@ public class ElementState implements Serializable
     int     blink    = panelState!=null?panelState.blink:0;
     ColorMeta color = this.color;
     
+    //TODO: what if panelState==null?
     if (color!=null && (!blinking || blink!=0)) return color;
     if (highlighted) return ColorMeta.WHITE;
     return LCARS.getColor(panelState.colorScheme,style^touch^(blinking?blink:0));

@@ -20,31 +20,31 @@ public class PanelState implements Serializable
 
   // only use the first byte for flags, all other digits are reserved for flags of ElementData or ElementState
   
-  /**flag mask**/
+  /**flag mask*/
   public static final int FLAG_MASK    = 0xFF0000;      
   
-  /**flag for changed dimension**/
+  /**flag for changed dimension*/
   public static final int DIMENSION    = 0x010000;
   
-  /**flag for changed color scheme**/
+  /**flag for changed color scheme*/
   public static final int COLOR_SCHEME = 0x020000;
 
-  /**flag for changed blink state**/
+  /**flag for changed blink state*/
   public static final int BLINK        = 0x040000;
   
-  /**flag for changed modal**/
+  /**flag for changed modal*/
   public static final int MODAL        = 0x080000;
   
-  /**flag for changed silent state**/
+  /**flag for changed silent state*/
   public static final int SILENT       = 0x100000;
   
-  /**flag for changed lock state**/
+  /**flag for changed lock state*/
   public static final int LOCKED       = 0x200000;
   
-  /**flag for changed transparency**/
+  /**flag for changed transparency*/
   public static final int ALPHA        = 0x400000;
   
-  /**flag for changed background source**/
+  /**flag for changed background source*/
   public static final int BACKGROUND   = 0x800000;
      
 
@@ -128,7 +128,7 @@ public class PanelState implements Serializable
     if (                         alpha       != other.alpha)       result |= ALPHA;
     return                       locked      != other.locked ?     result | LOCKED : result;
   }
-    
+  
   @Override
   public boolean equals(Object o)
   {

@@ -48,7 +48,6 @@ public class PanelData implements Serializable
         + " panelState="+panelState
         + " elementData="+elementData;
   }
-  
 }
 
 // EOF

@@ -20,6 +20,7 @@ public class GImage extends AGeometry
 {
   private static final long serialVersionUID = -1878671224748589604L;
   
+  
   public  final ImageMeta   meta;
   private final Point       pos;  
   private final Dimension   size;

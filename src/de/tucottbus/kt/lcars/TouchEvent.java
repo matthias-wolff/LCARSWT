@@ -42,7 +42,7 @@ public class TouchEvent implements Serializable
   public final boolean isMouseEvent;
   
   /**
-   * 
+   * Indicates if this event is a primary event of the current chain of touch events
    */
   public final boolean primary;
   

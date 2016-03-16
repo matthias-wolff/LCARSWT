@@ -15,7 +15,6 @@ import de.tucottbus.kt.lcars.elements.EElement;
  * 
  * @author Matthias Wolff
  */
-// TODO: rename to AGeometry
 public abstract class AGeometry implements Serializable
 {  
   private static final long serialVersionUID = -6704273422742875854L;

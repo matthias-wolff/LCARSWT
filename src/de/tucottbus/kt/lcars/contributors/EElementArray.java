@@ -308,9 +308,7 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public boolean getLock()
   {
-    if (eLock != null)
-      return eLock.isBlinking();
-    return this.lock;
+    return eLock != null ? eLock.isBlinking() : this.lock;
   }
 
   /**
@@ -455,10 +453,7 @@ public class EElementArray extends ElementContributor implements EEventListener
     synchronized (eList)
     {
       for (int i = 0; i < this.eList.size(); i++)
-      {
-        EElement e = this.eList.get(i);
-        e.setHighlighted(i == item);
-      }
+        this.eList.get(i).setHighlighted(i == item);
       if (this.panel != null)
         this.panel.invalidate();
     }

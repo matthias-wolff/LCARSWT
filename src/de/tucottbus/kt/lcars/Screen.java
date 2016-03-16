@@ -254,44 +254,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
     setPanel(panelClass);
 
-    // Window event handlers
-    // addWindowStateListener(new WindowStateListener()
-    // {
-    // @Override
-    // public void windowStateChanged(WindowEvent e)
-    // {
-    // }
-    // });
-    // addWindowListener(new WindowListener(){
-    // public void windowActivated(WindowEvent e){}
-    // public void windowClosed(WindowEvent e){}
-    // public void windowClosing(WindowEvent e){}
-    // public void windowDeactivated(WindowEvent e){}
-    // public void windowDeiconified(WindowEvent e){}
-    // public void windowIconified(WindowEvent e){}
-    // public void windowOpened(WindowEvent e){}
-    // });
-    // addComponentListener(new ComponentListener()
-    // {
-    // @Override
-    // public void componentShown(ComponentEvent e)
-    // {
-    // invalidateScreen();
-    // }
-    //
-    // @Override
-    // public void componentResized(ComponentEvent e)
-    // {
-    // invalidateScreen();
-    // }
-    //
-    // @Override
-    // public void componentMoved(ComponentEvent e){}
-    //
-    // @Override
-    // public void componentHidden(ComponentEvent e){}
-    // });
-
     shell.open();
 
     // The screen timer
@@ -428,11 +390,12 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
     if (ipanel == null)
     {
-      // Set and start new panel
+      // Clear screen
       composite.clear();
       return;
     }
     
+    // Set and start new panel
     try
     {
       this.panelId = ipanel.serialNo();
@@ -523,6 +486,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   }
 
   // -- Implementation of the MouseInputListener interface --
+  
   protected void processTouchEvents(TouchEvent[] touchEvent)
   {
     if (touchEvent == null)
@@ -676,6 +640,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     processTouchEvents(touches);
   }
 
+  /**
+   * Adds a {@link java.awt.Component} to the swt based screen.
+   * @param component - the {@link java.awt.Component} to add
+   */
   public synchronized void add(Component component)
   {
     if (component == null)
@@ -717,12 +685,20 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     });
   }
 
+  /**
+   * Removes a {@link java.awt.Component} to the swt based screen.
+   * @param component - the {@link java.awt.Component} to remove
+   */
   public void remove(Component component)
   {
     Composite composite = awtComponents.remove(component);
     composite.dispose();
   }
 
+  /**
+   * Returns the physical size of the screen in pixels. 
+   * @return
+   */
   public Dimension getSize()
   {
     Dimension d = new Dimension();
@@ -736,9 +712,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
   private void invoke(Runnable action)
   {
-    if (shell.isDisposed())
-      return;
-    shell.getDisplay().syncExec(action);
+    if (!shell.isDisposed())
+      shell.getDisplay().syncExec(action);
   }
 
   // -- Nested classes --

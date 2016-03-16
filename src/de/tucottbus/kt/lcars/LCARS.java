@@ -209,18 +209,16 @@ public class LCARS implements ILcarsRemote
   
   // -- Panel information --
   
+  /**
+   * The display size in pixels of a new instance of {@link de.tucottbus.kt.lcars.Panel} or an inherited class.
+   */
   protected static Dimension panelDim = new Dimension(1920,1080);
   
-  // The scaling to get a swt font with the same height as there awt variant
-  protected static double fontScale; 
   
-  static {
-    Display display = getDisplay();
-    display.syncExec(() -> {
-      fontScale = 72.0 / display.getDPI().y;
-    });
-  }
-  
+  /**
+   * Sets the display size in pixels of a new instance of {@link de.tucottbus.kt.lcars.Panel} or an inherited class
+   * @param dim
+   */
   public static void setPanelDimension(Dimension dim)
   {
     LCARS.panelDim = dim==null?new Dimension(1920,1080):dim;
@@ -453,6 +451,18 @@ public class LCARS implements ILcarsRemote
   private static FontMeta.Explicit[] fonts = null;
   private static Map<String,Boolean> insFnts = new Hashtable<String,Boolean>();
 
+  /** 
+   * The scaling to get a swt font with the same height as there awt variant
+   */
+  protected static double fontScale; 
+  
+  static {
+    Display display = getDisplay();
+    display.syncExec(() -> {
+      fontScale = 72.0 / display.getDPI().y;
+    });
+  }
+  
   /**
    * Determines if the specified font is installed.
    * 
@@ -588,29 +598,6 @@ public class LCARS implements ILcarsRemote
     tl.setFont(font);
     tl.setText(text);
     return tl;
-//    Path              path = new Path(font.getDevice());
-//    path.addString("M", 0, 0, font);
-//    float[] mBnds = new float[4];
-//    path.getBounds(mBnds);
-//    path.dispose();
-//    path = new Path(font.getDevice());
-//    
-//    FontMetrics fm = tl.getLineMetrics(0);
-//    x -= mBnds[0];
-//    float dy = fm.getAscent() + fm.getDescent() + fm.getLeading();
-//    
-//    for (String line : text.split("\n"))
-//    {
-//      if (line!=null && line.length()!=0)
-//        path.addString(line, x, y, font);
-//      y+=dy;
-//    }
-//    
-//    //float[] bnds = new float[4];
-//    //path.getBounds(bnds);
-//    tl.dispose();
-//    
-//    return path;
   }
 
   
@@ -1586,7 +1573,6 @@ public class LCARS implements ILcarsRemote
     
     try
     {
-
       if (getArg("--mode=") == null)
         LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
       boolean fullscreen = !("window".equals(getArg("--mode=")));
