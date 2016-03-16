@@ -70,7 +70,8 @@ public abstract class RmiAdapter implements Remote
    * Returns true if it is connected
    * @return
    */
-  public boolean isConnected() {
+  public boolean isConnected()
+  {
     return this.connection.run;
   }
   
@@ -78,7 +79,8 @@ public abstract class RmiAdapter implements Remote
    * Returns the last log message of peer/server
    * @return
    */
-  public String getServerMsg() {
+  public String getServerMsg()
+  {
     return connection.serverMsg;
   }
 
@@ -114,7 +116,13 @@ public abstract class RmiAdapter implements Remote
     if (connection!=null)
     {
       connection.end();
-      try { connection.join(1500); } catch (InterruptedException e) {}
+      try { 
+        connection.join(1500);
+      }
+      catch (InterruptedException e)
+      {
+        // ignored
+      }
       connection=null;
     }
   }
@@ -349,10 +357,7 @@ public abstract class RmiAdapter implements Remote
         }
         catch (RemoteException e)
         {
-          if (peer!=null)
-            msg = "Connection to peer broke down";
-          else
-            msg = "Peer not found";
+          msg = peer!=null ? "Connection to peer broke down" : "Peer not found";
           peer = null;
         }
         catch (MalformedURLException e)

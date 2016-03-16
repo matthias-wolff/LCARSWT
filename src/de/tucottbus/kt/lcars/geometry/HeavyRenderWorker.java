@@ -10,10 +10,19 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import de.tucottbus.kt.lcars.geometry.rendering.ARemotePaintListener;
+import de.tucottbus.kt.lcars.logging.Log;
 
+/**
+ * Represents a worker which draws {@link TData} to a buffer image which will be drawn to a
+ * {@link de.tucottbus.kt.lcars.geometry.HeavyGeometry<TData>} asynchronous. The drawing of
+ * {@link TData} to the buffer image will be defined by a
+ * {@link de.tucottbus.kt.lcars.geometry.IWorkspace<TData>}.
+ * @author Christian Borck
+ *
+ * @param <TData> type of input used to draw an image.
+ */
 public class HeavyRenderWorker<TData extends Serializable>
 {
-  //private static ExecutorService es = Executors.newWorkStealingPool();
   private static final HashMap<Long, HeavyRenderWorker<?>> activeRenderer = new HashMap<>(20);
   
   private final Class<? extends HeavyGeometry<TData>> clazz;
@@ -43,30 +52,38 @@ public class HeavyRenderWorker<TData extends Serializable>
     
     clazz = (Class<? extends HeavyGeometry<TData>>)geom.getClass();
     
-    worker = new Thread(() -> {
+    HeavyRenderWorker<TData> hrw = this;
+    worker = new Thread(() ->
+    {
       while (_running)
         try
         {
           while (_running)
             renderQueue.take().run();
-        } catch (Exception e) {}
+        } catch (Exception e)
+        {
+          Log.err("Some error occured while executing asynchronous renderer " + hrw.toString(), e);
+        }
     },HeavyRenderWorker.class.getSimpleName() + "#" + geom.serialNo);
     worker.run();
     doInvalidate(geom);
   }
   
-  HeavyRenderWorker(HeavyGeometry<TData> geom) {
+  HeavyRenderWorker(HeavyGeometry<TData> geom)
+  {
     this(geom, BufferedImage.TYPE_3BYTE_BGR);
   }
   
-  private void doInvalidate(HeavyGeometry<?> geometry) {
+  private void doInvalidate(HeavyGeometry<?> geometry)
+  {
     if(geometry == null)
       throw new NullPointerException("newInput");
     
     HeavyGeometry<TData> geo = clazz.cast(geometry);
     try
     {
-      renderQueue.put(() -> {
+      renderQueue.put(() ->
+      {
         if (geometry.getX() != pos.x || geometry.getY() != pos.y)
           pos = new Point(geometry.getX(), geometry.getY());
            
@@ -92,8 +109,7 @@ public class HeavyRenderWorker<TData extends Serializable>
       });
     } catch (InterruptedException e)
     {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      Log.err("Interupted asynchronous rendering.", e);
     }    
   }
   

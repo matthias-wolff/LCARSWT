@@ -37,7 +37,7 @@ public class LcarsComposite extends Composite implements PaintListener
   private int updateCount = 0;
   
   /**
-   * 
+   * Count of {@link #paintControl()} calls
    */
   private int paintCount = 0;
    

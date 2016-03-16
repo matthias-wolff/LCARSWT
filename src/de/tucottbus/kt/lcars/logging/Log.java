@@ -9,7 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class provides logging methods and supports debug messages. In addition observers can be registered that gets the logs too.  
+ * This static class provides logging methods and support for debug messages.
+ * In addition observers can be registered that gets the logs too.  
  * @author Christian Borck
  *
  */
@@ -47,7 +48,7 @@ public class Log {
     logWorker.start();   
   }
   
-  // hide constructor
+  // hide all constructors
   private Log(){}
   
   /**

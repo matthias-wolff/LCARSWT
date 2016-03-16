@@ -8,6 +8,7 @@ import java.awt.image.ImageObserver;
 
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 
 import de.tucottbus.kt.lcars.swt.ImageMeta;
 
@@ -20,7 +21,9 @@ public class GImage extends AGeometry
 {
   private static final long serialVersionUID = -1878671224748589604L;
   
-  
+  /**
+   * Meta information about the image that will be drawn using {@link paint2D(GC)}
+   */
   public  final ImageMeta   meta;
   private final Point       pos;  
   private final Dimension   size;
@@ -28,7 +31,7 @@ public class GImage extends AGeometry
   /**
    * Creates a new image geometry.
    * 
-   * @param resourceName
+   * @param imageMeta
    * @param pos
    * @param imageObeserver
    */
@@ -40,7 +43,7 @@ public class GImage extends AGeometry
   /**
    * Creates a new image geometry.
    * 
-   * @param resourceName
+   * @param imageMeta
    * @param pos
    * @param size
    * @param imageObeserver
@@ -62,7 +65,8 @@ public class GImage extends AGeometry
   }
   
   @Override
-  public Rectangle getBounds() {
+  public Rectangle getBounds()
+  {
 		if (size != null)
 			return new Rectangle(pos.x,pos.y,size.width,size.height);
 
@@ -72,6 +76,10 @@ public class GImage extends AGeometry
         : new Rectangle();
   }
   
+  /**
+   * Returns the image which will be drawn using {@link paint2D(GC)} and is provided by the member {@link #meta}.
+   * @return
+   */
   public Image getImage()
   {
     return meta.getImage();
@@ -80,20 +88,22 @@ public class GImage extends AGeometry
   @Override
   public void paint2D(GC gc)
   {
-    if (meta == null) return;
-    Image image = meta.getImage();
-    if (image!= null)
-			if (size!=null)
-				gc.drawImage(image, 0, 0, image.getImageData().width, image.getImageData().height, pos.x, pos.y, size.width, size.height);
-			else
-				gc.drawImage(image, pos.x, pos.y);
+    Image image;
+    if (meta == null || (image=meta.getImage()) == null) return;
+		if (size!=null)
+		{
+		  ImageData dt = image.getImageData();
+		  gc.drawImage(image, 0, 0, dt.width, dt.height, pos.x, pos.y, size.width, size.height);
+		}
+		else
+			gc.drawImage(image, pos.x, pos.y);
   }
 
   @Override
-  public String toString() {
-		if (size != null)
-			return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") size=(" + size.width + "," + size.height +") meta=" + meta;
-		else
-			return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y + ") meta=" + meta;
+  public String toString()
+  {
+    return getClass().getSimpleName() + " pos=(" + pos.x + "," + pos.y +
+           (size != null ?             ") size=(" + size.width + "," + size.height : "") +
+                                       ") meta=" + meta;
   }  
 }

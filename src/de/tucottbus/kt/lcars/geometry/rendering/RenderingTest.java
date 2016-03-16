@@ -120,17 +120,4 @@ public class RenderingTest
       else
         known.add(el.getSerialNo());
   }
-
-//int count = strCount.get("U2|735").get() > 0 ? 1 : 0;
-//for (String str : strCount.keySet())
-//  if (count != strCount.get(str).get())
-//  {
-//    Log.err(strCount.toString());
-//    return;
-//  }
-//
-
-//checkAudioLibraryBraceCountPanel
-//checkAudioLibraryBraceCountScreen
-
 }

@@ -97,7 +97,8 @@ public interface IScreen extends Remote
   public boolean isDisposed() throws RemoteException;
 
   /**
-   * Sets the current panel, which the screen reacts on
+   * @deprecated use {@link #setPanel(String)} instead<p>
+   * Sets the current panel, which the screen exclusively reacts on.
    * @param panelId
    */
   @Deprecated

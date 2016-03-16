@@ -325,11 +325,14 @@ public class ServerPanel extends Panel
       eScrCnt.setLabel(String.format("SERVING %03d",eScreens.getItemCount()));
 
       // Remove buttons
-      for (int i=0; i<eScreens.getItemCount(); )
+      int n = eScreens.getItemCount();
+      for (int i=0; i<n; )
       {
         RmiPanelAdapter rpa = (RmiPanelAdapter)eScreens.getItemElement(i).getData();
-        if (!rpas.containsValue(rpa))
+        if (!rpas.containsValue(rpa)){
           eScreens.remove(i);
+          n--;
+        }
         else
           i++;
       }
@@ -343,8 +346,9 @@ public class ServerPanel extends Panel
         for (EElement e : eScreens.getItemElements())
           if (e.getData()==rpa)
           {
-            ((EValue)e).setValue(rpa.getPanelTitle().toUpperCase());
-            ((EValue)e).setLabel(rpa.getPeerHostName().toUpperCase());
+            EValue ev = (EValue)e;
+            ev.setValue(rpa.getPanelTitle().toUpperCase());
+            ev.setLabel(rpa.getPeerHostName().toUpperCase());
             found = true;
             break;
           }
@@ -362,10 +366,7 @@ public class ServerPanel extends Panel
         ld  += lds.getLoad();
         fps += lds.getEventsPerPeriod();
       }
-      if (eScreens.getItemCount()==0)
-        eScreens.setTitle("NO SCREENS");
-      else
-        eScreens.setTitle("SCREENS");
+      eScreens.setTitle(eScreens.getItemCount()==0 ? "NO SCREENS" : "SCREENS");
       eSrvLd.setLabel(String.format("SRV LOAD\n%03d-%02d",ld,fps));
     }
     

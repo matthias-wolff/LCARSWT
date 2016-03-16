@@ -60,11 +60,19 @@ public class GText extends AGeometry
     this.fontMeta = fontMeta;
   }
 
+  /**
+   * Returns the coordinates of the upper left corner where the text will draw using {@link paint2D(GC)}. 
+   * @return
+   */
   public Point2D.Float getPos()
   {
     return new Point2D.Float(x, y);
   }
-
+  
+  /**
+   * Returns the style of the text.
+   * @return always zero
+   */
   @Deprecated
   public int getStyle()
   {
@@ -77,31 +85,53 @@ public class GText extends AGeometry
     return new Area(getBounds());
   }
 
+  /**
+   * Returns the smallest {@link java.awt.Rectangle} which contains the hole text ignoring indent and descent.
+   */
+  @Override
   public Rectangle getBounds()
   {
     return new Rectangle(x, y, width, height);
   }
 
+  /**
+   * Returns the text which will be drawn using {@link paint2D(GC)}.
+   * @return
+   */
   public String getText()
   {
     return this.text;
   }
 
+  /**
+   * Returns the distance from the baseline to the bottom of the lowest descenders on the glyphs.
+   * @return
+   */
   public int getDescent()
   {
     return this.descent;
   }
 
+  /**
+   * Sets the distance from the baseline to the bottom of the lowest descenders on the glyphs.
+   */
   public void setDescent(int descent)
   {
     this.descent = descent;
   }
 
+  /**
+   * Returns the distance of the text from either the left or the right margin of the bounds
+   * @return
+   */
   public int getIndent()
   {
     return indent;
   }
 
+  /**
+   * Sets the distance of the text from either the left or the right margin of the bounds
+   */
   public void setIndent(int indent)
   {
     this.indent = indent;
@@ -110,7 +140,7 @@ public class GText extends AGeometry
   /*
    * (non-Javadoc)
    * 
-   * @see de.tucottbus.kt.lcars.j2d.EGeometry2D#paint2D(java.awt.Graphics2D)
+   * @see de.tucottbus.kt.lcars.geometry.AGeometry#paint2D(org.eclipse.swt.graphics.GC)
    */
   @Override
   public void paint2D(GC gc)

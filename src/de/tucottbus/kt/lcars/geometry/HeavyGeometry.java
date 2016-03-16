@@ -10,6 +10,16 @@ import org.eclipse.swt.graphics.GC;
 import de.tucottbus.kt.lcars.geometry.rendering.ARemotePaintListener;
 
 /**
+ * EXPERIMENTAL: Represents a geometry which its {@link paint2D(GC)} taking to long to observe the
+ * frame rate of the screen. The drawing will be done asynchronous in a buffered image. This
+ * geometry can also by used to append generic data to be used to draw thus it is interesting for
+ * network purpose to reduce traffic because of sending some very basic input data instead of an
+ * drawn image. Than the drawing will be on the client/screen side. See also:
+ * <p><ul>
+ * <li>{@link de.tucottbus.kt.lcars.geometry.HeavyRenderWorker}
+ * <li>{@link de.tucottbus.kt.lcars.geometry.IWorkspace}
+ * <li>{@link de.tucottbus.kt.lcars.geometry.rendering.ARemotePaintListener}
+ * </ul><p>
  * 
  * @author Christian Borck
  *

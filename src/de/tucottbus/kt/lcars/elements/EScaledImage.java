@@ -51,10 +51,7 @@ public class EScaledImage extends EElement implements ImageObserver
 
 	public String getImagePath()
 	{
-		if (meta == null)
-			return null;
-		else
-			return meta.getPath();
+	  return meta != null ? meta.path : null;
 	}
 
   @Override
@@ -127,10 +124,7 @@ public class EScaledImage extends EElement implements ImageObserver
    */
   public Image getImage()
   {
-		if (meta != null)
-			return meta.getImage();
-		else
-			return null;
+    return meta != null ? meta.getImage() : null;
   }
 
   public void setSelected(boolean selected)
