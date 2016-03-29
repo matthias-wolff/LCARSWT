@@ -74,9 +74,7 @@ public class SunController implements PropertyChangeListener
 
     List<Layer> atmos = model.getLayers().getLayersByClass(SkyGradientLayer.class);
     if (!atmos.isEmpty())
-    {
       originalAtmosphere = (SkyGradientLayer) atmos.get(0);
-    }
     else
     {
       originalAtmosphere = new SkyGradientLayer();
@@ -103,7 +101,7 @@ public class SunController implements PropertyChangeListener
     double[] ll = subsolarPoint(JD);
     Position sunPosition = new Position(LatLon.fromRadians(ll[0], ll[1]), 0);
     logger.log(Level.FINE, "SUN Position @ {0} ({1}): {2}", new Object[]
-    { date, JD, sunPosition });
+        { date, JD, sunPosition });
     Vec4 sunVector = model.getGlobe().computePointFromPosition(sunPosition).normalize3();
 
     this.sunLayer.setSunDirection(sunVector);
@@ -205,9 +203,7 @@ public class SunController implements PropertyChangeListener
       double dX = Math.cos(eclipticLongitude);
       rightAscension = Math.atan2(dY, dX);
       if (rightAscension < 0.0)
-      {
         rightAscension = rightAscension + Math.PI * 2.0;
-      }
       declination = Math.asin(Math.sin(eclipticObliquity)
           * sinEclipticLongitude);
     }
@@ -221,21 +217,13 @@ public class SunController implements PropertyChangeListener
     }
 
     while (declination > Math.PI / 2.0)
-    {
       declination -= Math.PI;
-    }
     while (declination <= -Math.PI / 2.0)
-    {
       declination += Math.PI;
-    }
     while (longitude > Math.PI)
-    {
       longitude -= Math.PI * 2.0;
-    }
     while (longitude <= -Math.PI)
-    {
       longitude += Math.PI * 2.0;
-    }
     // Return latitude and longitude [radians]
     return new double[] { declination, longitude };
   }

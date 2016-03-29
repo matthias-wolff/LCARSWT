@@ -1,5 +1,6 @@
 package gov.nasa.worldwindx.sunlight;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Vec4;
@@ -116,19 +117,20 @@ public class LensFlareLayer extends RenderableLayer
         if (sunPoint == null)
             return;
 
-        if (dc.getView().getFrustumInModelCoordinates().getNear().distanceTo(sunPoint) < 0)
+        View view = dc.getView();
+        if (view.getFrustumInModelCoordinates().getNear().distanceTo(sunPoint) < 0)
             return; // Sun is behind the eye
 
-        Vec4 sunPos = dc.getView().project(this.sunPoint);
+        Vec4 sunPos = view.project(this.sunPoint);
         if (sunPos == null)
             return; // Sun does not project at all
 
-        Rectangle viewport = dc.getView().getViewport();
+        Rectangle viewport = view.getViewport();
         if (!viewport.contains(sunPos.x, sunPos.y))
             return; // Sun is not in viewport
 
         // Test for terrain occlusion
-        Line ray = new Line(dc.getView().getEyePoint(), this.sunDirection);
+        Line ray = new Line(view.getEyePoint(), this.sunDirection);
         if (dc.getSurfaceGeometry().intersect(ray) != null)
             return; // Some terrain is between the eye and the Sun
 

@@ -44,19 +44,17 @@ public class CityLightsLayer extends RenderableLayer
     // Disable picking for the layer because it covers the full sphere and will override a terrain pick.
     setPickEnabled(false);
     
-    java.awt.EventQueue.invokeLater(new Runnable()
+    java.awt.EventQueue.invokeLater(() ->
     {
-      public void run()
-      {
         try
         {
           CityLightsLayer.this.bi = loadImage(LCARS.class.getClassLoader().getResource(IMAGE_PATH));
         } catch (IOException e)
         {
-          e.printStackTrace();
+          Log.err("Some error occured", e);
         }
       }
-    });
+    );
   }
 
   @Override
@@ -100,13 +98,13 @@ public class CityLightsLayer extends RenderableLayer
     if (now-lastUpdate<60e3) return;
     lastUpdate = now;
 
-    Log.info("WWJ","CityLightsLayer - Starting update thread");
+    Log.info("CityLightsLayer - Starting update thread");
     (new Thread()
     {
       @Override
       public void run()
       {
-        Log.info("WWJ","CityLightsLayer - Update alpha shade");
+        Log.info("CityLightsLayer - Update alpha shade");
         int w = CityLightsLayer.this.bi.getWidth();
         int h = CityLightsLayer.this.bi.getHeight();
         BufferedImage imgAlpha = getAlpha(subsolarPoint,w,h);
@@ -219,7 +217,7 @@ public class CityLightsLayer extends RenderableLayer
         rgba[3]=Math.min(a[0],rgba[3]);
         imgCli.setPixel(x,y,rgba);
       }
-    System.out.println("applyAlpha(): "+(System.currentTimeMillis()-then)+" ms");
+    Log.info("applyAlpha(): "+(System.currentTimeMillis()-then)+" ms");
   }
 
   // == MAIN METHOD (FOR TESTING ONLY!) ==
@@ -242,13 +240,11 @@ public class CityLightsLayer extends RenderableLayer
       then = System.currentTimeMillis();
       File file = new File("d:/xfer/"+CityLightsLayer.class.getSimpleName()+".png");
       ImageIO.write(imgCli,"PNG",file);
-      System.out.println("save: "+(System.currentTimeMillis()-then)+" ms");
+      Log.info("save: "+(System.currentTimeMillis()-then)+" ms");
     }
     catch (IOException e)
     {
-      e.printStackTrace();
+      Log.err("Some error occured", e);
     }
   }
-
-
 }

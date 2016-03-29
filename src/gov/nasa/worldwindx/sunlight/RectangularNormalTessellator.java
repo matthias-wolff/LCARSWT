@@ -247,30 +247,19 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         }
 
         public boolean equals(Object o) {
-            if (this == o) {
+            if (this == o)
                 return true;
-            }
 
             CacheKey cacheKey = (CacheKey) o; // Note: no check of class type equivalence, for performance
-
-            if (density != cacheKey.density) {
-                return false;
-            }
-            if (globeStateKey != null ? !globeStateKey.equals(cacheKey.globeStateKey) : cacheKey.globeStateKey != null) {
-                return false;
-            }
-            //noinspection RedundantIfStatement
-            if (sector != null ? !sector.equals(cacheKey.sector) : cacheKey.sector != null) {
-                return false;
-            }
-
-            return true;
+            return density == cacheKey.density &&
+                (globeStateKey != null ? globeStateKey.equals(cacheKey.globeStateKey) : cacheKey.globeStateKey == null) &&
+                //noinspection RedundantIfStatement
+                (sector != null        ? sector.equals(cacheKey.sector)               : cacheKey.sector == null);
         }
 
         public int hashCode() {
             int result;
-            result = (sector != null ? sector.hashCode() : 0);
-            result = 31 * result + density;
+            result = (sector != null ? 31*sector.hashCode() : 0) + density;
             result = 31 * result + (globeStateKey != null ? globeStateKey.hashCode() : 0);
             return result;
         }
@@ -302,19 +291,22 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     protected Color ambientColor = new Color(.1f, .1f, .1f);
 
     public SectorGeometryList tessellate(DrawContext dc) {
-        if (dc == null) {
+        if (dc == null)
+        {
             String msg = Logging.getMessage("nullValue.DrawContextIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        if (dc.getView() == null) {
+        if (dc.getView() == null)
+        {
             String msg = Logging.getMessage("nullValue.ViewIsNull");
             Logging.logger().severe(msg);
             throw new IllegalStateException(msg);
         }
 
-        if (!WorldWind.getMemoryCacheSet().containsCache(CACHE_ID)) {
+        if (!WorldWind.getMemoryCacheSet().containsCache(CACHE_ID))
+        {
             long size = Configuration.getLongValue(
                     AVKey.SECTOR_GEOMETRY_CACHE_SIZE, 20000000L);
             MemoryCache cache = new BasicMemoryCache((long) (0.85 * size), size);
@@ -322,24 +314,21 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             WorldWind.getMemoryCacheSet().addCache(CACHE_ID, cache);
         }
 
-        if (this.topLevels == null) {
+        if (this.topLevels == null)
             this.topLevels = this.createTopLevelTiles(dc);
-        }
 
         this.currentTiles.clear();
         this.currentLevel = 0;
         this.currentCoverage = null;
 
         this.currentFrustum = dc.getView().getFrustumInModelCoordinates();
-        for (RectTile tile : this.topLevels) {
+        for (RectTile tile : this.topLevels)
             this.selectVisibleTiles(dc, tile);
-        }
 
         this.currentTiles.setSector(this.currentCoverage);
 
-        for (SectorGeometry tile : this.currentTiles) {
+        for (SectorGeometry tile : this.currentTiles)
             this.makeVerts(dc, (RectTile) tile);
-        }
 
         return this.currentTiles;
     }
@@ -353,19 +342,19 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         double deltaLon = 360d / DEFAULT_NUM_LON_SUBDIVISIONS;
         Angle lastLat = Angle.NEG90;
 
-        for (int row = 0; row < DEFAULT_NUM_LAT_SUBDIVISIONS; row++) {
+        for (int row = 0; row < DEFAULT_NUM_LAT_SUBDIVISIONS; row++)
+        {
             Angle lat = lastLat.addDegrees(deltaLat);
-            if (lat.getDegrees() + 1d > 90d) {
+            if (lat.getDegrees() + 1d > 90d)
                 lat = Angle.POS90;
-            }
 
             Angle lastLon = Angle.NEG180;
 
-            for (int col = 0; col < DEFAULT_NUM_LON_SUBDIVISIONS; col++) {
+            for (int col = 0; col < DEFAULT_NUM_LON_SUBDIVISIONS; col++)
+            {
                 Angle lon = lastLon.addDegrees(deltaLon);
-                if (lon.getDegrees() + 1d > 180d) {
+                if (lon.getDegrees() + 1d > 180d)
                     lon = Angle.POS180;
-                }
 
                 Sector tileSector = new Sector(lastLat, lat, lastLon, lon);
                 tops.add(this.createTile(dc, tileSector, 0));
@@ -377,7 +366,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         return tops;
     }
 
-    protected RectTile createTile(DrawContext dc, Sector tileSector, int level) {
+    protected RectTile createTile(DrawContext dc, Sector tileSector, int level)
+    {
         Extent extent = Sector.computeBoundingCylinder(dc.getGlobe(),
                 dc.getVerticalExaggeration(), tileSector);
         double cellSize = tileSector.getDeltaLatRadians()
@@ -387,11 +377,13 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
                 cellSize);
     }
 
-    public boolean isMakeTileSkirts() {
+    public boolean isMakeTileSkirts()
+    {
         return makeTileSkirts;
     }
 
-    public void setMakeTileSkirts(boolean makeTileSkirts) {
+    public void setMakeTileSkirts(boolean makeTileSkirts)
+    {
         this.makeTileSkirts = makeTileSkirts;
     }
 
@@ -400,23 +392,30 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         return 0;
     }
 
-    public void setUpdateFrequency(long updateFrequency) {
+    public void setUpdateFrequency(long updateFrequency)
+    {
+      // ignored
     }
 
-    public Vec4 getLightDirection() {
+    public Vec4 getLightDirection()
+    {
         return this.lightDirection;
     }
 
-    public void setLightDirection(Vec4 direction) {
+    public void setLightDirection(Vec4 direction)
+    {
         this.lightDirection = direction;
     }
 
-    public Color getLightColor() {
+    public Color getLightColor()
+    {
         return this.lightColor;
     }
 
-    public void setLightColor(Color color) {
-        if (color == null) {
+    public void setLightColor(Color color)
+    {
+        if (color == null)
+        {
             String msg = Logging.getMessage("nullValue.ColorIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
@@ -424,12 +423,15 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         this.lightColor = color;
     }
 
-    public Color getAmbientColor() {
+    public Color getAmbientColor()
+    {
         return this.ambientColor;
     }
 
-    public void setAmbientColor(Color color) {
-        if (color == null) {
+    public void setAmbientColor(Color color)
+    {
+        if (color == null)
+        {
             String msg = Logging.getMessage("nullValue.ColorIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
@@ -443,17 +445,16 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 //  }
     protected void selectVisibleTiles(DrawContext dc, RectTile tile) {
         Extent extent = tile.getExtent();
-        if (extent != null && !extent.intersects(this.currentFrustum)) {
+        if (extent != null && !extent.intersects(this.currentFrustum))
             return;
-        }
 
         int maxLevel = DEFAULT_MAX_LEVEL;
-        if (this.currentLevel < maxLevel - 1 && this.needToSplit(dc, tile)) {
+        if (this.currentLevel < maxLevel - 1 && this.needToSplit(dc, tile))
+        {
             ++this.currentLevel;
             RectTile[] subtiles = this.split(dc, tile);
-            for (RectTile child : subtiles) {
+            for (RectTile child : subtiles)
                 this.selectVisibleTiles(dc, child);
-            }
             --this.currentLevel;
             return;
         }
@@ -473,18 +474,14 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         double d5 = view.getEyePoint().distanceTo3(centerPoint);
 
         double minDistance = d1;
-        if (d2 < minDistance) {
+        if (d2 < minDistance)
             minDistance = d2;
-        }
-        if (d3 < minDistance) {
-            minDistance = d3;
-        }
-        if (d4 < minDistance) {
+        if (d3 < minDistance)
+            minDistance = d3;        
+        if (d4 < minDistance)
             minDistance = d4;
-        }
-        if (d5 < minDistance) {
+        if (d5 < minDistance)
             minDistance = d5;
-        }
 
         double logDist = Math.log10(minDistance);
         boolean useTile = tile.log10CellSize <= (logDist - DEFAULT_LOG10_RESOLUTION_TARGET);
@@ -492,7 +489,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         return !useTile;
     }
 
-    protected RectTile[] split(DrawContext dc, RectTile tile) {
+    protected RectTile[] split(DrawContext dc, RectTile tile)
+    {
         Sector[] sectors = tile.sector.subdivide();
 
         RectTile[] subTiles = new RectTile[4];
@@ -504,29 +502,31 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         return subTiles;
     }
 
-    protected RectangularNormalTessellator.CacheKey createCacheKey(DrawContext dc, RectTile tile) {
+    protected RectangularNormalTessellator.CacheKey createCacheKey(DrawContext dc, RectTile tile)
+    {
         return new CacheKey(dc, tile.sector, tile.density);
     }
 
-    protected void makeVerts(DrawContext dc, RectTile tile) {
+    protected void makeVerts(DrawContext dc, RectTile tile)
+    {
         // First see if the vertices have been previously computed and are in the cache. Since the elevation model
         // can change between frames, regenerate and re-cache vertices every second.
         MemoryCache cache = WorldWind.getMemoryCache(CACHE_ID);
         CacheKey cacheKey = this.createCacheKey(dc, tile);
         tile.ri = (RenderInfo) cache.getObject(cacheKey);
         if (tile.ri != null && tile.ri.time >= System.currentTimeMillis() - 1000) // Regenerate cache after one second
-        {
             return;
-        }
-
+    
         tile.ri = this.buildVerts(dc, tile, this.makeTileSkirts);
-        if (tile.ri != null) {
+        if (tile.ri != null)
+        {
             cacheKey = this.createCacheKey(dc, tile);
             cache.add(cacheKey, tile.ri, tile.ri.getSizeInBytes());
         }
     }
 
-    public RenderInfo buildVerts(DrawContext dc, RectTile tile, boolean makeSkirts) {
+    public RenderInfo buildVerts(DrawContext dc, RectTile tile, boolean makeSkirts)
+    {
         int density = tile.density;
         int side = density + 3;
         int numVertices = side * side;
@@ -557,14 +557,14 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         Iterator<LatLon> latLonIter = latlons.iterator();
 
         // Compute verts without skirts
-        for (int j = 0; j < side; j++) {
-            for (int i = 0; i < side; i++) {
+        for (int j = 0; j < side; j++)
+            for (int i = 0; i < side; i++)
+            {
                 LatLon latlon = latLonIter.next();
                 elevation = verticalExaggeration * elevations[ie++];
                 p = globe.computePointFromPosition(latlon.getLatitude(), latlon.getLongitude(), elevation);
                 verts.put(iv++, p.x - refCenter.x).put(iv++, p.y - refCenter.y).put(iv++, p.z - refCenter.z);
             }
-        }
 
         // Compute indices and normals
         java.nio.IntBuffer indices = getIndices(density);
@@ -573,7 +573,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         // Fold down the sides as skirts
         double exaggeratedMinElevation = makeSkirts ? Math.abs(globe.getMinElevation() * verticalExaggeration) : 0;
         lat = latMin;
-        for (int j = 0; j < side; j++) {
+        for (int j = 0; j < side; j++)
+        {
             //min longitude side
             ie = j * side + 1;
             elevation = verticalExaggeration * elevations[ie];
@@ -590,15 +591,15 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             iv = ((j + 1) * side - 1) * 3;
             verts.put(iv++, p.x - refCenter.x).put(iv++, p.y - refCenter.y).put(iv, p.z - refCenter.z);
 
-            if (j > density) {
+            if (j > density)
                 lat = latMax;
-            } else if (j != 0) {
+            else if (j != 0)
                 lat = lat.add(dLat);
-            }
         }
 
         lon = lonMin;
-        for (int i = 0; i < side; i++) {
+        for (int i = 0; i < side; i++)
+        {
             //min latitude side
             ie = i + side;
             elevation = verticalExaggeration * elevations[ie];
@@ -615,17 +616,17 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             iv = (side * (side - 1) + i) * 3;
             verts.put(iv++, p.x - refCenter.x).put(iv++, p.y - refCenter.y).put(iv, p.z - refCenter.z);
 
-            if (i > density) {
+            if (i > density)
                 lon = lonMax;
-            } else if (i != 0) {
+            else if (i != 0)
                 lon = lon.add(dLon);
-            }
         }
 
         return new RenderInfo(density, verts, getTextureCoordinates(density), norms, refCenter);
     }
 
-    protected ArrayList<LatLon> computeLocations(RectTile tile) {
+    protected ArrayList<LatLon> computeLocations(RectTile tile)
+    {
         int density = tile.density;
         int numVertices = (density + 3) * (density + 3);
 
@@ -636,18 +637,19 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         Angle dLon = tile.sector.getDeltaLon().divide(density);
 
         ArrayList<LatLon> latlons = new ArrayList<LatLon>(numVertices);
-        for (int j = 0; j <= density + 2; j++) {
+        for (int j = 0; j <= density + 2; j++)
+        {
             Angle lon = lonMin.subtract(dLon);
-            for (int i = 0; i <= density + 2; i++) {
+            for (int i = 0; i <= density + 2; i++)
+            {
                 latlons.add(new LatLon(lat, lon));
 
                 lon = lon.add(dLon);
 
-                if (lon.degrees < -180) {
+                if (lon.degrees < -180)
                     lon = Angle.NEG180;
-                } else if (lon.degrees > 180) {
+                else if (lon.degrees > 180)
                     lon = Angle.POS180;
-                }
             }
 
             lat = lat.add(dLat);
@@ -657,16 +659,18 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     }
 
     protected void renderMultiTexture(DrawContext dc, RectTile tile,
-            int numTextureUnits) {
-        if (dc == null) {
+            int numTextureUnits)
+    {
+        if (dc == null)
+        {
             String msg = Logging.getMessage("nullValue.DrawContextIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        if (numTextureUnits < 1) {
-            String msg = Logging
-                    .getMessage("generic.NumTextureUnitsLessThanOne");
+        if (numTextureUnits < 1)
+        {
+            String msg = Logging.getMessage("generic.NumTextureUnitsLessThanOne");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
@@ -675,7 +679,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     }
 
     protected void render(DrawContext dc, RectTile tile) {
-        if (dc == null) {
+        if (dc == null)
+        {
             String msg = Logging.getMessage("nullValue.DrawContextIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
@@ -685,7 +690,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     }
 
     protected long render(DrawContext dc, RectTile tile, int numTextureUnits) {
-        if (tile.ri == null) {
+        if (tile.ri == null)
+        {
             String msg = Logging.getMessage("nullValue.RenderInfoIsNull");
             Logging.logger().severe(msg);
             throw new IllegalStateException(msg);
@@ -693,7 +699,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 
         dc.getView().pushReferenceCenter(dc, tile.ri.referenceCenter);
 
-        if (!dc.isPickingMode() && this.lightDirection != null) {
+        if (!dc.isPickingMode() && this.lightDirection != null)
+        {
             beginLighting(dc);
         }
 
@@ -705,15 +712,14 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
         gl.glNormalPointer(GL2.GL_DOUBLE, 0, tile.ri.normals.rewind());
 
-        for (int i = 0; i < numTextureUnits; i++) {
+        for (int i = 0; i < numTextureUnits; i++)
+        {
             gl.glClientActiveTexture(GL2.GL_TEXTURE0 + i);
             gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
             Object texCoords = dc.getValue(AVKey.TEXTURE_COORDINATES);
-            if (texCoords != null && texCoords instanceof DoubleBuffer) {
-                gl.glTexCoordPointer(2, GL2.GL_DOUBLE, 0, ((DoubleBuffer) texCoords).rewind());
-            } else {
-                gl.glTexCoordPointer(2, GL2.GL_DOUBLE, 0, tile.ri.texCoords.rewind());
-            }
+            gl.glTexCoordPointer(2, GL2.GL_DOUBLE, 0,
+                (texCoords != null && texCoords instanceof DoubleBuffer
+                ? ((DoubleBuffer) texCoords) : tile.ri.texCoords).rewind());
         }
 
         gl.glDrawElements(GL2.GL_TRIANGLE_STRIP,
@@ -814,7 +820,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         gl.glPopAttrib();
     }
 
-    protected void renderPatchBoundary(DrawContext dc, RectTile tile, GL2 gl) {
+    protected void renderPatchBoundary(DrawContext dc, RectTile tile, GL2 gl)
+    {
         // TODO: Currently only works if called from renderWireframe because no state is set here.
         // TODO: Draw the boundary using the vertices along the boundary rather than just at the corners.
         gl.glColor4d(1d, 0, 0, 1d);
@@ -828,86 +835,83 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         gl.glEnd();
     }
 
-    protected void renderBoundingVolume(DrawContext dc, RectTile tile) {
+    protected void renderBoundingVolume(DrawContext dc, RectTile tile)
+    {
         Extent extent = tile.getExtent();
-        if (extent == null) {
+        if (extent == null)
             return;
-        }
-
         if (extent instanceof Cylinder) // TODO: make generic
-        {
             ((Cylinder) extent).render(dc);
-        }
     }
 
     protected PickedObject[] pick(DrawContext dc, RectTile tile,
-            List<? extends Point> pickPoints) {
-        if (dc == null) {
+            List<? extends Point> pickPoints)
+    {
+        if (dc == null)
+        {
             String msg = Logging.getMessage("nullValue.DrawContextIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        if (pickPoints.size() == 0) {
+        if (pickPoints.size() == 0)
             return null;
-        }
 
-        if (tile.ri == null) {
+        if (tile.ri == null)
             return null;
-        }
 
         PickedObject[] pos = new PickedObject[pickPoints.size()];
         this.renderTrianglesWithUniqueColors(dc, tile);
-        for (int i = 0; i < pickPoints.size(); i++) {
+        for (int i = 0; i < pickPoints.size(); i++)
             pos[i] = this.resolvePick(dc, tile, pickPoints.get(i));
-        }
 
         return pos;
     }
 
-    protected void pick(DrawContext dc, RectTile tile, Point pickPoint) {
-        if (dc == null) {
+    protected void pick(DrawContext dc, RectTile tile, Point pickPoint)
+    {
+        if (dc == null)
+        {
             String msg = Logging.getMessage("nullValue.DrawContextIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        if (tile.ri == null) {
+        if (tile.ri == null)
             return;
-        }
 
         renderTrianglesWithUniqueColors(dc, tile);
         PickedObject po = this.resolvePick(dc, tile, pickPoint);
-        if (po != null) {
+        if (po != null)
             dc.addPickedObject(po);
-        }
     }
 
-    protected void renderTrianglesWithUniqueColors(DrawContext dc, RectTile tile) {
-        if (dc == null) {
+    protected void renderTrianglesWithUniqueColors(DrawContext dc, RectTile tile)
+    {
+        if (dc == null)
+        {
             String message = Logging.getMessage("nullValue.DrawContextIsNull");
             Logging.logger().severe(message);
             throw new IllegalStateException(message);
         }
 
-        if (tile.ri.vertices == null) {
+        if (tile.ri.vertices == null)
             return;
-        }
 
         tile.ri.vertices.rewind();
         tile.ri.indices.rewind();
 
         GL2 gl = dc.getGL().getGL2();
 
-        if (null != tile.ri.referenceCenter) {
+        if (null != tile.ri.referenceCenter)
             dc.getView().pushReferenceCenter(dc, tile.ri.referenceCenter);
-        }
 
         tile.minColorCode = dc.getUniquePickColor().getRGB();
         int trianglesNum = tile.ri.indices.capacity() - 2;
 
         gl.glBegin(GL2.GL_TRIANGLES);
-        for (int i = 0; i < trianglesNum; i++) {
+        for (int i = 0; i < trianglesNum; i++)
+        {
             java.awt.Color color = dc.getUniquePickColor();
             gl.glColor3ub((byte) (color.getRed() & 0xFF), (byte) (color
                     .getGreen() & 0xFF), (byte) (color.getBlue() & 0xFF));
@@ -927,26 +931,23 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         gl.glEnd();
         tile.maxColorCode = dc.getUniquePickColor().getRGB();
 
-        if (null != tile.ri.referenceCenter) {
+        if (null != tile.ri.referenceCenter)
             dc.getView().popReferenceCenter(dc);
-        }
     }
 
     protected PickedObject resolvePick(DrawContext dc, RectTile tile,
-            Point pickPoint) {
+            Point pickPoint)
+    {
         int colorCode = this.pickSupport.getTopColor(dc, pickPoint);
-        if (colorCode < tile.minColorCode || colorCode > tile.maxColorCode) {
+        if (colorCode < tile.minColorCode || colorCode > tile.maxColorCode)
             return null;
-        }
 
         double EPSILON = (double) 0.00001f;
 
         int triangleIndex = colorCode - tile.minColorCode - 1;
 
-        if (tile.ri.indices == null
-                || triangleIndex >= (tile.ri.indices.capacity() - 2)) {
+        if (tile.ri.indices == null || triangleIndex >= (tile.ri.indices.capacity() - 2))
             return null;
-        }
 
         double centerX = tile.ri.referenceCenter.x;
         double centerY = tile.ri.referenceCenter.y;
@@ -979,9 +980,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         double a = -N.dot3(w0);
         double b = N.dot3(ray.getDirection());
         if (java.lang.Math.abs(b) < EPSILON) // ray is parallel to triangle plane
-        {
             return null; // if a == 0 , ray lies in triangle plane
-        }
+
         double r = a / b;
 
         Vec4 intersect = ray.getOrigin().add3(ray.getDirection().multiply3(r));
@@ -1006,42 +1006,43 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
      * @return an array of <code>Intersection</code> sorted by increasing distance from the line origin, or null if no
      *         intersection was found.
      */
-    protected Intersection[] intersect(RectTile tile, Line line) {
-        if (line == null) {
+    protected Intersection[] intersect(RectTile tile, Line line)
+    {
+        if (line == null)
+        {
             String msg = Logging.getMessage("nullValue.LineIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        if (tile.ri.vertices == null) {
+        if (tile.ri.vertices == null)
             return null;
-        }
 
         // Compute 'vertical' plane perpendicular to the ground, that contains the ray
         Vec4 normalV = line.getDirection().cross3(globe.computeSurfaceNormalAtPoint(line.getOrigin()));
         Plane verticalPlane = new Plane(normalV.x(), normalV.y(), normalV.z(), -line.getOrigin().dot3(normalV));
-        if (!tile.getExtent().intersects(verticalPlane)) {
+        if (!tile.getExtent().intersects(verticalPlane))
             return null;
-        }
 
         // Compute 'horizontal' plane perpendicular to the vertical plane, that contains the ray
         Vec4 normalH = line.getDirection().cross3(normalV);
         Plane horizontalPlane = new Plane(normalH.x(), normalH.y(), normalH.z(), -line.getOrigin().dot3(normalH));
-        if (!tile.getExtent().intersects(horizontalPlane)) {
+        if (!tile.getExtent().intersects(horizontalPlane))
             return null;
-        }
 
         Intersection[] hits;
         ArrayList<Intersection> list = new ArrayList<Intersection>();
 
         int[] indices = new int[tile.ri.indices.limit()];
         double[] coords = new double[tile.ri.vertices.limit()];
-        tile.ri.indices.rewind();
-        tile.ri.vertices.rewind();
-        tile.ri.indices.get(indices, 0, indices.length);
-        tile.ri.vertices.get(coords, 0, coords.length);
-        tile.ri.indices.rewind();
-        tile.ri.vertices.rewind();
+        IntBuffer indis = tile.ri.indices;
+        DoubleBuffer verts = tile.ri.vertices;
+        indis.rewind();
+        verts.rewind();
+        indis.get(indices, 0, indices.length);
+        verts.get(coords, 0, coords.length);
+        indis.rewind();
+        verts.rewind();
 
         int trianglesNum = tile.ri.indices.capacity() - 2;
         double centerX = tile.ri.referenceCenter.x;
@@ -1060,12 +1061,12 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         int startIndice = (density + 2) * 2 + 6; // skip firts skirt row and a couple degenerate cells
         int endIndice = trianglesNum - startIndice; // ignore last skirt row and a couple degenerate cells
         int k = -1;
-        for (int i = startIndice; i < endIndice; i += 2) {
+        for (int i = startIndice; i < endIndice; i += 2)
+        {
             // Skip skirts and degenerate triangle cells - based on indice sequence.
             k = k == density - 1 ? -4 : k + 1; // density x terrain cells interleaved with 4 skirt and degenerate cells.
-            if (k < 0) {
+            if (k < 0)
                 continue;
-            }
 
             // Triangle pair diagonal - v1 & v2
             int vIndex = 3 * indices[i + 1];
@@ -1083,14 +1084,12 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             Vec4 cellCenter = Vec4.mix3(.5, v1, v2);
 
             // Test cell center distance to vertical plane
-            if (Math.abs(verticalPlane.distanceTo(cellCenter)) > maxCellRadius) {
+            if (Math.abs(verticalPlane.distanceTo(cellCenter)) > maxCellRadius)
                 continue;
-            }
 
             // Test cell center distance to horizontal plane
-            if (Math.abs(horizontalPlane.distanceTo(cellCenter)) > elevationSpan) {
+            if (Math.abs(horizontalPlane.distanceTo(cellCenter)) > elevationSpan)
                 continue;
-            }
 
             // Prepare to test triangles - get other two vertices v0 & v3
             Vec4 p;
@@ -1108,37 +1107,33 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 
             // Test triangle 1 intersection w ray
             Triangle t = new Triangle(v0, v1, v2);
-            if ((p = t.intersect(line)) != null) {
+            if ((p = t.intersect(line)) != null)
                 list.add(new Intersection(p, false));
-            }
 
             // Test triangle 2 intersection w ray
             t = new Triangle(v1, v2, v3);
-            if ((p = t.intersect(line)) != null) {
+            if ((p = t.intersect(line)) != null)
                 list.add(new Intersection(p, false));
-            }
         }
 
         int numHits = list.size();
-        if (numHits == 0) {
+        if (numHits == 0)
             return null;
-        }
 
         hits = new Intersection[numHits];
         list.toArray(hits);
 
         final Vec4 origin = line.getOrigin();
-        Arrays.sort(hits, new Comparator<Intersection>() {
-            public int compare(Intersection i1, Intersection i2) {
-                if (i1 == null && i2 == null) {
+        Arrays.sort(hits, new Comparator<Intersection>()
+        {
+            public int compare(Intersection i1, Intersection i2)
+            {
+                if (i1 == null && i2 == null)
                     return 0;
-                }
-                if (i2 == null) {
+                if (i2 == null)
                     return -1;
-                }
-                if (i1 == null) {
+                if (i1 == null)
                     return 1;
-                }
 
                 Vec4 v1 = i1.getIntersectionPoint();
                 Vec4 v2 = i2.getIntersectionPoint();
@@ -1162,32 +1157,33 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
      *
      * @return an array of <code>Intersection</code> pairs or null if no intersection was found.
      */
-    protected Intersection[] intersect(RectTile tile, double elevation) {
-        if (tile.ri.vertices == null) {
+    protected Intersection[] intersect(RectTile tile, double elevation)
+    {
+        if (tile.ri.vertices == null)
             return null;
-        }
 
         // Check whether the tile includes the intersection elevation - assume cylinder as Extent
         // TODO: Make this work with Extent rather than just cylinder
-        if (tile.getExtent() instanceof Cylinder) {
+        if (tile.getExtent() instanceof Cylinder)
+        {
             Cylinder cylinder = ((Cylinder) tile.getExtent());
             if (!(globe.isPointAboveElevation(cylinder.getBottomCenter(), elevation)
-                    ^ globe.isPointAboveElevation(cylinder.getTopCenter(), elevation))) {
+                    ^ globe.isPointAboveElevation(cylinder.getTopCenter(), elevation)))
                 return null;
-            }
         }
-
         Intersection[] hits;
         ArrayList<Intersection> list = new ArrayList<Intersection>();
 
         int[] indices = new int[tile.ri.indices.limit()];
         double[] coords = new double[tile.ri.vertices.limit()];
-        tile.ri.indices.rewind();
-        tile.ri.vertices.rewind();
-        tile.ri.indices.get(indices, 0, indices.length);
-        tile.ri.vertices.get(coords, 0, coords.length);
-        tile.ri.indices.rewind();
-        tile.ri.vertices.rewind();
+        IntBuffer indis = tile.ri.indices;
+        DoubleBuffer verts = tile.ri.vertices;
+        indis.rewind();
+        verts.rewind();
+        indis.get(indices, 0, indices.length);
+        verts.get(coords, 0, coords.length);
+        indis.rewind();
+        verts.rewind();
 
         int trianglesNum = tile.ri.indices.capacity() - 2;
         double centerX = tile.ri.referenceCenter.x;
@@ -1198,12 +1194,12 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         int startIndice = (density + 2) * 2 + 6; // skip firts skirt row and a couple degenerate cells
         int endIndice = trianglesNum - startIndice; // ignore last skirt row and a couple degenerate cells
         int k = -1;
-        for (int i = startIndice; i < endIndice; i += 2) {
+        for (int i = startIndice; i < endIndice; i += 2)
+        {
             // Skip skirts and degenerate triangle cells - based on indice sequence.
             k = k == density - 1 ? -4 : k + 1; // density x terrain cells interleaved with 4 skirt and degenerate cells.
-            if (k < 0) {
+            if (k < 0)
                 continue;
-            }
 
             // Get the four cell corners
             int vIndex = 3 * indices[i];
@@ -1232,22 +1228,23 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 
             Intersection[] inter;
             // Test triangle 1 intersection
-            if ((inter = globe.intersect(new Triangle(v0, v1, v2), elevation)) != null) {
+            if ((inter = globe.intersect(new Triangle(v0, v1, v2), elevation)) != null)
+            {
                 list.add(inter[0]);
                 list.add(inter[1]);
             }
 
             // Test triangle 2 intersection
-            if ((inter = globe.intersect(new Triangle(v1, v2, v3), elevation)) != null) {
+            if ((inter = globe.intersect(new Triangle(v1, v2, v3), elevation)) != null)
+            {
                 list.add(inter[0]);
                 list.add(inter[1]);
             }
         }
 
         int numHits = list.size();
-        if (numHits == 0) {
+        if (numHits == 0)
             return null;
-        }
 
         hits = new Intersection[numHits];
         list.toArray(hits);
@@ -1256,12 +1253,11 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     }
 
     protected Vec4 getSurfacePoint(RectTile tile, Angle latitude,
-            Angle longitude, double metersOffset) {
+            Angle longitude, double metersOffset)
+    {
         Vec4 result = this.getSurfacePoint(tile, latitude, longitude);
-        if (metersOffset != 0 && result != null) {
+        if (metersOffset != 0 && result != null)
             result = applyOffset(this.globe, result, metersOffset);
-        }
-
         return result;
     }
 
@@ -1404,11 +1400,11 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     protected static Vec4 interpolate(Vec4 bL, Vec4 bR, Vec4 tR, Vec4 tL,
             double xDec, double yDec) {
         double pos = xDec + yDec;
-        if (pos == 1) {
+        if (pos == 1)
             // on the diagonal - what's more, we don't need to do any "oneMinusT" calculation
             return new Vec4(tL.x * yDec + bR.x * xDec, tL.y * yDec + bR.y
                     * xDec, tL.z * yDec + bR.z * xDec);
-        } else if (pos > 1) {
+        else if (pos > 1) {
             // in the "top right" half
 
             // vectors pointing from top right towards the point we want (can be thought of as "negative" vectors)
@@ -1439,42 +1435,37 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         double heightFromPoint
                 = distanceFromLine(pnt, V[1], V[2].subtract3(V[1]));
         b0b1b2[0] = heightFromPoint / triangleHeight;
-        if (Math.abs(b0b1b2[0]) < tol) {
+        if (Math.abs(b0b1b2[0]) < tol)
             b0b1b2[0] = 0.0;
-        } else if (Math.abs(1.0 - b0b1b2[0]) < tol) {
+        else if (Math.abs(1.0 - b0b1b2[0]) < tol)
             b0b1b2[0] = 1.0;
-        }
-        if (b0b1b2[0] < 0.0 || b0b1b2[0] > 1.0) {
+        if (b0b1b2[0] < 0.0 || b0b1b2[0] > 1.0)
             return null;
-        }
 
         // b1:
         triangleHeight = distanceFromLine(V[1], V[0], V[2].subtract3(V[0]));
         heightFromPoint = distanceFromLine(pnt, V[0], V[2].subtract3(V[0]));
         b0b1b2[1] = heightFromPoint / triangleHeight;
-        if (Math.abs(b0b1b2[1]) < tol) {
+        if (Math.abs(b0b1b2[1]) < tol)
             b0b1b2[1] = 0.0;
-        } else if (Math.abs(1.0 - b0b1b2[1]) < tol) {
+        else if (Math.abs(1.0 - b0b1b2[1]) < tol)
             b0b1b2[1] = 1.0;
-        }
-        if (b0b1b2[1] < 0.0 || b0b1b2[1] > 1.0) {
+        if (b0b1b2[1] < 0.0 || b0b1b2[1] > 1.0)
             return null;
-        }
 
         // b2:
         b0b1b2[2] = 1.0 - b0b1b2[0] - b0b1b2[1];
-        if (Math.abs(b0b1b2[2]) < tol) {
+        if (Math.abs(b0b1b2[2]) < tol)
             b0b1b2[2] = 0.0;
-        } else if (Math.abs(1.0 - b0b1b2[2]) < tol) {
+        else if (Math.abs(1.0 - b0b1b2[2]) < tol)
             b0b1b2[2] = 1.0;
-        }
-        if (b0b1b2[2] < 0.0) {
+        if (b0b1b2[2] < 0.0)
             return null;
-        }
         return b0b1b2;
     }
 
-    protected static double distanceFromLine(Vec4 pnt, Vec4 P, Vec4 u) {
+    protected static double distanceFromLine(Vec4 pnt, Vec4 P, Vec4 u)
+    {
         // Return distance from pnt to line(P,u)
         // Pythagorean theorem approach: c^2 = a^2 + b^2. The
         // The square of the distance we seek is b^2:
@@ -1484,21 +1475,22 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         aSquared *= aSquared;
         double distSquared = cSquared - aSquared;
         if (distSquared < 0.0) // must be a tiny number that really ought to be 0.0
-        {
             return 0.0;
-        }
         return Math.sqrt(distSquared);
     }
 
     protected DoubleBuffer makeGeographicTexCoords(SectorGeometry sg,
-            SectorGeometry.GeographicTextureCoordinateComputer computer) {
-        if (sg == null) {
+            SectorGeometry.GeographicTextureCoordinateComputer computer)
+    {
+        if (sg == null)
+        {
             String msg = Logging.getMessage("nullValue.SectorGeometryIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
         }
 
-        if (computer == null) {
+        if (computer == null)
+        {
             String msg = Logging.getMessage("nullValue.TextureCoordinateComputerIsNull");
             Logging.logger().severe(msg);
             throw new IllegalArgumentException(msg);
@@ -1507,9 +1499,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         RectTile rt = (RectTile) sg;
 
         int density = rt.density;
-        if (density < 1) {
+        if (density < 1)
             density = 1;
-        }
 
         int coordCount = (density + 3) * (density + 3);
         DoubleBuffer p = Buffers.newDirectDoubleBuffer(2 * coordCount);
@@ -1524,7 +1515,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         double[] uv; // for return values from computer
 
         int k = 2 * (density + 3);
-        for (int j = 0; j < density; j++) {
+        for (int j = 0; j < density; j++)
+        {
             Angle lat = Angle.fromRadians(minLat.radians + j * deltaLat);
 
             // skirt column; duplicate first column
@@ -1532,7 +1524,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             p.put(k++, uv[0]).put(k++, uv[1]);
 
             // interior columns
-            for (int i = 0; i < density; i++) {
+            for (int i = 0; i < density; i++)
+            {
                 Angle lon = Angle.fromRadians(minLon.radians + i * deltaLon);
                 uv = computer.compute(lat, lon);
                 p.put(k++, uv[0]).put(k++, uv[1]);
@@ -1550,7 +1543,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         uv = computer.compute(maxLat, minLon); // skirt column
         p.put(k++, uv[0]).put(k++, uv[1]);
 
-        for (int i = 0; i < density; i++) {
+        for (int i = 0; i < density; i++)
+        {
             Angle lon = Angle.fromRadians(minLon.radians + i * deltaLon); // u
             uv = computer.compute(maxLat, lon);
             p.put(k++, uv[0]).put(k++, uv[1]);
@@ -1562,7 +1556,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 
         // last skirt row
         int kk = k - 2 * (density + 3);
-        for (int i = 0; i < density + 3; i++) {
+        for (int i = 0; i < density + 3; i++)
+        {
             p.put(k++, p.get(kk++));
             p.put(k++, p.get(kk++));
         }
@@ -1570,7 +1565,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         // first skirt row
         k = 0;
         kk = 2 * (density + 3);
-        for (int i = 0; i < density + 3; i++) {
+        for (int i = 0; i < density + 3; i++)
+        {
             p.put(k++, p.get(kk++));
             p.put(k++, p.get(kk++));
         }
@@ -1578,25 +1574,25 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         return p;
     }
 
-    protected static DoubleBuffer getTextureCoordinates(int density) {
-        if (density < 1) {
+    protected static DoubleBuffer getTextureCoordinates(int density)
+    {
+        if (density < 1)
             density = 1;
-        }
 
         // Approximate 1 to avoid shearing off of right and top skirts in SurfaceTileRenderer.
         // TODO: dig into this more: why are the skirts being sheared off?
         final double one = 0.999999;
 
         DoubleBuffer p = parameterizations.get(density);
-        if (p != null) {
+        if (p != null)
             return p;
-        }
 
         int coordCount = (density + 3) * (density + 3);
         p = Buffers.newDirectDoubleBuffer(2 * coordCount);
         double delta = 1d / density;
         int k = 2 * (density + 3);
-        for (int j = 0; j < density; j++) {
+        for (int j = 0; j < density; j++)
+        {
             double v = j * delta;
 
             // skirt column; duplicate first column
@@ -1604,7 +1600,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             p.put(k++, v);
 
             // interior columns
-            for (int i = 0; i < density; i++) {
+            for (int i = 0; i < density; i++)
+            {
                 p.put(k++, i * delta); // u
                 p.put(k++, v);
             }
@@ -1624,10 +1621,12 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         p.put(k++, 0d); // skirt column
         p.put(k++, v);
 
-        for (int i = 0; i < density; i++) {
+        for (int i = 0; i < density; i++)
+        {
             p.put(k++, i * delta); // u
             p.put(k++, v);
         }
+        
         p.put(k++, one);//1d); // last interior column
         p.put(k++, v);
 
@@ -1636,7 +1635,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 
         // last skirt row
         int kk = k - 2 * (density + 3);
-        for (int i = 0; i < density + 3; i++) {
+        for (int i = 0; i < density + 3; i++)
+        {
             p.put(k++, p.get(kk++));
             p.put(k++, p.get(kk++));
         }
@@ -1644,7 +1644,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         // first skirt row
         k = 0;
         kk = 2 * (density + 3);
-        for (int i = 0; i < density + 3; i++) {
+        for (int i = 0; i < density + 3; i++)
+        {
             p.put(k++, p.get(kk++));
             p.put(k++, p.get(kk++));
         }
@@ -1654,25 +1655,26 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         return p;
     }
 
-    protected static IntBuffer getIndices(int density) {
-        if (density < 1) {
+    protected static IntBuffer getIndices(int density)
+    {
+        if (density < 1)
             density = 1;
-        }
 
         // return a pre-computed buffer if possible.
         java.nio.IntBuffer buffer = indexLists.get(density);
-        if (buffer != null) {
+        if (buffer != null)
             return buffer;
-        }
 
         int sideSize = density + 2;
 
         int indexCount = 2 * sideSize * sideSize + 4 * sideSize - 2;
         buffer = Buffers.newDirectIntBuffer(indexCount);
         int k = 0;
-        for (int i = 0; i < sideSize; i++) {
+        for (int i = 0; i < sideSize; i++)
+        {
             buffer.put(k);
-            if (i > 0) {
+            if (i > 0)
+            {
                 buffer.put(++k);
                 buffer.put(k);
             }
@@ -1680,7 +1682,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             if (i % 2 == 0) // even
             {
                 buffer.put(++k);
-                for (int j = 0; j < sideSize; j++) {
+                for (int j = 0; j < sideSize; j++)
+                {
                     k += sideSize;
                     buffer.put(k);
                     buffer.put(++k);
@@ -1688,7 +1691,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             } else // odd
             {
                 buffer.put(--k);
-                for (int j = 0; j < sideSize; j++) {
+                for (int j = 0; j < sideSize; j++)
+                {
                     k -= sideSize;
                     buffer.put(k);
                     buffer.put(--k);
@@ -1703,15 +1707,17 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
 
     //calculates normals quickly, but uses 4 surrounding vertices
     //instead of average of connected faces
-    protected static DoubleBuffer getNormalsQuick(int density, DoubleBuffer vertices, Vec4 referenceCenter) {
+    protected static DoubleBuffer getNormalsQuick(int density, DoubleBuffer vertices, Vec4 referenceCenter)
+    {
         int side = density + 3;
         int numVertices = side * side;
         DoubleBuffer normals = Buffers.newDirectDoubleBuffer(numVertices * 3);
         Vec4 p0, p1, p2, p3, p4;
 
         //don't calculate skirt normals yet
-        for (int j = 1; j < side - 1; j++) {
-            for (int i = 1; i < side - 1; i++) {
+        for (int j = 1; j < side - 1; j++)
+            for (int i = 1; i < side - 1; i++)
+            {
                 int index0 = j * side + i;
                 int index1 = j * side + (i - 1);
                 int index2 = j * side + (i + 1);
@@ -1732,10 +1738,10 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
                 normals.put(index0 * 3, normal.x).put(index0 * 3 + 1, normal.y)
                         .put(index0 * 3 + 2, normal.z);
             }
-        }
 
         //copy skirt normals from neighbours
-        for (int i = 1; i < side - 1; i++) {
+        for (int i = 1; i < side - 1; i++)
+        {
             int di = i;
             int si = side + i;
             copyNormalInBuffer(si, di, normals);
@@ -1744,7 +1750,9 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
             si = side * (side - 2) + i;
             copyNormalInBuffer(si, di, normals);
         }
-        for (int i = 0; i < side; i++) {
+        
+        for (int i = 0; i < side; i++)
+        {
             int di = i * side;
             int si = i * side + 1;
             copyNormalInBuffer(si, di, normals);
@@ -1758,7 +1766,8 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     }
 
     protected static Vec4 getVec4(int index, DoubleBuffer vertices,
-            Vec4 referenceCenter) {
+            Vec4 referenceCenter)
+    {
         return new Vec4(vertices.get(index * 3) + referenceCenter.x, vertices
                 .get(index * 3 + 1)
                 + referenceCenter.y, vertices.get(index * 3 + 2)
@@ -1766,14 +1775,16 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
     }
 
     protected static void copyNormalInBuffer(int srcIndex, int dstIndex,
-            DoubleBuffer normals) {
+            DoubleBuffer normals)
+    {
         normals.put(dstIndex * 3, normals.get(srcIndex * 3));
         normals.put(dstIndex * 3 + 1, normals.get(srcIndex * 3 + 1));
         normals.put(dstIndex * 3 + 2, normals.get(srcIndex * 3 + 2));
     }
 
     //computes normals for the triangle strip
-    protected static java.nio.DoubleBuffer getNormals(int density, DoubleBuffer vertices, java.nio.IntBuffer indices, Vec4 referenceCenter) {
+    protected static java.nio.DoubleBuffer getNormals(int density, DoubleBuffer vertices, java.nio.IntBuffer indices, Vec4 referenceCenter)
+    {
         int side = density + 3;
         int numVertices = side * side;
         int numFaces = indices.limit() - 2;
@@ -1784,11 +1795,11 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         DoubleBuffer normals = Buffers.newDirectDoubleBuffer(numVertices * 3);
         int[] counts = new int[numVertices];
         Vec4[] norms = new Vec4[numVertices];
-        for (int i = 0; i < numVertices; i++) {
+        for (int i = 0; i < numVertices; i++)
             norms[i] = new Vec4(0d);
-        }
 
-        for (int i = 0; i < numFaces; i++) {
+        for (int i = 0; i < numFaces; i++)
+        {
             //get vertex indices
             int index0 = indices.get(i);
             int index1 = indices.get(i + 1);
@@ -1808,15 +1819,12 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
                     + centerY, vertices.get(index2 * 3 + 2) + centerZ);
 
             // get triangle edge vectors and plane normal
-            Vec4 e1 = v1.subtract3(v0), e2;
-            if (i % 2 == 0) {
-                e2 = v2.subtract3(v0);
-            } else {
-                e2 = v0.subtract3(v2);
-            }
+            Vec4 e1 = v1.subtract3(v0);
+            Vec4 e2 = i % 2 == 0 ? v2.subtract3(v0) : v0.subtract3(v2);
             Vec4 N = e1.cross3(e2).normalize3(); // if N is 0, the triangle is degenerate
 
-            if (N.getLength3() > 0) {
+            if (N.getLength3() > 0)
+            {
                 // Store the face's normal for each of the vertices that make up the face.
                 norms[index0] = norms[index0].add3(N);
                 norms[index1] = norms[index1].add3(N);
@@ -1830,10 +1838,11 @@ public class RectangularNormalTessellator extends WWObjectImpl implements Tessel
         }
 
         // Now loop through each vertex, and average out all the normals stored.
-        for (int i = 0; i < numVertices; i++) {
-            if (counts[i] > 0) {
+        for (int i = 0; i < numVertices; i++)
+        {
+            if (counts[i] > 0)
                 norms[i] = norms[i].divide3(counts[i]).normalize3();
-            }
+
             int index = i * 3;
             normals.put(index++, norms[i].x).put(index++, norms[i].y).put(
                     index, norms[i].z);
