@@ -116,7 +116,8 @@ public abstract class RmiAdapter implements Remote
     if (connection!=null)
     {
       connection.end();
-      try { 
+      try
+      { 
         connection.join(1500);
       }
       catch (InterruptedException e)

@@ -119,7 +119,6 @@ public abstract class WorldWindPanel extends MainPanel
           getScreen().setPanel(null);
         } catch (ClassNotFoundException | RemoteException e)
         {
-          // TODO Auto-generated catch block
           Log.err("Cannot reset panel on screen.", e);
         }
       }
@@ -267,10 +266,7 @@ public abstract class WorldWindPanel extends MainPanel
       @Override
       public void touchDown(EEvent ee)
       {
-        if (ePlaceArray.isDisplayed())
-          setMainMode(MODE_WORLDWIND);
-        else
-          setMainMode(MODE_PLACES);
+        setMainMode(ePlaceArray.isDisplayed() ? MODE_WORLDWIND : MODE_PLACES);
       }
     });
     add(ePlaces);
@@ -505,8 +501,7 @@ public abstract class WorldWindPanel extends MainPanel
   protected void setBarMode(int mode)
   {
     if (mode<BARMODE_TOGGLE || mode>=NUM_BARMODES) return;
-    mode = (mode==BARMODE_TOGGLE?getBarMode()+1:mode);
-    mode %= NUM_BARMODES;
+    mode = (mode==BARMODE_TOGGLE?getBarMode()+1:mode) % NUM_BARMODES;
     
     eArrayControls.removeFromPanel();
     eOrbitArray.removeFromPanel();
@@ -573,14 +568,15 @@ public abstract class WorldWindPanel extends MainPanel
   protected void displayWorldWindState()
   {
     // Fall back if World Wind control does not exist
-    eDate.setStatic(eWw==null);
-    eModeSel.setDisabled(eWw==null);
-    eNavi.setDisabled(eWw==null);
-    eOrbit.setDisabled(eWw==null);
-    ePlaces.setDisabled(eWw==null);
-    eInsteadOfWwHead.setVisible(eWw==null);
-    eInsteadOfWwText.setVisible(eWw==null);
-    if (eWw==null) return;
+    boolean noEww = eWw == null;
+    eDate.setStatic(noEww);
+    eModeSel.setDisabled(noEww);
+    eNavi.setDisabled(noEww);
+    eOrbit.setDisabled(noEww);
+    ePlaces.setDisabled(noEww);
+    eInsteadOfWwHead.setVisible(noEww);
+    eInsteadOfWwText.setVisible(noEww);
+    if (noEww) return;
 
     // Display main mode
     if (ePlaceSearch.isDisplayed())
@@ -601,11 +597,9 @@ public abstract class WorldWindPanel extends MainPanel
     // Display layer set states
     for (EElement e:eViewArray.getItemElements())
     {
-      if (e.getData()==null || !(e.getData() instanceof LayerSet))
-        return;
-      
-      LayerSet layerSet = (LayerSet)e.getData();
-      e.setSelected(layerSet.isMajorityEnabled());
+      Object ed = e.getData();
+      if (ed!=null && e.getData() instanceof LayerSet)      
+        e.setSelected(((LayerSet)ed).isMajorityEnabled());
     }
   }
 

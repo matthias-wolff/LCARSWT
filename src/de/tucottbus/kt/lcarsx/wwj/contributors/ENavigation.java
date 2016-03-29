@@ -422,11 +422,12 @@ public class ENavigation extends ElementContributor
   {
     if (eWw==null || eWw.getView()==null)
     {
-      eLat.setValue("N/A");
-      eLon.setValue("N/A");
-      eAlt.setValue("N/A");
-      ePit.setValue("N/A");
-      eHdg.setValue("N/A");
+      final String na = "N/A";
+      eLat.setValue(na);
+      eLon.setValue(na);
+      eAlt.setValue(na);
+      ePit.setValue(na);
+      eHdg.setValue(na);
       return;
     }
     

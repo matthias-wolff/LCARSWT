@@ -271,8 +271,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public Position getEyePosition()
   {
-    if (getView()==null) return null;
-    return getView().getEyePosition();
+    View view = getView();
+    return view != null ? view.getEyePosition() : null;
   }
   
   /**
@@ -286,11 +286,12 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public void setEyePosition(Position eyePosition)
   {
+    View view;
     if (getOrbit()!=null)
       getOrbit().setEyePosition(eyePosition);
-    else if (getView()!=null)
+    else if ((view = getView())!=null)
       if (eyePosition!=null)
-        getView().setEyePosition(eyePosition);
+        view.setEyePosition(eyePosition);
       else
         setView(null);
   }
@@ -302,8 +303,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public Angle getHeading()
   {
-    if (getView()==null) return null;
-    return getView().getHeading();
+    View view = getView();
+    return view != null ? view.getHeading() : null;
   }
   
   /**
@@ -317,10 +318,11 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public void setHeading(Angle heading)
   {
+    View view;
     if (getOrbit()!=null)
       getOrbit().setHeading(heading);
-    else if (getView()!=null)
-      getView().setHeading(heading!=null?heading:Angle.ZERO);
+    else if ((view=getView())!=null)
+      view.setHeading(heading!=null?heading:Angle.ZERO);
   }
 
   /**
@@ -330,8 +332,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public Angle getPitch()
   {
-    if (getView()==null) return null;
-    return getView().getPitch();
+    View view = getView();
+    return view != null ? view.getPitch() : null;
   }
   
   /**
@@ -345,10 +347,11 @@ public class EWorldWind extends ElementContributor implements RenderingListener
    */
   public void setPitch(Angle pitch)
   {
+    View view;
     if (getOrbit()!=null)
       getOrbit().setPitch(pitch);
-    else if (getView()!=null)
-      getView().setPitch(pitch!=null?pitch:Angle.ZERO);
+    else if ((view=getView())!=null)
+      view.setPitch(pitch!=null?pitch:Angle.ZERO);
   }
   
   // -- Orbiting and flying API --
@@ -442,12 +445,10 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   @Override
   public void stageChanged(RenderingEvent event)
   {
-    if (event.getStage().equals(RenderingEvent.BEFORE_RENDERING))
-    {
-      if (orbit==null) return;
-      if (orbit.getView().getGlobe()==null) return;
+    if (event.getStage().equals(RenderingEvent.BEFORE_RENDERING) &&
+        orbit != null &&
+        orbit.getView().getGlobe() != null)
       orbit.updateView();
-    }
   }
   
 }

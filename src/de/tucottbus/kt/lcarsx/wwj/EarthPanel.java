@@ -92,24 +92,26 @@ public class EarthPanel extends WorldWindPanel
       this.model = new BasicModel();
       this.model.setGlobe(new Earth());
       
+      LayerList layers = this.model.getLayers();
+      
       // Remove standard layers
-      this.model.getLayers().removeIf(l -> l instanceof ScalebarLayer);
-      this.model.getLayers().removeIf(l -> l instanceof NASAWFSPlaceNameLayer);
+      layers.removeIf(l -> l instanceof ScalebarLayer);
+      layers.removeIf(l -> l instanceof NASAWFSPlaceNameLayer);
 
       // Add layers
-      this.model.getLayers().add(new LcarsGraticuleLayer());
-      this.model.getLayers().add(new LcarsScalebarLayer());
-      this.model.getLayers().add(new LcarsPlaceNameLayer());
-      this.model.getLayers().add(new MSVirtualEarthLayer());
+      layers.add(new LcarsGraticuleLayer());
+      layers.add(new LcarsScalebarLayer());
+      layers.add(new LcarsPlaceNameLayer());
+      layers.add(new MSVirtualEarthLayer());
 
       // Adjust sun and atmosphere
       this.sunLayer = new SunLayer();
       //this.cityLightsLayer = new CityLightsLayer();
       this.cloudLayer = new CloudLayer();
       this.atmosphereLayer = new AtmosphereLayer();
-      this.model.getLayers().add(this.sunLayer);
-      //this.model.getLayers().add(this.cityLightsLayer);
-      this.model.getLayers().add(cloudLayer);
+      layers.add(this.sunLayer);
+      //layers.add(this.cityLightsLayer);
+      layers.add(cloudLayer);
       this.sunController = new SunController(this.model,this.sunLayer,
         this.atmosphereLayer,null/*this.cityLightsLayer*/,this.cloudLayer);
       

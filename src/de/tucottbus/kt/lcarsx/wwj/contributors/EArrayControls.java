@@ -18,9 +18,10 @@ public class EArrayControls extends ElementContributor
   {
     super(x,y);
     this.worldWindPanel = worldWindPanel;
-    ePrev  = new EValue(null,   0,0,174,38,this.worldWindPanel.style|LCARS.ES_LABEL_E,"PREV");
-    eNext  = new ERect (null,1286,0, 58,38,this.worldWindPanel.style|LCARS.ES_LABEL_W,"NEXT");
-    eLock  = new ERect (null,1347,0, 58,38,this.worldWindPanel.style|LCARS.ES_LABEL_W,"LOCK");
+    int style = this.worldWindPanel.style;
+    ePrev  = new EValue(null,   0,0,174,38,style|LCARS.ES_LABEL_E,"PREV");
+    eNext  = new ERect (null,1286,0, 58,38,style|LCARS.ES_LABEL_W,"NEXT");
+    eLock  = new ERect (null,1347,0, 58,38,style|LCARS.ES_LABEL_W,"LOCK");
     ePrev.setValueMargin(0);
     add(ePrev);
     add(eNext);
