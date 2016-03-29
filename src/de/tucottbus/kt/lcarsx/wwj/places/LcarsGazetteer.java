@@ -3,7 +3,6 @@ package de.tucottbus.kt.lcarsx.wwj.places;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -26,6 +25,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * <p><i><b style="color:red">Experimental.</b></i></p>
@@ -79,14 +79,14 @@ public class LcarsGazetteer
     try
     {
       // Get and parse XML
-      LCARS.log("GAZ","HTTP GET \""+url+"\"");
+      Log.info("HTTP GET \""+url+"\"");
       conn = (new URL(url)).openConnection();
       conn.setRequestProperty("User-Agent","GoogleEarth");
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
       Document doc = db.parse(conn.getInputStream());
       doc.getDocumentElement().normalize();
-      //System.out.println(serializeXml(doc));
+      //Log.info(serializeXml(doc));
 
       // Dummy picking of some information from the DOM
       NodeList nl_res = doc.getElementsByTagName("result");
@@ -115,17 +115,17 @@ public class LcarsGazetteer
 
           // Create place
           Place place = Place.fromLatLonBox(name,world,north,south,east,west);
-          LCARS.log("GAZ","Result: name=\""+name+"\"; camera=\""+place.camera+"\"");
+          Log.info("Result: name=\""+name+"\"; camera=\""+place.camera+"\"");
           places.add(place);
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          Log.err("Some error occured", e);
         }
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Some error occured", e);
     }
     finally
     {
@@ -160,7 +160,7 @@ public class LcarsGazetteer
     try
     {
       // Get and parse KML
-      LCARS.log("GAZ","HTTP GET \""+url+"\"");
+      Log.info("HTTP GET \""+url+"\"");
       URLConnection conn = (new URL(url)).openConnection();
       conn.setRequestProperty("User-Agent","GoogleEarth");
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -225,26 +225,13 @@ public class LcarsGazetteer
         if (!added)
           places.add(new Place(name,world,(Camera)null,null));
         
-        LCARS.log("GAZ",log);
+        Log.info(log);
       }
     }
-    catch (MalformedURLException e1)
+    catch (IOException|ParserConfigurationException|SAXException e1)
     {
-      e1.printStackTrace();
+      Log.err("Some error occured", e1);
     }
-    catch (IOException e1)
-    {
-      e1.printStackTrace();
-    }
-    catch (ParserConfigurationException e)
-    {
-      e.printStackTrace();
-    }
-    catch (SAXException e)
-    {
-      e.printStackTrace();
-    }
-
     return places;
   }
  

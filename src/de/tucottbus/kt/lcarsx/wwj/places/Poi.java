@@ -9,8 +9,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * <p><i><b style="color:red">Experimental.</b></i></p>
@@ -51,8 +54,9 @@ public class Poi
         if (node.getNodeType()!=Node.ELEMENT_NODE) continue;
 
         // Get name and world
-        String name  = node.getAttributes().getNamedItem("name" ).getNodeValue();
-        String world = node.getAttributes().getNamedItem("world").getNodeValue();
+        NamedNodeMap attr = node.getAttributes();
+        String name  = attr.getNamedItem("name" ).getNodeValue();
+        String world = attr.getNamedItem("world").getNodeValue();
 
         // Get camera (if present)
         String camera = null;
@@ -88,7 +92,7 @@ public class Poi
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Some error occured", e);
     }
   }
   

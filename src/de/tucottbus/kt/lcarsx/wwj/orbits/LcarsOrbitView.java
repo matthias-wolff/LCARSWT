@@ -25,6 +25,7 @@ public class LcarsOrbitView extends BasicFlyView
       @Override
       public void stopAnimators()
       {
+        // ignored
       }
       
       @Override
@@ -36,11 +37,13 @@ public class LcarsOrbitView extends BasicFlyView
       @Override
       public void goTo(Position lookAtPos, double elevation)
       {
+        // ignored
       }
       
       @Override
       public void addAnimator(Animator animator)
       {
+        // ignored
       }
       
       @Override
@@ -48,12 +51,14 @@ public class LcarsOrbitView extends BasicFlyView
           double totalTranslateChange, DeviceAttributes deviceAttributes,
           ActionAttributes actionAttributes)
       {
+        // ignored
       }
       
       @Override
       protected void onVerticalTranslate(double translateChange,
           ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
@@ -61,33 +66,39 @@ public class LcarsOrbitView extends BasicFlyView
           double totalHeadingInput, double totalPitchInput,
           DeviceAttributes deviceAttributes, ActionAttributes actionAttributes)
       {
+        // ignored
       }
       
       @Override
       protected void onRotateView(Angle headingChange, Angle pitchChange,
           ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
       protected void onResetHeadingPitchRoll(ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
       protected void onResetHeading(ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
       protected void onMoveTo(Position focalPosition,
           DeviceAttributes deviceAttributes, ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
       protected void onMoveTo(Position focalPosition, ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
@@ -96,22 +107,24 @@ public class LcarsOrbitView extends BasicFlyView
           double forwardInputFromMouseDown, DeviceAttributes deviceAttributes,
           ActionAttributes actionAttributes)
       {
+        // ignored
       }
       
       @Override
       protected void onHorizontalTranslateRel(Angle forwardChange,
           Angle sideChange, ActionAttributes actionAttribs)
       {
+        // ignored
       }
       
       @Override
       protected void onHorizontalTranslateAbs(Angle latitudeChange,
           Angle longitudeChange, ActionAttributes actionAttribs)
       {
+        // ignored
       }
     };
     this.viewLimits.setEyeElevationLimits(0,MAX_ELEVATION);
     setEyePosition(Position.fromDegrees(0,0,MAX_ELEVATION));
   }
-
 }

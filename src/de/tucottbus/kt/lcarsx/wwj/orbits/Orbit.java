@@ -80,7 +80,7 @@ public abstract class Orbit
    */
   public void setEyePosition(Position eyePosition)
   {
-    this.eyePosition = eyePosition==null?getDefaultEyePosition():eyePosition;
+    this.eyePosition = eyePosition!=null?eyePosition:getDefaultEyePosition();
   }
   
   /**

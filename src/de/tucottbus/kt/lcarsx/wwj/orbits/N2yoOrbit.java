@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Vector;
 
-import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.logging.Log;
 
 /**
  * Instances of this class provide real time tracking of earth satellites
@@ -154,7 +154,7 @@ public abstract class N2yoOrbit extends Orbit
     Vector<OrbitState> orbit = new Vector<OrbitState>();
     
     String url = String.format(Locale.US,Q_ORBIT,getSatID());
-    LCARS.log("N2Y","HTTP-GET \""+url+"\"");
+    Log.info("HTTP-GET \""+url+"\"");
     HttpURLConnection conn;
     try
     {
@@ -174,7 +174,7 @@ public abstract class N2yoOrbit extends Orbit
           if (line==1)
           {
             name = tokens[2];
-            //LCARS.log("N2Y","("+line+") satname=\""+satName+"\"");
+            //Log.info("("+line+") satname=\""+satName+"\"");
           }
           else
           {
@@ -185,20 +185,19 @@ public abstract class N2yoOrbit extends Orbit
             pos.date = new Date(Long.valueOf(tokens[3])*1000);
             pos.spd  = Float.valueOf(tokens[4]);
             orbit.add(pos);
-            //LCARS.log("N2Y","("+line+") "+pos.toString());
+            //Log.info("N2Y","("+line+") "+pos.toString());
           }
         }
         catch (Exception e)
         {
-          LCARS.err("N2Y","Cannot parse line "+line+" \""+text+"\", reason:");
-          e.printStackTrace();
+          Log.err("Cannot parse line "+line+" \""+text+"\", reason:", e);
         }
       }
       conn.disconnect();
     }
     catch (Exception e)
     {
-      e.printStackTrace();
+      Log.err("Some error occured", e);
     }
     return orbit;
   }
@@ -225,17 +224,14 @@ public abstract class N2yoOrbit extends Orbit
     // Compute longitude delta
     double dlon = posB.lon.degrees-posA.lon.degrees;
     if (Math.abs(dlon)>300)
-    {
-      if (posB.lon.degrees<0) dlon = posB.lon.degrees+360-posA.lon.degrees;
-      else dlon = posB.lon.degrees-360-posA.lon.degrees;
-    }
+      dlon = posB.lon.degrees-posA.lon.degrees + (posB.lon.degrees<0 ? 360 : -360);
 
     // Compute interpolated position
     double lat = posA.lat.degrees+f*dlat;
     double lon = posA.lon.degrees+f*dlon;
     double alt = (posA.alt+f*(posB.alt-posA.alt))*1000;
     double spd = posA.spd+f*(posB.spd-posA.spd);
-    double hdg = dlon==0?0:Math.atan(dlon/dlat)/Math.PI*180;
+    double hdg = dlon==0?0:Math.atan(dlon/dlat)*(180/Math.PI);
     if (lon>180) lon -= 360;
     if (dlon>0&&hdg<0) hdg += 180;
     else if (dlon<0&&hdg>0) hdg -= 180;
@@ -341,23 +337,23 @@ public abstract class N2yoOrbit extends Orbit
    */
   private static double[] lin_solve(double[][] matrix)
   {
-    double[] results = new double[matrix.length];
-    int[] order = new int[matrix.length];
+    int n = matrix.length;
+    int m = n>0 ? matrix[0].length : 0;
+    double[] results = new double[n];
+    int[] order = new int[n];
     for (int i = 0; i<order.length; ++i)
-    {
       order[i] = i;
-    }
-    for (int i = 0; i<matrix.length; ++i)
+
+    for (int i = 0; i<n; ++i)
     {
+      double[] matcoli = matrix[i];
+
       // partial pivot
       int maxIndex = i;
-      for (int j = i+1; j<matrix.length; ++j)
-      {
+      for (int j = i+1; j<n; ++j)
         if (Math.abs(matrix[maxIndex][i])<Math.abs(matrix[j][i]))
-        {
           maxIndex = j;
-        }
-      }
+
       if (maxIndex!=i)
       {
         // swap order
@@ -367,33 +363,34 @@ public abstract class N2yoOrbit extends Orbit
           order[maxIndex] = temp;
         }
         // swap matrix
-        for (int j = 0; j<matrix[0].length; ++j)
+        double[] matcolmax = matrix[maxIndex];
+        for (int j = 0; j<m; ++j)
         {
-          double temp = matrix[i][j];
-          matrix[i][j] = matrix[maxIndex][j];
-          matrix[maxIndex][j] = temp;
+          double temp = matcoli[j];
+          matcoli[j] = matcolmax[j];
+          matcolmax[j] = temp;
         }
       }
       if (Math.abs(matrix[i][i])<1e-15) { throw new RuntimeException(
           "Singularity detected"); }
-      for (int j = i+1; j<matrix.length; ++j)
+      for (int j = i+1; j<n; ++j)
       {
-        double factor = matrix[j][i]/matrix[i][i];
-        for (int k = i; k<matrix[0].length; ++k)
-        {
-          matrix[j][k] -= matrix[i][k]*factor;
-        }
+        double[] matcolj = matrix[j];
+        double factor = matcolj[i]/matcoli[i];
+        for (int k = i; k<m; ++k)
+          matcolj[k] -= matcoli[k]*factor;
       }
     }
-    for (int i = matrix.length-1; i>=0; --i)
+    for (int i = n-1; i>=0; --i)
     {
+      double[] matcol = matrix[i];
       // back substitute
-      results[i] = matrix[i][matrix.length];
-      for (int j = i+1; j<matrix.length; ++j)
+      results[i] = matcol[n];
+      for (int j = i+1; j<n; ++j)
       {
-        results[i] -= results[j]*matrix[i][j];
+        results[i] -= results[j]*matcol[j];
       }
-      results[i] /= matrix[i][i];
+      results[i] /= matcol[i];
     }
     double[] correctResults = new double[results.length];
     for (int i = 0; i<order.length; ++i)
@@ -436,19 +433,17 @@ public abstract class N2yoOrbit extends Orbit
     double matrix[][] = new double[power+1][power+2];
     for (int i = 0; i<power+1; ++i)
     {
+      double[] matcol = matrix[i];
       for (int j = 0; j<power; ++j)
-      {
-        matrix[i][j] = Math.pow(dataX[xIndex+i],(power-j));
-      }
-      matrix[i][power] = 1;
-      matrix[i][power+1] = dataY[xIndex+i];
+        matcol[j] = Math.pow(dataX[xIndex+i],(power-j));
+
+      matcol[power] = 1;
+      matcol[power+1] = dataY[xIndex+i];
     }
     double[] coefficients = lin_solve(matrix);
     double answer = 0;
     for (int i = 0; i<coefficients.length; ++i)
-    {
       answer += coefficients[i]*Math.pow(x,(power-i));
-    }
     return answer;
   }
 }

@@ -28,10 +28,8 @@ public class IssOrbit extends N2yoOrbit
   public static void main(String[] args)
   {
     final IssOrbit iss = new IssOrbit();
-    
     (new Timer()).schedule(new TimerTask()
-    {
-      
+    {      
       @Override
       public void run()
       {

@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcarsx.wwj.places;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.Position;
 
 public class Camera
 {
@@ -46,9 +47,10 @@ public class Camera
   public static Camera fromView(View view)
   {
     Camera camera = new Camera(0,0,0,0,0,0,0);
-    camera.latitude  = view.getEyePosition().getLatitude().degrees;
-    camera.longitude = view.getEyePosition().getLongitude().degrees;
-    camera.altitude  = view.getEyePosition().getAltitude();
+    Position eye = view.getEyePosition();
+    camera.latitude  = eye.getLatitude().degrees;
+    camera.longitude = eye.getLongitude().degrees;
+    camera.altitude  = eye.getAltitude();
     camera.heading   = view.getHeading().degrees;
     camera.tilt      = view.getPitch().degrees;
     camera.roll      = view.getRoll().degrees;
