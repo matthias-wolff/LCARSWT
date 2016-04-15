@@ -131,7 +131,7 @@ public class LcarsComposite extends Composite implements PaintListener
     final Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
        
     if(context.getFullRepaint())
-      gc.setClipping(0,0,getBounds().width, getBounds().height);
+      gc.setClipping(0,0,(int)Math.ceil(getBounds().width/sx),(int)Math.ceil(getBounds().height/sy));
     else
       gc.setClipping(dirtyArea);
 
