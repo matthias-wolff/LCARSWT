@@ -172,6 +172,9 @@
 					<includes>
 						<include>**/*</include>
 					</includes>
+                    <excludes>
+                      <exclude>**/*-jar-with-dependencies.*</exclude>
+                    </excludes>
 					<repositoryName>${github.maven.project}</repositoryName>      <!-- github repo name -->
 					<repositoryOwner>${github.maven.owner}</repositoryOwner>    <!-- github username -->
 					<merge>true</merge>
