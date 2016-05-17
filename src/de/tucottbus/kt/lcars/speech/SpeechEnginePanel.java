@@ -443,8 +443,16 @@ public class SpeechEnginePanel extends Panel
     eRec.setSelected  (spe!=null&&!spe.hasFailed()&&spe.isStarted()&&spe.getListenMode()>0);
     eRec.setValue     (recLb);
     
-    eAudFdbk.setSelected((spe.getUserFeedbackMode()&UserFeedbackPlayer.AUDITORY)!=0);
-    eVisFdbk.setSelected((spe.getUserFeedbackMode()&UserFeedbackPlayer.VISUAL)!=0);
+    if (spe!=null)
+    {
+      eAudFdbk.setSelected((spe.getUserFeedbackMode()&UserFeedbackPlayer.AUDITORY)!=0);
+      eVisFdbk.setSelected((spe.getUserFeedbackMode()&UserFeedbackPlayer.VISUAL)!=0);
+    }
+    else
+    {
+      eAudFdbk.setSelected(false);
+      eVisFdbk.setSelected(false);
+    }
     
     if (spe!=null && !spe.isStarted())
       cSpeechSig.reset();
