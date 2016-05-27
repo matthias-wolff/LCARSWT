@@ -311,6 +311,14 @@ public class ServerPanel extends Panel
   }
 
   @Override
+  public void stop()
+  {
+    super.stop();
+    eLog.removeFromPanel();
+    eScreens.removeFromPanel();
+  }
+  
+  @Override
   protected void fps2()
   {
     super.fps2();

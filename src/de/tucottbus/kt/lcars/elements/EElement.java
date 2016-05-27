@@ -484,6 +484,7 @@ public abstract class EElement
   public void clearTouch()
   {
     data.state.setTouch(0x00000000);
+    runHoldThread(null);
   }
   
   /**

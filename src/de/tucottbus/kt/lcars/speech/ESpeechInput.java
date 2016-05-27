@@ -16,11 +16,11 @@ import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
+import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
-import de.tucottbus.kt.lcars.swt.FontMeta;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcars.swt.FontMeta;
 
 /**
  * EXPERIMENTAL: Display of speech level and recognition result details.
@@ -266,6 +266,11 @@ public class ESpeechInput extends ElementContributor
   @Override
   public void removeFromPanel()
   {
+    if (runt!=null)
+    {
+      runt.cancel();
+      runt = null;
+    }
     super.removeFromPanel();
   }  
   
@@ -273,7 +278,11 @@ public class ESpeechInput extends ElementContributor
   {
     public void run()
     {
-      if (panel==null) { runt.cancel(); return; }
+      if (panel==null) 
+      {
+        try { runt.cancel(); } catch (Exception e) {} 
+        return; 
+      }
       
       // Softly clear level display
       lvlCount++;

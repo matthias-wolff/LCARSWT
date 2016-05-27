@@ -54,7 +54,7 @@ public class SpeechEnginePanel extends Panel
   // Misc
   private   int             modeU;
   private   int             redAlertCtr;
-  private   ColorMeta           cRed = LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED);
+  private   ColorMeta       cRed = LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_PRIMARY|LCARS.ES_SELECTED);
   
   public SpeechEnginePanel(IScreen screen)
   {
@@ -283,6 +283,15 @@ public class SpeechEnginePanel extends Panel
     cSpeechPostproc.addToPanel(this);
   }
 
+  @Override
+  public void stop()
+  {
+    super.stop();
+    cSpeechIo.removeFromPanel();
+    cSpeechSig.removeFromPanel();
+    cSpeechPostproc.removeFromPanel();
+  }
+  
   public boolean getModeUAuto()
   {
     return eModeUAuto.isBlinking();

@@ -402,7 +402,7 @@ public abstract class ElementContributor implements EEventListener
   {
     synchronized (timerTasks)
     {
-      if (timer==null) timer = new Timer(true);
+      if (timer==null) timer = new Timer(getClass().getSimpleName()+".timer",true);
       cancelTimerTask(name);
       if (period>0)
         timer.schedule(task,firstTime,period);

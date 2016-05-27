@@ -1222,7 +1222,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void start()
   {
     if (runt == null)
-      (runt = new Timer("Panel timer", true))
+      (runt = new Timer(getClass().getSimpleName()+".runt (panel timer)", true))
           .scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
     if (getSpeechEngine() != null)
       getSpeechEngine().addSpeechEventListener(this);
@@ -1320,7 +1320,14 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           else {
             if (i > this.dragTouch.size())
               continue;
-            dragElement = this.dragTouch.get(i++);
+            try
+            {
+              dragElement = this.dragTouch.get(i++);
+            }
+            catch (IndexOutOfBoundsException e)
+            {
+              dragElement = null;
+            }
           }
           clearDragTouch &= event.isMouseEvent;
           
