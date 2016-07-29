@@ -451,17 +451,19 @@ public class LCARS implements ILcarsRemote
   private static FontMeta.Explicit[] fonts = null;
   private static Map<String,Boolean> insFnts = new Hashtable<String,Boolean>();
 
-  /** 
-   * The scaling to get a swt font with the same height as there awt variant
-   */
-  protected static double fontScale; 
-  
-  static {
-    Display display = getDisplay();
-    display.syncExec(() -> {
-      fontScale = 72.0 / display.getDPI().y;
-    });
-  }
+//  /** 
+//   * The scaling to get a swt font with the same height as there awt variant
+//   */
+//  protected static double fontScale; 
+//  
+//  static {
+//    Display display = getDisplay();
+//    display.syncExec(() -> {
+//      org.eclipse.swt.graphics.Point p = display.getDPI();
+//      System.err.println("*** DPI.x="+p.x+", DPI.y="+p.y+" ***");
+//      fontScale = 72.0 / display.getDPI().y;
+//    });
+//  }
   
   /**
    * Determines if the specified font is installed.
@@ -524,24 +526,24 @@ public class LCARS implements ILcarsRemote
     {
       String[] f = {LCARS.getInstalledFont(FN_COMPACTA)};
       
-      int    h = 1200;/*LCARS.panelDim.height;*/
+      int    h = 1080;/*LCARS.panelDim.height;*/
       
       FontMeta.Explicit[] fonts = new FontMeta.Explicit[EF_COUNT];
       final Function<Integer, FontMeta.Explicit> newFont = (height) -> {       
-        return new FontMeta.Explicit(f[0], (int)(height*fontScale), java.awt.Font.PLAIN);
+        return new FontMeta.Explicit(f[0], height, java.awt.Font.PLAIN);
       };
       
-      fonts[EF_LARGE >>EF_SHIFT] = newFont.apply((int)(h/27.0)); //32.0
-      fonts[EF_HEAD1 >>EF_SHIFT] = newFont.apply((int)(h/10.0)); //12.0
-      fonts[EF_HEAD2 >>EF_SHIFT] = newFont.apply((int)(h/17.0)); //25.0
+      fonts[EF_HEAD1 >>EF_SHIFT] = newFont.apply((int)Math.round(h/10.)); //12.0
+      fonts[EF_HEAD2 >>EF_SHIFT] = newFont.apply((int)Math.round(h/16.)); //25.0
+      fonts[EF_LARGE >>EF_SHIFT] = newFont.apply((int)Math.round(h/28.));
       
       /* --> */
       if (f[0].equals(FN_COMPACTA))
         f[0] = LCARS.getInstalledFont(FN_SWISS911);
       
-      fonts[EF_NORMAL >>EF_SHIFT] = newFont.apply((int)(h/37.5));
-      fonts[EF_SMALL >>EF_SHIFT] = newFont.apply((int)(h/50.0));
-      fonts[EF_TINY >>EF_SHIFT] = newFont.apply((int)(h/65.0));                                
+      fonts[EF_NORMAL >>EF_SHIFT] = newFont.apply((int)Math.round(h/37.5));
+      fonts[EF_SMALL >>EF_SHIFT] = newFont.apply((int)Math.round(h/50.));
+      fonts[EF_TINY >>EF_SHIFT] = newFont.apply((int)Math.round(h/65.));                                
       LCARS.fonts = fonts;
     }
     int font = (style & ES_FONT) >> EF_SHIFT;
@@ -556,12 +558,12 @@ public class LCARS implements ILcarsRemote
    *          The LCARS element style, a combination of <code>LCARS.ES_XXX</code>
    *          and <code>LCARS.EC_XXX</code> constants.
    * @param size
-   *          The point size of the font.
+   *          The size of the font in LCARS panel pixels.
    * @return The font.
    */
   public static FontMeta.Explicit getFontMeta(int style, int size)
   {
-    return new FontMeta.Explicit(getFontMeta(style), (int)(size*fontScale+.5));
+    return new FontMeta.Explicit(getFontMeta(style),size);
   }
 
   // -- Cursor manager --
@@ -600,8 +602,16 @@ public class LCARS implements ILcarsRemote
     return tl;
   }
 
-  
-  public static Rectangle getTextBounds(FontMeta meta, String text) {    
+  /**
+   * Computes the bounding rectangle of a text.
+   * 
+   * @param meta
+   *          The font descriptor.
+   * @param text
+   *          The text.
+   */
+  public static Rectangle getTextBounds(FontMeta meta, String text) 
+  {    
     if (text == null || text == "") return new Rectangle();
     Font font = meta.getFont();    
     TextLayout lt = new TextLayout(font.getDevice());
@@ -660,7 +670,8 @@ public class LCARS implements ILcarsRemote
     boolean             foreground    
   )
   {
-    //TODO: http://pawlan.com/monica/articles/texttutorial/other.html
+    //TODO: This implementation is entirely wrong. Re-do it (see
+    //      http://pawlan.com/monica/articles/texttutorial/other.html)!
     
     ArrayList<AGeometry> geos = new ArrayList<AGeometry>(); 
     if (text==null || text.length()==0 || bounds==null) return geos;
@@ -668,8 +679,7 @@ public class LCARS implements ILcarsRemote
     
     
     // Measure text lines
-    Display      display = Display.getDefault();
-    TextLayout        tl = new TextLayout(display);
+    TextLayout tl = new TextLayout(fontMeta.getFont().getDevice());
     String s[] = text.split("\n");
     
     Font font = fontMeta.getFont();
@@ -709,7 +719,13 @@ public class LCARS implements ILcarsRemote
         break;
       default: return geos;
     }
-        
+     
+//    System.err.println("*** ASCENT   : "+tl.getAscent());
+//    System.err.println("*** DESCENT  : "+tl.getDescent());
+//    System.err.println("*** LEADING  : "+tl.getLineMetrics(0).getLeading());
+//    System.err.println("*** L_ASCENT : "+tl.getLineMetrics(0).getAscent());
+//    System.err.println("*** L_DESCENT: "+tl.getLineMetrics(0).getDescent());
+    
     switch (align % 3) // vertical alignment
     {
       case 0: // top
@@ -1450,7 +1466,11 @@ public class LCARS implements ILcarsRemote
     return largs.toArray(args);
   }
   
-  public static Display getDisplay() {
+  /**
+   * Returns the LCARS SWT display.
+   */
+  public static Display getDisplay() 
+  {
     return Display.getDefault();
   }
   

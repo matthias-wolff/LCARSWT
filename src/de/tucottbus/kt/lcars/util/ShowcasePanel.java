@@ -291,19 +291,19 @@ public class ShowcasePanel extends Panel
     add(new ELabel(this,1427,215,300,0,LCARS.EF_SMALL|LCARS.ES_STATIC|LCARS.EC_TEXT,"SMALL TEXT"));
     add(new ELabel(this,1427,236,300,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT"));
     
-    ELabel eLabel = new ELabel(this,1730,154,164,0,LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT,"LARGE TEXT");
+    ELabel eLabel = new ELabel(this,1750,154,164,0,LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.EC_TEXT,"LARGE TEXT");
     eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
-    eLabel = new ELabel(this,1730,189,164,0,LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.EC_TEXT,"NORMAL TEXT");
+    eLabel = new ELabel(this,1750,189,164,0,LCARS.EF_NORMAL|LCARS.ES_STATIC|LCARS.EC_TEXT,"NORMAL TEXT");
     eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
-    eLabel = new ELabel(this,1730,215,164,0,LCARS.EF_SMALL|LCARS.ES_STATIC|LCARS.EC_TEXT,"SMALL TEXT");
+    eLabel = new ELabel(this,1750,215,164,0,LCARS.EF_SMALL|LCARS.ES_STATIC|LCARS.EC_TEXT,"SMALL TEXT");
     eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 
-    eLabel = new ELabel(this,1730,236,164,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT");
+    eLabel = new ELabel(this,1750,236,164,0,LCARS.EF_TINY|LCARS.ES_STATIC|LCARS.EC_TEXT,"TINY TEXT");
     eLabel.setColor(ColorMeta.BLACK);
     add(eLabel);
 

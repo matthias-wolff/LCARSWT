@@ -9,9 +9,9 @@ import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.geometry.GArea;
 import de.tucottbus.kt.lcars.swt.FontMeta;
-import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.util.Objectt;
 
 public class EValue extends ERect
@@ -121,7 +121,12 @@ public class EValue extends ERect
     int   vstyle = (style&LCARS.ES_VALUE_W)!=0 ? LCARS.ES_LABEL_W : LCARS.ES_LABEL_E;
     FontMeta.Explicit  fm = getValueFont();
     Point insets = new Point(3,0);
-    if (fm.name.equals(LCARS.FN_COMPACTA)) bounds.y-=(int)(0.05*bounds.height);
+    // TODO HACK: Fix LCARS.createTextGeometry2D(...) and then remove this!
+    if (fm.name.equals(LCARS.FN_COMPACTA)) 
+    {
+      bounds.y-=(int)Math.round(0.05*bounds.height)+1;
+      bounds.height+=(int)Math.round(0.05*bounds.height)+1;
+    }
     
     //geos.add(new GText(value, new Point2D.Float(bounds.x, bounds.y), null, fd, isBlinking()))
     geos.addAll(LCARS.createTextGeometry2D(fm,value,bounds,vstyle,insets,false));
