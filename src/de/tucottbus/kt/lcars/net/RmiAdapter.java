@@ -1,6 +1,8 @@
 package de.tucottbus.kt.lcars.net;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
+import java.rmi.ConnectIOException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -323,6 +325,11 @@ public abstract class RmiAdapter implements Remote
             msg = "\""+serverURL+"\" is not a valid URL";
             peer = null;
           }
+					catch (ConnectException|ConnectIOException e)
+					{
+            msg = "Could not connect to \""+serverURL+"\"\nreason: "+e.getMessage();
+            peer = null;
+					}
           catch (RemoteException e)
           {
             e.printStackTrace();

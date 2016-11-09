@@ -12,6 +12,7 @@ import java.util.Vector;
 import de.tucottbus.kt.lcars.IPanel;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.PanelData;
 import de.tucottbus.kt.lcars.PanelState;
 import de.tucottbus.kt.lcars.Screen;
@@ -70,7 +71,24 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   @Override
   protected void updatePeer()
   {
-    screen.setPanel(getPanel());
+		IPanel panel;
+
+		panel = getPanel();
+		if (panel != null)
+			screen.setPanel(panel);
+		else
+		{
+			panel = screen.getPanel();
+			if (panel == null || panel.getClass() != Panel.class)
+				try
+				{
+					screen.setPanel(Panel.createPanel(null, screen));
+				}
+				catch (ClassNotFoundException e)
+				{
+					// Should not happen since default Panel is created!
+				}
+		}
   }
   
   @Override

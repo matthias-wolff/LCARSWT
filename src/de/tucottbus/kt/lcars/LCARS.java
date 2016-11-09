@@ -1507,6 +1507,11 @@ public class LCARS implements ILcarsRemote
    */
   public static void main(String[] args)
   {
+		// To detect loss of network connection this timeout is introduced.
+		// This setting is specific to Java 1.8 - see the following URL for details:
+		// http://docs.oracle.com/javase/8/docs/technotes/guides/rmi/sunrmiproperties.html
+		System.setProperty("sun.rmi.transport.tcp.responseTimeout", "1000");
+
     LCARS.args = args;
     
     if (getArg("--help")!=null || getArg("-h")!=null || getArg("?")!=null)
