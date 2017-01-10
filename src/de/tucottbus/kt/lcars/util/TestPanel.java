@@ -124,7 +124,8 @@ public class TestPanel extends Panel
       @Override
       public void touchDown(EEvent ee)
       {
-        dragOffset.set(ee.pt.x,ee.pt.y);
+        dragOffset.setX(ee.pt.x);
+        dragOffset.setY(ee.pt.y);
         System.err.println("DOWN");
       }
       
