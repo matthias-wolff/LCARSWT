@@ -22,7 +22,6 @@ import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.util.WWUtil;
 import gov.nasa.worldwind.util.layertree.LayerTree;
-import gov.nasa.worldwindx.examples.util.HotSpotController;
 
 import java.awt.BorderLayout;
 import java.net.URI;
@@ -246,8 +245,6 @@ public class MultiPlanet extends JFrame
         .refresh(new LayerList(all_layers.toArray(new Layer[0])));
 
     // Add a controller to handle input events on the layer tree.
-    @SuppressWarnings("unused")
-    HotSpotController controller = new HotSpotController(planet_panel.wwd);
 
     return all_layers;
   }

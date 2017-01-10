@@ -2,9 +2,6 @@ package de.tucottbus.kt.lcarsx.wwj.orbits;
 
 import gov.nasa.worldwind.animation.Animator;
 import gov.nasa.worldwind.awt.AbstractViewInputHandler;
-import gov.nasa.worldwind.awt.ViewInputAttributes.ActionAttributes;
-import gov.nasa.worldwind.awt.ViewInputAttributes.DeviceAttributes;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 
@@ -20,110 +17,30 @@ public class LcarsOrbitView extends BasicFlyView
   public LcarsOrbitView()
   {
     super();
-    this.viewInputHandler=new AbstractViewInputHandler()
-    {
-      @Override
-      public void stopAnimators()
-      {
-        // ignored
-      }
-      
-      @Override
-      public boolean isAnimating()
-      {
-        return false;
-      }
-      
-      @Override
-      public void goTo(Position lookAtPos, double elevation)
-      {
-        // ignored
-      }
-      
-      @Override
-      public void addAnimator(Animator animator)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onVerticalTranslate(double translateChange,
-          double totalTranslateChange, DeviceAttributes deviceAttributes,
-          ActionAttributes actionAttributes)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onVerticalTranslate(double translateChange,
-          ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onRotateView(double headingInput, double pitchInput,
-          double totalHeadingInput, double totalPitchInput,
-          DeviceAttributes deviceAttributes, ActionAttributes actionAttributes)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onRotateView(Angle headingChange, Angle pitchChange,
-          ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onResetHeadingPitchRoll(ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onResetHeading(ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onMoveTo(Position focalPosition,
-          DeviceAttributes deviceAttributes, ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onMoveTo(Position focalPosition, ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onHorizontalTranslateRel(double sideInput,
-          double forwardInput, double sideInputFromMouseDown,
-          double forwardInputFromMouseDown, DeviceAttributes deviceAttributes,
-          ActionAttributes actionAttributes)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onHorizontalTranslateRel(Angle forwardChange,
-          Angle sideChange, ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-      
-      @Override
-      protected void onHorizontalTranslateAbs(Angle latitudeChange,
-          Angle longitudeChange, ActionAttributes actionAttribs)
-      {
-        // ignored
-      }
-    };
+    this.viewInputHandler = new AbstractViewInputHandler() {
+		
+		@Override
+		public void stopAnimators() {
+			// ignored			
+		}
+		
+		@Override
+		public boolean isAnimating() {
+			// ignored
+			return false;
+		}
+		
+		@Override
+		public void goTo(Position lookAtPos, double elevation) {
+			// ignored
+		}
+		
+		@Override
+		public void addAnimator(Animator animator) {
+			// ignored
+		}
+	};
+    
     this.viewLimits.setEyeElevationLimits(0,MAX_ELEVATION);
     setEyePosition(Position.fromDegrees(0,0,MAX_ELEVATION));
   }
