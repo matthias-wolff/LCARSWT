@@ -1477,7 +1477,8 @@ public class LCARS implements ILcarsRemote
   /**
    * The LCARS main method.
    * <h3>Usage</h3>
-   * <p><code>java -cp "./bin;./lib/swt.jar" de.tucottbus.kt.lcars.LCARS [options]</code></p>
+   * <p><code>java -cp "target/lcarswt-&lt;version&gt;.&lt;profile&gt;-jar-with-dependencies.jar" de.tucottbus.kt.lcars.LCARS [options]</code></p>
+   * <p>Note: Fat jar archive built by Maven goal <code>package</code>. Profiles supported: Win86, Win64, Linux86, Linux64, MacOSX86, and MacOSX64.</p>
    * 
    * @param args
    *  Command line options<pre>
@@ -1520,7 +1521,7 @@ public class LCARS implements ILcarsRemote
       System.out.print("\nLCARS");
       System.out.print("\n----------------------------------------------------------------------------");
       System.out.print("\n\nUsage");
-      System.out.print("\n\n  java -cp \"./bin;./lib/swt.jar\" de.tucottbus.kt.lcars.LCARS [options]");
+      System.out.print("\n\n  java -cp \"target/lcarswt-<version>.<profile>-jar-with-dependencies.jar\" de.tucottbus.kt.lcars.LCARS [options]");
       System.out.print("\n\nCommand line options");
 //      System.out.print("\n  --asyncRenderer                      - Uses an asynchronous renderer");
       System.out.print("\n  --clientof=hostname                  - Serve a remote screen [1]");
@@ -1704,8 +1705,9 @@ public class LCARS implements ILcarsRemote
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }
       
-      // Create initial panel
+      // Create initial panel and run screen
       if (iscreen!=null)
+      {
         try
         {
           String pcn = getArg("--panel=");
@@ -1732,6 +1734,7 @@ public class LCARS implements ILcarsRemote
         {
           Log.err("Error in screen execution.", e);
         }
+      }
     }
     catch (Exception e)
     {

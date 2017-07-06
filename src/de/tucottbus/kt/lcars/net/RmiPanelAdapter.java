@@ -10,6 +10,7 @@ import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.TouchEvent;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -84,7 +85,13 @@ implements IPanel, IRmiPanelAdapterRemote
   @Override
   protected void updatePeer()
   {
-    panel.setScreen((IScreen)getPeer());
+    try
+    {
+      panel.setScreen((IScreen)getPeer());
+    } catch (NullPointerException e)
+    {
+      Log.err("Cannot set screen.", e); 
+    }
   }
   
   @Override
