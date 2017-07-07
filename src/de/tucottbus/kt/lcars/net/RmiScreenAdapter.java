@@ -201,7 +201,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   public void exit() throws RemoteException
   {
     shutDown();
-    screen.getSwtDisplay().asyncExec(screen::exit);
+    screen.exit();
   }
   
   /**

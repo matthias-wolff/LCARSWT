@@ -493,7 +493,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public void exit()
   {
-    shell.dispose();
+    getSwtDisplay().asyncExec(shell::dispose);
   }
 
   // -- Implementation of the MouseInputListener interface --
