@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
@@ -349,9 +348,9 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
       LoadStatistics ls2 = getScreen().getLoadStatistics();
       s += String.format("/%03d-%02d",ls2.getLoad(),ls2.getEventsPerPeriod());
     }
-    catch (RemoteException e)
+    catch (Exception e)
     {
-      e.printStackTrace();
+      // Whatever...
     }
     eGuiLd.setLabel(s);
   }

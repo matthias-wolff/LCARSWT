@@ -56,6 +56,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   private static boolean speechEngineSearched;
 
+  /**
+   * Flag suppressing recurring network errors when connection to remote screen was 
+   * lost (no important function, just for beautification).
+   */
+  private boolean noConnectionOnUpdate = false;
+  
   // -- Fields --
 
   /**
@@ -1111,18 +1117,19 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * @param runnable
    *          The runnable.
    */
-  protected void invokeLater(Runnable runnable)
+  public void invokeLater(Runnable runnable)
   {
-    final Runnable __runnable = runnable;
-    (new Timer()).schedule(new TimerTask()
+    if (runt==null)
+      return;
+
+    runt.schedule(new TimerTask()
     {
       @Override
       public void run()
       {
-        __runnable.run();
+        runnable.run();
       }
-    }, 10);
-
+    },1);
   }
 
   /**
@@ -1206,11 +1213,15 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     // Update screen
     try
     {
-      PanelData data = new PanelData(this, state, els); // TODO: better make a
+      PanelData data = new PanelData(this, state, els);
       iscreen.update(data, incremental);
+      noConnectionOnUpdate = false;
     } catch (RemoteException e)
     {
-      Log.err("Cannot sending update to screen.", e);
+      if (!noConnectionOnUpdate)
+        Log.info("Remote screen of "+getClass().getSimpleName()
+          +" not updated (no connection).");
+      noConnectionOnUpdate = true;
     }
     time = System.nanoTime() - time;
     loadStat.add((int) (time / 400000));

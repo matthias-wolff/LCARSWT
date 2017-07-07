@@ -79,10 +79,10 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
 		else
 		{
 			panel = screen.getPanel();
-			if (panel == null || panel.getClass() != Panel.class)
+			if (panel == null || panel.getClass() != ClientPanel.class)
 				try
 				{
-					screen.setPanel(Panel.createPanel(null, screen));
+					screen.setPanel(Panel.createPanel(ClientPanel.class.getName(),screen));
 				}
 				catch (ClassNotFoundException e)
 				{
@@ -200,11 +200,12 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   @Override
   public void exit() throws RemoteException
   {
-    screen.getSwtDisplay().syncExec(screen::exit);
+    shutDown();
+    screen.getSwtDisplay().asyncExec(screen::exit);
   }
   
   /**
-   * Displays all occured RMI errors on the screen.
+   * Displays all occurred RMI errors on the screen.
    */
  
   public void showRmiErrors()

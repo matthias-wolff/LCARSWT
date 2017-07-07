@@ -1609,7 +1609,7 @@ public class LCARS implements ILcarsRemote
         int scrid = srcIdArg != null ?
             Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
         
-        Screen scr = new Screen(display,null,fullscreen);       
+        Screen scr = new Screen(display,null,fullscreen,getArg("--clientof")!=null);
         scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
         //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
         //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
@@ -1722,9 +1722,12 @@ public class LCARS implements ILcarsRemote
         {
           Log.err("Error while initiation.", e);
         }
+      }
 
       // Run SWT event loop 
-      while (!iscreen.isDisposed())
+      // TODO: SWT event loop should not be necessary in --nogui mode!
+      while (iscreen==null || !iscreen.isDisposed())
+      {
         try
         {
           if (!getDisplay().readAndDispatch())
@@ -1738,7 +1741,7 @@ public class LCARS implements ILcarsRemote
     }
     catch (Exception e)
     {
-      Log.err("", e);
+      Log.err("Uncaught exception in LCARS main.", e);
     }
     
     Log.info("END OF LCARS MAIN");

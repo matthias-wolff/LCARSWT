@@ -117,7 +117,7 @@ implements IPanel, IRmiPanelAdapterRemote
   @Override
   public void setPanel(String className) throws ClassNotFoundException
   {
-    log("Setting panel "+className+" ...");
+    Log.info("Setting panel "+className+" ...");
     panel = Panel.createPanel(className,(IScreen)getPeer());
     if (panel==null)
     {
@@ -130,11 +130,11 @@ implements IPanel, IRmiPanelAdapterRemote
         panel.messageBox("ERROR",className+"\n"+s.toUpperCase(),"OK",null,null);
       } catch (RemoteException e)
       {
-        err("... Panel set failed");
+        Log.err("... Panel set failed",e);
         return;
       }
     }
-    log("... Panel set");
+    Log.info("... Panel set");
   }
 
   @Override

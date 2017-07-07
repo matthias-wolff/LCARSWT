@@ -39,6 +39,7 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.net.ClientPanel;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.SWTResourceManager;
 import de.tucottbus.kt.lcars.swt.SwtKeyMapper;
@@ -87,6 +88,11 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    */
   protected boolean fullScreenMode;
 
+  /**
+   * Flag indicating that this screen is a client to an LCARS panel server.
+   */
+  protected boolean clientMode;
+  
   /**
    * The cache for the 2D rendering transform.
    */
@@ -143,10 +149,13 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    *          the class name of the LCARS {@link Panel} to display on the screen
    * @param fullScreen
    *          full screen mode
+   * @param clientModel
+   *          if <code>true</code> screen is going to display a panel served by an 
+   *          LCARS panel server. 
    * @throws ClassNotFoundException
    *           If <code>panelClass</code> is invalid
    */
-  public Screen(Display display, String panelClass, boolean fullScreen)
+  public Screen(Display display, String panelClass, boolean fullScreen, boolean clientMode)
       throws ClassNotFoundException
   {
     shell = new Shell(display, SWT.NO_TRIM);
@@ -156,6 +165,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     shell.setText("LCARS");    
     shell.setImage(SWTResourceManager.getImage(Root.class, defaultIcon));
     
+    this.clientMode = clientMode;
     
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -252,7 +262,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       }
     };
 
-    setPanel(panelClass);
+    if (!clientMode)
+      setPanel(panelClass);
 
     shell.open();
 
@@ -382,8 +393,9 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         this.panel.stop();
       } catch (RemoteException e)
       {
-        Log.err("Could not stop the previous panel while setting a new panel.",
-            e);
+        if (!(ipanel instanceof ClientPanel)) 
+          // Otherwise connection broke-down -> no error message required
+          Log.err("Could not stop the previous panel while setting a new panel.", e);
       }
 
     this.panel = ipanel;
@@ -482,7 +494,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   public void exit()
   {
     shell.dispose();
-    System.exit(0);
   }
 
   // -- Implementation of the MouseInputListener interface --
