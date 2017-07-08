@@ -1108,31 +1108,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
-   * <p>
-   * <i><b style="color:red">Experimental.</b></i>
-   * </p>
-   *
-   * Runs the <code>runnable</code> after a short period of time.
-   * 
-   * @param runnable
-   *          The runnable.
-   */
-  public void invokeLater(Runnable runnable)
-  {
-    if (runt==null)
-      return;
-
-    runt.schedule(new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        runnable.run();
-      }
-    },1);
-  }
-
-  /**
    * Called 25 times per second. Derived classes may override this method to
    * perform periodic actions. It is <em>not</em> recommended to start own
    * threads for that purpose.
@@ -1172,7 +1147,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * Call this method to notify the framework that the panel needs to be
    * redrawn.
    */
-  public synchronized void invalidate()
+  public void invalidate()
   {
     screenInvalid.set(true);
   }
@@ -1233,8 +1208,10 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void start()
   {
     if (runt == null)
+    {
       (runt = new Timer(getClass().getSimpleName()+".runt (panel timer)", true))
           .scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
+    }
     if (getSpeechEngine() != null)
       getSpeechEngine().addSpeechEventListener(this);
     invalidate();
@@ -1245,14 +1222,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     if (getSpeechEngine() != null)
       getSpeechEngine().removeSpeechEventListener(this);
-    Timer runt = this.runt;
     if (runt == null)
       return;
-    this.runt = null;
-    // TODO: runt.purge(); ? purge all TimerTask's like screen update, otherwise
-    // possible sending of PanelData to a screen where this Panel is not the
-    // owner anymore, can cause inconsistent screen data
     runt.cancel();
+    runt.purge();
+    runt = null;
   }
 
   @Override

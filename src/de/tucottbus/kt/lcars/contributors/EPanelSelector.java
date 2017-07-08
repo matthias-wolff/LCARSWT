@@ -63,17 +63,17 @@ public class EPanelSelector extends EMessageBox
     ERect btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
     btn.addEEventListener(new EEventListenerAdapter()
     {
-      public void touchDown(EEvent ee)
+      public void touchUp(EEvent ee)
       {
+        Panel panel = EPanelSelector.this.panel;
+        close();
         try
         {
           panel.getScreen().exit();
-        }
-        catch (RemoteException e)
+        } catch (RemoteException e)
         {
           Log.err("Cannot exit screen.", e);
         }
-        removeFromPanel();
       }
     });
     add(btn);

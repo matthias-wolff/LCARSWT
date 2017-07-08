@@ -35,6 +35,7 @@ import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
 import java.rmi.Naming;
+import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -1398,10 +1399,47 @@ public class LCARS implements ILcarsRemote
     if (rpa!=null) rpa.shutDown();
   }
   
-  // -- LCARS main function --
+  // -- Static methods --
+  
+  /**
+   * Runs a <code>runnable</code> after a short period of time.
+   * 
+   * @param runnable
+   *          The runnable.
+   */
+  public static void invokeLater(Runnable runnable)
+  {
+    invokeLater(runnable,1);
+  }
 
-  private static IScreen  iscreen;
-  private static String[] args;
+  /**
+   * Runs a <code>runnable</code> after a <code>delay</code> milliseconds.
+   * 
+   * @param runnable
+   *          The runnable.
+   * @param delay
+   *          The delay in milliseconds
+   */
+  public static void invokeLater(Runnable runnable, long delay)
+  {
+    String name = "LCARS.invokeLater";
+    try
+    {
+      name += "@"+Thread.currentThread().getStackTrace()[2];
+    } catch(Exception e) 
+    {
+    }
+    Thread thread = new Thread(name){
+      @Override
+      public void run()
+      {
+        try { Thread.sleep(delay); } catch (InterruptedException e) {}
+        runnable.run();
+      }
+    };
+    thread.setDaemon(true);
+    thread.start();
+  }
 
   /**
    * Scans the command line for the first argument with a specified prefix.
@@ -1473,6 +1511,56 @@ public class LCARS implements ILcarsRemote
   {
     return Display.getDefault();
   }
+  
+  /**
+   * Starts the LCARS panel server. If starting the server failed, the program will
+   * exit.
+   */
+  public static void startServer()
+  {
+    try
+    {
+      LCARS.getRmiRegistry();
+      Log.info("server at "+getHostName());
+      server = new LCARS();
+      Remote stub = UnicastRemoteObject.exportObject(server,0);
+      Naming.rebind(getRmiName(),stub);
+    } catch (Exception e)
+    {
+      Log.err("FATAL ERROR: RMI binding failed.", e);
+      System.exit(-1);
+    }
+  }
+
+  /**
+   * Shuts down the LCARS panel server. If there is not panel server running, the
+   * method down nothing.
+   */
+  public static void shutDownServer()
+  {
+    if (server==null)
+      return;
+
+    try
+    {
+      Naming.unbind(getRmiName());
+    } catch (Exception e)
+    {
+      Log.err("RMI unbinding failed.", e);
+    }
+    try
+    {
+      UnicastRemoteObject.unexportObject(server,true);
+    } catch (Exception e)
+    {
+      Log.err("RMI unexporting failed.", e);
+    }
+  }
+
+  // -- LCARS main function --
+
+  private static IScreen  iscreen;
+  private static String[] args;
   
   /**
    * The LCARS main method.
@@ -1574,8 +1662,7 @@ public class LCARS implements ILcarsRemote
       {
         doLog(pfx, msg, false);
       }
-      
-      
+
       @Override
       public void err(String pfx, String msg, Throwable e)
       {
@@ -1609,7 +1696,7 @@ public class LCARS implements ILcarsRemote
         int scrid = srcIdArg != null ?
             Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
         
-        Screen scr = new Screen(display,null,fullscreen,getArg("--clientof")!=null);
+        Screen scr = new Screen(display,null,fullscreen);
         scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
         //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
         //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
@@ -1624,25 +1711,43 @@ public class LCARS implements ILcarsRemote
         @Override
         public void run()
         {
-          Log.info("Shutting down ...");
+          System.out.println("[Shutting down...]");
 
-          // Shut-down panel
+          // Shut-down local screen and panel
           if (iscreen!=null)
           {
-  	        try
-  	        {
-  	          IPanel panel = iscreen.getPanel();
-  	          if (panel!=null)
-  	            panel.stop();
-  	        }
-  	        catch (RemoteException e)
-  	        {
-  	          Log.err("Cannot shut down panel.", e);
-  	        }
-  	
-  	        // Shut-down RMI screen adapter
+            // Shut down panel
+            try
+            {
+              IPanel panel = iscreen.getPanel();
+              if (panel!=null)
+              {
+                System.out.println("[Shutting down panel...]");
+                try
+                {
+                  panel.stop();
+                  System.out.println("[...Panel shut down]");
+                } catch (NoSuchObjectException e) { 
+                  // Because RMI has already been shut down -> ignore
+                }
+                catch (Exception e)
+                {
+                  System.out.println("[...FAILED to shut down local panel]");
+                  e.printStackTrace();
+                }
+              }
+            }
+            catch (Exception e)
+            {
+            }
+            
+            // Shut-down RMI screen adapter
   	        if (iscreen instanceof RmiScreenAdapter)
-  	          ((RmiScreenAdapter)iscreen).shutDown();
+  	        {
+              System.out.println("[Shutting down RMI screen adapter...]");
+              ((RmiScreenAdapter)iscreen).shutDown();
+              System.out.println("[...RMI screen adapter shut down]");
+  	        }
   	        iscreen = null;
           }
 
@@ -1650,22 +1755,21 @@ public class LCARS implements ILcarsRemote
           if (server!=null)
           {
             for (RmiPanelAdapter rpa : server.rmiPanelAdapters.values())
+            {
+              System.out.println("[Shutting down remote panel "+rpa.getRmiName()+"...]");
               rpa.shutDown();
+              System.out.println("[... Remote panel shut down]");
+            }
             server.rmiPanelAdapters.clear();
-            try
-            {
-              Naming.unbind(getRmiName());
-              UnicastRemoteObject.unexportObject(server,true);
-            }
-            catch (Exception e)
-            {
-              Log.err("Cannot shut down RMI panel adapters", e);
-            }
           }
 
           // Shut-down speech engine
+          System.out.println("[Disposing speech engine...]");
           Panel.disposeSpeechEngine();
-          Log.info("... shut-down");  
+          System.out.println("[...Speech engine disposed]");
+          
+          // The end
+          System.out.println("[...Shut down complete]");
         }
       });
       
@@ -1679,22 +1783,7 @@ public class LCARS implements ILcarsRemote
       
       // Start LCARS server (command line option "--server")
       if (getArg("--server")!=null)
-      {
-        LCARS.getRmiRegistry();
-        Log.info("server at "+getHostName());
-        server = new LCARS();
-        try
-        {
-          Remote stub = UnicastRemoteObject.exportObject(server,0);
-          Naming.rebind(getRmiName(),stub);
-        }
-        catch (Exception e)
-        {
-          Log.err("FATAL ERROR: RMI binding failed.");
-          e.printStackTrace();
-          System.exit(-1);
-        }
-      }
+        startServer();
       
       // Start LCARS client (command line option "--clientof")
       String clientOf = getArg("--clientof=");

@@ -93,7 +93,8 @@ implements IPanel, IRmiPanelAdapterRemote
       Log.err("Cannot set screen.", e); 
     }
   }
-  
+
+
   @Override
   public String getRmiName()
   {

@@ -38,29 +38,29 @@ public class ServerPanel extends Panel
   private static ArrayList<WeakReference<ServerPanel>> instances;
   
   // -- GUI element fields --
-  private EElementArray eLog;
-  private EElementArray eScreens;
-  private EElbo         eLogSize;
-  private EElbo         eScrCnt;
-  private EElbo         eSrvLd;
-  private EElbo         eCscLd;
-  private ERect         eLogLock;
-  private ERect         eLogPrev;
-  private ERect         eLogNext;
-  private ERect         eConfirm;
-  private ERect         eScrLock;
-  private ERect         eScrPrev;
-  private ERect         eScrNext;
-  private ERect         eCscShutdown;
-  private EValue        eCsc;
-  private ELabel        eCscPnlUrl;
-  private ELabel        eCscScrUrl;
-  private ELabel        eCscSize;
-  private ERect         eCscUpdate;
-  private ERect         eCscStart;
-  private ERect         eCscStop;
-  private ERect         eCscPnlSel;
-  private final ColorMeta   cRed = new ColorMeta(0x00FF0066,false);
+  private EElementArray   eLog;
+  private EElementArray   eScreens;
+  private EElbo           eLogSize;
+  private EElbo           eScrCnt;
+  private EElbo           eSrvLd;
+  private EElbo           eCscLd;
+  private ERect           eLogLock;
+  private ERect           eLogPrev;
+  private ERect           eLogNext;
+  private ERect           eConfirm;
+  private ERect           eScrLock;
+  private ERect           eScrPrev;
+  private ERect           eScrNext;
+  private ERect           eCscShutdown;
+  private EValue          eCsc;
+  private ELabel          eCscPnlUrl;
+  private ELabel          eCscScrUrl;
+  private ELabel          eCscSize;
+  private ERect           eCscUpdate;
+  private ERect           eCscStart;
+  private ERect           eCscStop;
+  private ERect           eCscPnlSel;
+  private final ColorMeta cRed = new ColorMeta(0x00FF0066,false);
   
   // -- Constructors --
   
@@ -313,9 +313,9 @@ public class ServerPanel extends Panel
   @Override
   public void stop()
   {
-    super.stop();
     eLog.removeFromPanel();
     eScreens.removeFromPanel();
+    super.stop();
   }
   
   @Override
@@ -472,7 +472,7 @@ public class ServerPanel extends Panel
   // -- Logging --
 
   /**
-   * Dispatches a log or error message to all server pabels.
+   * Dispatches a log or error message to all server panels.
    * 
    * @param pfx
    *          The message prefix (used for message filtering).

@@ -32,7 +32,7 @@ public abstract class RmiAdapter implements Remote
   /**
    * The peer this adapter is connected to.
    */
-  private Remote peer;
+  private IRmiAdapterRemote peer;
   
   /**
    * The name of the host serving the peer of this adapter.
@@ -208,7 +208,7 @@ public abstract class RmiAdapter implements Remote
    * Returns the peer this adapter is connected to. The return value is <code>null</code> if there
    * is no network connection.
    */
-  protected final Remote getPeer()
+  protected final IRmiAdapterRemote getPeer()
   {
     return peer;
   }
@@ -337,12 +337,12 @@ public abstract class RmiAdapter implements Remote
         {
           if (peer==null)
           {
-            peer = Naming.lookup(getRmiPeerUrl());
+            peer = (IRmiAdapterRemote)Naming.lookup(getRmiPeerUrl());
             msg = "Connection to peer established";
           }
           if (peer!=null)
           {
-            ((IRmiAdapterRemote)peer).ping();
+            peer.ping();
             msg = "Connection to peer ok";
           }
         }

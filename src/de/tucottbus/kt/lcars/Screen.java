@@ -11,6 +11,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Timer;
@@ -89,11 +90,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   protected boolean fullScreenMode;
 
   /**
-   * Flag indicating that this screen is a client to an LCARS panel server.
-   */
-  protected boolean clientMode;
-  
-  /**
    * The cache for the 2D rendering transform.
    */
   protected AtomicBoolean invalid = new AtomicBoolean(false);
@@ -149,13 +145,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    *          the class name of the LCARS {@link Panel} to display on the screen
    * @param fullScreen
    *          full screen mode
-   * @param clientModel
-   *          if <code>true</code> screen is going to display a panel served by an 
-   *          LCARS panel server. 
    * @throws ClassNotFoundException
    *           If <code>panelClass</code> is invalid
    */
-  public Screen(Display display, String panelClass, boolean fullScreen, boolean clientMode)
+  public Screen(Display display, String panelClass, boolean fullScreen)
       throws ClassNotFoundException
   {
     shell = new Shell(display, SWT.NO_TRIM);
@@ -164,8 +157,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     // Create Swings widgets
     shell.setText("LCARS");    
     shell.setImage(SWTResourceManager.getImage(Root.class, defaultIcon));
-    
-    this.clientMode = clientMode;
     
     // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -261,9 +252,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         // Does not give visual feedback
       }
     };
-
-    if (!clientMode)
-      setPanel(panelClass);
 
     shell.open();
 
@@ -493,6 +481,37 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public void exit()
   {
+    try
+    {
+      if (panel!=null)
+      {
+        panel.stop();
+        panel = null;
+      }
+    } catch (NoSuchObjectException e) { 
+      // Because RMI has already been shut down -> ignore
+    } catch (Exception e)
+    {
+      Log.err("Failed to stop panel.",e);
+    }
+    try
+    {
+      screenTimer.cancel();
+      screenTimer.purge();
+      screenTimer=null;
+    } catch (Exception e)
+    {
+      Log.err("Failed to stop screen timer.",e);
+    }
+    try
+    {
+      userFeedbackPlayer.cancel();
+      userFeedbackPlayer = null;
+    } catch (Exception e)
+    {
+      Log.err("Failed to user feedback player.",e);
+    }
+    LCARS.shutDownServer();
     getSwtDisplay().asyncExec(shell::dispose);
   }
 

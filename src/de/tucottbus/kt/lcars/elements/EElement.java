@@ -660,7 +660,7 @@ public abstract class EElement
     // Dispatch event
     try
     {
-      getPanel().invokeLater(new Runnable()
+      LCARS.invokeLater(new Runnable()
       {
         @Override
         public void run()
