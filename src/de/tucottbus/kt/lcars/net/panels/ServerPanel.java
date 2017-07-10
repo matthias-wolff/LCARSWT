@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.net;
+package de.tucottbus.kt.lcars.net.panels;
 
 import java.awt.Dimension;
 import java.lang.ref.WeakReference;
@@ -19,6 +19,10 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.net.IRmiScreenAdapterRemote;
+import de.tucottbus.kt.lcars.net.LcarsServer;
+import de.tucottbus.kt.lcars.net.NetUtils;
+import de.tucottbus.kt.lcars.net.RmiPanelAdapter;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
@@ -128,13 +132,13 @@ public class ServerPanel extends Panel
     eLogLock = new ERect(this,938,602,192,96,c1|LCARS.ES_LABEL_NW,"FOLLOW");
     add(eLogLock);
     
-    String s = String.format("%d/%s",LCARS.getRmiPort(),LCARS.getRmiName());
+    String s = String.format("%d/%s",NetUtils.getRmiPort(),NetUtils.getRmiName());
     eElbo = new EElbo(this,938,703,230,354,ce|LCARS.ES_STATIC|LCARS.ES_SHAPE_SW|LCARS.ES_LABEL_NW,s);
     eElbo.setArmWidths(192,68); eElbo.setArcWidths(238,98);
     add(eElbo);
     
     eValue = new EValue(this,1167,989,720,68,ce|LCARS.ES_STATIC|LCARS.ES_RECT_RND_E|LCARS.ES_VALUE_W,null);
-    eValue.setValue(LCARS.getHostName().toUpperCase());
+    eValue.setValue(NetUtils.getHostName().toUpperCase());
     eValue.setValueMargin(68);
     add(eValue); 
 
@@ -327,55 +331,67 @@ public class ServerPanel extends Panel
     eLogSize.setLabel(String.format("%03d",eLog.getItemCount()));
     
     // Update connected screens display
+    
     synchronized(this)
     {
-      HashMap<String,RmiPanelAdapter> rpas = LCARS.getPanelAdapters();
-      eScrCnt.setLabel(String.format("SERVING %03d",eScreens.getItemCount()));
+      HashMap<String,RmiPanelAdapter> rpas = LcarsServer.getPanelAdapters();
+      if (rpas!=null)
+        eScrCnt.setLabel(String.format("SERVING %03d",eScreens.getItemCount()));
+      else
+        eScrCnt.setLabel("SERVER DOWN");
 
       // Remove buttons
       int n = eScreens.getItemCount();
       for (int i=0; i<n; )
       {
         RmiPanelAdapter rpa = (RmiPanelAdapter)eScreens.getItemElement(i).getData();
-        if (!rpas.containsValue(rpa)){
+        if (rpas==null || !rpas.containsValue(rpa)){
           eScreens.remove(i);
           n--;
         }
         else
           i++;
       }
-        
-      // Add buttons
-      int ld  = 0;
-      int fps = 0;
-      for (RmiPanelAdapter rpa : rpas.values())
+
+      if (rpas!=null)
       {
-        boolean found = false;
-        for (EElement e : eScreens.getItemElements())
-          if (e.getData()==rpa)
-          {
-            EValue ev = (EValue)e;
-            ev.setValue(rpa.getPanelTitle().toUpperCase());
-            ev.setLabel(rpa.getPeerHostName().toUpperCase());
-            found = true;
-            break;
-          }
-        if (!found)
+        // Add buttons
+        int ld  = 0;
+        int fps = 0;
+        for (RmiPanelAdapter rpa : rpas.values())
         {
-          EValue e = (EValue)eScreens.add(rpa.getRmiPeerUrl());
-          e.setSelected(true);
-          e.setData(rpa);
-          e.setValue(rpa.getPanelTitle().toUpperCase());
-          e.setValueMargin(43);
-          e.setLabel(rpa.getPeerHostName().toUpperCase());
-          eScreens.animate();
+          boolean found = false;
+          for (EElement e : eScreens.getItemElements())
+            if (e.getData()==rpa)
+            {
+              EValue ev = (EValue)e;
+              ev.setValue(rpa.getPanelTitle().toUpperCase());
+              ev.setLabel(rpa.getPeerHostName().toUpperCase());
+              found = true;
+              break;
+            }
+          if (!found)
+          {
+            EValue e = (EValue)eScreens.add(rpa.getRmiPeerUrl());
+            e.setSelected(true);
+            e.setData(rpa);
+            e.setValue(rpa.getPanelTitle().toUpperCase());
+            e.setValueMargin(43);
+            e.setLabel(rpa.getPeerHostName().toUpperCase());
+            eScreens.animate();
+          }
+          LoadStatistics lds = rpa.getLoadStatistics();
+          ld  += lds.getLoad();
+          fps += lds.getEventsPerPeriod();
         }
-        LoadStatistics lds = rpa.getLoadStatistics();
-        ld  += lds.getLoad();
-        fps += lds.getEventsPerPeriod();
+        eScreens.setTitle(eScreens.getItemCount()==0 ? "NO SCREENS" : "SCREENS");
+        eSrvLd.setLabel(String.format("SRV LOAD\n%03d-%02d",ld,fps));
       }
-      eScreens.setTitle(eScreens.getItemCount()==0 ? "NO SCREENS" : "SCREENS");
-      eSrvLd.setLabel(String.format("SRV LOAD\n%03d-%02d",ld,fps));
+      else
+      {
+        eScreens.setTitle("SERVER DOWN");
+        eSrvLd.setLabel("SRV LOAD\nN/A");
+      }
     }
     
     // Update selected screen display

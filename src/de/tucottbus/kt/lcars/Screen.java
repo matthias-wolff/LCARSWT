@@ -40,7 +40,9 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.net.ClientPanel;
+import de.tucottbus.kt.lcars.net.LcarsServer;
+import de.tucottbus.kt.lcars.net.NetUtils;
+import de.tucottbus.kt.lcars.net.panels.ClientPanel;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.SWTResourceManager;
 import de.tucottbus.kt.lcars.swt.SwtKeyMapper;
@@ -431,7 +433,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public String getHostName()
   {
-    return LCARS.getHostName();
+    return NetUtils.getHostName();
   }
 
   @Override
@@ -511,7 +513,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     {
       Log.err("Failed to user feedback player.",e);
     }
-    LCARS.shutDownServer();
+    LcarsServer.shutDown();
     getSwtDisplay().asyncExec(shell::dispose);
   }
 

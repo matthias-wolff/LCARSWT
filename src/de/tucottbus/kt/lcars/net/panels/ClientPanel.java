@@ -1,4 +1,4 @@
-package de.tucottbus.kt.lcars.net;
+package de.tucottbus.kt.lcars.net.panels;
 
 import java.awt.Dimension;
 
@@ -9,6 +9,7 @@ import de.tucottbus.kt.lcars.elements.EEvent;
 import de.tucottbus.kt.lcars.elements.EEventListenerAdapter;
 import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
+import de.tucottbus.kt.lcars.net.NetUtils;
 
 /**
  * Default panel being displayed at client screens.
@@ -35,7 +36,7 @@ public class ClientPanel extends Panel
     ELabel eTitle = new ELabel(this,0,dim.height/2-30,dim.width,60, 
       LCARS.EC_SECONDARY|LCARS.EF_HEAD1|LCARS.ES_STATIC|LCARS.ES_LABEL_C, null);
     setTitleLabel(eTitle);
-    setTitle("LCARS CLIENT AT "+LCARS.getHostName().toUpperCase());
+    setTitle("LCARS CLIENT AT "+NetUtils.getHostName().toUpperCase());
 
     ELabel eSubTitle = new ELabel(this,0,dim.height/2+50,dim.width,20, 
       LCARS.EC_PRIMARY|LCARS.EF_LARGE|LCARS.ES_STATIC|LCARS.ES_LABEL_C, 

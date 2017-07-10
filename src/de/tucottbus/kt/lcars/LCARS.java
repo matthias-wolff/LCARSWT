@@ -22,25 +22,15 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.NetworkInterface;
 import java.net.URL;
-import java.net.URLConnection;
-import java.rmi.Naming;
 import java.rmi.NoSuchObjectException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -71,12 +61,10 @@ import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.geometry.GText;
 import de.tucottbus.kt.lcars.logging.ILogObserver;
 import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.net.ILcarsRemote;
-import de.tucottbus.kt.lcars.net.RmiAdapter;
-import de.tucottbus.kt.lcars.net.RmiPanelAdapter;
+import de.tucottbus.kt.lcars.net.LcarsServer;
+import de.tucottbus.kt.lcars.net.NetUtils;
 import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
-import de.tucottbus.kt.lcars.net.RmiSecurityManager;
-import de.tucottbus.kt.lcars.net.ServerPanel;
+import de.tucottbus.kt.lcars.net.panels.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.FontMeta;
@@ -91,7 +79,7 @@ import de.tucottbus.kt.lcars.swt.FontMeta;
  * 
  * @author Matthias Wolff
  */
-public class LCARS implements ILcarsRemote
+public class LCARS
 {
   public static final String CLASSKEY = "LCARS";
   
@@ -187,26 +175,7 @@ public class LCARS implements ILcarsRemote
 
   // -- Fields --
   
-  protected HashMap<String,RmiPanelAdapter> rmiPanelAdapters;
-  
   public static boolean SCREEN_DEBUG;
-  
-  // -- The server singleton --
-
-  /**
-   * The server singleton. If started in server mode (command line option <code>--server</code>),
-   * this field contains the one and only server instance.
-   */
-  static LCARS server = null;
-  
-  /**
-   * Creates an LCARS server singleton.
-   */
-  protected LCARS() throws RemoteException
-  {
-    super();
-    rmiPanelAdapters = new HashMap<String,RmiPanelAdapter>();
-  }
   
   // -- Panel information --
   
@@ -1094,311 +1063,6 @@ public class LCARS implements ILcarsRemote
       return string.substring(0,length-3)+"...";
   }
   
-  // -- Network --
-  
-  /**
-   * Cache for the {@link #getHostName()} method.
-   */
-  private static String hostName;
-
-  /**
-   * Cache for the {@link #getRmiRegistry()} method.
-   */
-  private static Registry rmiRegistry; 
-  
-  /**
-   * Performs an HTTP GET request.
-   * <p><b>Author:</b> http://www.aviransplace.com/2008/01/08/make-http-post-or-get-request-from-java/</p>
-   * 
-   * @param  url
-   *           The URL, e.g. "http://www.myserver.com?q=whats%20up".
-   * @return The response or <code>null</code> in case of errors.
-   */
-  public static String HttpGet(String url)
-  {
-    String result = null;
-    if (url.startsWith("http://"))
-    {
-      // Send a GET request to the servlet
-      try
-      {
-        URLConnection conn = (new URL(url)).openConnection();
-
-        // Get the response
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        StringBuffer sb = new StringBuffer();
-        String line;
-        while ((line = rd.readLine()) != null)
-        {
-          sb.append(line);
-        }
-        rd.close();
-        result = sb.toString();
-      }
-      catch (Exception e)
-      {
-        Log.err("Cannot perform HTTP GET on \"" + url + "\"", e);
-      }
-    }
-    return result;
-    
-  }
-
-  /**
-   * Returns the IP address of the computer running this iscreen.
-   * 
-   * @param verbose
-   *          If <code>true</code> do some console logging.
-   */
-  public static InetAddress getIP(boolean verbose)
-  {
-    if (System.getSecurityManager()!=null)
-    {
-      System.out.println("myIP warning: Security manager active. Some IP addresses might not be detected.");
-    }
-    try
-    {
-      InetAddress myIP = null;
-      InetAddress host = InetAddress.getLocalHost();
-      if (verbose) System.out.println("myIP: Local host");
-      InetAddress[] ips = InetAddress.getAllByName(host.getHostName());
-      for (int i=0; i<ips.length; i++)
-        if (verbose) System.out.println("  address = " + ips[i]);
-      if (verbose) System.out.println("myIP: Network interfaces");
-      Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
-      while (netInterfaces.hasMoreElements())
-      {
-        NetworkInterface ni = netInterfaces.nextElement();
-        if (verbose) System.out.println("  "+ni.getName());
-        Enumeration<InetAddress> inetAddresses = ni.getInetAddresses();
-        while (inetAddresses.hasMoreElements())
-        {
-          InetAddress ip = inetAddresses.nextElement();
-          if
-          (
-            myIP==null &&
-            !ip.isLoopbackAddress() &&
-            ip.getHostAddress().indexOf(":")==-1
-          )
-          {
-            myIP = ip;
-          }
-          ips = InetAddress.getAllByName(ip.getHostName());
-          for (InetAddress ip2 : ips)
-          {
-            if (verbose) System.out.println("  - "+ip2);
-          }
-        }
-      }
-      if (myIP!=null)
-        return myIP;
-      else
-        throw new Exception();
-    }
-    catch (Throwable e)
-    {
-      System.out.println("myIP error: cannot detect IP Address.");
-      return null;
-    }
-  }
-
-  /**
-   * Returns the serverName of the local host. 
-   */
-  public static String getHostName()
-  { 
-    if (LCARS.hostName==null)
-    {
-      if (getArg("--rminame=")!=null)
-      {
-        LCARS.hostName = getArg("--rminame=");
-      }
-      else
-        try
-        {
-          LCARS.hostName = InetAddress.getLocalHost().getHostName();
-        }
-        catch (java.net.UnknownHostException e)
-        {
-          LCARS.hostName = "127.0.0.1";
-        }
-    }
-    return LCARS.hostName;
-  }
-
-  /**
-   * Returns the port of the RMI registry listing for LCARS remove panel requests.
-   */
-  public static int getRmiPort()
-  {
-    return 1099;
-  }  
-
-  /**
-   * Returns the LCARS RMI name prefix.
-   */
-  public static String getRmiName()
-  {
-    return "LCARS";
-  }
-
-  /**
-   * Returns the local RMI registry at the port returned by {@link LCARS#getRmiPort()}. If no
-   * such registry exists, the method creates one.
-   * 
-   * @return The local RMI registry.
-   * @throws RemoteException
-   *           If the registry could not be exported or no reference could be created.
-   */
-  public static Registry getRmiRegistry() throws RemoteException
-  {
-    // TODO: Make sure that local registry is not removed by JVM shutting down! How?
-    if (LCARS.rmiRegistry==null)
-    {
-      System.setSecurityManager(new RmiSecurityManager());
-      if (getArg("--rminame=")!=null)
-        System.setProperty("java.rmi.server.hostname",getArg("--rminame=")); 
-      try
-      {
-        
-        LCARS.rmiRegistry = LocateRegistry.createRegistry(getRmiPort());
-        /* TODO: Here is how to create an RMI registry bound to a specific IP address --> 
-        LCARS.rmiRegistry = LocateRegistry.createRegistry(getRmiPort(), null,
-            new RMIServerSocketFactory()
-            {
-              @Override
-              public ServerSocket createServerSocket(int port) throws IOException
-              {
-                ServerSocket serverSocket = null;
-                try
-                {
-                  serverSocket = new ServerSocket(port,50,Inet4Address.getByAddress(new byte[]{(byte)141,(byte)43,(byte)71,(byte)26}));
-                } catch (Exception e)
-                {
-                  e.printStackTrace();
-                }
-                LCARS.log("DBG","RMI Server Socket="+serverSocket.toString());
-                return (serverSocket);
-              }
-
-              @Override
-              public boolean equals(Object that)
-              {
-                return (that != null && that.getClass() == this.getClass());
-              }
-            });
-         <-- */
-      }
-      catch (Exception e)
-      {
-        LCARS.rmiRegistry = LocateRegistry.getRegistry(getRmiPort());
-      }
-      Log.info("RMI registry: "+LCARS.rmiRegistry);
-    }
-    return LCARS.rmiRegistry;
-  }
-
-  /**
-   * Returns the list of {@linkplain RmiPanelAdapter panel adapters} served by this LCARS session if
-   * this LCARS session was started in server mode (command line option <code>--server</code>).
-   * Otherwise the method returns <code>null</code>.
-   */
-  public static HashMap<String,RmiPanelAdapter> getPanelAdapters()
-  {
-    if (server!=null)
-      return server.rmiPanelAdapters;
-    else
-      return null;
-  }
-  
-  // -- Logging --
-  /**
-   * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::log' instead
-   * Prints a log message.
-   * 
-   * @param pfx
-   *          The message prefix (used for message filtering).
-   * @param msg
-   *          The message.
-   */
-  @Deprecated
-   public static void log(String pfx, String msg)
-   {
-     System.out.print(String.format("\n[%s: %s]",pfx,msg));
-     if ("LCARS".equals(pfx) || "NET".equals(pfx))
-       ServerPanel.logMsg(pfx,msg,false);
-   }
-  
-   /**
-    * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::err' instead
-    * Prints an error message.
-    * 
-    * @param pfx
-    *          The message prefix (used for message filtering).
-    * @param msg
-    *          The message.
-    */
-   @Deprecated
-   public static void err(String pfx, String msg)
-   {
-     System.err.print(String.format("\n[%s: %s]",pfx,msg));
-     if ("LCARS".equals(pfx) || "NET".equals(pfx))
-       ServerPanel.logMsg(pfx,msg,true);
-   }
-   
-   /**
-    * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::debug' instead
-    * Prints a debug message.
-    * 
-    * @param pfx
-    *          The message prefix (used for message filtering).
-    * @param msg
-    *          The message.
-    */
-   @Deprecated
-   public static void debug(String pfx, String msg)
-   {
-     System.err.print(String.format("\n[%s: %s]",pfx,msg));
-     if ("LCARS".equals(pfx) || "NET".equals(pfx))
-       ServerPanel.logMsg(pfx,msg,false);
-   }
-   
-  // -- Implementation of the ILcarsRemote interface --
-  
-  @Override
-  public boolean serveRmiPanelAdapter(String screenHostName, int screenID, String panelClassName)
-  {
-    if (screenHostName==null) return false;
-    
-    if (rmiPanelAdapters.containsKey(screenHostName+"."+screenID))
-      return true;
-    
-    try
-    {
-      String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-      Log.info("LCARS.server: Connection request from "+screenUrl);
-      RmiPanelAdapter rpa = new RmiPanelAdapter(panelClassName,screenHostName);
-      rmiPanelAdapters.put(screenHostName+"."+screenID,rpa);
-      return true;
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-      return false;
-    }
-  }
-
-  @Override
-  public void destroyRmiPanelAdapter(String screenHostName, int screenID)
-  {
-    String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-    String key = screenHostName+"."+screenID;
-    Log.info("LCARS.server: Disconnection request from "+screenUrl);
-    
-    RmiPanelAdapter rpa = rmiPanelAdapters.remove(key);
-    if (rpa!=null) rpa.shutDown();
-  }
-  
   // -- Static methods --
   
   /**
@@ -1510,51 +1174,6 @@ public class LCARS implements ILcarsRemote
   public static Display getDisplay() 
   {
     return Display.getDefault();
-  }
-  
-  /**
-   * Starts the LCARS panel server. If starting the server failed, the program will
-   * exit.
-   */
-  public static void startServer()
-  {
-    try
-    {
-      LCARS.getRmiRegistry();
-      Log.info("server at "+getHostName());
-      server = new LCARS();
-      Remote stub = UnicastRemoteObject.exportObject(server,0);
-      Naming.rebind(getRmiName(),stub);
-    } catch (Exception e)
-    {
-      Log.err("FATAL ERROR: RMI binding failed.", e);
-      System.exit(-1);
-    }
-  }
-
-  /**
-   * Shuts down the LCARS panel server. If there is not panel server running, the
-   * method down nothing.
-   */
-  public static void shutDownServer()
-  {
-    if (server==null)
-      return;
-
-    try
-    {
-      Naming.unbind(getRmiName());
-    } catch (Exception e)
-    {
-      Log.err("RMI unbinding failed.", e);
-    }
-    try
-    {
-      UnicastRemoteObject.unexportObject(server,true);
-    } catch (Exception e)
-    {
-      Log.err("RMI unexporting failed.", e);
-    }
   }
 
   // -- LCARS main function --
@@ -1752,16 +1371,7 @@ public class LCARS implements ILcarsRemote
           }
 
           // Shut-down RMI panel adapters
-          if (server!=null)
-          {
-            for (RmiPanelAdapter rpa : server.rmiPanelAdapters.values())
-            {
-              System.out.println("[Shutting down remote panel "+rpa.getRmiName()+"...]");
-              rpa.shutDown();
-              System.out.println("[... Remote panel shut down]");
-            }
-            server.rmiPanelAdapters.clear();
-          }
+          LcarsServer.shutDown();
 
           // Shut-down speech engine
           System.out.println("[Disposing speech engine...]");
@@ -1783,14 +1393,14 @@ public class LCARS implements ILcarsRemote
       
       // Start LCARS server (command line option "--server")
       if (getArg("--server")!=null)
-        startServer();
+        LcarsServer.start();
       
       // Start LCARS client (command line option "--clientof")
       String clientOf = getArg("--clientof=");
       if (clientOf!=null)
       {
-        Log.info("client of "+clientOf+" at "+getHostName());
-        LCARS.getRmiRegistry();
+        Log.info("client of "+clientOf+" at "+NetUtils.getHostName());
+        NetUtils.getRmiRegistry();
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }
       

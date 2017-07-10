@@ -6,7 +6,6 @@ import java.rmi.RemoteException;
 
 import de.tucottbus.kt.lcars.IPanel;
 import de.tucottbus.kt.lcars.IScreen;
-import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.TouchEvent;
@@ -83,7 +82,7 @@ implements IPanel, IRmiPanelAdapterRemote
   // -- Implementation of abstract methods --
   
   @Override
-  protected void updatePeer()
+  public void updatePeer()
   {
     try
     {
@@ -104,13 +103,13 @@ implements IPanel, IRmiPanelAdapterRemote
   @Override
   public String getRmiUrl()
   {
-    return makePanelAdapterUrl(LCARS.getHostName(),getPeerHostName(),0);
+    return makePanelAdapterUrl(NetUtils.getHostName(),getPeerHostName(),0);
   }
   
   @Override
   public String getRmiPeerUrl()
   {
-    return makeScreenAdapterUrl(LCARS.getHostName(),getPeerHostName(),0);
+    return makeScreenAdapterUrl(NetUtils.getHostName(),getPeerHostName(),0);
   }
 
   // -- Implementation of the IRmiPanelAdapteRemote interface --

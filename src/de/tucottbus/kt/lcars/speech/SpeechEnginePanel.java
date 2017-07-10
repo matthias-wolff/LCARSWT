@@ -17,6 +17,7 @@ import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.net.NetUtils;
 import de.tucottbus.kt.lcars.speech.events.LevelEvent;
 import de.tucottbus.kt.lcars.speech.events.PostprocEvent;
 import de.tucottbus.kt.lcars.speech.events.RecognitionEvent;
@@ -87,7 +88,7 @@ public class SpeechEnginePanel extends Panel
     });
     add(eLcars);
 
-    String pnlHost = LCARS.getHostName().toUpperCase();
+    String pnlHost = NetUtils.getHostName().toUpperCase();
     eElboU = new EElbo(this,23,172,464,142,LCARS.EC_ELBOUP|LCARS.ES_SHAPE_SW|LCARS.ES_LABEL_NE|LCARS.ES_STATIC,pnlHost);
     eElboU.setArmWidths(208,38); eElboU.setArcWidths(170,90);
     add(eElboU);

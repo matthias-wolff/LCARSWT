@@ -175,11 +175,11 @@ public class EPanelSelector extends EMessageBox
     if (LCARS.getArg("--server")!=null)
       try
       {
-        list.add(Class.forName("de.tucottbus.kt.lcars.net.ServerPanel").asSubclass(Panel.class));
+        list.add(Class.forName("de.tucottbus.kt.lcars.net.panels.ServerPanel").asSubclass(Panel.class));
       }
       catch (Exception e)
       {
-        Log.err("Cannot get 'de.tucottbus.kt.lcars.net.ServerPanel'", e);
+        Log.err("Cannot get 'de.tucottbus.kt.lcars.net.panels.ServerPanel'", e);
       }
     if (Panel.getSpeechEngine()!=null)
       try

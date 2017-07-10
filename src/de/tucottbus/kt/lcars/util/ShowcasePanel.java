@@ -45,6 +45,7 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.elements.modify.EGeometryModifier;
 import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.geometry.GArea;
+import de.tucottbus.kt.lcars.net.NetUtils;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.ImageMeta;
 
@@ -110,7 +111,7 @@ public class ShowcasePanel extends Panel
     eElbo.setArmWidths(208,38); eElbo.setArcWidths(170,90);
     add(eElbo);
 
-    eElbo = new EElbo(this,23,317,498,122,LCARS.EC_ELBOLO|LCARS.ES_SHAPE_NW|LCARS.ES_LABEL_SE|LCARS.ES_STATIC,LCARS.getHostName().toUpperCase());
+    eElbo = new EElbo(this,23,317,498,122,LCARS.EC_ELBOLO|LCARS.ES_SHAPE_NW|LCARS.ES_LABEL_SE|LCARS.ES_STATIC,NetUtils.getHostName().toUpperCase());
     eElbo.setArmWidths(208,38); eElbo.setArcWidths(170,90);
     add(eElbo);
 
@@ -121,7 +122,7 @@ public class ShowcasePanel extends Panel
       @Override
       public void run()
       {
-        eIp.setLabel(LCARS.getIP(false).getHostAddress());
+        eIp.setLabel(NetUtils.getIP(false).getHostAddress());
       }
     },1);
     

@@ -126,7 +126,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return LCARS.getRmiName()+".ScreenAdapter."+panelHostName.toUpperCase();
+    return NetUtils.getRmiName()+".ScreenAdapter."+panelHostName.toUpperCase();
   }
   
   /**
@@ -148,7 +148,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return "//"+screenHostName+":"+LCARS.getRmiPort()+
+    return "//"+screenHostName+":"+NetUtils.getRmiPort()+
            "/" + makeScreenAdapterRmiName(panelHostName,screenID);
   }
 
@@ -168,7 +168,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return LCARS.getRmiName()+".PanelAdapter."+screenHostName.toUpperCase();
+    return NetUtils.getRmiName()+".PanelAdapter."+screenHostName.toUpperCase();
   }
 
   /**
@@ -190,7 +190,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return "//"+panelHostName+":"+LCARS.getRmiPort()+
+    return "//"+panelHostName+":"+NetUtils.getRmiPort()+
            "/" +makePanelAdapterRmiName(screenHostName,screenID);
   }
   
@@ -199,7 +199,7 @@ public abstract class RmiAdapter implements Remote
   /**
    * Returns the name of the host serving the peer of this adapter.
    */
-  protected final String getPeerHostName()
+  public final String getPeerHostName()
   {
     return peerHostName;
   }
@@ -208,7 +208,7 @@ public abstract class RmiAdapter implements Remote
    * Returns the peer this adapter is connected to. The return value is <code>null</code> if there
    * is no network connection.
    */
-  protected final IRmiAdapterRemote getPeer()
+  public final IRmiAdapterRemote getPeer()
   {
     return peer;
   }
@@ -261,7 +261,7 @@ public abstract class RmiAdapter implements Remote
       while (run)
       {
       
-      String serverURL = "//"+getPeerHostName()+":"+LCARS.getRmiPort()+"/"+LCARS.getRmiName();      
+      String serverURL = "//"+getPeerHostName()+":"+NetUtils.getRmiPort()+"/"+NetUtils.getRmiName();      
       
       // Start connection
       Log.info("Starting");
@@ -299,8 +299,8 @@ public abstract class RmiAdapter implements Remote
           String msg = "";
           try
           {
-            ILcarsRemote server = (ILcarsRemote)Naming.lookup(serverURL);
-            server.serveRmiPanelAdapter(LCARS.getHostName(),0,LCARS.getArg("--panel="));
+            IRmiLcarsServerRemote server = (IRmiLcarsServerRemote)Naming.lookup(serverURL);
+            server.serveRmiPanelAdapter(NetUtils.getHostName(),0,LCARS.getArg("--panel="));
             msg = "Connection to \""+serverURL+"\" established";
           }
           catch (MalformedURLException e)
@@ -398,8 +398,8 @@ public abstract class RmiAdapter implements Remote
         try
         {
           Log.info("Disconnecting from server ...");        
-          ILcarsRemote server = (ILcarsRemote)Naming.lookup(serverURL);
-          server.destroyRmiPanelAdapter(LCARS.getHostName(),0);
+          IRmiLcarsServerRemote server = (IRmiLcarsServerRemote)Naming.lookup(serverURL);
+          server.destroyRmiPanelAdapter(NetUtils.getHostName(),0);
           Log.info("... Disconnected");
         }
         catch (Exception e)
