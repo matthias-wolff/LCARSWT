@@ -65,6 +65,14 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   {
     super(panelHostName);
     this.screen = screen;
+    try
+    {
+      screen.setPanel(Panel.createPanel(ClientPanel.class.getName(),screen));
+    }
+    catch (ClassNotFoundException e)
+    {
+      // Should not happen since default Panel is created!
+    }
   }
   
   // -- Implementation of abstract methods --
@@ -207,8 +215,8 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   
   /**
    * Displays all occurred RMI errors on the screen.
-   */
- 
+   * @deprecated
+   */ 
   public void showRmiErrors()
   {    
     Rectangle rect = screen.getArea().getBounds();
