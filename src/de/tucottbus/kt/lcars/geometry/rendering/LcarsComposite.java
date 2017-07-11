@@ -202,6 +202,8 @@ public class LcarsComposite extends Composite implements PaintListener
     {
       for (ElementData el : context.getElementsToPaint())
       {
+        if (el==null)
+          continue;
         if (el.serialNo == -1)
           Log.debug(el.toString());
         el.render2D(gc, state);

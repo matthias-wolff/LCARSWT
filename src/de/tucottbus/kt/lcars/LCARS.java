@@ -722,15 +722,22 @@ public class LCARS
       Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
       //if (b.width <= 0 || b.height <=0) continue;
       
-      GText gt = new GText(
-          s[i],
-          b,
-          fontMeta,
-          foreground);
-      if (x < tx) gt.setIndent(x-tx);
-      if (y < ty) gt.setDescent(y-ty);
-      //TODO:
-      geos.add(gt);
+      try
+      {
+        GText gt = new GText(
+            s[i],
+            b,
+            fontMeta,
+            foreground);
+        if (x < tx) gt.setIndent(x-tx);
+        if (y < ty) gt.setDescent(y-ty);
+        //TODO:
+        geos.add(gt);
+      }
+      catch (Exception e)
+      {
+        Log.err("Invalid line index "+i+" rendering text \""+text+"\"");
+      }
     }
     
     tl.dispose();

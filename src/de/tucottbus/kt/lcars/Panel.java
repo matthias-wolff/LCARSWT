@@ -1173,31 +1173,44 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       incremental = false;
     }
 
-    // Make update data
-    ElementData[] els;
-    int i = 0;
-    synchronized (this.elements)
-    {
-      els = new ElementData[this.elements.size()];
-      for (EElement el : this.elements)
-        els[i++] = el
-            .getUpdateData(incremental && !this.addedElements.contains(el));
-      this.addedElements.clear();
-    }
-
-    // Update screen
     try
     {
+      // Make update data
+      ElementData[] els;
+      int i = 0;
+      synchronized (this.elements)
+      {
+        els = new ElementData[this.elements.size()];
+        for (EElement el : this.elements)
+          try
+          {
+            els[i++] 
+              = el.getUpdateData(incremental && !this.addedElements.contains(el));
+          }
+          catch (Exception e)
+          {
+            Log.err("Failed to get update data for element "+el,e);
+          }
+        this.addedElements.clear();
+      }
+
+      // Update screen
       PanelData data = new PanelData(this, state, els);
       iscreen.update(data, incremental);
       noConnectionOnUpdate = false;
-    } catch (RemoteException e)
+    } 
+    catch (RemoteException e)
     {
       if (!noConnectionOnUpdate)
         Log.info("Remote screen of "+getClass().getSimpleName()
           +" not updated (no connection).");
       noConnectionOnUpdate = true;
     }
+    catch (Exception e)
+    {
+      Log.err("Failed to make screen update data.",e);
+    }
+
     time = System.nanoTime() - time;
     loadStat.add((int) (time / 400000));
   }
