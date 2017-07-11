@@ -1189,27 +1189,27 @@ public class LCARS
    * 
    * @param args
    *  Command line options<pre>
-   *  --clientof=hostname                  - Serve a remote screen [1]
-   *  --debug                              - Print debug messages
-   *  --device=devicename                  - Name of host device, e.g. wetab [2]
-   *  --help, -h, ?                        - Print help and exit
-   *  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)
-   *  --nogui                              - Do not display a screen [3]
-   *  --nomouse                            - Hide mouse cursor
-   *  --nospeech                           - Disable speech I/O
-   *  --PADD                               - Running on a PADD
-   *  --panel=classname                    - LCARS panel to display at start-up 
-   *  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]
-   *  --screen=n                           - Use n-th screen (default: 1) [5]
-   *  --server                             - Serve remote panels [1]
-   *  --wallpaper=filename                 - Use wall paper (slower!)
-   *  --xpos=n                             - Horizontal position of window [6]
+   *  --clientof=hostname        - Serve a remote screen [1]
+   *  --debug                    - Print debug messages
+   *  --device=devicename        - Name of host device, e.g. wetab [2]
+   *  --help, -h, ?              - Print help and exit
+   *  --mode=[fullscreen|window] - Screen mode (default: fullscreen)
+   *  --nogui                    - Do not display a screen [3]
+   *  --nomouse                  - Hide mouse cursor
+   *  --nospeech                 - Disable speech I/O
+   *  --PADD                     - Running on a PADD
+   *  --panel=classname          - LCARS panel to display at start-up 
+   *  --rminame=name             - RMI name (default: &lt;hostname&gt;) [4]
+   *  --screen=n                 - Use n-th screen (default: 1) [5]
+   *  --server                   - Serve remote panels [1]
+   *  --wallpaper=filename       - Use wall paper (slower!)
+   *  --xpos=n                   - Horizontal position of window [6]
    *  
    *  [1] mutually exclusive
    *  [2] currently the only use is --device=wetab which adjusts PADD-panels
    *  [3] only valid with --server
    *  [4] useful when multiple NICs are installed in a host
-   *  [5] only valid with --mode=fullscreen
+   *  [5] implies --mode=fullscreen
    *  [6] valid with --mode=maximized for displaying panel at secondary screen
    *  </pre>
    */
@@ -1230,30 +1230,28 @@ public class LCARS
       System.out.print("\n\nUsage");
       System.out.print("\n\n  java -cp \"target/lcarswt-<version>.<profile>-jar-with-dependencies.jar\" de.tucottbus.kt.lcars.LCARS [options]");
       System.out.print("\n\nCommand line options");
-//      System.out.print("\n  --asyncRenderer                      - Uses an asynchronous renderer");
-      System.out.print("\n  --clientof=hostname                  - Serve a remote screen [1]");
-      System.out.print("\n  --debug                              - Print debug messages");
-      System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
-      System.out.print("\n  --help, -h, ?                        - Print help and exit");
-      System.out.print("\n  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)");
-      System.out.print("\n  --musiclib=<music-dir>               - Audio library folder");
-      System.out.print("\n  --nogui                              - Do not display a screen [3]");
-      System.out.print("\n  --nomouse                            - Hide mouse cursor");
-      System.out.print("\n  --nospeech                           - Disable speech I/O");
-      System.out.print("\n  --PADD                               - Running on a PADD");
-      System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
-      System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
-      System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [5]");
-//      System.out.print("\n  --selectiveRendering                 - Re-paint changes only");
-      System.out.print("\n  --server                             - Serve remote panels [1]");
-      System.out.print("\n  --wallpaper=filename                 - Use wall paper (slower!)");
-      System.out.print("\n  --xpos=n                             - Horizontal position of window [6]");
+      System.out.print("\n  --clientof=hostname        - Serve a remote screen [1]");
+      System.out.print("\n  --debug                    - Print debug messages");
+      System.out.print("\n  --device=devicename        - Name of host device, e.g. wetab [2]");
+      System.out.print("\n  --help, -h, ?              - Print help and exit");
+      System.out.print("\n  --mode=[fullscreen|window] - Screen mode (default: fullscreen)");
+      System.out.print("\n  --musiclib=<music-dir>     - Audio library folder");
+      System.out.print("\n  --nogui                    - Do not display a screen [3]");
+      System.out.print("\n  --nomouse                  - Hide mouse cursor");
+      System.out.print("\n  --nospeech                 - Disable speech I/O");
+      System.out.print("\n  --PADD                     - Running on a PADD");
+      System.out.print("\n  --panel=classname          - LCARS panel to display at start-up"); 
+      System.out.print("\n  --rminame=name             - RMI name (default: &lt;hostname&gt;) [4]");
+      System.out.print("\n  --screen=n                 - Use n-th screen (default: 1) [5]");
+      System.out.print("\n  --server                   - Serve remote panels [1]");
+      System.out.print("\n  --wallpaper=filename       - Use wall paper (slower!)");
+      System.out.print("\n  --xpos=n                   - Horizontal position of window [6]");
       System.out.print("\n  ");
       System.out.print("\n  [1] mutually exclusive");
       System.out.print("\n  [2] currently the only use is --device=wetab which adjusts PADD-panels");
       System.out.print("\n  [3] only valid with --server");
       System.out.print("\n  [4] useful when multiple NICs are installed in a host");
-      System.out.print("\n  [5] only valid with --mode=fullscreen");
+      System.out.print("\n  [5] implies --mode=fullscreen");
       System.out.print("\n  [6] valid with --mode=maximized for displaying panel at secondary screen");
       System.out.print("\n----------------------------------------------------------------------------");
       System.out.print("\n\n");
@@ -1265,7 +1263,8 @@ public class LCARS
     
     Log.addObserver(new ILogObserver()
     {
-      private void doLog(String pfx, String msg, Boolean err) {
+      private void doLog(String pfx, String msg, Boolean err) 
+      {
         if ("LCARS".equals(pfx) || "NET".equals(pfx))
           ServerPanel.logMsg(pfx,msg,err);       
       }
@@ -1303,23 +1302,30 @@ public class LCARS
     
     try
     {
-      if (getArg("--mode=") == null)
-        LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
-      boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
       {
-        Display display = Display.getDefault();
-        Monitor[] monitors = display.getMonitors();
-       
-        String srcIdArg = getArg("--screen=");
-        int scrid = srcIdArg != null ?
-            Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
-        
-        Screen scr = new Screen(display,null,fullscreen);
-        scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
-        //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
-        //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
-        iscreen = scr;
+        boolean fullscreen = !("window".equals(getArg("--mode=")));
+        Display display = LCARS.getDisplay();
+
+        String scrIdArg = getArg("--screen=");
+        if (scrIdArg!=null)
+        {
+          fullscreen = true;
+          Monitor[] monitors = display.getMonitors();
+          int scrid = 0;
+          try
+          {
+            scrid = Math.max(Math.min(Integer.parseInt(scrIdArg)-1, monitors.length), 0);
+          }
+          catch (NumberFormatException e)
+          {
+            Log.err("Invalis screen ID \""+scrIdArg+"\", using default screen.");
+          }
+          iscreen = new Screen(display,fullscreen);
+          iscreen.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
+        }
+        else
+          iscreen = new Screen(display,fullscreen);
       }
       else
         Log.info("Command line mode (no GUI)");

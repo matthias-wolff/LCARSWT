@@ -104,7 +104,7 @@ class FrameData
   {
     if (pred == null)
     {
-      dirtyArea = new Rectangle(getRenderWidth(), getRenderHeight());
+      dirtyArea = new Rectangle(getPanelWidth(), getPanelHeight());
       elementsToPaint = new ArrayList<ElementData>(Arrays.asList(elements));
       bgChanged = updateBgImage(null);
       return;
@@ -145,7 +145,7 @@ class FrameData
             else
               Log.err("Cannot apply frame update because of illegal null ElementData.");
           }
-      dirtyArea = new Area(new Rectangle(getRenderWidth(), getRenderHeight()));
+      dirtyArea = new Area(new Rectangle(getPanelWidth(), getPanelHeight()));
     } else
     {
       ArrayList<ElementData> elementsToPaint = new ArrayList<ElementData>(elCount);
@@ -185,7 +185,7 @@ class FrameData
       {
         Log.err("Cannot create dirty area.", e);
       }
-      dirtyArea.intersect(new Area(new Rectangle(getRenderWidth(), getRenderHeight())));
+      dirtyArea.intersect(new Area(new Rectangle(getPanelWidth(), getPanelHeight())));
       this.dirtyArea = dirtyArea;
 
       for (ElementData edu : elsWithoutChanges)
@@ -268,12 +268,12 @@ class FrameData
     return dirtyArea;
   }
 
-  public int getRenderWidth()
+  public int getPanelWidth()
   {
     return panelState.width;
   }
 
-  public int getRenderHeight()
+  public int getPanelHeight()
   {
     return panelState.height;
   }

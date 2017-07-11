@@ -1,7 +1,9 @@
 package de.tucottbus.kt.lcars.geometry.rendering;
 
-import java.awt.geom.Point2D;
+import java.awt.Graphics2D;
+import java.awt.Point;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
@@ -21,55 +23,67 @@ import de.tucottbus.kt.lcars.logging.Log;
 /**
  * This Class organizes the screen updates to relieve the paint process.
  * 
- * @author Christian Borck
- *
+ * @author Christian Borck, Matthias Wolff
  */
 public class LcarsComposite extends Composite implements PaintListener
 {  
-  /**
-   * Number of updates between two debug logs 
-   */
-  public static final int DEBUG_INTERVAL = 1500; // 1500 updates ~ 60 sec
 
-  /**
-   * Count of updates between to paints
-   */
-  private int updateCount = 0;
-  
-  /**
-   * Count of {@link #paintControl()} calls
-   */
-  private int paintCount = 0;
-   
   /**
    * Enables selective rendering where only dirty regions will be updated
    */
   protected boolean selectiveRepaint = false;
-  
-  protected Point2D.Float scale = new Point2D.Float(1, 1);
-  
+
   /**
    * Context for the next repaint. Contains all element and the region of the
    * screen that has to be updated.
    */
   private FrameData context;
   
+  /**
+   * The SWT rendering transform.
+   */
+  protected Transform transform;
+  
+  /**
+   * The SWT display this composite is placed on.
+   */
   private final Display display;
   
   /**
+   * Creates a new LCARS composite.
    * 
-   * @param initialSize
+   * @param parent
+   *          The parent composite.
    */
-  public LcarsComposite(Composite parent, int style) {
-    super(parent, style);    
+  public LcarsComposite(Composite parent) 
+  {
+    super(parent, SWT.DOUBLE_BUFFERED|SWT.EMBEDDED);    
     display = parent.getDisplay();
+    transform = new Transform(display);
     addPaintListener(this);
   }
-    
+
+  @Override
+  public void dispose()
+  {
+    if (transform!=null && !transform.isDisposed())
+      transform.dispose();
+    super.dispose();
+  }
+
+  @Override
+  public org.eclipse.swt.graphics.Point computeSize(int wHint, int hHint, boolean changed)
+  {
+    return getShell().getSize();
+  }
+
   /**
-   * Sets a hint for selective repaints where only dirty areas on the screen will be repainted.
-   * Dirty areas are defined by elements that has been added, remove or changed. 
+   * Sets a hint for selective repaints where only dirty areas on the screen
+   * will be repainted. Dirty areas are defined by elements that has been added,
+   * remove or changed.
+   * 
    * @param selectiveRepaint
+   *          The new selective repaint mode.
    */
   public void setSelectiveRenderingHint(boolean selectiveRepaint)
   {
@@ -77,16 +91,18 @@ public class LcarsComposite extends Composite implements PaintListener
   }
 
   /**
-   * Updates the data for rendering.
+   * Updates the rendering data.
+   * 
    * @param data
+   *          The panel data update.
    * @param incremental
+   *          If <code>true</code> the update data are incremental.
    */
   public void applyUpdate(PanelData data, boolean incremental)
   {
     FrameData nextContext = FrameData.create(data, incremental, this.selectiveRepaint);    
     nextContext.apply(context);
     context = nextContext;
-    onUpdate();
     
     if (nextContext.isBgChanged())
     {      
@@ -95,6 +111,67 @@ public class LcarsComposite extends Composite implements PaintListener
         setBackgroundImage(bg);
       });
     }
+  }
+  
+  /**
+   * Updates and returns the SWT rendering transform.
+   */
+  protected Transform updateRenderingTransform()
+  {
+    transform.identity();
+    
+    if (context!=null)
+    {
+      Rectangle b = getBounds();
+      float scrw = (float)b.width;
+      float scrh = (float)b.height;
+      float pnlw = context.getPanelWidth();
+      float pnlh = context.getPanelHeight();
+      
+      float scl  = Math.min(scrw/pnlw,scrh/pnlh);
+      float ofsx = (scrw/scl-pnlw)/2;
+      float ofsy = (scrh/scl-pnlh)/2;
+      
+      transform.translate(ofsx,ofsy);
+      transform.scale(scl,scl);
+    }
+    
+    return transform;
+  }
+
+  /**
+   * Converts LCARS panel to LCARS composite coordinates.
+   * 
+   * @param pt
+   *          The panel coordinates.
+   * @return
+   *    The composite coordinates.
+   */
+  public Point panelToComposite(Point pt)
+  {
+    float[] pointArray = new float[] {(float) pt.x, (float) pt.y};
+    transform.transform(pointArray);
+    return new Point(Math.round(pointArray[0]),Math.round(pointArray[1]));
+  }
+
+  /**
+   * Converts LCARS composite to LCARS panel coordinates.
+   * 
+   * @param pt
+   *          The composite coordinates.
+   * @return
+   *    The panel coordinates.
+   */
+  public Point compositeToPanel(Point pt)
+  {
+    float[] elements = new float[6];
+    transform.getElements(elements);
+    Transform itransform = new Transform(display,elements);
+    itransform.invert();
+    float[] pointArray = new float[] {(float) pt.x, (float) pt.y};
+    itransform.transform(pointArray);
+    itransform.dispose();
+    return new Point(Math.round(pointArray[0]),Math.round(pointArray[1]));
   }
   
   /**
@@ -107,31 +184,16 @@ public class LcarsComposite extends Composite implements PaintListener
   public void paintControl(PaintEvent e)
   {
     GC gc = e.gc;
-    onPaint();
-    FrameData context = this.context;
-    
-    if (context == null) // null -> reset
-    {
-      if (scale.x != 1 || scale.y != 1)
-        scale = new Point2D.Float(1, 1);
+
+    gc.setTransform(updateRenderingTransform());
+    if (context==null)
       return;
-    }
-    
-    Rectangle b = getBounds();
-    float sx = (float)b.width /context.getRenderWidth();
-    float sy = (float)b.height/context.getRenderHeight();
-    if (scale.x != sx || scale.y != sy)
-      scale = new Point2D.Float(sx, sy);    
-    
-    Transform t = new Transform(display, sx, 0, 0, sy, 0, 0);
-    gc.setTransform(t);
-    t.dispose();
     
     // clipping setup
     final Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
        
     if(context.getFullRepaint())
-      gc.setClipping(0,0,(int)Math.ceil(getBounds().width/sx),(int)Math.ceil(getBounds().height/sy));
+      gc.setClipping(0,0,context.getPanelWidth(),context.getPanelHeight());
     else
       gc.setClipping(dirtyArea);
 
@@ -161,30 +223,4 @@ public class LcarsComposite extends Composite implements PaintListener
     context = null;    
   }
 
-  public Point2D.Float getScale() {
-    Point2D.Float scale = this.scale;
-    return new Point2D.Float(scale.x, scale.y);
-  }
-  
-  /**
-   * Checks paint count and 
-   */
-  private void onPaint() {
-    if(++this.paintCount == DEBUG_INTERVAL) {
-      int updateCount = this.updateCount;
-      int paintCount = this.paintCount;
-      this.paintCount = this.updateCount = 0;
-      if(updateCount > paintCount) {
-        int skipped = updateCount-paintCount;
-        Log.debug(skipped + " of " + updateCount +  " Frame(s) skipped (" + String.format("%.2f", skipped*100f/updateCount) + "%, lower is better)");        
-      }         
-    }
-  }
-  
-  /**
-   * Increments the update counter
-   */
-  protected void onUpdate() {
-    this.updateCount++;
-  }  
 }
