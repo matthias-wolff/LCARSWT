@@ -11,7 +11,7 @@ import de.tucottbus.kt.lcars.util.Objectt;
  * 
  * @author Matthias Wolff
  */
-public class PanelState implements Serializable
+public class PanelState implements Serializable, Cloneable
 {
   /**
    * The default serial version ID.

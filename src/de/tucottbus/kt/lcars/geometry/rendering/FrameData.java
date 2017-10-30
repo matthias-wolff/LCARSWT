@@ -22,7 +22,7 @@ import de.tucottbus.kt.lcars.util.Objectt;
  * @author Christian Borck
  *
  */
-class FrameData
+class FrameData implements Cloneable
 {
   public static final String CLASSKEY = "FrmDt";
   
@@ -35,8 +35,12 @@ class FrameData
   private boolean fullRepaint;
   private boolean bgChanged = true;
 
-  private FrameData(PanelData panelData, boolean incremental,
-      boolean selectiveRepaint)
+  private FrameData(boolean incremental)
+  {
+    this.incremental = incremental;
+  }
+  
+  private FrameData(PanelData panelData, boolean incremental, boolean selectiveRepaint)
   {
     this.incremental = incremental;
     this.selectiveRepaint = selectiveRepaint;
@@ -88,7 +92,26 @@ class FrameData
     return true;
   }
 
+  @Override
+  public FrameData clone()
+  {
+    try
+    {
+      // Shallow copy of all fields
+      FrameData clone = (FrameData)super.clone();
 
+      // Deeper copy of some fields
+      clone.dirtyArea = new Area(this.dirtyArea);
+      
+      return clone;
+    } 
+    catch (CloneNotSupportedException e)
+    {
+      e.printStackTrace();
+    }
+    return null;
+  }
+  
   /**
    * Applies missing data from the previous {@link FrameData} and calculates changes
    * from previous to this {@link FrameData}.
@@ -112,22 +135,16 @@ class FrameData
     
     bgChanged = updateBgImage(pred);
     
-    this.fullRepaint = !panelState.equals(pred.panelState)
+    fullRepaint = !panelState.equals(pred.panelState)
                     || !incremental
                     || !selectiveRepaint;
-    //fullRepaint = true;
-
-    int elCount = elements.length;
-
+    
     // 1. Create a hash map of the current ElementData
     HashMap<Long, ElementData> hPred = incremental ? createHashMap(pred.elements) : null;
-    if (incremental)
-      for (ElementData edp : pred.elements)
-        hPred.put(edp.serialNo, edp);
     
     // 2. Complete the received ElementData with the present information
     //
-    if (this.fullRepaint)
+    if (fullRepaint)
     {
       elementsToPaint = new ArrayList<ElementData>(Arrays.asList(elements));
       if (incremental)
@@ -136,7 +153,7 @@ class FrameData
           {
             ElementData edp = hPred.get(edu.serialNo);
             if (edp != null)
-              hPred.remove(edp);
+              hPred.remove(edu.serialNo);
             edu.applyUpdate(edp);          
           } catch (Exception e)
           {
@@ -146,41 +163,42 @@ class FrameData
               Log.err("Cannot apply frame update because of illegal null ElementData.");
           }
       dirtyArea = new Area(new Rectangle(getPanelWidth(), getPanelHeight()));
-    } else
+    } 
+    else
     {
-      ArrayList<ElementData> elementsToPaint = new ArrayList<ElementData>(elCount);
-      ArrayList<ElementData> elsWithoutChanges = new ArrayList<ElementData>(elCount);
+      ArrayList<ElementData> elementsToPaint = new ArrayList<ElementData>(elements.length);
+      ArrayList<ElementData> elsWithoutChanges = new ArrayList<ElementData>(elements.length);
       Area dirtyArea = new Area();
 
       for (ElementData edu : elements)
         try
         {
-            if (incremental) {
-              ElementData edp = hPred.get(edu.serialNo);
-              if (edp != null)
-                hPred.remove(edp);
+          if (incremental) 
+          {
+            ElementData edp = hPred.get(edu.serialNo);
+            if (edp != null)
+              hPred.remove(edu.serialNo);
               
-              if (edu.applyUpdate(edp) == 0)
-              {
-                elsWithoutChanges.add(edu);
-                continue;                
-              }
-              
-              dirtyArea.add(new Area(edp.getBounds()));
+            if (edu.applyUpdate(edp) == 0)
+            {
+              elsWithoutChanges.add(edu);
+              continue;                
             }
-            dirtyArea.add(new Area(edu.getBounds()));
-            elementsToPaint.add(edu);
+              
+            if (edp!=null)
+              dirtyArea.add(new Area(edp.getBounds()));
+          }
+          dirtyArea.add(new Area(edu.getBounds()));
+          elementsToPaint.add(edu);
 
         } catch (Exception e)
         {
-          Log.err("Update failed on element #" + edu.serialNo + ": "
-                  + e.getMessage());
+          Log.err("Update failed on element #" + edu.serialNo + ": "+e.getMessage(),e);
         }
       // Add removed elements to the dirtyArea
       try
       {
-        hPred
-            .forEach((serialNo, edp) -> dirtyArea.add(new Area(edp.getBounds())));
+        hPred.forEach((serialNo, edp) -> dirtyArea.add(new Area(edp.getBounds())));
       } catch (Exception e)
       {
         Log.err("Cannot create dirty area.", e);
@@ -189,7 +207,7 @@ class FrameData
       this.dirtyArea = dirtyArea;
 
       for (ElementData edu : elsWithoutChanges)
-        if (dirtyArea.intersects(edu.getBounds()))
+        if (dirtyArea.getBounds().intersects(edu.getBounds()))
           elementsToPaint.add(edu);
       this.elementsToPaint = elementsToPaint;
     }

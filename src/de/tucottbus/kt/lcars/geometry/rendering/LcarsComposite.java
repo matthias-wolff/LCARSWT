@@ -26,7 +26,13 @@ import de.tucottbus.kt.lcars.logging.Log;
  * @author Christian Borck, Matthias Wolff
  */
 public class LcarsComposite extends Composite implements PaintListener
-{  
+{
+  /**
+   * If <code>true</code>, the area that would be redrawn in {@link 
+   * LcarsComposite#selectiveRepaint} mode is marked in red. Note that selective 
+   * repainting itself is disabled in DEBUG mode!
+   */
+  protected boolean DEBUG = false;
 
   /**
    * Enables selective rendering where only dirty regions will be updated
@@ -57,7 +63,7 @@ public class LcarsComposite extends Composite implements PaintListener
    */
   public LcarsComposite(Composite parent) 
   {
-    super(parent, SWT.DOUBLE_BUFFERED|SWT.EMBEDDED);    
+    super(parent, SWT.DOUBLE_BUFFERED|SWT.EMBEDDED|SWT.NO_BACKGROUND);    
     display = parent.getDisplay();
     transform = new Transform(display);
     addPaintListener(this);
@@ -100,13 +106,16 @@ public class LcarsComposite extends Composite implements PaintListener
    */
   public void applyUpdate(PanelData data, boolean incremental)
   {
-    FrameData nextContext = FrameData.create(data, incremental, this.selectiveRepaint);    
-    nextContext.apply(context);
-    context = nextContext;
+    FrameData context = FrameData.create(data, incremental, selectiveRepaint);    
+    context.apply(this.context);
+    synchronized (this)
+    {
+      this.context = context;
+    }
     
-    if (nextContext.isBgChanged())
+    if (context.isBgChanged())
     {      
-      Image bg = nextContext.isBgChanged() ? nextContext.getBackgroundImage().getImage() : null;
+      Image bg = context.isBgChanged() ? context.getBackgroundImage().getImage() : null;
       display.asyncExec(() -> {
         setBackgroundImage(bg);
       });
@@ -186,16 +195,24 @@ public class LcarsComposite extends Composite implements PaintListener
     GC gc = e.gc;
 
     gc.setTransform(updateRenderingTransform());
-    if (context==null)
+    if (this.context==null)
       return;
+
+    FrameData context;
+    synchronized (this)
+    {
+      context = this.context.clone();
+    }
     
     // clipping setup
     final Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
        
-    if(context.getFullRepaint())
+    if (context.getFullRepaint() || DEBUG)
       gc.setClipping(0,0,context.getPanelWidth(),context.getPanelHeight());
     else
       gc.setClipping(dirtyArea);
+    gc.setBackground(getBackground());
+    gc.fillRectangle(0,0,context.getPanelWidth(),context.getPanelHeight());
 
     PanelState state = context.getPanelState();
     try
@@ -212,7 +229,22 @@ public class LcarsComposite extends Composite implements PaintListener
     {
       Log.err("error drawing elements to the screen", ex);
     }
-  }  
+    
+    // -- DEBUG: Show repainted area -->
+    if (DEBUG)
+    {
+      if (context.getFullRepaint())
+        gc.setClipping(0,0,context.getPanelWidth(),context.getPanelHeight());
+      else
+        gc.setClipping(dirtyArea);
+      int alpha = gc.getAlpha();
+      gc.setAlpha(64);
+      gc.setBackground(LCARS.getColor(LCARS.CS_REDALERT,LCARS.EC_ELBOLO).getColor());
+      gc.fillRectangle(0,0,context.getPanelWidth(),context.getPanelHeight());
+      gc.setAlpha(alpha);
+    }
+    // <--
+  }
   
   /**
    * Clears the painter and fills the screen with the default background color (

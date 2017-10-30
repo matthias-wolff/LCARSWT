@@ -37,6 +37,14 @@ public abstract class ElementContributor implements EEventListener
   
   // -- Constructors --
   
+  /**
+   * Abstract constructor of element contributors.
+   * 
+   * @param x
+   *          The x-coordinate of the top-left corner in LCARS panel pixels
+   * @param y
+   *          The y-coordinate of the top-left corner in LCARS panel pixels
+   */
   public ElementContributor(int x, int y)
   {
     elements   = new ArrayList<EElement>();
@@ -377,21 +385,25 @@ public abstract class ElementContributor implements EEventListener
       }
   }
 
+  @Override
   public void touchDown(EEvent ee)
   {
     fireEEvent(ee);
   }
 
+  @Override
   public void touchDrag(EEvent ee)
   {
     fireEEvent(ee);
   }
 
+  @Override
   public void touchHold(EEvent ee)
   {
     fireEEvent(ee);
   }
 
+  @Override
   public void touchUp(EEvent ee)
   {
     fireEEvent(ee);
