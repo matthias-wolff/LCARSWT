@@ -56,6 +56,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    */
   private static boolean speechEngineSearched;
 
+  /**
+   * Flag suppressing recurring network errors when connection to remote screen was 
+   * lost (no important function, just for beautification).
+   */
+  private boolean noConnectionOnUpdate = false;
+  
   // -- Fields --
 
   /**
@@ -1101,30 +1107,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
-   * <p>
-   * <i><b style="color:red">Experimental.</b></i>
-   * </p>
-   *
-   * Runs the <code>runnable</code> after a short period of time.
-   * 
-   * @param runnable
-   *          The runnable.
-   */
-  protected void invokeLater(Runnable runnable)
-  {
-    final Runnable __runnable = runnable;
-    (new Timer()).schedule(new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        __runnable.run();
-      }
-    }, 10);
-
-  }
-
-  /**
    * Called 25 times per second. Derived classes may override this method to
    * perform periodic actions. It is <em>not</em> recommended to start own
    * threads for that purpose.
@@ -1164,7 +1146,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * Call this method to notify the framework that the panel needs to be
    * redrawn.
    */
-  public synchronized void invalidate()
+  public void invalidate()
   {
     screenInvalid.set(true);
   }
@@ -1190,27 +1172,44 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       incremental = false;
     }
 
-    // Make update data
-    ElementData[] els;
-    int i = 0;
-    synchronized (this.elements)
-    {
-      els = new ElementData[this.elements.size()];
-      for (EElement el : this.elements)
-        els[i++] = el
-            .getUpdateData(incremental && !this.addedElements.contains(el));
-      this.addedElements.clear();
-    }
-
-    // Update screen
     try
     {
-      PanelData data = new PanelData(this, state, els); // TODO: better make a
+      // Make update data
+      ElementData[] els;
+      int i = 0;
+      synchronized (this.elements)
+      {
+        els = new ElementData[this.elements.size()];
+        for (EElement el : this.elements)
+          try
+          {
+            els[i++] 
+              = el.getUpdateData(incremental && !this.addedElements.contains(el));
+          }
+          catch (Exception e)
+          {
+            Log.err("Failed to get update data for element "+el,e);
+          }
+        this.addedElements.clear();
+      }
+
+      // Update screen
+      PanelData data = new PanelData(this, state, els);
       iscreen.update(data, incremental);
-    } catch (RemoteException e)
+      noConnectionOnUpdate = false;
+    } 
+    catch (RemoteException e)
     {
-      Log.err("Cannot sending update to screen.", e);
+      if (!noConnectionOnUpdate)
+        Log.info("Remote screen of "+getClass().getSimpleName()
+          +" not updated (no connection).");
+      noConnectionOnUpdate = true;
     }
+    catch (Exception e)
+    {
+      Log.err("Failed to make screen update data.",e);
+    }
+
     time = System.nanoTime() - time;
     loadStat.add((int) (time / 400000));
   }
@@ -1221,8 +1220,10 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   public void start()
   {
     if (runt == null)
+    {
       (runt = new Timer(getClass().getSimpleName()+".runt (panel timer)", true))
           .scheduleAtFixedRate(new PanelTimerTask(), 20, 20);
+    }
     if (getSpeechEngine() != null)
       getSpeechEngine().addSpeechEventListener(this);
     invalidate();
@@ -1233,14 +1234,11 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   {
     if (getSpeechEngine() != null)
       getSpeechEngine().removeSpeechEventListener(this);
-    Timer runt = this.runt;
     if (runt == null)
       return;
-    this.runt = null;
-    // TODO: runt.purge(); ? purge all TimerTask's like screen update, otherwise
-    // possible sending of PanelData to a screen where this Panel is not the
-    // owner anymore, can cause inconsistent screen data
     runt.cancel();
+    runt.purge();
+    runt = null;
   }
 
   @Override
