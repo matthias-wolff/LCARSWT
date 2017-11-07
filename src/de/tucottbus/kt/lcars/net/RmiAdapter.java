@@ -32,7 +32,7 @@ public abstract class RmiAdapter implements Remote
   /**
    * The peer this adapter is connected to.
    */
-  private Remote peer;
+  private IRmiAdapterRemote peer;
   
   /**
    * The name of the host serving the peer of this adapter.
@@ -87,28 +87,6 @@ public abstract class RmiAdapter implements Remote
   }
 
   // -- Operations --
-  
-  /**
-   * Prints a log message.
-   * 
-   * @param msg
-   *          The message.
-   */
-  protected void log(String msg)
-  {
-    Log.info(getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
-  }
-  
-  /**
-   * Prints an error message.
-   * 
-   * @param msg
-   *          The message.
-   */
-  protected void err(String msg)
-  {
-    Log.err(getClass().getSimpleName()+"."+getPeerHostName()+": "+msg);
-  }
 
   /**
    * Shuts this RMI network adapter down.
@@ -148,7 +126,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return LCARS.getRmiName()+".ScreenAdapter."+panelHostName.toUpperCase();
+    return NetUtils.getRmiName()+".ScreenAdapter."+panelHostName.toUpperCase();
   }
   
   /**
@@ -170,7 +148,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return "//"+screenHostName+":"+LCARS.getRmiPort()+
+    return "//"+screenHostName+":"+NetUtils.getRmiPort()+
            "/" + makeScreenAdapterRmiName(panelHostName,screenID);
   }
 
@@ -190,7 +168,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return LCARS.getRmiName()+".PanelAdapter."+screenHostName.toUpperCase();
+    return NetUtils.getRmiName()+".PanelAdapter."+screenHostName.toUpperCase();
   }
 
   /**
@@ -212,7 +190,7 @@ public abstract class RmiAdapter implements Remote
     int screenID
   )
   {
-    return "//"+panelHostName+":"+LCARS.getRmiPort()+
+    return "//"+panelHostName+":"+NetUtils.getRmiPort()+
            "/" +makePanelAdapterRmiName(screenHostName,screenID);
   }
   
@@ -221,7 +199,7 @@ public abstract class RmiAdapter implements Remote
   /**
    * Returns the name of the host serving the peer of this adapter.
    */
-  protected final String getPeerHostName()
+  public final String getPeerHostName()
   {
     return peerHostName;
   }
@@ -230,7 +208,7 @@ public abstract class RmiAdapter implements Remote
    * Returns the peer this adapter is connected to. The return value is <code>null</code> if there
    * is no network connection.
    */
-  protected final Remote getPeer()
+  public final IRmiAdapterRemote getPeer()
   {
     return peer;
   }
@@ -278,31 +256,36 @@ public abstract class RmiAdapter implements Remote
     @Override
     public void run()
     {
-      String serverURL = "//"+getPeerHostName()+":"+LCARS.getRmiPort()+"/"+LCARS.getRmiName();      
+      run = true;
+      Log.info("Running RMI connection");
+      while (run)
+      {
+      
+      String serverURL = "//"+getPeerHostName()+":"+NetUtils.getRmiPort()+"/"+NetUtils.getRmiName();      
       
       // Start connection
-      log("Starting");
-      log("- self: "+getRmiName());
-      log("- peer: "+getRmiPeerUrl());
+      Log.info("Starting");
+      Log.info("- self: "+getRmiName());
+      Log.info("- peer: "+getRmiPeerUrl());
       try
       {
-        log("Exporting remote stub ...");
+        Log.info("Exporting remote stub ...");
         Remote stub = UnicastRemoteObject.exportObject(self,0);
-        log("... Exported");
-        log("Binding to \""+getRmiName()+"\" ...");
+        Log.info("... Exported");
+        Log.info("Binding to \""+getRmiName()+"\" ...");
         Naming.rebind(getRmiName(),stub);
-        log("... Bound");
+        Log.info("... Bound");
       }
       catch (Exception e)
       {
-        log("... FAILED ("+e.toString()+")");
-        err("FATAL ERROR: Screen adapter not started.");
-        return;
+        Log.info("... FAILED ("+e.toString()+")");
+        //Log.err("FATAL ERROR: Screen adapter not started.");
+        //return;
       }      
-      log("Running");
+      Log.info("Running");
+      peerMsg = null;
       
       // Maintain connection ...
-      run = true;
       while (run)
       {
         // Wait
@@ -316,9 +299,9 @@ public abstract class RmiAdapter implements Remote
           String msg = "";
           try
           {
-            ILcarsRemote server = (ILcarsRemote)Naming.lookup(serverURL);
-            server.serveRmiPanelAdapter(LCARS.getHostName(),0,LCARS.getArg("--panel="));
-            msg = "Connection to server \""+serverURL+"\" established";
+            IRmiLcarsServerRemote server = (IRmiLcarsServerRemote)Naming.lookup(serverURL);
+            server.serveRmiPanelAdapter(NetUtils.getHostName(),0,LCARS.getArg("--panel="));
+            msg = "Connection to \""+serverURL+"\" established";
           }
           catch (MalformedURLException e)
           {
@@ -327,13 +310,13 @@ public abstract class RmiAdapter implements Remote
           }
 					catch (ConnectException|ConnectIOException e)
 					{
-            msg = "Could not connect to \""+serverURL+"\"\nreason: "+e.getMessage();
+            msg = "No connection to \""+serverURL+"\"\nreason: "+e.getMessage();
             peer = null;
 					}
           catch (RemoteException e)
           {
             e.printStackTrace();
-            msg = "No connection to server \""+serverURL+"\"\nreason: "+e.getMessage();
+            msg = "No connection to \""+serverURL+"\"\nreason: "+e.getMessage();
             peer = null;
           }
           catch (NotBoundException e)
@@ -343,7 +326,7 @@ public abstract class RmiAdapter implements Remote
           }
           if (!msg.equals(serverMsg))
           {
-            log(msg);
+            Log.info(msg);
             serverMsg = msg;
           }
         }
@@ -354,12 +337,12 @@ public abstract class RmiAdapter implements Remote
         {
           if (peer==null)
           {
-            peer = Naming.lookup(getRmiPeerUrl());
+            peer = (IRmiAdapterRemote)Naming.lookup(getRmiPeerUrl());
             msg = "Connection to peer established";
           }
           if (peer!=null)
           {
-            ((IRmiAdapterRemote)peer).ping();
+            peer.ping();
             msg = "Connection to peer ok";
           }
         }
@@ -381,39 +364,52 @@ public abstract class RmiAdapter implements Remote
         updatePeer();
         if (!msg.equals(peerMsg))
         {
-          log(msg);
+          Log.info(msg);
           peerMsg = msg;
         }
+        
+        if (peer==null) break;
       }
       
       // End connection
-      log("Terminating ...");
+      Log.info("Terminating ...");
       try
       {
-        log("Unbinding from \""+getRmiName()+"\" ...");        
+        Log.info("Unbinding from \""+getRmiName()+"\" ...");        
         Naming.unbind(getRmiName());
-        UnicastRemoteObject.unexportObject(self,true);
-        log("... Unbound");
+        Log.info("... Unbound");
       }
       catch (Exception e)
       {
-        log("... FAILED ("+e.toString()+")");
+        Log.info("... FAILED ("+e.toString()+")");
+      }
+      try
+      {
+        Log.info("Unexporting ...");        
+        UnicastRemoteObject.unexportObject(self,true);
+        Log.info("... Unexported");
+      }
+      catch (Exception e)
+      {
+        Log.info("... FAILED ("+e.toString()+")");
       }
       if (self instanceof RmiScreenAdapter)
       {
         try
         {
-          log("Disconnecting from server ...");        
-          ILcarsRemote server = (ILcarsRemote)Naming.lookup(serverURL);
-          server.destroyRmiPanelAdapter(LCARS.getHostName(),0);
-          log("... Disconnected");
+          Log.info("Disconnecting from server ...");        
+          IRmiLcarsServerRemote server = (IRmiLcarsServerRemote)Naming.lookup(serverURL);
+          server.destroyRmiPanelAdapter(NetUtils.getHostName(),0);
+          Log.info("... Disconnected");
         }
         catch (Exception e)
         {
-          log("... FAILED ("+e.toString()+")");
+          Log.info("... FAILED ("+e.toString()+")");
         }
       }
-      log("... Terminated");
+      Log.info("... Terminated");
+    }
+      Log.info("End of RMI connection");
     }
     
     public void end()

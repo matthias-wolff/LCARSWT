@@ -6,10 +6,10 @@ import java.rmi.RemoteException;
 
 import de.tucottbus.kt.lcars.IPanel;
 import de.tucottbus.kt.lcars.IScreen;
-import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.Screen;
 import de.tucottbus.kt.lcars.TouchEvent;
+import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
@@ -82,11 +82,18 @@ implements IPanel, IRmiPanelAdapterRemote
   // -- Implementation of abstract methods --
   
   @Override
-  protected void updatePeer()
+  public void updatePeer()
   {
-    panel.setScreen((IScreen)getPeer());
+    try
+    {
+      panel.setScreen((IScreen)getPeer());
+    } catch (NullPointerException e)
+    {
+      Log.err("Cannot set screen.", e); 
+    }
   }
-  
+
+
   @Override
   public String getRmiName()
   {
@@ -96,13 +103,13 @@ implements IPanel, IRmiPanelAdapterRemote
   @Override
   public String getRmiUrl()
   {
-    return makePanelAdapterUrl(LCARS.getHostName(),getPeerHostName(),0);
+    return makePanelAdapterUrl(NetUtils.getHostName(),getPeerHostName(),0);
   }
   
   @Override
   public String getRmiPeerUrl()
   {
-    return makeScreenAdapterUrl(LCARS.getHostName(),getPeerHostName(),0);
+    return makeScreenAdapterUrl(NetUtils.getHostName(),getPeerHostName(),0);
   }
 
   // -- Implementation of the IRmiPanelAdapteRemote interface --
@@ -110,7 +117,7 @@ implements IPanel, IRmiPanelAdapterRemote
   @Override
   public void setPanel(String className) throws ClassNotFoundException
   {
-    log("Setting panel "+className+" ...");
+    Log.info("Setting panel "+className+" ...");
     panel = Panel.createPanel(className,(IScreen)getPeer());
     if (panel==null)
     {
@@ -123,11 +130,11 @@ implements IPanel, IRmiPanelAdapterRemote
         panel.messageBox("ERROR",className+"\n"+s.toUpperCase(),"OK",null,null);
       } catch (RemoteException e)
       {
-        err("... Panel set failed");
+        Log.err("... Panel set failed",e);
         return;
       }
     }
-    log("... Panel set");
+    Log.info("... Panel set");
   }
 
   @Override

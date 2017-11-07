@@ -21,6 +21,7 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ElementData;
 import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.net.panels.ClientPanel;
 import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcars.util.ObjectSize;
 import de.tucottbus.kt.lcars.util.Objectt;
@@ -64,6 +65,14 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   {
     super(panelHostName);
     this.screen = screen;
+    try
+    {
+      screen.setPanel(Panel.createPanel(ClientPanel.class.getName(),screen));
+    }
+    catch (ClassNotFoundException e)
+    {
+      // Should not happen since default Panel is created!
+    }
   }
   
   // -- Implementation of abstract methods --
@@ -79,10 +88,10 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
 		else
 		{
 			panel = screen.getPanel();
-			if (panel == null || panel.getClass() != Panel.class)
+			if (panel == null || panel.getClass() != ClientPanel.class)
 				try
 				{
-					screen.setPanel(Panel.createPanel(null, screen));
+					screen.setPanel(Panel.createPanel(ClientPanel.class.getName(),screen));
 				}
 				catch (ClassNotFoundException e)
 				{
@@ -100,13 +109,13 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   @Override
   public String getRmiUrl()
   {
-    return makeScreenAdapterUrl(getPeerHostName(),LCARS.getHostName(),0);
+    return makeScreenAdapterUrl(getPeerHostName(),NetUtils.getHostName(),0);
   }
   
   @Override
   public String getRmiPeerUrl()
   {
-    return makePanelAdapterUrl(getPeerHostName(),LCARS.getHostName(),0);
+    return makePanelAdapterUrl(getPeerHostName(),NetUtils.getHostName(),0);
   }
   
   // -- Implementation of the IRmiScreenAdapter interface --
@@ -145,7 +154,7 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   @Override
   public String getHostName()
   {
-    return LCARS.getHostName();
+    return NetUtils.getHostName();
   }
   
   @Override
@@ -200,13 +209,14 @@ public class RmiScreenAdapter extends RmiAdapter implements IScreen, IRmiScreenA
   @Override
   public void exit() throws RemoteException
   {
-    screen.getSwtDisplay().syncExec(screen::exit);
+    shutDown();
+    screen.exit();
   }
   
   /**
-   * Displays all occured RMI errors on the screen.
-   */
- 
+   * Displays all occurred RMI errors on the screen.
+   * @deprecated
+   */ 
   public void showRmiErrors()
   {    
     Rectangle rect = screen.getArea().getBounds();

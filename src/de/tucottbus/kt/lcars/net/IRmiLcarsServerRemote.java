@@ -10,7 +10,7 @@ import de.tucottbus.kt.lcars.Screen;
  * 
  * @author Matthias Wolff
  */
-public interface ILcarsRemote extends Remote
+public interface IRmiLcarsServerRemote extends Remote
 {
   /**
    * Assures that a remote panel adapter (and the respective panel) for the specified screen is

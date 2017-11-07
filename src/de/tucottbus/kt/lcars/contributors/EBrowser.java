@@ -18,6 +18,8 @@ import org.eclipse.swt.browser.StatusTextEvent;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 
 import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.Panel;
@@ -104,15 +106,20 @@ public class EBrowser extends ElementContributor
       if (browser!=null) throw new IllegalStateException("Browser already existing"); // FIXME: not reachable
       
       final Screen scr = screen = Screen.getLocal(panel.getScreen());
-      tl = scr.panelToScreen(bounds.x,bounds.y);
-      br = scr.panelToScreen(bounds.x+bounds.width,bounds.y+bounds.height);
-      scr.getSwtDisplay().syncExec(()->
+      scr.getSwtShell().getDisplay().syncExec(()->
       {
         browser = new Browser(scr.getLcarsComposite(),SWT.NONE);
         browser.setBackground(ColorMeta.GREEN.getColor());
         browser.setVisible(false);
-        browser.setLocation(tl.x, tl.y);
-        browser.setSize(br.x-tl.x,br.y-tl.y);
+        reposition();
+        scr.getSwtShell().addListener(SWT.Resize, new Listener()
+        {
+          @Override
+          public void handleEvent(Event event)
+          {
+            reposition();
+          }
+        });
         if (EBrowser.this.browserText!=null)
           browser.setText(EBrowser.this.browserText);
         else if (EBrowser.this.browserUrl!=null)
@@ -192,7 +199,7 @@ public class EBrowser extends ElementContributor
   {
     if (panel==null) return;
     if (screen!=null && browser != null)
-      screen.getSwtDisplay().asyncExec(() ->
+      screen.getSwtShell().getDisplay().asyncExec(() ->
       {
         try
         {
@@ -207,6 +214,26 @@ public class EBrowser extends ElementContributor
     super.removeFromPanel();
   }
 
+  /**
+   * Repositions the Browser contributor on the (local) screen.
+   */
+  protected void reposition()
+  {
+    if (screen==null)
+      return;
+    screen.getSwtShell().getDisplay().asyncExec(()->
+    {
+      // Async. to give SWT a little time to compute the (new) shell size
+      tl = screen.panelToScreen(bounds.x,bounds.y);
+      br = screen.panelToScreen(bounds.x+bounds.width,bounds.y+bounds.height);
+      if (browser!=null && !browser.isDisposed())
+      {
+        browser.setLocation(tl.x, tl.y);
+        browser.setSize(br.x-tl.x,br.y-tl.y);
+      }
+    });
+  }
+  
   /**
    * Shows or hides this browser contributor. This method may be used instead
    * of {@link #addToPanel(Panel)} or {@link #removeFromPanel()} if the browser 
@@ -273,7 +300,7 @@ public class EBrowser extends ElementContributor
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
     this.back_ = false;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtShell().getDisplay().syncExec(new Runnable()
     {
       public void run()
       {
@@ -288,7 +315,7 @@ public class EBrowser extends ElementContributor
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
     this.forward_ = false;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtShell().getDisplay().syncExec(new Runnable()
     {
       public void run()
       {
@@ -304,7 +331,7 @@ public class EBrowser extends ElementContributor
     if (browser.isDisposed()) return false;
     final String script_ = script;
     execute_ = false;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtShell().getDisplay().syncExec(new Runnable()
     {
       public void run()
       {
@@ -319,7 +346,7 @@ public class EBrowser extends ElementContributor
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
     this.isBackEnabled_ = false;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtShell().getDisplay().syncExec(new Runnable()
     {
       public void run()
       {
@@ -335,7 +362,7 @@ public class EBrowser extends ElementContributor
     if (browser.isDisposed()) return false;
     this.scrollBy_       = false;
     this.scrollBy_pixels = pixels;
-    screen.getSwtDisplay().syncExec(new Runnable()
+    screen.getSwtShell().getDisplay().syncExec(new Runnable()
     {
       public void run()
       {
@@ -360,7 +387,7 @@ public class EBrowser extends ElementContributor
     this.setText_    = false;
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
-    screen.getSwtDisplay().syncExec(() ->
+    screen.getSwtShell().getDisplay().syncExec(() ->
     {
       browser.setVisible(false);
       EBrowser.this.setText_ = browser.setText(EBrowser.this.browserText);
@@ -397,7 +424,7 @@ public class EBrowser extends ElementContributor
     {
       Log.err("Cannot set text via temporary file.", e);
     }
-    screen.getSwtDisplay().asyncExec(() ->
+    screen.getSwtShell().getDisplay().asyncExec(() ->
     {
       //browser.setVisible(false);
       try
@@ -424,7 +451,7 @@ public class EBrowser extends ElementContributor
     this.setUrl_    = false;
     if (browser==null       ) return true;
     if (browser.isDisposed()) return false;
-    screen.getSwtDisplay().asyncExec(() ->
+    screen.getSwtShell().getDisplay().asyncExec(() ->
     {
       browser.setVisible(false);
       EBrowser.this.setUrl_ = browser.setUrl(EBrowser.this.browserUrl);
@@ -457,7 +484,7 @@ public class EBrowser extends ElementContributor
     else
       style &= ~LCARS.ES_BROWSER_NORESTYLEHTML;
 
-    screen.getSwtDisplay().asyncExec(() ->
+    screen.getSwtShell().getDisplay().asyncExec(() ->
     {
       try
       {

@@ -63,17 +63,17 @@ public class EPanelSelector extends EMessageBox
     ERect btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
     btn.addEEventListener(new EEventListenerAdapter()
     {
-      public void touchDown(EEvent ee)
+      public void touchUp(EEvent ee)
       {
+        Panel panel = EPanelSelector.this.panel;
+        close();
         try
         {
           panel.getScreen().exit();
-        }
-        catch (RemoteException e)
+        } catch (RemoteException e)
         {
           Log.err("Cannot exit screen.", e);
         }
-        removeFromPanel();
       }
     });
     add(btn);
@@ -175,11 +175,11 @@ public class EPanelSelector extends EMessageBox
     if (LCARS.getArg("--server")!=null)
       try
       {
-        list.add(Class.forName("de.tucottbus.kt.lcars.net.ServerPanel").asSubclass(Panel.class));
+        list.add(Class.forName("de.tucottbus.kt.lcars.net.panels.ServerPanel").asSubclass(Panel.class));
       }
       catch (Exception e)
       {
-        Log.err("Cannot get 'de.tucottbus.kt.lcars.net.ServerPanel'", e);
+        Log.err("Cannot get 'de.tucottbus.kt.lcars.net.panels.ServerPanel'", e);
       }
     if (Panel.getSpeechEngine()!=null)
       try

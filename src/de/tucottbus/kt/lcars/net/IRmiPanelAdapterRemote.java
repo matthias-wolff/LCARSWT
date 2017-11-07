@@ -22,8 +22,7 @@ public interface IRmiPanelAdapterRemote extends IRmiAdapterRemote
    */
   public void setPanel(String className)
   throws ClassNotFoundException, RemoteException;
-  
-  
+
   public int serialNo()
       throws RemoteException;
 }

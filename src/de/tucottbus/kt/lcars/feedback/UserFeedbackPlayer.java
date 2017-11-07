@@ -48,6 +48,11 @@ public abstract class UserFeedbackPlayer
   private int eyeconSample;
 
   /**
+   * The current audio stream.
+   */
+  AudioStream stream;
+  
+  /**
    * No user feedback.
    */
   public static final int NONE = 0x0000;
@@ -234,7 +239,9 @@ public abstract class UserFeedbackPlayer
     {
       try
       {
-        AudioStream stream = signal.earcon.getAudioStream();
+        if (stream!=null)
+          AudioPlayer.player.stop(stream);
+        stream = signal.earcon.getAudioStream();
         AudioPlayer.player.start(stream);
       }
       catch (Exception e)
@@ -244,6 +251,34 @@ public abstract class UserFeedbackPlayer
     }
   }
 
+  /**
+   * Cancels all running feedbacks.
+   */
+  public void cancel()
+  {
+    if (timer!=null)
+      try
+      {
+        eyeconSamples = null;
+        eyeconSample = 0;
+        timer.cancel();
+        timer.purge();
+        timer = null;
+      } catch (Exception e)
+      {
+        Log.err("Failed to cancel visual UserFeedbackPlayer",e);
+      }
+    
+    try
+    {
+      if (stream!=null)
+        AudioPlayer.player.stop(stream);
+    } catch (Exception e)
+    {
+      Log.err("Failed to cancel audio UserFeedbackPlayer",e);
+    }
+  }
+  
   // -- Abstract API --
   
   /**

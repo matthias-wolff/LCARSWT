@@ -37,6 +37,14 @@ public abstract class ElementContributor implements EEventListener
   
   // -- Constructors --
   
+  /**
+   * Abstract constructor of element contributors.
+   * 
+   * @param x
+   *          The x-coordinate of the top-left corner in LCARS panel pixels
+   * @param y
+   *          The y-coordinate of the top-left corner in LCARS panel pixels
+   */
   public ElementContributor(int x, int y)
   {
     elements   = new ArrayList<EElement>();
@@ -333,6 +341,7 @@ public abstract class ElementContributor implements EEventListener
   
   public void removeFromPanel()
   {
+    cancelAllTimerTasks();
     synchronized (this.elements)
     {
       Panel panel = this.panel;
@@ -376,21 +385,25 @@ public abstract class ElementContributor implements EEventListener
       }
   }
 
+  @Override
   public void touchDown(EEvent ee)
   {
     fireEEvent(ee);
   }
 
+  @Override
   public void touchDrag(EEvent ee)
   {
     fireEEvent(ee);
   }
 
+  @Override
   public void touchHold(EEvent ee)
   {
     fireEEvent(ee);
   }
 
+  @Override
   public void touchUp(EEvent ee)
   {
     fireEEvent(ee);
@@ -402,7 +415,13 @@ public abstract class ElementContributor implements EEventListener
   {
     synchronized (timerTasks)
     {
-      if (timer==null) timer = new Timer(getClass().getSimpleName()+".timer",true);
+      if (timer==null)
+      {
+        String s = getClass().getSimpleName();
+        if (panel!=null)
+          s += "@"+panel.getClass().getSimpleName();
+        timer = new Timer(s+".timer",true);
+      }
       cancelTimerTask(name);
       if (period>0)
         timer.schedule(task,firstTime,period);
@@ -446,7 +465,12 @@ public abstract class ElementContributor implements EEventListener
         tt.cancel();
         i.remove();
       }
-      if (timer!=null) timer.purge();      
+      if (timer!=null) 
+      {
+        timer.cancel();
+        timer.purge();
+      }
+      timer = null;
     }
   }
 }

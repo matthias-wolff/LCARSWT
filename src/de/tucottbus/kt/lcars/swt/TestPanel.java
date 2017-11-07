@@ -597,7 +597,7 @@ public class TestPanel extends Panel
     shell.setLayout(new FillLayout());
     shell.setFullScreen(true);
         
-    Composite composite = new LcarsComposite(shell, /*SWT.NO_BACKGROUND |*/ SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
+    Composite composite = new LcarsComposite(shell)
     {
       @Override
       public void paintControl(PaintEvent e)

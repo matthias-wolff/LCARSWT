@@ -22,24 +22,15 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.NetworkInterface;
 import java.net.URL;
-import java.net.URLConnection;
-import java.rmi.Naming;
-import java.rmi.Remote;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -70,12 +61,10 @@ import de.tucottbus.kt.lcars.geometry.AGeometry;
 import de.tucottbus.kt.lcars.geometry.GText;
 import de.tucottbus.kt.lcars.logging.ILogObserver;
 import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.net.ILcarsRemote;
-import de.tucottbus.kt.lcars.net.RmiAdapter;
-import de.tucottbus.kt.lcars.net.RmiPanelAdapter;
+import de.tucottbus.kt.lcars.net.LcarsServer;
+import de.tucottbus.kt.lcars.net.NetUtils;
 import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
-import de.tucottbus.kt.lcars.net.RmiSecurityManager;
-import de.tucottbus.kt.lcars.net.ServerPanel;
+import de.tucottbus.kt.lcars.net.panels.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.FontMeta;
@@ -90,7 +79,7 @@ import de.tucottbus.kt.lcars.swt.FontMeta;
  * 
  * @author Matthias Wolff
  */
-public class LCARS implements ILcarsRemote
+public class LCARS
 {
   public static final String CLASSKEY = "LCARS";
   
@@ -186,26 +175,7 @@ public class LCARS implements ILcarsRemote
 
   // -- Fields --
   
-  protected HashMap<String,RmiPanelAdapter> rmiPanelAdapters;
-  
   public static boolean SCREEN_DEBUG;
-  
-  // -- The server singleton --
-
-  /**
-   * The server singleton. If started in server mode (command line option <code>--server</code>),
-   * this field contains the one and only server instance.
-   */
-  static LCARS server = null;
-  
-  /**
-   * Creates an LCARS server singleton.
-   */
-  protected LCARS() throws RemoteException
-  {
-    super();
-    rmiPanelAdapters = new HashMap<String,RmiPanelAdapter>();
-  }
   
   // -- Panel information --
   
@@ -752,15 +722,22 @@ public class LCARS implements ILcarsRemote
       Rectangle b = new Rectangle(Math.max(x, tx), Math.max(y, ty), Math.min(linBnds.width, tw-linBnds.x), Math.min(linBnds.height, th-linBnds.y));
       //if (b.width <= 0 || b.height <=0) continue;
       
-      GText gt = new GText(
-          s[i],
-          b,
-          fontMeta,
-          foreground);
-      if (x < tx) gt.setIndent(x-tx);
-      if (y < ty) gt.setDescent(y-ty);
-      //TODO:
-      geos.add(gt);
+      try
+      {
+        GText gt = new GText(
+            s[i],
+            b,
+            fontMeta,
+            foreground);
+        if (x < tx) gt.setIndent(x-tx);
+        if (y < ty) gt.setDescent(y-ty);
+        //TODO:
+        geos.add(gt);
+      }
+      catch (Exception e)
+      {
+        Log.err("Invalid line index "+i+" rendering text \""+text+"\"");
+      }
     }
     
     tl.dispose();
@@ -1093,315 +1070,47 @@ public class LCARS implements ILcarsRemote
       return string.substring(0,length-3)+"...";
   }
   
-  // -- Network --
+  // -- Static methods --
   
   /**
-   * Cache for the {@link #getHostName()} method.
-   */
-  private static String hostName;
-
-  /**
-   * Cache for the {@link #getRmiRegistry()} method.
-   */
-  private static Registry rmiRegistry; 
-  
-  /**
-   * Performs an HTTP GET request.
-   * <p><b>Author:</b> http://www.aviransplace.com/2008/01/08/make-http-post-or-get-request-from-java/</p>
+   * Runs a <code>runnable</code> after a short period of time.
    * 
-   * @param  url
-   *           The URL, e.g. "http://www.myserver.com?q=whats%20up".
-   * @return The response or <code>null</code> in case of errors.
+   * @param runnable
+   *          The runnable.
    */
-  public static String HttpGet(String url)
+  public static void invokeLater(Runnable runnable)
   {
-    String result = null;
-    if (url.startsWith("http://"))
-    {
-      // Send a GET request to the servlet
-      try
-      {
-        URLConnection conn = (new URL(url)).openConnection();
-
-        // Get the response
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        StringBuffer sb = new StringBuffer();
-        String line;
-        while ((line = rd.readLine()) != null)
-        {
-          sb.append(line);
-        }
-        rd.close();
-        result = sb.toString();
-      }
-      catch (Exception e)
-      {
-        Log.err("Cannot perform HTTP GET on \"" + url + "\"", e);
-      }
-    }
-    return result;
-    
+    invokeLater(runnable,1);
   }
 
   /**
-   * Returns the IP address of the computer running this iscreen.
+   * Runs a <code>runnable</code> after a <code>delay</code> milliseconds.
    * 
-   * @param verbose
-   *          If <code>true</code> do some console logging.
+   * @param runnable
+   *          The runnable.
+   * @param delay
+   *          The delay in milliseconds
    */
-  public static InetAddress getIP(boolean verbose)
+  public static void invokeLater(Runnable runnable, long delay)
   {
-    if (System.getSecurityManager()!=null)
-    {
-      System.out.println("myIP warning: Security manager active. Some IP addresses might not be detected.");
-    }
+    String name = "LCARS.invokeLater";
     try
     {
-      InetAddress myIP = null;
-      InetAddress host = InetAddress.getLocalHost();
-      if (verbose) System.out.println("myIP: Local host");
-      InetAddress[] ips = InetAddress.getAllByName(host.getHostName());
-      for (int i=0; i<ips.length; i++)
-        if (verbose) System.out.println("  address = " + ips[i]);
-      if (verbose) System.out.println("myIP: Network interfaces");
-      Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
-      while (netInterfaces.hasMoreElements())
+      name += "@"+Thread.currentThread().getStackTrace()[2];
+    } catch(Exception e) 
+    {
+    }
+    Thread thread = new Thread(name){
+      @Override
+      public void run()
       {
-        NetworkInterface ni = netInterfaces.nextElement();
-        if (verbose) System.out.println("  "+ni.getName());
-        Enumeration<InetAddress> inetAddresses = ni.getInetAddresses();
-        while (inetAddresses.hasMoreElements())
-        {
-          InetAddress ip = inetAddresses.nextElement();
-          if
-          (
-            myIP==null &&
-            !ip.isLoopbackAddress() &&
-            ip.getHostAddress().indexOf(":")==-1
-          )
-          {
-            myIP = ip;
-          }
-          ips = InetAddress.getAllByName(ip.getHostName());
-          for (InetAddress ip2 : ips)
-          {
-            if (verbose) System.out.println("  - "+ip2);
-          }
-        }
+        try { Thread.sleep(delay); } catch (InterruptedException e) {}
+        runnable.run();
       }
-      if (myIP!=null)
-        return myIP;
-      else
-        throw new Exception();
-    }
-    catch (Throwable e)
-    {
-      System.out.println("myIP error: cannot detect IP Address.");
-      return null;
-    }
+    };
+    thread.setDaemon(true);
+    thread.start();
   }
-
-  /**
-   * Returns the serverName of the local host. 
-   */
-  public static String getHostName()
-  { 
-    if (LCARS.hostName==null)
-    {
-      if (getArg("--rminame=")!=null)
-      {
-        LCARS.hostName = getArg("--rminame=");
-      }
-      else
-        try
-        {
-          LCARS.hostName = InetAddress.getLocalHost().getHostName();
-        }
-        catch (java.net.UnknownHostException e)
-        {
-          LCARS.hostName = "127.0.0.1";
-        }
-    }
-    return LCARS.hostName;
-  }
-
-  /**
-   * Returns the port of the RMI registry listing for LCARS remove panel requests.
-   */
-  public static int getRmiPort()
-  {
-    return 1099;
-  }  
-
-  /**
-   * Returns the LCARS RMI name prefix.
-   */
-  public static String getRmiName()
-  {
-    return "LCARS";
-  }
-
-  /**
-   * Returns the local RMI registry at the port returned by {@link LCARS#getRmiPort()}. If no
-   * such registry exists, the method creates one.
-   * 
-   * @return The local RMI registry.
-   * @throws RemoteException
-   *           If the registry could not be exported or no reference could be created.
-   */
-  public static Registry getRmiRegistry() throws RemoteException
-  {
-    // TODO: Make sure that local registry is not removed by JVM shutting down! How?
-    if (LCARS.rmiRegistry==null)
-    {
-      System.setSecurityManager(new RmiSecurityManager());
-      if (getArg("--rminame=")!=null)
-        System.setProperty("java.rmi.server.hostname",getArg("--rminame=")); 
-      try
-      {
-        
-        LCARS.rmiRegistry = LocateRegistry.createRegistry(getRmiPort());
-        /* TODO: Here is how to create an RMI registry bound to a specific IP address --> 
-        LCARS.rmiRegistry = LocateRegistry.createRegistry(getRmiPort(), null,
-            new RMIServerSocketFactory()
-            {
-              @Override
-              public ServerSocket createServerSocket(int port) throws IOException
-              {
-                ServerSocket serverSocket = null;
-                try
-                {
-                  serverSocket = new ServerSocket(port,50,Inet4Address.getByAddress(new byte[]{(byte)141,(byte)43,(byte)71,(byte)26}));
-                } catch (Exception e)
-                {
-                  e.printStackTrace();
-                }
-                LCARS.log("DBG","RMI Server Socket="+serverSocket.toString());
-                return (serverSocket);
-              }
-
-              @Override
-              public boolean equals(Object that)
-              {
-                return (that != null && that.getClass() == this.getClass());
-              }
-            });
-         <-- */
-      }
-      catch (Exception e)
-      {
-        LCARS.rmiRegistry = LocateRegistry.getRegistry(getRmiPort());
-      }
-      Log.info("RMI registry: "+LCARS.rmiRegistry);
-    }
-    return LCARS.rmiRegistry;
-  }
-
-  /**
-   * Returns the list of {@linkplain RmiPanelAdapter panel adapters} served by this LCARS session if
-   * this LCARS session was started in server mode (command line option <code>--server</code>).
-   * Otherwise the method returns <code>null</code>.
-   */
-  public static HashMap<String,RmiPanelAdapter> getPanelAdapters()
-  {
-    if (server!=null)
-      return server.rmiPanelAdapters;
-    else
-      return null;
-  }
-  
-  // -- Logging --
-  /**
-   * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::log' instead
-   * Prints a log message.
-   * 
-   * @param pfx
-   *          The message prefix (used for message filtering).
-   * @param msg
-   *          The message.
-   */
-  @Deprecated
-   public static void log(String pfx, String msg)
-   {
-     System.out.print(String.format("\n[%s: %s]",pfx,msg));
-     if ("LCARS".equals(pfx) || "NET".equals(pfx))
-       ServerPanel.logMsg(pfx,msg,false);
-   }
-  
-   /**
-    * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::err' instead
-    * Prints an error message.
-    * 
-    * @param pfx
-    *          The message prefix (used for message filtering).
-    * @param msg
-    *          The message.
-    */
-   @Deprecated
-   public static void err(String pfx, String msg)
-   {
-     System.err.print(String.format("\n[%s: %s]",pfx,msg));
-     if ("LCARS".equals(pfx) || "NET".equals(pfx))
-       ServerPanel.logMsg(pfx,msg,true);
-   }
-   
-   /**
-    * @deprecated Use 'de.tucottbus.kt.lcars.logging.Log::debug' instead
-    * Prints a debug message.
-    * 
-    * @param pfx
-    *          The message prefix (used for message filtering).
-    * @param msg
-    *          The message.
-    */
-   @Deprecated
-   public static void debug(String pfx, String msg)
-   {
-     System.err.print(String.format("\n[%s: %s]",pfx,msg));
-     if ("LCARS".equals(pfx) || "NET".equals(pfx))
-       ServerPanel.logMsg(pfx,msg,false);
-   }
-   
-  // -- Implementation of the ILcarsRemote interface --
-  
-  @Override
-  public boolean serveRmiPanelAdapter(String screenHostName, int screenID, String panelClassName)
-  {
-    if (screenHostName==null) return false;
-    
-    if (rmiPanelAdapters.containsKey(screenHostName+"."+screenID))
-      return true;
-    
-    try
-    {
-      String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-      Log.info("LCARS.server: Connection request from "+screenUrl);
-      RmiPanelAdapter rpa = new RmiPanelAdapter(panelClassName,screenHostName);
-      rmiPanelAdapters.put(screenHostName+"."+screenID,rpa);
-      return true;
-    }
-    catch (Exception e)
-    {
-      e.printStackTrace();
-      return false;
-    }
-  }
-
-  @Override
-  public void destroyRmiPanelAdapter(String screenHostName, int screenID)
-  {
-    String screenUrl = RmiAdapter.makeScreenAdapterUrl(LCARS.getHostName(),screenHostName,0);
-    String key = screenHostName+"."+screenID;
-    Log.info("LCARS.server: Disconnection request from "+screenUrl);
-    
-    RmiPanelAdapter rpa = rmiPanelAdapters.remove(key);
-    if (rpa!=null) rpa.shutDown();
-  }
-  
-  // -- LCARS main function --
-
-  private static IScreen  iscreen;
-  private static String[] args;
 
   /**
    * Scans the command line for the first argument with a specified prefix.
@@ -1473,35 +1182,41 @@ public class LCARS implements ILcarsRemote
   {
     return Display.getDefault();
   }
+
+  // -- LCARS main function --
+
+  private static IScreen  iscreen;
+  private static String[] args;
   
   /**
    * The LCARS main method.
    * <h3>Usage</h3>
-   * <p><code>java -cp "./bin;./lib/swt.jar" de.tucottbus.kt.lcars.LCARS [options]</code></p>
+   * <p><code>java -cp "target/lcarswt-&lt;version&gt;.&lt;profile&gt;-jar-with-dependencies.jar" de.tucottbus.kt.lcars.LCARS [options]</code></p>
+   * <p>Note: Fat jar archive built by Maven goal <code>package</code>. Profiles supported: Win86, Win64, Linux86, Linux64, MacOSX86, and MacOSX64.</p>
    * 
    * @param args
    *  Command line options<pre>
-   *  --clientof=hostname                  - Serve a remote screen [1]
-   *  --debug                              - Print debug messages
-   *  --device=devicename                  - Name of host device, e.g. wetab [2]
-   *  --help, -h, ?                        - Print help and exit
-   *  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)
-   *  --nogui                              - Do not display a screen [3]
-   *  --nomouse                            - Hide mouse cursor
-   *  --nospeech                           - Disable speech I/O
-   *  --PADD                               - Running on a PADD
-   *  --panel=classname                    - LCARS panel to display at start-up 
-   *  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]
-   *  --screen=n                           - Use n-th screen (default: 1) [5]
-   *  --server                             - Serve remote panels [1]
-   *  --wallpaper=filename                 - Use wall paper (slower!)
-   *  --xpos=n                             - Horizontal position of window [6]
+   *  --clientof=hostname        - Serve a remote screen [1]
+   *  --debug                    - Print debug messages
+   *  --device=devicename        - Name of host device, e.g. wetab [2]
+   *  --help, -h, ?              - Print help and exit
+   *  --mode=[fullscreen|window] - Screen mode (default: fullscreen)
+   *  --nogui                    - Do not display a screen [3]
+   *  --nomouse                  - Hide mouse cursor
+   *  --nospeech                 - Disable speech I/O
+   *  --PADD                     - Running on a PADD
+   *  --panel=classname          - LCARS panel to display at start-up 
+   *  --rminame=name             - RMI name (default: &lt;hostname&gt;) [4]
+   *  --screen=n                 - Use n-th screen (default: 1) [5]
+   *  --server                   - Serve remote panels [1]
+   *  --wallpaper=filename       - Use wall paper (slower!)
+   *  --xpos=n                   - Horizontal position of window [6]
    *  
    *  [1] mutually exclusive
    *  [2] currently the only use is --device=wetab which adjusts PADD-panels
    *  [3] only valid with --server
    *  [4] useful when multiple NICs are installed in a host
-   *  [5] only valid with --mode=fullscreen
+   *  [5] implies --mode=fullscreen
    *  [6] valid with --mode=maximized for displaying panel at secondary screen
    *  </pre>
    */
@@ -1520,32 +1235,30 @@ public class LCARS implements ILcarsRemote
       System.out.print("\nLCARS");
       System.out.print("\n----------------------------------------------------------------------------");
       System.out.print("\n\nUsage");
-      System.out.print("\n\n  java -cp \"./bin;./lib/swt.jar\" de.tucottbus.kt.lcars.LCARS [options]");
+      System.out.print("\n\n  java -cp \"target/lcarswt-<version>.<profile>-jar-with-dependencies.jar\" de.tucottbus.kt.lcars.LCARS [options]");
       System.out.print("\n\nCommand line options");
-//      System.out.print("\n  --asyncRenderer                      - Uses an asynchronous renderer");
-      System.out.print("\n  --clientof=hostname                  - Serve a remote screen [1]");
-      System.out.print("\n  --debug                              - Print debug messages");
-      System.out.print("\n  --device=devicename                  - Name of host device, e.g. wetab [2]");
-      System.out.print("\n  --help, -h, ?                        - Print help and exit");
-      System.out.print("\n  --mode=[fullscreen|maximized|window] - Screen mode (default: maximized)");
-      System.out.print("\n  --musiclib=<music-dir>               - Audio library folder");
-      System.out.print("\n  --nogui                              - Do not display a screen [3]");
-      System.out.print("\n  --nomouse                            - Hide mouse cursor");
-      System.out.print("\n  --nospeech                           - Disable speech I/O");
-      System.out.print("\n  --PADD                               - Running on a PADD");
-      System.out.print("\n  --panel=classname                    - LCARS panel to display at start-up"); 
-      System.out.print("\n  --rminame=name                       - RMI name (default: &lt;hostname&gt;) [4]");
-      System.out.print("\n  --screen=n                           - Use n-th screen (default: 1) [5]");
-//      System.out.print("\n  --selectiveRendering                 - Re-paint changes only");
-      System.out.print("\n  --server                             - Serve remote panels [1]");
-      System.out.print("\n  --wallpaper=filename                 - Use wall paper (slower!)");
-      System.out.print("\n  --xpos=n                             - Horizontal position of window [6]");
+      System.out.print("\n  --clientof=hostname        - Serve a remote screen [1]");
+      System.out.print("\n  --debug                    - Print debug messages");
+      System.out.print("\n  --device=devicename        - Name of host device, e.g. wetab [2]");
+      System.out.print("\n  --help, -h, ?              - Print help and exit");
+      System.out.print("\n  --mode=[fullscreen|window] - Screen mode (default: fullscreen)");
+      System.out.print("\n  --musiclib=<music-dir>     - Audio library folder");
+      System.out.print("\n  --nogui                    - Do not display a screen [3]");
+      System.out.print("\n  --nomouse                  - Hide mouse cursor");
+      System.out.print("\n  --nospeech                 - Disable speech I/O");
+      System.out.print("\n  --PADD                     - Running on a PADD");
+      System.out.print("\n  --panel=classname          - LCARS panel to display at start-up"); 
+      System.out.print("\n  --rminame=name             - RMI name (default: &lt;hostname&gt;) [4]");
+      System.out.print("\n  --screen=n                 - Use n-th screen (default: 1) [5]");
+      System.out.print("\n  --server                   - Serve remote panels [1]");
+      System.out.print("\n  --wallpaper=filename       - Use wall paper (slower!)");
+      System.out.print("\n  --xpos=n                   - Horizontal position of window [6]");
       System.out.print("\n  ");
       System.out.print("\n  [1] mutually exclusive");
       System.out.print("\n  [2] currently the only use is --device=wetab which adjusts PADD-panels");
       System.out.print("\n  [3] only valid with --server");
       System.out.print("\n  [4] useful when multiple NICs are installed in a host");
-      System.out.print("\n  [5] only valid with --mode=fullscreen");
+      System.out.print("\n  [5] implies --mode=fullscreen");
       System.out.print("\n  [6] valid with --mode=maximized for displaying panel at secondary screen");
       System.out.print("\n----------------------------------------------------------------------------");
       System.out.print("\n\n");
@@ -1557,7 +1270,8 @@ public class LCARS implements ILcarsRemote
     
     Log.addObserver(new ILogObserver()
     {
-      private void doLog(String pfx, String msg, Boolean err) {
+      private void doLog(String pfx, String msg, Boolean err) 
+      {
         if ("LCARS".equals(pfx) || "NET".equals(pfx))
           ServerPanel.logMsg(pfx,msg,err);       
       }
@@ -1573,8 +1287,7 @@ public class LCARS implements ILcarsRemote
       {
         doLog(pfx, msg, false);
       }
-      
-      
+
       @Override
       public void err(String pfx, String msg, Throwable e)
       {
@@ -1596,23 +1309,30 @@ public class LCARS implements ILcarsRemote
     
     try
     {
-      if (getArg("--mode=") == null)
-        LCARS.args = setArg(LCARS.args, "--mode=", "maximized");
-      boolean fullscreen = !("window".equals(getArg("--mode=")));
       if (getArg("--nogui")==null)
       {
-        Display display = Display.getDefault();
-        Monitor[] monitors = display.getMonitors();
-       
-        String srcIdArg = getArg("--screen=");
-        int scrid = srcIdArg != null ?
-            Math.max(Math.min(Integer.parseInt(srcIdArg)-1, monitors.length), 0) : 0;
-        
-        Screen scr = new Screen(display,null,fullscreen);       
-        scr.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
-        //scr.setSelectiveRenderingHint(getArg("--selectiveRendering")!=null);
-        //scr.setAsyncRenderingHint(getArg("--asyncRenderer")!=null);
-        iscreen = scr;
+        boolean fullscreen = !("window".equals(getArg("--mode=")));
+        Display display = LCARS.getDisplay();
+
+        String scrIdArg = getArg("--screen=");
+        if (scrIdArg!=null)
+        {
+          fullscreen = true;
+          Monitor[] monitors = display.getMonitors();
+          int scrid = 0;
+          try
+          {
+            scrid = Math.max(Math.min(Integer.parseInt(scrIdArg)-1, monitors.length), 0);
+          }
+          catch (NumberFormatException e)
+          {
+            Log.err("Invalis screen ID \""+scrIdArg+"\", using default screen.");
+          }
+          iscreen = new Screen(display,fullscreen);
+          iscreen.setArea(new Area(SWTUtils.toAwtRectangle(monitors[scrid].getBounds())));
+        }
+        else
+          iscreen = new Screen(display,fullscreen);
       }
       else
         Log.info("Command line mode (no GUI)");
@@ -1623,48 +1343,56 @@ public class LCARS implements ILcarsRemote
         @Override
         public void run()
         {
-          Log.info("Shutting down ...");
+          System.out.println("[Shutting down...]");
 
-          // Shut-down panel
+          // Shut-down local screen and panel
           if (iscreen!=null)
           {
-  	        try
-  	        {
-  	          IPanel panel = iscreen.getPanel();
-  	          if (panel!=null)
-  	            panel.stop();
-  	        }
-  	        catch (RemoteException e)
-  	        {
-  	          Log.err("Cannot shut down panel.", e);
-  	        }
-  	
-  	        // Shut-down RMI screen adapter
+            // Shut down panel
+            try
+            {
+              IPanel panel = iscreen.getPanel();
+              if (panel!=null)
+              {
+                System.out.println("[Shutting down panel...]");
+                try
+                {
+                  panel.stop();
+                  System.out.println("[...Panel shut down]");
+                } catch (NoSuchObjectException e) { 
+                  // Because RMI has already been shut down -> ignore
+                }
+                catch (Exception e)
+                {
+                  System.out.println("[...FAILED to shut down local panel]");
+                  e.printStackTrace();
+                }
+              }
+            }
+            catch (Exception e)
+            {
+            }
+            
+            // Shut-down RMI screen adapter
   	        if (iscreen instanceof RmiScreenAdapter)
-  	          ((RmiScreenAdapter)iscreen).shutDown();
+  	        {
+              System.out.println("[Shutting down RMI screen adapter...]");
+              ((RmiScreenAdapter)iscreen).shutDown();
+              System.out.println("[...RMI screen adapter shut down]");
+  	        }
   	        iscreen = null;
           }
 
           // Shut-down RMI panel adapters
-          if (server!=null)
-          {
-            for (RmiPanelAdapter rpa : server.rmiPanelAdapters.values())
-              rpa.shutDown();
-            server.rmiPanelAdapters.clear();
-            try
-            {
-              Naming.unbind(getRmiName());
-              UnicastRemoteObject.unexportObject(server,true);
-            }
-            catch (Exception e)
-            {
-              Log.err("Cannot shut down RMI panel adapters", e);
-            }
-          }
+          LcarsServer.shutDown();
 
           // Shut-down speech engine
+          System.out.println("[Disposing speech engine...]");
           Panel.disposeSpeechEngine();
-          Log.info("... shut-down");  
+          System.out.println("[...Speech engine disposed]");
+          
+          // The end
+          System.out.println("[...Shut down complete]");
         }
       });
       
@@ -1678,34 +1406,20 @@ public class LCARS implements ILcarsRemote
       
       // Start LCARS server (command line option "--server")
       if (getArg("--server")!=null)
-      {
-        LCARS.getRmiRegistry();
-        Log.info("server at "+getHostName());
-        server = new LCARS();
-        try
-        {
-          Remote stub = UnicastRemoteObject.exportObject(server,0);
-          Naming.rebind(getRmiName(),stub);
-        }
-        catch (Exception e)
-        {
-          Log.err("FATAL ERROR: RMI binding failed.");
-          e.printStackTrace();
-          System.exit(-1);
-        }
-      }
+        LcarsServer.start();
       
       // Start LCARS client (command line option "--clientof")
       String clientOf = getArg("--clientof=");
       if (clientOf!=null)
       {
-        Log.info("client of "+clientOf+" at "+getHostName());
-        LCARS.getRmiRegistry();
+        Log.info("client of "+clientOf+" at "+NetUtils.getHostName());
+        NetUtils.getRmiRegistry();
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }
       
-      // Create initial panel
+      // Create initial panel and run screen
       if (iscreen!=null)
+      {
         try
         {
           String pcn = getArg("--panel=");
@@ -1720,9 +1434,12 @@ public class LCARS implements ILcarsRemote
         {
           Log.err("Error while initiation.", e);
         }
+      }
 
       // Run SWT event loop 
-      while (!iscreen.isDisposed())
+      // TODO: SWT event loop should not be necessary in --nogui mode!
+      while (iscreen==null || !iscreen.isDisposed())
+      {
         try
         {
           if (!getDisplay().readAndDispatch())
@@ -1732,10 +1449,11 @@ public class LCARS implements ILcarsRemote
         {
           Log.err("Error in screen execution.", e);
         }
+      }
     }
     catch (Exception e)
     {
-      Log.err("", e);
+      Log.err("Uncaught exception in LCARS main.", e);
     }
     
     Log.info("END OF LCARS MAIN");

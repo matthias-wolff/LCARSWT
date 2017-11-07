@@ -24,7 +24,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.tucottbus.kt.lcars.LCARS;
 import de.tucottbus.kt.lcars.logging.Log;
 
 /**
@@ -154,7 +153,7 @@ public class LcarsGazetteer
     if (url==null) throw new IllegalArgumentException("["+world+": unknown world]");
     
     // Query
-    LCARS.log("GAZ","Geocoding \""+address+"\" on "+world);
+    Log.info("GAZ: Geocoding \""+address+"\" on "+world);
     url = url.replace("[ADDRESS]",urlEncode(address));
 
     try

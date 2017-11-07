@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
-import java.awt.geom.Point2D;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Timer;
@@ -39,6 +39,9 @@ import de.tucottbus.kt.lcars.feedback.UserFeedback;
 import de.tucottbus.kt.lcars.feedback.UserFeedbackPlayer;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.net.LcarsServer;
+import de.tucottbus.kt.lcars.net.NetUtils;
+import de.tucottbus.kt.lcars.net.panels.ClientPanel;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.SWTResourceManager;
 import de.tucottbus.kt.lcars.swt.SwtKeyMapper;
@@ -61,8 +64,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 {
   // -- Constants --
 
-  private static final int preferedWidth = 950;
-  private static final int preferedHeight = 560;
   private static final String defaultIcon = "lcars/resources/images/lcars.png";
   
   // -- Fields --
@@ -81,11 +82,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    * Serial number of the panel.
    */
   private int panelId = -1;
-
-  /**
-   * Full screen mode flag.
-   */
-  protected boolean fullScreenMode;
 
   /**
    * The cache for the 2D rendering transform.
@@ -115,12 +111,12 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   private Integer touchCount = 0;
 
   /**
-   * Composite where all lcars geometries will be drawn
+   * Composite where all LCARS geometries will be drawn
    */
   protected final LcarsComposite composite;
 
   /**
-   * Map of all awt components added to this swt shell
+   * Map of all AWT components added to this swt shell
    */
   protected HashMap<Component, Composite> awtComponents = new HashMap<>(5);
 
@@ -139,45 +135,59 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    *          The SWT display on which this screen is run.
    * @param device
    *          the graphics device to display the screen on
-   * @param panelClass
-   *          the class name of the LCARS {@link Panel} to display on the screen
    * @param fullScreen
    *          full screen mode
    * @throws ClassNotFoundException
    *           If <code>panelClass</code> is invalid
    */
-  public Screen(Display display, String panelClass, boolean fullScreen)
-      throws ClassNotFoundException
+  public Screen(Display display, boolean fullScreen)
+  throws ClassNotFoundException
   {
-    shell = new Shell(display, SWT.NO_TRIM);
-    shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
     loadStat = new LoadStatistics(25);
-    // Create Swings widgets
+
+    // Prepare shell
+    shell = new Shell(display, fullScreen ? SWT.NO_TRIM : SWT.SHELL_TRIM);
+    shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
     shell.setText("LCARS");    
     shell.setImage(SWTResourceManager.getImage(Root.class, defaultIcon));
+    shell.setLayout(new FillLayout());
     
-    
-    // TODO: setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-    fullScreenMode = fullScreen;// && device.isFullScreenSupported();
-    // TODO: setUndecorated(fullScreen);
-    // TODO: setResizable(!fullScreen);
-
-    if (fullScreenMode && !"maximized".equals(LCARS.getArg("--mode=")))
+    // Instantiate the LCARS composite
+    composite = new LcarsComposite(shell)
     {
-      // Full-screen mode
-      shell.setLayout(new FillLayout());
+      @Override
+      public void paintControl(PaintEvent e)
+      {
+        long time = System.nanoTime();
+        GC gc = e.gc;
+        gc.setTextAntialias(SWT.ON);
+        gc.setInterpolation(SWT.LOW);
+        gc.setAntialias(SWT.ON);
+        super.paintControl(e);
+        loadStat.add((int) ((System.nanoTime() - time) / 400000));
+      }
+    };
+    composite.setTouchEnabled(true);
+    composite.addTouchListener(this);
+    composite.addMouseListener(this);
+    composite.addMouseMoveListener(this);
+    composite.addKeyListener(this);
+    composite.setBackground(ColorMeta.BLACK.getColor());
+    //LCARS composite must have absolute layout!
+    //composite.setLayout(new FillLayout());
+    composite.setVisible(true);
+
+    if (LCARS.getArg("--nomouse") != null)
+      composite.setCursor(LCARS.createBlankCursor(display));
+    
+    // Initialize SWT shell
+    if (fullScreen)
+    {
+      shell.setMaximized(true);
       shell.setFullScreen(true);
-      // setAlwaysOnTop(fullScreen);
-      // TODO: validate();
-      // TODO: createBufferStrategy(1);
-    } else
+    } 
+    else
     {
-      // FIXME: window mode not working
-
-      // Windowed mode
-      shell.setSize(preferedWidth, preferedHeight);
-      // TODO: setPreferredSize(new Dimension(950,560));
       int nXPos = 200;
       final String argPfx = "--xpos=";
       String arg = LCARS.getArg(argPfx);
@@ -192,57 +202,10 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
 
       shell.setLocation(nXPos, 200);
       shell.pack();
-      shell.setVisible(true);
-      if (fullScreen)
-        shell.setMaximized(true);
-
-      // TODO: sometimes an error occurs that the buffer has not been created
-      // TODO: createBufferStrategy(2);
     }
+    shell.open();
 
-    final Dimension size = getSize();
-    final int w = size.width;
-    final int h = size.height;
-    composite = new LcarsComposite(shell, SWT.DOUBLE_BUFFERED | SWT.EMBEDDED)
-    {
-      @Override
-      public void paintControl(PaintEvent e)
-      {
-        long time = System.nanoTime();
-
-        // Prepare setup
-        GC gc = e.gc;
-        gc.setTextAntialias(SWT.ON);
-        gc.setInterpolation(SWT.LOW);
-        gc.setAntialias(SWT.ON);
-
-        // TODO: gc.setRenderingHint(RenderingHints.KEY_RENDERING,
-        // RenderingHints.VALUE_RENDER_QUALITY);
-        // TODO: gc.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-        // RenderingHints.VALUE_STROKE_NORMALIZE);
-        // TODO: gc.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
-        // RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
-        // TODO:
-        // gc.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-        // 1.0f));
-        super.paintControl(e);
-        loadStat.add((int) ((System.nanoTime() - time) / 400000));
-      }
-    };
-    composite.setTouchEnabled(true);
-    composite.addTouchListener(this);
-    composite.addMouseListener(this);
-    composite.addMouseMoveListener(this);
-    composite.addKeyListener(this);
-    composite.setBackground(ColorMeta.BLACK.getColor());
-    composite.setSize(w, h);
-    composite.setLayout(new FillLayout());
-    composite.setVisible(true);
-
-    if (LCARS.getArg("--nomouse") != null)
-      composite.setCursor(LCARS.createBlankCursor(display));
-
-    // The user feedback player
+    // Initialize user feedback player
     userFeedbackPlayer = new UserFeedbackPlayer(UserFeedbackPlayer.AUDITORY)
     {
       @Override
@@ -252,16 +215,18 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       }
     };
 
-    setPanel(panelClass);
-
-    shell.open();
-
-    // The screen timer
+    // Start screen timer
     screenTimer = new Timer("ScreenTimerTask", true);
     screenTimer.scheduleAtFixedRate(new ScreenTimerTask(), 40, 40);
   }
 
   // -- Getters and setters --
+
+  @Override
+  public boolean isDisposed() throws RemoteException
+  {
+    return shell.isDisposed();
+  }
 
   /**
    * Returns the actual {@link Screen} for an {@linkplain IScreen LCARS screen
@@ -281,13 +246,13 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   }
 
   /**
-   * Returns the SWT display this screen is running on.
+   * Returns the SWT shell s´this screen is running on.
    */
-  public Display getSwtDisplay()
+  public Shell getSwtShell()
   {
-    return shell.getDisplay();// Display.getDefault();
+    return shell;
   }
-
+  
   /**
    * Returns the top composite of the LCARS SWT screen.
    */
@@ -295,74 +260,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   {
     return composite;
   }
-
-  // -- 2D rendering --
-
-  /**
-   * Determines if the screen needs to be redrawn.
-   */
-  protected boolean isScreenInvalid()
-  {
-    return invalid.get();
-  }
-
-  /**
-   * Marks the screen as needing to be redrawn.
-   */
-  public synchronized void invalidateScreen()
-  {
-    invalid.set(true);
-  }
-
-  /**
-   * Converts component (LCARS screen) to panel coordinates.
-   * 
-   * @param pt
-   *          The AWT component coordinates.
-   * @return The panel coordinates
-   * 
-   * @see #panelToScreen(Point)
-   */
-  protected Point screenToPanel(int x, int y)
-  {
-    Point2D.Float scale = composite.getScale();
-    return new Point((int) (x / scale.x + .5f), (int) (y / scale.y + .5f));
-  }
-
-  /**
-   * Converts panel to component (LCARS screen) coordinates.out
-   * 
-   * @param pt
-   *          The LCARS panel coordinates.
-   * @return The AWT component coordinates.
-   * 
-   * @see #componentToPanel(Point)
-   */
-  public Point panelToScreen(Point pt)
-  {
-    Point2D.Float scale = composite.getScale();
-    return new Point((int) (pt.x * scale.x + .5f),
-        (int) (pt.y * scale.y + .5f));
-  }
-
-  /**
-   * Converts panel to component (LCARS screen) coordinates.out
-   * 
-   * @param x
-   *          The LCARS panel x-coordinate.
-   * @param y
-   *          The LCARS panel y-coordinate.
-   * @return The AWT component coordinates.
-   * 
-   * @see #componentToPanel(Point)
-   */
-  public Point panelToScreen(int x, int y)
-  {
-    Point2D.Float scale = composite.getScale();
-    return new Point((int) (x * scale.x + .5f), (int) (y * scale.y + .5f));
-  }
-
-  // -- Getters and setters --
 
   /**
    * Sets the panel to be displayed at this screen.
@@ -382,8 +279,9 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         this.panel.stop();
       } catch (RemoteException e)
       {
-        Log.err("Could not stop the previous panel while setting a new panel.",
-            e);
+        if (!(ipanel instanceof ClientPanel)) 
+          // Otherwise connection broke-down -> no error message required
+          Log.err("Could not stop the previous panel while setting a new panel.", e);
       }
 
     this.panel = ipanel;
@@ -419,7 +317,150 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     }
   }
 
+  /**
+   * Returns the physical size of the screen in pixels. 
+   * @return
+   */
+  public Dimension getSize()
+  {
+    Dimension d = new Dimension();
+    if (!shell.isDisposed())
+      shell.getDisplay().syncExec(() -> 
+      {
+        org.eclipse.swt.graphics.Point size = shell.getSize();
+        d.width = size.x;
+        d.height = size.y;
+      });
+    return d;
+  }
+
+  // -- Operations --
+
+  /**
+   * Determines if the screen needs to be redrawn.
+   */
+  protected boolean isScreenInvalid()
+  {
+    return invalid.get();
+  }
+
+  /**
+   * Marks the screen as needing to be redrawn.
+   */
+  public synchronized void invalidateScreen()
+  {
+    invalid.set(true);
+  }
+
+  /**
+   * Converts component (LCARS screen) to panel coordinates.
+   * 
+   * @param pt
+   *          The absolute display coordinates.
+   * @return The panel coordinates
+   * 
+   * @see #panelToScreen(Point)
+   */
+  protected Point screenToPanel(int x, int y)
+  {
+    return composite.compositeToPanel(new Point(x,y));
+  }
+
+  /**
+   * Converts panel to component (LCARS screen) coordinates.out
+   * 
+   * @param pt
+   *          The LCARS panel coordinates.
+   * @return The AWT component coordinates.
+   * 
+   * @see #componentToPanel(Point)
+   */
+  public Point panelToScreen(Point pt)
+  {
+    return panelToScreen(pt.x,pt.y);
+  }
+
+  /**
+   * Converts panel to component (LCARS screen) coordinates.out
+   * 
+   * @param x
+   *          The LCARS panel x-coordinate.
+   * @param y
+   *          The LCARS panel y-coordinate.
+   * @return The AWT component coordinates.
+   * 
+   * @see #componentToPanel(Point)
+   */
+  public Point panelToScreen(int x, int y)
+  {
+    return composite.panelToComposite(new Point(x,y));
+  }
+  
+  // -- SWT-AWT bridge --
+  
+  /**
+   * Adds a {@link java.awt.Component} to the SWT based screen.
+   * @param component - the {@link java.awt.Component} to add
+   */
+  public synchronized void add(Component component)
+  {
+    if (component == null)
+      throw new NullPointerException("component");
+
+    if (awtComponents.containsKey(component))
+      return;
+    Display display = LCARS.getDisplay();
+
+    int w = component.getWidth();
+    int h = component.getHeight();
+
+    if (w == 0 || h == 0)
+      Log.warn(
+          "Component has zero width/height and size updates are not applied in the awt swt bridge.");
+
+    display.syncExec(() -> {
+      // TODO: check awtFrame is in embedded full screen mode
+      Composite composite = awtComponents.get(display);
+      if (composite != null)
+      {
+        composite.moveAbove(null);
+        return;
+      }
+
+      composite = new Composite(this.composite,
+          SWT.DOUBLE_BUFFERED | SWT.EMBEDDED);
+
+      composite.setBounds(component.getX(), component.getY(),
+          component.getWidth(), component.getHeight());
+      composite.moveAbove(null);
+      component.setBounds(0, 0, component.getWidth(), component.getHeight());
+
+      Frame awtFrame = SWT_AWT.new_Frame(composite);
+      awtComponents.put(component, composite);
+      awtFrame.setBounds(component.getBounds());
+      awtFrame.add(component);
+      shell.redraw();
+    });
+  }
+
+  /**
+   * Removes a {@link java.awt.Component} to the SWT based screen.
+   * @param component - the {@link java.awt.Component} to remove
+   */
+  public void remove(Component component)
+  {
+    Composite composite = awtComponents.remove(component);
+    composite.dispose();
+  }
+  
   // -- Implementation of the IScreen interface --
+
+  @Override
+  public void setArea(Area area) throws RemoteException
+  {
+    Rectangle bnds = area.getBounds();
+    shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);
+  }
 
   @Override
   public Area getArea()
@@ -431,7 +472,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public String getHostName()
   {
-    return LCARS.getHostName();
+    return NetUtils.getHostName();
   }
 
   @Override
@@ -481,8 +522,38 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   @Override
   public void exit()
   {
-    shell.dispose();
-    System.exit(0);
+    try
+    {
+      if (panel!=null)
+      {
+        panel.stop();
+        panel = null;
+      }
+    } catch (NoSuchObjectException e) { 
+      // Because RMI has already been shut down -> ignore
+    } catch (Exception e)
+    {
+      Log.err("Failed to stop panel.",e);
+    }
+    try
+    {
+      screenTimer.cancel();
+      screenTimer.purge();
+      screenTimer=null;
+    } catch (Exception e)
+    {
+      Log.err("Failed to stop screen timer.",e);
+    }
+    try
+    {
+      userFeedbackPlayer.cancel();
+      userFeedbackPlayer = null;
+    } catch (Exception e)
+    {
+      Log.err("Failed to user feedback player.",e);
+    }
+    LcarsServer.shutDown();
+    getSwtShell().getDisplay().asyncExec(shell::dispose);
   }
 
   // -- Implementation of the MouseInputListener interface --
@@ -508,9 +579,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   {
     if (!(e.widget instanceof Control))
       return null;
-    org.eclipse.swt.graphics.Point absPos = ((Control) e.widget).toDisplay(e.x,
-        e.y);
-    Point pt = screenToPanel(absPos.x, absPos.y);
+    Point pt = screenToPanel(e.x, e.y);
     return new TouchEvent[]
       { new TouchEvent(eventType, pt, true, e.count==0) };
   }
@@ -593,6 +662,8 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       }
   }
 
+  // -- Implementation of the TouchListener interface --
+
   @Override
   public void touch(org.eclipse.swt.events.TouchEvent e)
   {
@@ -605,16 +676,16 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       if (!(e.widget instanceof Control))
         return;
 
-      Control ctrl = (Control) e.widget;
+      //Control ctrl = (Control) e.widget;
 
       touches = new TouchEvent[e.touches.length];
       int i = 0;
 
       for (Touch touch : e.touches)
       {
-        org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(touch.x,
-            touch.y);
-        Point pt = screenToPanel(absPos.x, absPos.y);
+        //org.eclipse.swt.graphics.Point absPos = ctrl.toDisplay(touch.x,touch.y);
+        org.eclipse.swt.graphics.Point pos = composite.toControl(touch.x,touch.y);
+        Point pt = screenToPanel(pos.x, pos.y);
         int eventType;
         switch (touch.state)
         {
@@ -640,82 +711,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     processTouchEvents(touches);
   }
 
-  /**
-   * Adds a {@link java.awt.Component} to the swt based screen.
-   * @param component - the {@link java.awt.Component} to add
-   */
-  public synchronized void add(Component component)
-  {
-    if (component == null)
-      throw new NullPointerException("component");
-
-    if (awtComponents.containsKey(component))
-      return;
-    Display display = LCARS.getDisplay();
-
-    int w = component.getWidth();
-    int h = component.getHeight();
-
-    if (w == 0 || h == 0)
-      Log.warn(
-          "Component has zero width/height and size updates are not applied in the awt swt bridge.");
-
-    display.syncExec(() -> {
-      // TODO: check awtFrame is in embedded full screen mode
-      Composite composite = awtComponents.get(display);
-      if (composite != null)
-      {
-        composite.moveAbove(null);
-        return;
-      }
-
-      composite = new Composite(this.composite,
-          SWT.DOUBLE_BUFFERED | SWT.EMBEDDED);
-
-      composite.setBounds(component.getX(), component.getY(),
-          component.getWidth(), component.getHeight());
-      composite.moveAbove(null);
-      component.setBounds(0, 0, component.getWidth(), component.getHeight());
-
-      Frame awtFrame = SWT_AWT.new_Frame(composite);
-      awtComponents.put(component, composite);
-      awtFrame.setBounds(component.getBounds());
-      awtFrame.add(component);
-      shell.redraw();
-    });
-  }
-
-  /**
-   * Removes a {@link java.awt.Component} to the swt based screen.
-   * @param component - the {@link java.awt.Component} to remove
-   */
-  public void remove(Component component)
-  {
-    Composite composite = awtComponents.remove(component);
-    composite.dispose();
-  }
-
-  /**
-   * Returns the physical size of the screen in pixels. 
-   * @return
-   */
-  public Dimension getSize()
-  {
-    Dimension d = new Dimension();
-    invoke(() -> {
-      org.eclipse.swt.graphics.Point size = shell.getSize();
-      d.width = size.x;
-      d.height = size.y;
-    });
-    return d;
-  }
-
-  private void invoke(Runnable action)
-  {
-    if (!shell.isDisposed())
-      shell.getDisplay().syncExec(action);
-  }
-
   // -- Nested classes --
 
   /**
@@ -731,8 +726,9 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
     {
       // Every 40 milliseconds...
       {
-        if (invalid.getAndSet(false))
-          invoke(() -> {
+        if (invalid.getAndSet(false) && !shell.isDisposed())
+          shell.getDisplay().syncExec(() -> 
+          {
             composite.redraw();
           });
       }
@@ -740,8 +736,9 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       // Every second...
       if (ctr % 25 == 0)
       {
-        if (!isScreenInvalid() && loadStat.getEventCount() == 0)
-          invoke(() -> {
+        if (!isScreenInvalid() && loadStat.getEventCount()==0 && !shell.isDisposed())
+          shell.getDisplay().syncExec(() -> 
+          {
             composite.redraw();
           });
         loadStat.period();
@@ -763,19 +760,6 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         }
       ctr++;
     }
-  }
-
-  @Override
-  public void setArea(Area area) throws RemoteException
-  {
-    Rectangle bnds = area.getBounds();
-    shell.setBounds(bnds.x, bnds.y, bnds.width, bnds.height);
-  }
-
-  @Override
-  public boolean isDisposed() throws RemoteException
-  {
-    return shell.isDisposed();
   }
 
 }

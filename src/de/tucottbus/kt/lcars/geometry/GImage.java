@@ -70,6 +70,8 @@ public class GImage extends AGeometry
 		if (size != null)
 			return new Rectangle(pos.x,pos.y,size.width,size.height);
 
+		if (meta==null)
+		  return new Rectangle();
     Image image = meta.getImage(); 
     return image != null
         ? new java.awt.Rectangle(pos.x,pos.y,image.getImageData().width,image.getImageData().height)

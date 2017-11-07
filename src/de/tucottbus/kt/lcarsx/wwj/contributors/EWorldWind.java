@@ -1,5 +1,26 @@
 package de.tucottbus.kt.lcarsx.wwj.contributors;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Rectangle;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.awt.SWT_AWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+
+import com.jogamp.opengl.util.Animator;
+
+import de.tucottbus.kt.lcars.LCARS;
+import de.tucottbus.kt.lcars.Panel;
+import de.tucottbus.kt.lcars.Screen;
+import de.tucottbus.kt.lcars.contributors.ElementContributor;
+import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.ColorMeta;
+import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
+import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
@@ -14,26 +35,6 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
-import org.eclipse.swt.widgets.Composite;
-
-import com.jogamp.opengl.util.Animator;
-
-import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.Panel;
-import de.tucottbus.kt.lcars.Screen;
-import de.tucottbus.kt.lcars.contributors.ElementContributor;
-import de.tucottbus.kt.lcars.logging.Log;
-import de.tucottbus.kt.lcars.swt.ColorMeta;
-import de.tucottbus.kt.lcarsx.wwj.orbits.Orbit;
-import de.tucottbus.kt.lcarsx.wwj.places.Camera;
 
 /**
  * <p><i><b style="color:red">Experimental.</b></i></p>
@@ -121,13 +122,11 @@ public class EWorldWind extends ElementContributor implements RenderingListener
       Screen screen = Screen.getLocal(panel.getScreen());
       if (wwd==null)
       {
-        screen.getSwtDisplay().syncExec(() ->
+        screen.getSwtShell().getDisplay().syncExec(() ->
         {
           swtCmpsWwd = new Composite(screen.getLcarsComposite(),SWT.EMBEDDED);
           swtCmpsWwd.setBackground(ColorMeta.BLACK.getColor());
-          Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
-          Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
-          swtCmpsWwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+          reposition();
           java.awt.Frame awtFrameWwd = SWT_AWT.new_Frame(swtCmpsWwd);
           awtFrameWwd.setBackground(Color.BLACK);
           
@@ -146,6 +145,14 @@ public class EWorldWind extends ElementContributor implements RenderingListener
           animator.add(wwd);
           animator.start();
           wwd.redrawNow();
+          
+          screen.getSwtShell().addListener(SWT.Resize, new Listener () 
+          {
+            public void handleEvent (Event e) 
+            {
+              reposition();
+            }
+          });
         });
       }
     }
@@ -169,7 +176,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
         animator.stop();
       }
       if (wwd!=null)
-        screen.getSwtDisplay().syncExec(() ->
+        screen.getSwtShell().getDisplay().syncExec(() ->
         {
           swtCmpsWwd.dispose();
           swtCmpsWwd = null;
@@ -182,6 +189,29 @@ public class EWorldWind extends ElementContributor implements RenderingListener
     }
 
     super.removeFromPanel();
+  }
+  
+  /**
+   * Repositions the WorldWind contributor on the (local) screen.
+   */
+  protected void reposition()
+  {
+    try
+    {
+      Screen screen = Screen.getLocal(panel.getScreen());
+      screen.getSwtShell().getDisplay().asyncExec(()->
+      {
+        // Async. to give SWT a little time to compute the (new) shell size
+        Point tl = screen.panelToScreen(new Point(bounds.x,bounds.y));
+        Point br = screen.panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
+        if (swtCmpsWwd!=null && !swtCmpsWwd.isDisposed())
+          swtCmpsWwd.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+      });
+    }
+    catch (ClassCastException e)
+    {
+      Log.err("LCARS: Function not supported on remote screens.", e);
+    }
   }
 
   // -- World Wind API --

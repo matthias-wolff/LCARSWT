@@ -658,14 +658,37 @@ public abstract class EElement
     }
     
     // Dispatch event
-    for (int i=0; i<tlist.size(); i++)
-      switch (ee.id)
+    try
+    {
+      LCARS.invokeLater(new Runnable()
       {
-      case EEvent.TOUCH_DOWN: tlist.get(i).touchDown(ee); break;
-      case EEvent.TOUCH_UP  : tlist.get(i).touchUp  (ee); break;
-      case EEvent.TOUCH_DRAG: tlist.get(i).touchDrag(ee); break;
-      case EEvent.TOUCH_HOLD: tlist.get(i).touchHold(ee); break;
-      }
+        @Override
+        public void run()
+        {
+          try
+          {
+            for (int i=0; i<tlist.size(); i++)
+              switch (ee.id)
+              {
+              case EEvent.TOUCH_DOWN: tlist.get(i).touchDown(ee); break;
+              case EEvent.TOUCH_UP  : tlist.get(i).touchUp  (ee); break;
+              case EEvent.TOUCH_DRAG: tlist.get(i).touchDrag(ee); break;
+              case EEvent.TOUCH_HOLD: tlist.get(i).touchHold(ee); break;
+              }
+          }
+          catch (Exception e)
+          {
+            if (getPanel()!=null && getPanel().getScreen()!=null)
+              Log.error("Error dispatching event.",e);
+          }
+        }
+      });
+    }
+    catch (Exception e)
+    {
+      if (getPanel()!=null && getPanel().getScreen()!=null)
+        Log.error("Error dispatching event.",e);
+    }
     
     return fbt;
   }
