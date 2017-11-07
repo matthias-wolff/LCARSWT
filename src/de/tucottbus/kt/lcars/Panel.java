@@ -246,7 +246,6 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     {
       Log.err("Cannot initiate panel.", e);
     }
-
     setBackground(new ImageMeta.Resource(LCARS.getArg("--wallpaper=")));
 
     eMsgBox = new EMessageBox((dim.width - 600) / 2, (dim.height - 280) / 2,
@@ -1417,6 +1416,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
   // -- Implementation of the EEventListener interface --
 
+  @Override
   public void touchDown(EEvent ee)
   {
     if (ee.el == eLight)
@@ -1427,10 +1427,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
       setSilent(!isSilent());
   }
 
+  @Override
   public void touchDrag(EEvent ee)
   {
   }
 
+  @Override
   public void touchHold(EEvent ee)
   {
     if (ee.el == eLight)
@@ -1448,6 +1450,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     }
   }
 
+  @Override
   public void touchUp(EEvent ee)
   {
   }
