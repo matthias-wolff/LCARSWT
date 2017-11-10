@@ -132,14 +132,14 @@ public class LcarsComposite extends Composite implements PaintListener
     if (context!=null)
     {
       Rectangle b = getBounds();
-      float scrw = (float)b.width;
-      float scrh = (float)b.height;
+      float scrw = b.width;
+      float scrh = b.height;
       float pnlw = context.getPanelWidth();
       float pnlh = context.getPanelHeight();
       
       float scl  = Math.min(scrw/pnlw,scrh/pnlh);
-      float ofsx = (scrw/scl-pnlw)/2;
-      float ofsy = (scrh/scl-pnlh)/2;
+      float ofsx = (scrw-pnlw*scl)/2;
+      float ofsy = (scrh-pnlh*scl)/2;
       
       transform.translate(ofsx,ofsy);
       transform.scale(scl,scl);
@@ -158,7 +158,7 @@ public class LcarsComposite extends Composite implements PaintListener
    */
   public Point panelToComposite(Point pt)
   {
-    float[] pointArray = new float[] {(float) pt.x, (float) pt.y};
+    float[] pointArray = new float[] {pt.x, pt.y};
     transform.transform(pointArray);
     return new Point(Math.round(pointArray[0]),Math.round(pointArray[1]));
   }
@@ -177,7 +177,7 @@ public class LcarsComposite extends Composite implements PaintListener
     transform.getElements(elements);
     Transform itransform = new Transform(display,elements);
     itransform.invert();
-    float[] pointArray = new float[] {(float) pt.x, (float) pt.y};
+    float[] pointArray = new float[] {pt.x, pt.y};
     itransform.transform(pointArray);
     itransform.dispose();
     return new Point(Math.round(pointArray[0]),Math.round(pointArray[1]));
@@ -194,7 +194,8 @@ public class LcarsComposite extends Composite implements PaintListener
   {
     GC gc = e.gc;
 
-    gc.setTransform(updateRenderingTransform());
+    Transform transform = updateRenderingTransform();
+    gc.setTransform(transform);
     if (this.context==null)
       return;
 
@@ -204,16 +205,26 @@ public class LcarsComposite extends Composite implements PaintListener
       context = this.context.clone();
     }
     
-    // clipping setup
+    // Clipping setup
     final Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
-       
-    if (context.getFullRepaint() || DEBUG)
-      gc.setClipping(0,0,context.getPanelWidth(),context.getPanelHeight());
-    else
-      gc.setClipping(dirtyArea);
-    gc.setBackground(getBackground());
-    gc.fillRectangle(0,0,context.getPanelWidth(),context.getPanelHeight());
+    final Rectangle maxArea = e.widget.getDisplay().getBounds();
 
+    // Erase background
+    gc.setBackground(getBackground());
+    if (context.getFullRepaint() || DEBUG)
+    {
+      gc.setTransform(null);
+      gc.setClipping((Rectangle)null);
+      gc.fillRectangle(0,0,maxArea.width,maxArea.height);
+      gc.setTransform(transform);
+    }
+    else
+    {
+      gc.setClipping(dirtyArea);
+      gc.fillRectangle(0,0,maxArea.width,maxArea.height);
+    }
+
+    // Draw elements
     PanelState state = context.getPanelState();
     try
     {
