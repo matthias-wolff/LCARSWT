@@ -64,6 +64,7 @@ public class EMessageBox extends ElementContributor implements EEventListener
 
   protected void fireAnswer(String answer)
   {
+    Panel panel = getPanel();
     if (panel==null) return;
     panel.dim(1f);
     panel.setModal(false);

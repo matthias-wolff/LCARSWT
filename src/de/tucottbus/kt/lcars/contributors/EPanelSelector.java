@@ -65,11 +65,12 @@ public class EPanelSelector extends EMessageBox
     {
       public void touchUp(EEvent ee)
       {
-        Panel panel = EPanelSelector.this.panel;
+        Panel panel = getPanel();
         close();
         try
         {
-          panel.getScreen().exit();
+          if (panel!=null)
+            panel.getScreen().exit();
         } catch (RemoteException e)
         {
           Log.err("Cannot exit screen.", e);
@@ -140,6 +141,7 @@ public class EPanelSelector extends EMessageBox
 
   public void close()
   {
+    Panel panel = getPanel();
     if (panel==null) return;
     for (EElement el : veList)
       el.removeAllEEventListeners();

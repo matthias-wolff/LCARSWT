@@ -48,6 +48,7 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
   @Override
   public void removeFromPanel()
   {
+    Panel panel = getPanel();
     if (panel!=null)
       panel.removeKeyListener(this);
     super.removeFromPanel();
@@ -178,6 +179,8 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
         el.setLabel(label);
       }
     });
+    
+    Panel panel = getPanel();
     if (panel!=null) panel.invalidate();
   }
   
@@ -237,6 +240,7 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
 
   public void keyPressed(KeyEvent e)
   {
+    Panel panel = getPanel();
     if (panel==null) return;
     e.consume();
     AbstractList<Key> keys = findKeys(e.getKeyCode());
@@ -260,6 +264,7 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
 
   public void keyReleased(KeyEvent e)
   {
+    Panel panel = getPanel();
     if (panel==null) return;
     e.consume();
     AbstractList<Key> keys = findKeys(e.getKeyCode());
@@ -272,7 +277,7 @@ public abstract class EKeyboard extends ElementContributor implements EEventList
 
   public void keyTyped(KeyEvent e)
   {
-    if (panel==null) return;
+    if (getPanel()==null) return;
     e.consume();
     for (KeyListener listener : listeners)
       listener.keyTyped(e);

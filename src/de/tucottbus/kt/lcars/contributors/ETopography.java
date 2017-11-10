@@ -395,7 +395,7 @@ public class ETopography extends ElementContributor
    */
   public synchronized void slideCursor(float x, float y, long time, String label)
   {
-    if (panel==null)
+    if (getPanel()==null)
     {
       setCursorPos(x,y,label);
       return;
@@ -518,7 +518,7 @@ public class ETopography extends ElementContributor
    */
   protected void layout()
   {
-    if (panel==null || pTx==null) return;
+    if (getPanel()==null || pTx==null) return;
     while (!isEmpty()) remove(0);
     
     Point tl = pToL(pBounds.x,pBounds.y+pBounds.height);
@@ -593,7 +593,7 @@ public class ETopography extends ElementContributor
     if (this.gridStyle!=-1)
       gs = this.gridStyle & (LCARS.ES_COLOR|LCARS.ES_FONT);
       
-    ColorMeta color = new ColorMeta(LCARS.getColor(panel.getColorScheme(),gs), gridMajorAlpha);
+    ColorMeta color = new ColorMeta(LCARS.getColor(getPanel().getColorScheme(),gs), gridMajorAlpha);
     ELabel unitLabel = null;
     if (pGridMajor!=null)
     {
@@ -646,6 +646,7 @@ public class ETopography extends ElementContributor
       setCursorPos(x,y,label);
     }
     
+    Panel panel = getPanel();
     if (panel!=null) panel.invalidate();
   }
   

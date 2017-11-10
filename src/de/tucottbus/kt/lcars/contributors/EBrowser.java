@@ -197,7 +197,7 @@ public class EBrowser extends ElementContributor
   @Override
   public void removeFromPanel()
   {
-    if (panel==null) return;
+    if (getPanel()==null) return;
     if (screen!=null && browser != null)
       screen.getSwtShell().getDisplay().asyncExec(() ->
       {

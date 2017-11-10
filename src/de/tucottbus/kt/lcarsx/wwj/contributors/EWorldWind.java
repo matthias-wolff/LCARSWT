@@ -165,6 +165,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   @Override
   public void removeFromPanel()
   {
+    Panel panel = getPanel();
     if (panel==null) return;
     
     try
@@ -198,7 +199,7 @@ public class EWorldWind extends ElementContributor implements RenderingListener
   {
     try
     {
-      Screen screen = Screen.getLocal(panel.getScreen());
+      Screen screen = Screen.getLocal(getPanel().getScreen());
       screen.getSwtShell().getDisplay().asyncExec(()->
       {
         // Async. to give SWT a little time to compute the (new) shell size

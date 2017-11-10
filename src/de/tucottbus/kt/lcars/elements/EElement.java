@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicLong;
@@ -79,7 +80,7 @@ public abstract class EElement
    */
   public EElement(Panel panel, int x, int y, int w, int h, int style, String label)
   {
-    this.panel         = panel;
+    this.panel         = new WeakReference<Panel>(panel);
     this.label         = label;
     this.serialNo      = serialNumber.getAndIncrement();
     this.data          = new ElementData(this, new Rectangle(x,y,w,h),style);
@@ -627,6 +628,7 @@ public abstract class EElement
     if (!isVisible()) return fbt;
 
     // Modal mode
+    Panel panel = getPanel();
     if (panel!=null && panel.isModal() && data.state.getStyle(LCARS.ES_MODAL)==0)
       return fbt;
 
@@ -806,6 +808,7 @@ public abstract class EElement
   {    
     if (geometryChanged)
       geoState |= GEO_RECOMPUTE;
+    Panel panel = getPanel();
     if (panel!=null) panel.invalidate();
   }
 
@@ -839,7 +842,7 @@ public abstract class EElement
   /**
    * The panel this element is displayed on, <code>null</code> if the element is currently not displayed.
    */
-  protected transient Panel panel = null;
+  private transient WeakReference<Panel> panel = null;
 
   /**
    * Returns the LCARS {@link Panel} this element is displayed on. If the element is currently not
@@ -850,7 +853,7 @@ public abstract class EElement
    */
   public Panel getPanel()
   {
-    return panel;
+    return panel.get();
   }
 
   /**
@@ -862,8 +865,8 @@ public abstract class EElement
    */
   public synchronized void setPanel(Panel panel)
   {
-    if (this.panel == panel) return;
-    this.panel = panel;
+    if (getPanel() == panel) return;
+    this.panel = new WeakReference<Panel>(panel);
     if (panel == null) return;
     data.state.setChanged();
     geoState |= GEO_RECOMPUTE;
@@ -876,7 +879,7 @@ public abstract class EElement
       valid[0] = false;
     };
     
-    if (panel == null)
+    if (getPanel() == null)
       invalid.accept("panel == null");
     
     if (data == null)

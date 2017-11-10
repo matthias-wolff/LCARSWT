@@ -241,7 +241,7 @@ public class ESignalDisplay extends ElementContributor
 
   public void animate()
   {
-    if (panel==null) return;
+    if (getPanel()==null) return;
     if ((mode&MODE_NOSAMPLES)!=0) return;
 
     this.animation = new Timer("ESignalDisplay.timer");
@@ -298,6 +298,7 @@ public class ESignalDisplay extends ElementContributor
       cursor.setBounds(bounds);
       cursorLab.setLabel(Math.round(displayToSeconds(sampleWidth*curSample)*10)/10f+" s");
     }
+    Panel panel = getPanel();
     if (panel!=null) panel.invalidate();
     return curSample;
   }
@@ -313,7 +314,7 @@ public class ESignalDisplay extends ElementContributor
   {
     public void run()
     {
-      if (panel==null                       ) { cancel(); return; }
+      if (getPanel()==null                  ) { cancel(); return; }
       if ((mode&MODE_NOSAMPLES)!=0          ) { cancel(); return; }
       if ((mode&MODE_ANIMATION)==MODE_STATIC) { cancel(); return; }
       if (locked) return;

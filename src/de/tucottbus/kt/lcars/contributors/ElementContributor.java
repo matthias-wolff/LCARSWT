@@ -1,6 +1,7 @@
 package de.tucottbus.kt.lcars.contributors;
 
 import java.awt.Rectangle;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,19 +22,21 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 /**
  * Contributes elements to an LCARS {@link Panel}.
  * 
- * <p><b>TODO:</b><br>Rename to <code>ElementGroup</code>!</p>
+ * <p><b>TODO:</b> Element contributors are bogus. Replace by cascading 
+ * sub-panels!</p>
  * 
  * @author Matthias Wolff
  */
+// FIXME: Replace by cascading sub-panels!
 public abstract class ElementContributor implements EEventListener
 {
-  protected Panel                            panel;
-  private   final ArrayList<EElement>        elements;
-  protected final int                        x;
-  protected final int                        y;
-  private   final Vector<EEventListener>     listeners;
-  private   Timer                            timer;
-  private   final HashMap<String, TimerTask> timerTasks;
+  private transient WeakReference<Panel>             panel;
+  private final     ArrayList<EElement>        elements;
+  protected final   int                        x;
+  protected final   int                        y;
+  private final     Vector<EEventListener>     listeners;
+  private           Timer                      timer;
+  private final     HashMap<String, TimerTask> timerTasks;
   
   // -- Constructors --
   
@@ -52,6 +55,7 @@ public abstract class ElementContributor implements EEventListener
     this.y     = y;
     listeners  = new Vector<EEventListener>();
     timerTasks = new HashMap<String,TimerTask>();
+    panel      = new WeakReference<Panel>(null);
   }
 
   // -- Element management --
@@ -70,8 +74,8 @@ public abstract class ElementContributor implements EEventListener
     synchronized (this.elements)
     {
       this.elements.remove(el);
-      this.elements.add(el);      
-      Panel panel = this.panel;
+      this.elements.add(el);
+      Panel panel = getPanel();
       if (panel!=null)
       {
         panel.add(el);
@@ -104,8 +108,8 @@ public abstract class ElementContributor implements EEventListener
     this.elements.removeAll(elements);
     this.elements.addAll(elements);
 
-    Panel panel = this.panel;
-    if (panel == null) return;
+    Panel panel = getPanel();
+    if (panel==null) return;
     panel.addAll(elements);
     for (EElement el : elements)
       el.setPanel(panel);
@@ -136,7 +140,9 @@ public abstract class ElementContributor implements EEventListener
     synchronized (this.elements)
     {
       this.elements.remove(el);
-      if (this.panel!=null) this.panel.remove(el);
+      Panel panel = getPanel();
+      if (panel!=null) 
+        panel.remove(el);
     }
   }
   
@@ -146,14 +152,16 @@ public abstract class ElementContributor implements EEventListener
     synchronized (this.elements)
     {
       el = this.elements.remove(i);
-      if (this.panel!=null) this.panel.remove(el);
+      Panel panel = getPanel();
+      if (panel!=null) 
+        panel.remove(el);
     }
   }
   
   private void doRemoveAll(Collection<EElement> elements)
   {
     this.elements.removeAll(elements);
-    Panel panel = this.panel;
+    Panel panel = getPanel();
     if (panel!=null)
       panel.removeAll(elements);
     elements.clear();
@@ -171,7 +179,7 @@ public abstract class ElementContributor implements EEventListener
   {
     synchronized (this.elements)
     {
-      Panel panel = this.panel;
+      Panel panel = getPanel();
       if (panel!=null)
         panel.removeAll(this.elements);
       this.elements.clear();
@@ -186,7 +194,7 @@ public abstract class ElementContributor implements EEventListener
   {
     synchronized (this.elements)
     {
-      Panel panel = this.panel;
+      Panel panel = getPanel();
       Iterator<EElement> it = this.elements.iterator();
       
       if (panel != null)
@@ -316,37 +324,63 @@ public abstract class ElementContributor implements EEventListener
   }
   
   /**
-   * Return true if the element list is empty, otherwise false.
-   * @return
+   * Return <code>true</code> if the element list is empty, otherwise
+   * <code>false</code>.
    */
   public final boolean isEmpty()
   {
     return this.elements.isEmpty();
   }
   
+  /**
+   * Returns the {@linkplain Panel LCARS panel} this contributor is supplying
+   * elements for.
+   */
+  public final Panel getPanel()
+  {
+    return panel.get();
+  }
+ 
+  /**
+   * Adds the elements of this contributor to an {@linkplain Panel LCARS panel}.
+   * 
+   * @param panel
+   *          The panel.
+   * @see #removeFromPanel()
+   * @see #isDisplayed()
+   * @see #getPanel()
+   */
   public void addToPanel(Panel panel)
   {
     if (panel==null) return;
     synchronized (this.elements)
     {
-      if (this.panel==panel) return;
-      this.panel = panel;
+      if (getPanel()==panel) return;
+      this.panel = new WeakReference<Panel>(panel);
       panel.addAll(this.elements);
       this.elements.forEach((el) -> {
-        el.setPanel(this.panel);
+        el.setPanel(panel);
       });
-      this.panel.invalidate();
+      panel.invalidate();
     }
   }
   
+  /**
+   * Removes the elements of this contributor from the {@linkplain Panel LCARS
+   * panel}.
+   * 
+   * @see #addToPanel(Panel)
+   * @see #isDisplayed()
+   * @see #getPanel()
+   */
   public void removeFromPanel()
   {
     cancelAllTimerTasks();
     synchronized (this.elements)
     {
-      Panel panel = this.panel;
+      Panel panel = getPanel();
       if (panel==null) return;
-      this.panel = null;
+      this.panel = new WeakReference<Panel>(null);
 
       for (EElement el : this.elements)
         el.setPanel(null);
@@ -355,9 +389,16 @@ public abstract class ElementContributor implements EEventListener
     }
   }
 
+  /**
+   * Determines if the elements of this contributor are displayed on an
+   * {@linkplain Panel LCARS panel}.
+   * 
+   * @see #addToPanel(Panel)
+   * @see #removeFromPanel()
+   */
   public boolean isDisplayed()
   {
-    return this.panel!=null;
+    return getPanel()!=null;
   }
 
   // -- EEvent handling --

@@ -194,6 +194,7 @@ public class ESpeechInput extends ElementContributor
     eRscore.setValue(String.format(Locale.US,"%4.0f",event.getDetailFloat("gw.ref",0)));
     */
     
+    Panel panel = getPanel();
     if (panel!=null) panel.invalidate();
   }
 
@@ -249,6 +250,7 @@ public class ESpeechInput extends ElementContributor
       Rectangle b1 = eCursor[1].getBounds(); b1.y=y+height/2-curLevel*barHeight-4;
       eCursor[1].setBounds(b1);
     }
+    Panel panel = getPanel();
     if (panel!=null) panel.invalidate();
   }
   
@@ -278,7 +280,7 @@ public class ESpeechInput extends ElementContributor
   {
     public void run()
     {
-      if (panel==null) 
+      if (getPanel()==null) 
       {
         try { runt.cancel(); } catch (Exception e) {} 
         return; 
@@ -300,6 +302,7 @@ public class ESpeechInput extends ElementContributor
           eAccept.setColor(nullColor);
           eConf.setColor(nullColor);
 
+          Panel panel = getPanel();
           if (panel!=null && panel instanceof SpeechEnginePanel)
             if (((SpeechEnginePanel)panel).getModeUAuto())
               ((SpeechEnginePanel)panel).switchModeU(0);
@@ -320,6 +323,7 @@ public class ESpeechInput extends ElementContributor
         marqueeCtr++;
       }
       
+      Panel panel = getPanel();
       if (panel!=null) panel.invalidate();
     }
   }

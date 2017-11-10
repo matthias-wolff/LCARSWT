@@ -454,8 +454,9 @@ public class EElementArray extends ElementContributor implements EEventListener
     {
       for (int i = 0; i < this.eList.size(); i++)
         this.eList.get(i).setHighlighted(i == item);
-      if (this.panel != null)
-        this.panel.invalidate();
+      Panel panel = getPanel();
+      if (panel != null)
+        panel.invalidate();
     }
   }
 
@@ -476,8 +477,9 @@ public class EElementArray extends ElementContributor implements EEventListener
       EElement e = this.eList.get(item);
       e.setHighlighted(true);
       scheduleTimerTask(new UnhiliteTask(e), TT_UNHILITE + e.hashCode(), time, 0);
-      if (this.panel != null)
-        this.panel.invalidate();
+      Panel panel = getPanel();
+      if (panel != null)
+        panel.invalidate();
     }
   }
 
@@ -536,7 +538,6 @@ public class EElementArray extends ElementContributor implements EEventListener
 
       // GUI reflection
       EElement e;
-      Panel p;
       if ((e = ePrev) != null)
       {
         e.clearTouch();
@@ -547,8 +548,9 @@ public class EElementArray extends ElementContributor implements EEventListener
         e.clearTouch();
         e.setDisabled(first >= n - rows * cols);
       }
-      if ((p = panel) != null)
-        p.invalidate();
+      Panel panel = getPanel();
+      if (panel!=null)
+        panel.invalidate();
     }
   }
 
@@ -693,7 +695,7 @@ public class EElementArray extends ElementContributor implements EEventListener
   {
     try
     {
-      if (panel == null)
+      if (getPanel() == null)
         cancelTimerTask(TT_ANIMATION);
       scheduleTimerTask(new AnimationTask(), TT_ANIMATION, 1, 100);
     } catch (IllegalStateException e)
@@ -707,7 +709,7 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void autopage()
   {
-    if (panel == null)
+    if (getPanel() == null)
       cancelTimerTask(TT_AUTOPAGE);
     int timeout = this.cols * this.rows * 100 + 5000;
     scheduleTimerTask(new AutoPagerTask(), TT_AUTOPAGE, timeout, timeout);
@@ -724,7 +726,7 @@ public class EElementArray extends ElementContributor implements EEventListener
 
     public void run()
     {
-      if (panel == null || ctr > cols * rows)
+      if (getPanel() == null || ctr > cols * rows)
       {
         cancel();
         return;
@@ -748,7 +750,7 @@ public class EElementArray extends ElementContributor implements EEventListener
   {
     public void run()
     {
-      if (panel == null)
+      if (getPanel() == null)
       {
         cancel();
         return;
@@ -777,6 +779,7 @@ public class EElementArray extends ElementContributor implements EEventListener
       try
       {
         elementRef.get().setHighlighted(false);
+        Panel panel = getPanel();
         if (panel != null)
           panel.invalidate();
       } catch (NullPointerException e)
