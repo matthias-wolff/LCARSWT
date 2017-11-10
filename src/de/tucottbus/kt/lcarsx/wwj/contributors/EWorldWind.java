@@ -111,6 +111,8 @@ public class EWorldWind extends ElementContributor implements RenderingListener
     
     try
     {
+      Screen screen = Screen.getLocal(panel.getScreen());
+
       // NOTE: WorldWind needs to be embedded in an java.awt.Panel!
       if (awtPanelWwd==null)
       {
@@ -132,12 +134,14 @@ public class EWorldWind extends ElementContributor implements RenderingListener
         animator.start();
       }
 
-      Screen screen = Screen.getLocal(panel.getScreen());
-      screen.getSwtShell().getDisplay().syncExec(() ->
-      {      
-        screen.addAwtComponent(awtPanelWwd,bounds.x,bounds.y,bounds.width-bounds.x,bounds.height-bounds.y);
+      LCARS.invokeLater(()->
+      {
+        screen.getSwtShell().getDisplay().syncExec(() ->
+        {      
+          screen.addAwtComponent(awtPanelWwd,bounds.x,bounds.y,bounds.width-bounds.x,bounds.height-bounds.y);
+        });
+        awtPanelWwd.setVisible(true);
       });
-      awtPanelWwd.setVisible(true);
     }
     catch (ClassCastException e)
     {
