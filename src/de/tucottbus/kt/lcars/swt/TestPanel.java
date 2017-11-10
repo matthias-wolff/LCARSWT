@@ -677,8 +677,7 @@ public class TestPanel extends Panel
         g.drawLine(0, 0, d.width, d.height);
       }
     };
-    canvas.setSize(600, 600);
-    src.add(canvas);
+    src.addAwtComponent(canvas,0,0,600,600);
     canvas.setBackground(Color.BLACK);
 
     new Timer().schedule(new TimerTask()
@@ -695,8 +694,7 @@ public class TestPanel extends Panel
             g.drawLine(0, 0, d.width, d.height);
           }
         };
-        canvas.setSize(500, 500);
-        src.add(canvas);
+        src.addAwtComponent(canvas,0,0,500,500);
         canvas.setBackground(Color.BLACK);
       }
     }, 1000,1000);
