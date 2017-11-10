@@ -303,8 +303,7 @@ public abstract class WorldWindPanel extends MainPanel
   /**
    * <p><i><b style="color:red">Experimental.</b></i></p>
    * 
-   * Initializes "fat" components which take their time. Invoked by a timer task
-   * scheduled by {@link #init()}.
+   * Initializes "fat" components which take their time. Invoked by {@link #init()}.
    */
   protected void fatInit()
   {

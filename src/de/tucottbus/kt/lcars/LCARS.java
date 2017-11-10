@@ -1343,56 +1343,7 @@ public class LCARS
         @Override
         public void run()
         {
-          System.out.println("[Shutting down...]");
-
-          // Shut-down local screen and panel
-          if (iscreen!=null)
-          {
-            // Shut down panel
-            try
-            {
-              IPanel panel = iscreen.getPanel();
-              if (panel!=null)
-              {
-                System.out.println("[Shutting down panel...]");
-                try
-                {
-                  panel.stop();
-                  System.out.println("[...Panel shut down]");
-                } catch (NoSuchObjectException e) { 
-                  // Because RMI has already been shut down -> ignore
-                }
-                catch (Exception e)
-                {
-                  System.out.println("[...FAILED to shut down local panel]");
-                  e.printStackTrace();
-                }
-              }
-            }
-            catch (Exception e)
-            {
-            }
-            
-            // Shut-down RMI screen adapter
-  	        if (iscreen instanceof RmiScreenAdapter)
-  	        {
-              System.out.println("[Shutting down RMI screen adapter...]");
-              ((RmiScreenAdapter)iscreen).shutDown();
-              System.out.println("[...RMI screen adapter shut down]");
-  	        }
-  	        iscreen = null;
-          }
-
-          // Shut-down RMI panel adapters
-          LcarsServer.shutDown();
-
-          // Shut-down speech engine
-          System.out.println("[Disposing speech engine...]");
-          Panel.disposeSpeechEngine();
-          System.out.println("[...Speech engine disposed]");
-          
-          // The end
-          System.out.println("[...Shut down complete]");
+          // Intentionally left blank
         }
       });
       
@@ -1437,7 +1388,6 @@ public class LCARS
       }
 
       // Run SWT event loop 
-      // TODO: SWT event loop should not be necessary in --nogui mode!
       while (iscreen==null || !iscreen.isDisposed())
       {
         try
@@ -1456,6 +1406,56 @@ public class LCARS
       Log.err("Uncaught exception in LCARS main.", e);
     }
     
+    // Shut down    
+    System.out.println("[Shutting down...]");
+
+    // - Local screen and panel
+    if (iscreen!=null)
+    {
+      try
+      {
+        IPanel panel = iscreen.getPanel();
+        if (panel!=null)
+        {
+          System.out.println("[Shutting down panel...]");
+          try
+          {
+            panel.stop();
+            System.out.println("[...Panel shut down]");
+          } catch (NoSuchObjectException e) { 
+            // Because RMI has already been shut down -> ignore
+          }
+          catch (Exception e)
+          {
+            System.out.println("[...FAILED to shut down local panel]");
+            e.printStackTrace();
+          }
+        }
+      }
+      catch (Exception e)
+      {
+      }
+      
+      // - RMI screen adapter
+      if (iscreen instanceof RmiScreenAdapter)
+      {
+        System.out.println("[Shutting down RMI screen adapter...]");
+        ((RmiScreenAdapter)iscreen).shutDown();
+        System.out.println("[...RMI screen adapter shut down]");
+      }
+        iscreen = null;
+    }
+
+    // - RMI panel adapters
+    LcarsServer.shutDown();
+
+    // - Speech engine
+    System.out.println("[Disposing speech engine...]");
+    Panel.disposeSpeechEngine();
+    System.out.println("[...Speech engine disposed]");
+    
+    // - The end
+    System.out.println("[...Shut down complete]");
     Log.info("END OF LCARS MAIN");
     //System.exit(0); // HACK: Hard off; should not be necessary!
   }

@@ -158,6 +158,12 @@ implements IPanel, IRmiPanelAdapterRemote
     panel.stop();
   }
 
+	@Override
+	public boolean isRunning() 
+	{
+		return panel.isRunning();
+	}
+  
   @Override
   public void processTouchEvents(TouchEvent[] events)
   {

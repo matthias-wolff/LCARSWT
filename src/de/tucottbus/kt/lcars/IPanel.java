@@ -26,6 +26,11 @@ public interface IPanel extends Remote
   public void stop() throws RemoteException;
 
   /**
+   * Determines if the panel is running.
+   */
+  public boolean isRunning() throws RemoteException;
+  
+  /**
    * Called by the {@linkplain Screen LCARS screen} displaying this panel when touch events occur.
    * The contract of this method is to translate touch events into {@link EEvent element events} and
    * to dispatch the latter.

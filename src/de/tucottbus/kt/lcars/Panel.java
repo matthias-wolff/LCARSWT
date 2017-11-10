@@ -1242,6 +1242,12 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   @Override
+  public boolean isRunning() 
+  {
+    return runt!=null;
+  }
+  
+  @Override
   public void processTouchEvents(TouchEvent[] events)
   {
     if (events.length == 0) return;
