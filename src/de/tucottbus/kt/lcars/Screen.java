@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcars;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -159,6 +160,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       public void paintControl(PaintEvent e)
       {
         long time = System.nanoTime();
+        repostionAwtComponents();
         GC gc = e.gc;
         gc.setTextAntialias(SWT.ON);
         gc.setInterpolation(SWT.LOW);
@@ -400,42 +402,41 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   
   /**
    * Adds a {@link java.awt.Component} to the SWT based screen.
-   * @param component - the {@link java.awt.Component} to add
+   * 
+   * @param component 
+   *   The {@link java.awt.Component} to add.
+   * @param x
+   *          The x-coordinate of the top left corner (LCARS panel coordinates). 
+   * @param y
+   *          The y-coordinate of the top left corner (LCARS panel coordinates).
+   * @param w
+   *          The width (LCARS panel coordinates).
+   * @param h
+   *          The height (LCARS panel coordinates).
    */
-  public synchronized void add(Component component)
+  public synchronized void addAwtComponent(Component component, int x, int y, int w, int h)
   {
     if (component == null)
       throw new NullPointerException("component");
 
     if (awtComponents.containsKey(component))
       return;
-    Display display = LCARS.getDisplay();
+    
+    Rectangle bounds = new Rectangle(x, y, w, h);
+    Point tl = panelToScreen(new Point(bounds.x,bounds.y));
+    Point br = panelToScreen(new Point(bounds.x+bounds.width,bounds.y+bounds.height));
 
-    int w = component.getWidth();
-    int h = component.getHeight();
-
-    if (w == 0 || h == 0)
-      Log.warn(
-          "Component has zero width/height and size updates are not applied in the awt swt bridge.");
-
-    display.syncExec(() -> {
-      // TODO: check awtFrame is in embedded full screen mode
-      Composite composite = awtComponents.get(display);
-      if (composite != null)
-      {
-        composite.moveAbove(null);
-        return;
-      }
-
-      composite = new Composite(this.composite,
-          SWT.DOUBLE_BUFFERED | SWT.EMBEDDED);
-
-      composite.setBounds(component.getX(), component.getY(),
-          component.getWidth(), component.getHeight());
+    LCARS.getDisplay().syncExec(() -> 
+    {
+      Composite composite = new Composite(this.composite,SWT.DOUBLE_BUFFERED|SWT.EMBEDDED);
+      composite.setBackground(ColorMeta.BLACK.getColor());
+      composite.setData(bounds); // Remember bounds in LCARS panel coordinates
+      composite.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
       composite.moveAbove(null);
-      component.setBounds(0, 0, component.getWidth(), component.getHeight());
+      component.setBounds(0,0,br.x-tl.x,br.y-tl.y);
 
       Frame awtFrame = SWT_AWT.new_Frame(composite);
+      awtFrame.setBackground(Color.BLACK);
       awtComponents.put(component, composite);
       awtFrame.setBounds(component.getBounds());
       awtFrame.add(component);
@@ -447,10 +448,42 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
    * Removes a {@link java.awt.Component} to the SWT based screen.
    * @param component - the {@link java.awt.Component} to remove
    */
-  public void remove(Component component)
+  public void removeAwtComponent(Component component)
   {
     Composite composite = awtComponents.remove(component);
     composite.dispose();
+  }
+  
+  /**
+   * Repositions @link java.awt.Component} on the SWT based screen.
+   */
+  protected void repostionAwtComponents()
+  {
+    if (awtComponents==null)
+      return;
+
+    LCARS.getDisplay().syncExec(() -> 
+    {
+      awtComponents.forEach((component,composite) ->
+      {
+        Rectangle pnlBounds = (Rectangle)composite.getData();
+        Point tl = panelToScreen(new Point(pnlBounds.x,pnlBounds.y));
+        Point br = panelToScreen(new Point(pnlBounds.x+pnlBounds.width,pnlBounds.y+pnlBounds.height));
+        org.eclipse.swt.graphics.Rectangle scrBoundsCmps = composite.getBounds();
+        Rectangle scrBoundsCmp = component.getBounds();
+        if 
+        (  
+          scrBoundsCmps.x    !=tl.x      || scrBoundsCmps.y     !=tl.y      ||
+          scrBoundsCmps.width!=br.x-tl.x || scrBoundsCmps.height!=br.y-tl.y ||
+          scrBoundsCmp .x    !=0         || scrBoundsCmp .y     !=0         ||
+          scrBoundsCmp .width!=br.x-tl.x || scrBoundsCmp .height!=br.y-tl.y
+        )
+        {
+          composite.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+          component.setBounds(0,0,br.x-tl.x,br.y-tl.y);
+        }
+      });
+    });
   }
   
   // -- Implementation of the IScreen interface --
