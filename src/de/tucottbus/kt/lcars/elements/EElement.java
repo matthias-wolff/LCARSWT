@@ -199,6 +199,7 @@ public abstract class EElement
   /**
    * @deprecated 
    */
+  @Deprecated
   public ColorMeta getBgColor()
   {
     return data.state.getBgColor(new PanelState(null));
@@ -794,7 +795,6 @@ public abstract class EElement
    * 
    * @return The geometries.
    */
-  //TODO: replace Vector with ArrayList 
   protected abstract ArrayList<AGeometry> createGeometriesInt();
     
   /**
