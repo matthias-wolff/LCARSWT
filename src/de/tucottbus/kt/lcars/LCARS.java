@@ -143,8 +143,6 @@ public class LCARS
   public static final int CS_SECONDARY  = 2;            // Secondary systems
   public static final int CS_ANCILLARY  = 3;            // Ancillary systems
   public static final int CS_DATABASE   = 4;            // Database systems
-  
-  /** Multi-Display **/
   public static final int CS_MULTIDISP  = 5;            // Multi-Display
   public static final int CS_REDALERT   = 6;            // Red alert
   public static final int CS_MAX        = 6;
