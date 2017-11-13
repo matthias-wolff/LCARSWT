@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.MainPanel;
+import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.contributors.ElementContributor;
 import de.tucottbus.kt.lcars.elements.EElbo;
 import de.tucottbus.kt.lcars.elements.EElement;
@@ -29,7 +29,7 @@ import de.tucottbus.kt.lcars.swt.ImageMeta;
  * 
  * @author Matthias Wolff, BTU Cottbus-Senftenberg
  */
-public class UcuiDraftPanel extends MainPanel 
+public class UcuiDraftPanel extends Panel 
 {
   // -- Fields --
   

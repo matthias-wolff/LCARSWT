@@ -29,7 +29,6 @@ import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
-import de.tucottbus.kt.lcars.util.LoadStatistics;
 
 /**
  * EXPERIMENTAL, MP3 player.
@@ -127,7 +126,7 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
     
     eGuiLd  = new ELabel(this,23,420,192,38,LCARS.ES_STATIC|LCARS.ES_LABEL_E,null);
     eGuiLd.setColor(cOutline);
-    add(eGuiLd);
+    setLoadStatControl(add(eGuiLd));
 
     add(new ERect(this,23,461,192,66,LCARS.EC_ELBOLO|LCARS.ES_LABEL_SE|LCARS.ES_STATIC,"TRACK SELECT"));
     
@@ -336,23 +335,6 @@ public class AudioLibraryPanel extends MainPanel implements IAudioPlayerEventLis
         });
       e.setAlpha(at.isExcluded()?0.33f:1f);
     });    
-  }
-
-  @Override
-  protected void fps10()
-  {
-    LoadStatistics ls1 = getLoadStatistics();
-    String s = String.format("%03d-%02d",ls1.getLoad(),ls1.getEventsPerPeriod());
-    try
-    {
-      LoadStatistics ls2 = getScreen().getLoadStatistics();
-      s += String.format("/%03d-%02d",ls2.getLoad(),ls2.getEventsPerPeriod());
-    }
-    catch (Exception e)
-    {
-      // Whatever...
-    }
-    eGuiLd.setLabel(s);
   }
 
   @Override

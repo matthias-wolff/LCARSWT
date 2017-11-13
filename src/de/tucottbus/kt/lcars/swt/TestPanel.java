@@ -55,7 +55,6 @@ import de.tucottbus.kt.lcars.elements.EValue;
 import de.tucottbus.kt.lcars.geometry.rendering.LcarsComposite;
 import de.tucottbus.kt.lcars.logging.Log;
 import de.tucottbus.kt.lcars.speech.ESpeechInput;
-import de.tucottbus.kt.lcars.util.LoadStatistics;
 import de.tucottbus.kt.lcarsx.al.AudioPlayer;
 import de.tucottbus.kt.lcarsx.al.AudioTrack;
 import de.tucottbus.kt.lcarsx.al.ELevelsDisplay;
@@ -95,22 +94,6 @@ public class TestPanel extends Panel
       }
     };
     timer.schedule(result, 40, 40);
-    return result;
-  }
-
-  private TimerTask runEverySecond(Runnable task)
-  {
-    if (timer == null)
-      timer = new Timer();
-    TimerTask result = new TimerTask()
-    {
-      @Override
-      public void run()
-      {
-        task.run();
-      }
-    };
-    timer.schedule(result, 1000, 1000);
     return result;
   }
 
@@ -251,22 +234,7 @@ public class TestPanel extends Panel
 
   private void initStatistics()
   {
-    ELabel eGuiLd = add(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
-    runEverySecond(() -> {
-      LoadStatistics ls1 = getLoadStatistics();
-      String s = String.format("%03d-%02d", ls1.getLoad(),
-          ls1.getEventsPerPeriod());
-      try
-      {
-        LoadStatistics ls2 = getScreen().getLoadStatistics();
-        s += String.format("/%03d-%02d", ls2.getLoad(),
-            ls2.getEventsPerPeriod());
-      } catch (RemoteException e)
-      {
-        e.printStackTrace();
-      }
-      eGuiLd.setLabel(s);
-    });
+    setLoadStatControl(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
   }
 
   
@@ -299,22 +267,7 @@ public class TestPanel extends Panel
   
   private void initDimmed()
   {
-    ELabel eGuiLd = add(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
-    runEverySecond(() -> {
-      LoadStatistics ls1 = getLoadStatistics();
-      String s = String.format("%03d-%02d", ls1.getLoad(),
-          ls1.getEventsPerPeriod());
-      try
-      {
-        LoadStatistics ls2 = getScreen().getLoadStatistics();
-        s += String.format("/%03d-%02d", ls2.getLoad(),
-            ls2.getEventsPerPeriod());
-      } catch (RemoteException e)
-      {
-        e.printStackTrace();
-      }
-      eGuiLd.setLabel(s);
-    });
+    setLoadStatControl(new ELabel(this, 0, 0, 192, 60, LCARS.ES_STATIC, null));
     
     EElbo eElbo = new EElbo(this,23,23,268,146,LCARS.EC_ELBOUP|LCARS.ES_LABEL_SE,"LCARS");
     eElbo.setArmWidths(192,46);

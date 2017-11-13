@@ -130,6 +130,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   private EElement eLight;
   private EElement eDim;
   private EElement eSilent;
+  private EElement eLoadStat;
   private Timer runt;
   private int runc;
   private int dimc;
@@ -689,6 +690,40 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
   }
 
   /**
+   * Sets the control for displaying the panel and screen computational load
+   * statistics. The statistics will display in the form
+   * <code>RRR-UU/SSS-VV</code> with the following elements:
+   * <table>
+   *   <tr><th>Field</th><th>Description</th></tr>
+   *   <tr><td><code>RRR</code></td><td>
+   *       Average real-time factor of creating one panel update
+   *     </td>
+   *   </tr>
+   *   <tr><td><code>UU</code></td><td>
+   *       Average panel update rate (number of updates per second)
+   *     </td>
+   *   </tr>
+   *   <tr><td><code>SSS</code></td><td>
+   *       Average real-time factor of rendering the LCARS screen
+   *     </td>
+   *   </tr>
+   *   <tr><td><code>VV</code></td><td>
+   *       Average screen update rate (number of frames per second)
+   *     </td>
+   *   </tr>
+   * </table>
+   * 
+   * @param eLoadStat
+   *          The control, can be <code>null</code>.
+   * @see #getLoadStatistics()
+   * @see IScreen#getLoadStatistics()
+   */
+  public void setLoadStatControl(EElement eLoadStat)
+  {
+    this.eLoadStat = eLoadStat;
+  }
+  
+  /**
    * Calls {@link EElement#clearTouch()} of all {@link Panel#elements} to reset
    * the touch state to not touched
    */
@@ -729,6 +764,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
    * <li>Call {@link LoadStatistics#getEventsPerPeriod()} on the return value to
    * determine the actual frame rate in the last complete second.</li>
    * </ul>
+   * 
+   * @see #setLoadStatControl(EElement)
    */
   public LoadStatistics getLoadStatistics()
   {
@@ -1023,6 +1060,13 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
           err(e);
         }
       if (runc % 5 == 0)
+      {
+        if (eLoadStat!=null)
+          try
+          {
+            getScreen().getLoadStatistics();
+          }
+          catch (Exception e) {}
         try
         {
           fps10();
@@ -1030,6 +1074,7 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
         {
           err(e);
         }
+      }
       if (runc % 25 == 0)
         try
         {
@@ -1161,6 +1206,24 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     boolean invalid = screenInvalid.getAndSet(false);
     if (!invalid)
       return;
+
+    // Update load statistics display
+    if (eLoadStat!=null)
+    {
+      LoadStatistics lsp = getLoadStatistics();
+      String s = String.format("%03d-%02d",lsp.getLoad(),lsp.getEventsPerPeriod());
+      try
+      {
+        LoadStatistics lss = getScreen().getLoadStatistics();
+        s += String.format("/%03d-%02d",lss.getLoad(),lss.getEventsPerPeriod());
+      }
+      catch (Exception e) {}
+      try
+      {
+        eLoadStat.setLabel(s);
+      }
+      catch (Exception e) {}
+    }
 
     // Decide on incremental update
     boolean incremental = !(getScreen() instanceof Screen);
