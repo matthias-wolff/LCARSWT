@@ -20,8 +20,9 @@ public abstract class GRenderedImage extends AGeometry
   private int   y;
   private int   w;
   private int   h;
-  private Image img;
   
+  private transient Image img;
+
   /**
    * Creates a new rendered image.
    * 
