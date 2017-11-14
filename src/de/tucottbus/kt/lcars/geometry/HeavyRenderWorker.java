@@ -20,7 +20,9 @@ import de.tucottbus.kt.lcars.logging.Log;
  * @author Christian Borck
  *
  * @param <TData> type of input used to draw an image.
+ * @deprecated
  */
+@Deprecated
 public class HeavyRenderWorker<TData extends Serializable>
 {
   private static final HashMap<Long, HeavyRenderWorker<?>> activeRenderer = new HashMap<>(20);

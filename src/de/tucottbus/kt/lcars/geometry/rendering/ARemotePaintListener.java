@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import de.tucottbus.kt.lcars.geometry.IWorkspace;
 
+@Deprecated
 public abstract class ARemotePaintListener <TData extends Serializable> implements Serializable
 {
   private static final long serialVersionUID = -4116020572081158964L;

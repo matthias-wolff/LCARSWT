@@ -22,8 +22,9 @@ import de.tucottbus.kt.lcars.geometry.rendering.ARemotePaintListener;
  * </ul><p>
  * 
  * @author Christian Borck
- *
+ * @deprecated
  */
+@Deprecated
 public final class HeavyGeometry <TData extends Serializable> extends AGeometry
 {
   private static final long serialVersionUID = 5157875180660436224L;
