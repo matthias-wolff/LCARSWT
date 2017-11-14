@@ -1264,8 +1264,8 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     catch (RemoteException e)
     {
       if (!noConnectionOnUpdate)
-        Log.info("Remote screen of "+getClass().getSimpleName()
-          +" not updated (no connection).");
+        Log.err("Remote screen of "+getClass().getSimpleName()
+          +" not updated (no connection).",e);
       noConnectionOnUpdate = true;
     }
     catch (Exception e)

@@ -10,6 +10,12 @@ import org.eclipse.swt.graphics.Image;
  * Geometry of an SWT image rendered at the {@linkplain Screen LCARS screen}
  * side.
  * 
+ * <h3>Remarks:</h3>
+ * <ul>
+ *   <li>FIXME: Not serializable!</li>
+ *   <li>TODO: Create <code>ERenderedImage extends EElement</code></li>
+ * </ul>
+ * 
  * @author Matthias Wolff
  */
 public abstract class GRenderedImage extends AGeometry

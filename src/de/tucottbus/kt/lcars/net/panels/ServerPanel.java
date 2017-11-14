@@ -150,7 +150,7 @@ public class ServerPanel extends Panel
         if (name.length()>90) name = name.substring(0,90)+"...";
         EElement e = super.add(name);
         while (getItemCount()>226) remove(0);
-        showItemsInt(((int)getItemCount()/25)*25,25);
+        showItemsInt((getItemCount()/25)*25,25);
         hiliteItem(getItemCount()-1,2000);
         return e;
       }

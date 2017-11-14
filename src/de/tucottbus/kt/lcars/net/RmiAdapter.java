@@ -358,7 +358,7 @@ public abstract class RmiAdapter implements Remote
         }
         catch (NotBoundException e)
         {
-          msg = "Peer is down";
+          msg = "Peer is down: " + e.getMessage();
           peer = null;
         }
         updatePeer();
