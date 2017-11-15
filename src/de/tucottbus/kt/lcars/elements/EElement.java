@@ -301,6 +301,30 @@ public abstract class EElement
   {
     return data.state.getStyle(LCARS.ES_STYLE);
   }
+  
+  /**
+   * Sets the font style of this LCARS GUI element.
+   * 
+   * @param style
+   *          One of the {@link LCARS}<code>.EF_XXX</code> constants.
+   * @see #getFontStyle()
+   */
+  public void setFontStyle(int style)
+  {
+    if(data.state.setStyle((data.state.getStyle()&~LCARS.ES_FONT) | (style&LCARS.ES_FONT)))
+      invalidate(false);
+  }
+  
+  /**
+   * Determines the font style of this LCARS GUI element.
+   * 
+   * @return One of the {@link LCARS}<code>.EF_XXX</code> constants.
+   * @see #getFontStyle()
+   */
+  public int getFontStyle()
+  {
+    return data.state.getStyle(LCARS.ES_FONT);
+  }
 
   /**
    * Determines if this LCARS GUI element is disabled. Disabled elements are
