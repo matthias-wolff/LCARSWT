@@ -70,12 +70,16 @@ import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.FontMeta;
 
 /**
- * The LCARS main class. Includes the main method, constants, static service methods, and the panel
- * server singleton.
- * <p>
- * See documentation of the {@linkplain #main(String[]) main method} for a description of supported
- * command line options.
- * </p>
+ * The LCARS main class. Includes the main method, constants, static service
+ * methods, and the panel server singleton.
+ * 
+ * <p>See documentation of the {@linkplain #main(String[]) main method} for a
+ * description of supported command line options.</p>
+ * 
+ * <h3>Remark:</h3>
+ * <ul>
+ *   <li>TODO: Move questionable stuff to <code>retired</code> package.
+ * </ul>
  * 
  * @author Matthias Wolff
  */
