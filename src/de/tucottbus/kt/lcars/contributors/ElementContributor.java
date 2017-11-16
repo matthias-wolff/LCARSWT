@@ -22,15 +22,11 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
 /**
  * Contributes elements to an LCARS {@link Panel}.
  * 
- * <p><b>TODO:</b> Element contributors are bogus. Replace by cascading 
- * sub-panels!</p>
- * 
  * @author Matthias Wolff
  */
-// FIXME: Replace by cascading sub-panels!
 public abstract class ElementContributor implements EEventListener
 {
-  private transient WeakReference<Panel>             panel;
+  private transient WeakReference<Panel>       panel;
   private final     ArrayList<EElement>        elements;
   protected final   int                        x;
   protected final   int                        y;
@@ -90,30 +86,33 @@ public abstract class ElementContributor implements EEventListener
     return add(el,true);
   }
 
-  private void doReposition(Collection<EElement> elements)
+  /**
+   * Adds the elements of another element contributor.
+   * 
+   * @param ec
+   *          The other contributor.
+   * @param reposition
+   *          If <code>true</code>, offset all added elements by the coordinates
+   *          of the top-left corner of this element contributor, i.e. by 
+   *          (<code>this.</code>{@link #x}, <code>this.</code>{@link #y}).
+   */
+  protected void add(ElementContributor ec, boolean reposition)
   {
-    int x = this.x;
-    int y = this.y;
-    for (EElement el : elements)
-    {
-      Rectangle bounds = el.getBounds();
-      bounds.x += x;
-      bounds.y += y;
-      el.setBounds(bounds);
-    }
+    if (ec==null)
+      return;
+    ec.forAllElements((el)->{ this.add(el); });
   }
-  
-  private void doAddAll(Collection<EElement> elements)
-  {
-    this.elements.removeAll(elements);
-    this.elements.addAll(elements);
 
-    Panel panel = getPanel();
-    if (panel==null) return;
-    panel.addAll(elements);
-    for (EElement el : elements)
-      el.setPanel(panel);
-    
+  /**
+   * Adds the elements of another element contributor. Equivalent to
+   * {@link #add(ElementContributor, boolean) add}<code>(ec,true)</code>}.
+   * 
+   * @param ec
+   *          The other contributor.
+   */
+  protected void add(ElementContributor ec)
+  {
+    add(ec,true);
   }
   
   protected void addAll(Collection<EElement> elements, boolean reposition)
@@ -133,7 +132,7 @@ public abstract class ElementContributor implements EEventListener
   {
     addAll(elements, true);
   }
-
+  
   protected void remove(EElement el)
   {
     if (el==null) return;
@@ -158,13 +157,17 @@ public abstract class ElementContributor implements EEventListener
     }
   }
   
-  private void doRemoveAll(Collection<EElement> elements)
+  /**
+   * Removes the elements of another element contributor.
+   * 
+   * @param ec
+   *          The other contributor.
+   */
+  protected void remove(ElementContributor ec)
   {
-    this.elements.removeAll(elements);
-    Panel panel = getPanel();
-    if (panel!=null)
-      panel.removeAll(elements);
-    elements.clear();
+    if (ec==null)
+      return;
+    ec.forAllElements((el)->{ this.remove(el); });
   }
   
   protected void removeAll(Collection<EElement> elements)
@@ -185,7 +188,7 @@ public abstract class ElementContributor implements EEventListener
       this.elements.clear();
     }
   }
-  
+ 
   /**
    * Removes those elements from this {@link ElementConstributor} and from the panel where the filter returns true.
    * @param filter - mapping of EElement to boolean (see {@link Predicate})
@@ -231,31 +234,7 @@ public abstract class ElementContributor implements EEventListener
   {
     removeAllAndAddAll(remove, add, true);
   }
-  
-  protected int size()
-  {
-    synchronized (this.elements)
-    {
-      return this.elements.size();
-    }
-  }
-  
-  protected EElement getElement(int i) 
-  {
-    synchronized (this.elements)
-    {
-      return this.elements.get(i);
-    }
-  }
-  
-  protected ArrayList<EElement> createElementList()
-  {
-    synchronized (this.elements)
-    {
-      return new ArrayList<>(this.elements);
-    }
-  }
-  
+
   /**
    * Iterates over the elements list in the given bounds
    * @param fromInclusive - lower bound, index is included
@@ -320,6 +299,30 @@ public abstract class ElementContributor implements EEventListener
       Integer i = 0;
       for(EElement el : this.elements)
         action.accept(i++, el);
+    }
+  }
+  
+  protected int size()
+  {
+    synchronized (this.elements)
+    {
+      return this.elements.size();
+    }
+  }
+  
+  protected EElement getElement(int i) 
+  {
+    synchronized (this.elements)
+    {
+      return this.elements.get(i);
+    }
+  }
+  
+  protected ArrayList<EElement> createElementList()
+  {
+    synchronized (this.elements)
+    {
+      return new ArrayList<>(this.elements);
     }
   }
   
@@ -399,6 +402,43 @@ public abstract class ElementContributor implements EEventListener
   public boolean isDisplayed()
   {
     return getPanel()!=null;
+  }
+
+  // -- Private element management --
+  
+  private void doReposition(Collection<EElement> elements)
+  {
+    int x = this.x;
+    int y = this.y;
+    for (EElement el : elements)
+    {
+      Rectangle bounds = el.getBounds();
+      bounds.x += x;
+      bounds.y += y;
+      el.setBounds(bounds);
+    }
+  }
+  
+  private void doAddAll(Collection<EElement> elements)
+  {
+    this.elements.removeAll(elements);
+    this.elements.addAll(elements);
+
+    Panel panel = getPanel();
+    if (panel==null) return;
+    panel.addAll(elements);
+    for (EElement el : elements)
+      el.setPanel(panel);
+    
+  }
+  
+  private void doRemoveAll(Collection<EElement> elements)
+  {
+    this.elements.removeAll(elements);
+    Panel panel = getPanel();
+    if (panel!=null)
+      panel.removeAll(elements);
+    elements.clear();
   }
 
   // -- EEvent handling --
