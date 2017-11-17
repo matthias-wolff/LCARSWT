@@ -100,7 +100,7 @@ public abstract class ElementContributor implements EEventListener
   {
     if (ec==null)
       return;
-    ec.forAllElements((el)->{ this.add(el); });
+    ec.forAllElements((el)->{ this.add(el,reposition); });
   }
 
   /**
