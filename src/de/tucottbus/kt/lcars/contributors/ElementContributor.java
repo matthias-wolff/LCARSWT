@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import de.tucottbus.kt.lcars.IPanelTimerListener;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
@@ -26,16 +27,15 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
  */
 public abstract class ElementContributor implements EEventListener
 {
-  private transient WeakReference<Panel>       panel;
-  private final     ArrayList<EElement>        elements;
-  protected final   int                        x;
-  protected final   int                        y;
-  private final     Vector<EEventListener>     listeners;
-  private           Timer                      timer;
-  private final     HashMap<String, TimerTask> timerTasks;
-  
+  private transient WeakReference<Panel>   panel;
+  private final     ArrayList<EElement>    elements;
+  protected final   int                    x;
+  protected final   int                    y;
+  private final     Vector<EEventListener> listeners;
+  private final     IPanelTimerListener    panelTimerListener;
+
   // -- Constructors --
-  
+
   /**
    * Abstract constructor of element contributors.
    * 
@@ -52,13 +52,41 @@ public abstract class ElementContributor implements EEventListener
     listeners  = new Vector<EEventListener>();
     timerTasks = new HashMap<String,TimerTask>();
     panel      = new WeakReference<Panel>(null);
+    panelTimerListener = new IPanelTimerListener()
+    {
+      
+      @Override
+      public void fps25()
+      {
+        ElementContributor.this.fps25();
+      }
+      
+      @Override
+      public void fps10()
+      {
+        ElementContributor.this.fps10();
+      }
+      
+      @Override
+      public void fps2()
+      {
+        ElementContributor.this.fps2();
+      }
+      
+      @Override
+      public void fps1()
+      {
+        ElementContributor.this.fps1();
+      }
+    };
   }
 
   // -- Element management --
-  
+
   protected <T extends EElement> T add(T el, boolean reposition)
   {
-    if (el==null) return null;
+    if (el==null)
+      return null;
     if (reposition)
     {
       Rectangle bounds = el.getBounds();
@@ -66,7 +94,7 @@ public abstract class ElementContributor implements EEventListener
       bounds.y += this.y;
       el.setBounds(bounds);
     }
-    
+
     synchronized (this.elements)
     {
       this.elements.remove(el);
@@ -80,7 +108,7 @@ public abstract class ElementContributor implements EEventListener
     }
     return el;
   }
-  
+
   protected <T extends EElement> T add(T el)
   {
     return add(el,true);
@@ -93,7 +121,7 @@ public abstract class ElementContributor implements EEventListener
    *          The other contributor.
    * @param reposition
    *          If <code>true</code>, offset all added elements by the coordinates
-   *          of the top-left corner of this element contributor, i.e. by 
+   *          of the top-left corner of this element contributor, i.e. by
    *          (<code>this.</code>{@link #x}, <code>this.</code>{@link #y}).
    */
   protected void add(ElementContributor ec, boolean reposition)
@@ -114,37 +142,39 @@ public abstract class ElementContributor implements EEventListener
   {
     add(ec,true);
   }
-  
+
   protected void addAll(Collection<EElement> elements, boolean reposition)
   {
-    if (elements==null) return;
-    
+    if (elements==null)
+      return;
+
     if (reposition)
       doReposition(elements);
-    
+
     synchronized (this.elements)
     {
       doAddAll(elements);
     }
   }
-  
+
   protected void addAll(Collection<EElement> elements)
   {
     addAll(elements, true);
   }
-  
+
   protected void remove(EElement el)
   {
-    if (el==null) return;
+    if (el==null)
+      return;
     synchronized (this.elements)
     {
       this.elements.remove(el);
       Panel panel = getPanel();
-      if (panel!=null) 
+      if (panel!=null)
         panel.remove(el);
     }
   }
-  
+
   protected void remove(int i)
   {
     EElement el;
@@ -152,11 +182,11 @@ public abstract class ElementContributor implements EEventListener
     {
       el = this.elements.remove(i);
       Panel panel = getPanel();
-      if (panel!=null) 
+      if (panel!=null)
         panel.remove(el);
     }
   }
-  
+
   /**
    * Removes the elements of another element contributor.
    * 
@@ -169,7 +199,7 @@ public abstract class ElementContributor implements EEventListener
       return;
     ec.forAllElements((el)->{ this.remove(el); });
   }
-  
+
   protected void removeAll(Collection<EElement> elements)
   {
     synchronized (this.elements)
@@ -177,7 +207,7 @@ public abstract class ElementContributor implements EEventListener
       doRemoveAll(elements);
     }
   }
-  
+
   protected void removeAll()
   {
     synchronized (this.elements)
@@ -188,10 +218,13 @@ public abstract class ElementContributor implements EEventListener
       this.elements.clear();
     }
   }
- 
+
   /**
-   * Removes those elements from this {@link ElementConstributor} and from the panel where the filter returns true.
-   * @param filter - mapping of EElement to boolean (see {@link Predicate})
+   * Removes those elements from this {@link ElementConstributor} and from the
+   * panel where the filter returns true.
+   * 
+   * @param filter
+   *          - mapping of EElement to boolean (see {@link Predicate})
    */
   protected void removeIf(Predicate<EElement> filter)
   {
@@ -199,37 +232,39 @@ public abstract class ElementContributor implements EEventListener
     {
       Panel panel = getPanel();
       Iterator<EElement> it = this.elements.iterator();
-      
+
       if (panel != null)
-        while(it.hasNext())
+        while (it.hasNext())
         {
           EElement el = it.next();
-          if (!filter.test(el)) return;
-          it.remove();          
+          if (!filter.test(el))
+            return;
+          it.remove();
           panel.remove(el);
         }
       else
-        while(it.hasNext())
+        while (it.hasNext())
         {
           EElement el = it.next();
-          if (!filter.test(el)) return;
+          if (!filter.test(el))
+            return;
           it.remove();
         }
     }
   }
-  
+
   protected void removeAllAndAddAll(Collection<EElement> remove, Collection<EElement> add, boolean repositionAdd)
   {
-    if(repositionAdd)
+    if (repositionAdd)
       doReposition(add);
-    
+
     synchronized (this.elements)
     {
       doRemoveAll(remove);
       doAddAll(add);
     }
   }
-  
+
   protected void removeAllAndAddAll(Collection<EElement> remove, Collection<EElement> add)
   {
     removeAllAndAddAll(remove, add, true);
@@ -237,9 +272,13 @@ public abstract class ElementContributor implements EEventListener
 
   /**
    * Iterates over the elements list in the given bounds
-   * @param fromInclusive - lower bound, index is included
-   * @param toExclusive - higher bound, index is excluded
-   * @param action - method with the parameters (int index, EElement element)
+   * 
+   * @param fromInclusive
+   *          - lower bound, index is included
+   * @param toExclusive
+   *          - higher bound, index is excluded
+   * @param action
+   *          - method with the parameters (int index, EElement element)
    */
   public void forAllElements(int fromInclusive, int toExclusive, Consumer<EElement> action)
   {
@@ -247,61 +286,74 @@ public abstract class ElementContributor implements EEventListener
     {
       if (fromInclusive < 0 || fromInclusive >= toExclusive || toExclusive > this.elements.size())
         throw new IllegalArgumentException("iteration limits out of bounds.");
-      for(;fromInclusive < toExclusive; fromInclusive++)
+      for (; fromInclusive < toExclusive; fromInclusive++)
         action.accept(this.elements.get(fromInclusive));
     }
   }
-  
+
   /**
    * Iterates over the elements list in the given bounds
-   * @param fromInclusive - lower bound, index is included
-   * @param pradicate - method with the parameters (EElement element) and boolean as return type to break loop if true
+   * 
+   * @param fromInclusive
+   *          - lower bound, index is included
+   * @param pradicate
+   *          - method with the parameters (EElement element) and boolean as
+   *          return type to break loop if true
    */
   public void forAllElements(int fromInclusive, Function<EElement, Boolean> action)
   {
     synchronized (this.elements)
     {
       int toExclusive = this.elements.size();
-      if (fromInclusive >= toExclusive) return;
+      if (fromInclusive >= toExclusive)
+        return;
       if (fromInclusive < 0)
         throw new IllegalArgumentException("iteration limits out of bounds.");
-      for(; fromInclusive < toExclusive; fromInclusive++)
-        if(action.apply(this.elements.get(fromInclusive)))
+      for (; fromInclusive < toExclusive; fromInclusive++)
+        if (action.apply(this.elements.get(fromInclusive)))
           break;
     }
   }
-  
+
   /**
    * Iterates over the elements list in the given bounds
-   * @param fromInclusive - lower bound, index is included
-   * @param toExclusive - higher bound, index is excluded
-   * @param action - method with the parameters (EElement element)
+   * 
+   * @param fromInclusive
+   *          - lower bound, index is included
+   * @param toExclusive
+   *          - higher bound, index is excluded
+   * @param action
+   *          - method with the parameters (EElement element)
    */
   public void forAllElements(Consumer<EElement> action)
   {
     synchronized (this.elements)
     {
-      for(EElement el : this.elements)
+      for (EElement el : this.elements)
         action.accept(el);
     }
   }
-  
+
   /**
    * Iterates over the elements list in the given bounds
-   * @param fromInclusive - lower bound, index is included
-   * @param toExclusive - higher bound, index is excluded
-   * @param action - method with the parameters (int index, EElement element)
+   * 
+   * @param fromInclusive
+   *          - lower bound, index is included
+   * @param toExclusive
+   *          - higher bound, index is excluded
+   * @param action
+   *          - method with the parameters (int index, EElement element)
    */
   public void forAllElements(BiConsumer<Integer, EElement> action)
   {
     synchronized (this.elements)
     {
       Integer i = 0;
-      for(EElement el : this.elements)
+      for (EElement el : this.elements)
         action.accept(i++, el);
     }
   }
-  
+
   protected int size()
   {
     synchronized (this.elements)
@@ -309,15 +361,15 @@ public abstract class ElementContributor implements EEventListener
       return this.elements.size();
     }
   }
-  
-  protected EElement getElement(int i) 
+
+  protected EElement getElement(int i)
   {
     synchronized (this.elements)
     {
       return this.elements.get(i);
     }
   }
-  
+
   protected ArrayList<EElement> createElementList()
   {
     synchronized (this.elements)
@@ -325,7 +377,7 @@ public abstract class ElementContributor implements EEventListener
       return new ArrayList<>(this.elements);
     }
   }
-  
+
   /**
    * Return <code>true</code> if the element list is empty, otherwise
    * <code>false</code>.
@@ -334,7 +386,7 @@ public abstract class ElementContributor implements EEventListener
   {
     return this.elements.isEmpty();
   }
-  
+
   /**
    * Returns the {@linkplain Panel LCARS panel} this contributor is supplying
    * elements for.
@@ -343,7 +395,7 @@ public abstract class ElementContributor implements EEventListener
   {
     return panel.get();
   }
- 
+
   /**
    * Adds the elements of this contributor to an {@linkplain Panel LCARS panel}.
    * 
@@ -355,10 +407,12 @@ public abstract class ElementContributor implements EEventListener
    */
   public void addToPanel(Panel panel)
   {
-    if (panel==null) return;
+    if (panel==null)
+      return;
     synchronized (this.elements)
     {
-      if (getPanel()==panel) return;
+      if (getPanel()==panel)
+        return;
       this.panel = new WeakReference<Panel>(panel);
       panel.addAll(this.elements);
       this.elements.forEach((el) -> {
@@ -366,8 +420,9 @@ public abstract class ElementContributor implements EEventListener
       });
       panel.invalidate();
     }
+    panel.addPanelTimerListener(panelTimerListener);
   }
-  
+
   /**
    * Removes the elements of this contributor from the {@linkplain Panel LCARS
    * panel}.
@@ -382,7 +437,9 @@ public abstract class ElementContributor implements EEventListener
     synchronized (this.elements)
     {
       Panel panel = getPanel();
-      if (panel==null) return;
+      if (panel==null)
+        return;
+      panel.removePanelTimerListener(panelTimerListener);
       this.panel = new WeakReference<Panel>(null);
 
       for (EElement el : this.elements)
@@ -405,7 +462,7 @@ public abstract class ElementContributor implements EEventListener
   }
 
   // -- Private element management --
-  
+
   private void doReposition(Collection<EElement> elements)
   {
     int x = this.x;
@@ -418,20 +475,21 @@ public abstract class ElementContributor implements EEventListener
       el.setBounds(bounds);
     }
   }
-  
+
   private void doAddAll(Collection<EElement> elements)
   {
     this.elements.removeAll(elements);
     this.elements.addAll(elements);
 
     Panel panel = getPanel();
-    if (panel==null) return;
+    if (panel==null)
+      return;
     panel.addAll(elements);
     for (EElement el : elements)
       el.setPanel(panel);
-    
+
   }
-  
+
   private void doRemoveAll(Collection<EElement> elements)
   {
     this.elements.removeAll(elements);
@@ -442,7 +500,7 @@ public abstract class ElementContributor implements EEventListener
   }
 
   // -- EEvent handling --
-  
+
   public void addEEventListener(EEventListener listener)
   {
     this.listeners.add(listener);
@@ -490,8 +548,58 @@ public abstract class ElementContributor implements EEventListener
     fireEEvent(ee);
   }
 
-  // -- Timers --
-  
+  // -- Panel timer event handling
+
+  /**
+   * Called 25 times per second as long as the element contributor
+   * {@linkplain #isDisplayed() is displayed}. Derived classes may override this
+   * method to perform periodic actions. The base class implementation does
+   * nothing.
+   */
+  protected void fps25()
+  {
+  }
+
+  /**
+   * Called 10 times per second as long as the element contributor
+   * {@linkplain #isDisplayed() is displayed}. Derived classes may override this
+   * method to perform periodic actions. The base class implementation does
+   * nothing.
+   */
+  protected void fps10()
+  {
+  }
+
+  /**
+   * Called twice per second as long as the element contributor
+   * {@linkplain #isDisplayed() is displayed}. Derived classes may override this
+   * method to perform periodic actions. The base class implementation does
+   * nothing.
+   */
+  protected void fps2()
+  {
+  }
+
+  /**
+   * Called once per second as long as the element contributor
+   * {@linkplain #isDisplayed() is displayed}. Derived classes may override this
+   * method to perform periodic actions. The base class implementation does
+   * nothing.
+   */
+  protected void fps1()
+  {
+  }
+
+  // -- Deprecated API --
+
+  private Timer timer;
+  private final HashMap<String, TimerTask> timerTasks;
+
+  /**
+   * @deprecated Use {@link #fps25()}, {@link #fps10()}, {@link #fps2()}, or
+   *             {@link #fps1()}.
+   */
+  @Deprecated
   public void scheduleTimerTask(TimerTask task, String name, long firstTime, long period)
   {
     synchronized (timerTasks)
@@ -508,10 +616,11 @@ public abstract class ElementContributor implements EEventListener
         timer.schedule(task,firstTime,period);
       else
         timer.schedule(task,firstTime);
-      timerTasks.put(name,task);      
+      timerTasks.put(name,task);
     }
   }
-  
+
+  @Deprecated
   public void cancelTimerTask(String name)
   {
     synchronized (timerTasks)
@@ -519,23 +628,28 @@ public abstract class ElementContributor implements EEventListener
       cancelTimerTask(timerTasks.get(name));
     }
   }
-  
+
+  @Deprecated
   public void cancelTimerTask(TimerTask task)
   {
-    if (task==null) return;
+    if (task==null)
+      return;
     task.cancel();
-    
+
     synchronized (timerTasks)
     {
       for (Iterator<TimerTask> i = timerTasks.values().iterator(); i.hasNext();)
       {
         TimerTask tt = i.next();
-        if (tt.equals(task)) i.remove();
+        if (tt.equals(task))
+          i.remove();
       }
-      if (timer!=null) timer.purge();      
+      if (timer != null)
+        timer.purge();
     }
   }
-  
+
+  @Deprecated
   public void cancelAllTimerTasks()
   {
     synchronized (timerTasks)
@@ -546,7 +660,7 @@ public abstract class ElementContributor implements EEventListener
         tt.cancel();
         i.remove();
       }
-      if (timer!=null) 
+      if (timer!=null)
       {
         timer.cancel();
         timer.purge();
@@ -555,3 +669,5 @@ public abstract class ElementContributor implements EEventListener
     }
   }
 }
+
+// EOF

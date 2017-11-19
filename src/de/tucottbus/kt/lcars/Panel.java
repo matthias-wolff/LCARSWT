@@ -17,6 +17,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import de.tucottbus.kt.lcars.contributors.EMessageBox;
 import de.tucottbus.kt.lcars.contributors.EMessageBoxListener;
@@ -1008,183 +1009,9 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
     dimc = Math.abs((int) ((alpha - this.state.alpha) / this.dimInc)) + 1;
   }
 
-  // -- Event handling --
-
-  /**
-   * Adds the specified key listener to receive key events from this panel.
-   * 
-   * @param listener
-   *          The key listener. If <code>null</code> or if the specified
-   *          listened is already registered, the method does nothing.
-   */
-  public void addKeyListener(KeyListener listener)
-  {
-    if (keyListeners.indexOf(listener) >= 0)
-      return;
-    keyListeners.add(listener);
-  }
-
-  /**
-   * Removes the specified key listener from the listeners list.
-   * 
-   * @param listener
-   *          The key listener.
-   */
-  public void removeKeyListener(KeyListener listener)
-  {
-    keyListeners.remove(listener);
-  }
-
-  // -- Implementation of the ISpeechEventListener interface --
-
-  @Override
-  public void speechEvent(SpeechEvent event)
-  {
-  }
-
-  // -- Periodic and timer actions --
-
-  class PanelTimerTask extends TimerTask
-  {
-
-    @Override
-    public void run()
-    {
-      // Call periodic panel methods
-      if (runc % 2 == 0)
-        try
-        {
-          fps25();
-        } catch (Exception e)
-        {
-          err(e);
-        }
-      if (runc % 5 == 0)
-      {
-        if (eLoadStat!=null)
-          try
-          {
-            getScreen().getLoadStatistics();
-          }
-          catch (Exception e) {}
-        try
-        {
-          fps10();
-        } catch (Exception e)
-        {
-          err(e);
-        }
-      }
-      if (runc % 25 == 0)
-        try
-        {
-          fps2();
-        } catch (Exception e)
-        {
-          err(e);
-        }
-      if (runc % 50 == 0)
-        try
-        {
-          fps1();
-        } catch (Exception e)
-        {
-          err(e);
-        }
-      if (++runc >= 50)
-        runc = 0;
-
-      // Dimming
-      if (dimc > 0)
-      {
-        setAlpha(state.alpha + dimInc);
-        dimc--;
-      }
-
-      // Blinking
-      if (runc % 25 == 0)
-      {
-        state.blink = (runc > 0) ? LCARS.ES_SELECTED : 0x00000000;
-
-        synchronized (elements)
-        {
-          for (EElement el : elements)
-            if (el.isBlinking())
-              el.invalidate(false);
-        }
-      }
-
-      // Automatic re-locking
-      if (runc % 50 == 0 && !isLocked() && state.autoRelock > 0)
-      {
-        state.autoRelock--;
-        if (state.autoRelock == 0)
-          setLocked(true);
-      }
-
-      // UI reflections
-      if (runc % 25 == 0)
-      {
-        float a = getAlpha();
-        if (eLight != null)
-          eLight.setDisabled(a >= 1.0f);
-        if (eDim != null)
-          eDim.setDisabled(a <= 0.1f);
-        if (eSilent != null)
-          eSilent.setBlinking(isSilent());
-      }
-
-      // Set period of load statistics
-      if (runc % 50 == 0)
-        loadStat.period();
-
-      // Update screen
-      if (runc % 50 == 0)
-        invalidate();
-      if (runc % 2 == 0)
-        updateScreen();
-    }
-  }
-
   private void err(Exception e)
   {
     Log.err("Error in Panel execution.", e);
-  }
-
-  /**
-   * Called 25 times per second. Derived classes may override this method to
-   * perform periodic actions. It is <em>not</em> recommended to start own
-   * threads for that purpose.
-   */
-  protected void fps25()
-  {
-  }
-
-  /**
-   * Called 10 times per second. Derived classes may override this method to
-   * perform periodic actions. It is <em>not</em> recommended to start own
-   * threads for that purpose.
-   */
-  protected void fps10()
-  {
-  }
-
-  /**
-   * Called twice per second. Derived classes may override this method to
-   * perform periodic actions. It is <em>not</em> recommended to start own
-   * threads for that purpose.
-   */
-  protected void fps2()
-  {
-  }
-
-  /**
-   * Called once per second. Derived classes may override this method to perform
-   * periodic actions. It is <em>not</em> recommended to start own threads for
-   * that purpose.
-   */
-  protected void fps1()
-  {
   }
 
   /**
@@ -1275,6 +1102,234 @@ public class Panel implements IPanel, EEventListener, ISpeechEventListener
 
     time = System.nanoTime() - time;
     loadStat.add((int) (time / 400000));
+  }
+  
+  // -- Keyboard event  handling --
+
+  /**
+   * Adds the specified key listener to receive key events from this panel.
+   * 
+   * @param listener
+   *          The key listener. If <code>null</code> or if the specified
+   *          listened is already registered, the method does nothing.
+   */
+  public void addKeyListener(KeyListener listener)
+  {
+    if (keyListeners.indexOf(listener) >= 0)
+      return;
+    keyListeners.add(listener);
+  }
+
+  /**
+   * Removes the specified key listener from the listeners list.
+   * 
+   * @param listener
+   *          The key listener.
+   */
+  public void removeKeyListener(KeyListener listener)
+  {
+    keyListeners.remove(listener);
+  }
+
+  // -- Implementation of the ISpeechEventListener interface --
+
+  @Override
+  public void speechEvent(SpeechEvent event)
+  {
+  }
+
+  // -- Periodic and timer actions --
+
+  class PanelTimerTask extends TimerTask
+  {
+
+    @Override
+    public void run()
+    {
+      // Call periodic panel methods
+      if (runc % 2 == 0)
+      {
+        try { fps25(); } catch (Exception e) {err(e); }
+        firePanelTimer((listener)->listener.fps25());
+      }
+      if (runc % 5 == 0)
+      {
+        if (eLoadStat!=null)
+          try
+          {
+            getScreen().getLoadStatistics();
+          }
+          catch (Exception e) {}
+        try { fps10(); } catch (Exception e) { err(e); }
+        firePanelTimer((listener)->listener.fps10());
+      }
+      if (runc % 25 == 0)
+      {
+        try { fps2(); } catch (Exception e) { err(e); }
+        firePanelTimer((listener)->listener.fps2());
+      }
+      if (runc % 50 == 0)
+      {
+        try { fps1(); } catch (Exception e) { err(e); }
+        firePanelTimer((listener)->listener.fps1());
+      }
+      if (++runc >= 50)
+        runc = 0;
+
+      // Dimming
+      if (dimc > 0)
+      {
+        setAlpha(state.alpha + dimInc);
+        dimc--;
+      }
+
+      // Blinking
+      if (runc % 25 == 0)
+      {
+        state.blink = (runc > 0) ? LCARS.ES_SELECTED : 0x00000000;
+
+        synchronized (elements)
+        {
+          for (EElement el : elements)
+            if (el.isBlinking())
+              el.invalidate(false);
+        }
+      }
+
+      // Automatic re-locking
+      if (runc % 50 == 0 && !isLocked() && state.autoRelock > 0)
+      {
+        state.autoRelock--;
+        if (state.autoRelock == 0)
+          setLocked(true);
+      }
+
+      // UI reflections
+      if (runc % 25 == 0)
+      {
+        float a = getAlpha();
+        if (eLight != null)
+          eLight.setDisabled(a >= 1.0f);
+        if (eDim != null)
+          eDim.setDisabled(a <= 0.1f);
+        if (eSilent != null)
+          eSilent.setBlinking(isSilent());
+      }
+
+      // Set period of load statistics
+      if (runc % 50 == 0)
+        loadStat.period();
+
+      // Update screen
+      if (runc % 50 == 0)
+        invalidate();
+      if (runc % 2 == 0)
+        updateScreen();
+    }
+  }
+  
+  /**
+   * Called 25 times per second as long as the panel {@linkplain #isRunning() is
+   * running}. Derived classes may override this method to perform periodic
+   * actions. The base class implementation does nothing.
+   */
+  protected void fps25()
+  {
+  }
+
+  /**
+   * Called 10 times per second as long as the panel {@linkplain #isRunning() is
+   * running}. Derived classes may override this method to perform periodic
+   * actions. The base class implementation does nothing.
+   */
+  protected void fps10()
+  {
+  }
+
+  /**
+   * Called twice per second as long as the panel {@linkplain #isRunning() is
+   * running}. Derived classes may override this method to perform periodic
+   * actions. The base class implementation does nothing.
+   */
+  protected void fps2()
+  {
+  }
+
+  /**
+   * Called once per second as long as the panel {@linkplain #isRunning() is
+   * running}. Derived classes may override this method to perform periodic
+   * actions. The base class implementation does nothing.
+   */
+  protected void fps1()
+  {
+  }
+
+  /**
+   * List of panel timer listeners.
+   */
+  private ArrayList<IPanelTimerListener> timerListeners = null;
+  
+  /**
+   * Adds a panel timer listener.
+   * 
+   * @param listener
+   *          The listener.
+   */
+  public void addPanelTimerListener(IPanelTimerListener listener)
+  {
+    if (listener==null)
+      return;
+    if (timerListeners==null)
+      timerListeners = new ArrayList<IPanelTimerListener>();
+    if (timerListeners.contains(listener))
+      return;
+    timerListeners.add(listener);
+  }
+ 
+  /**
+   * Removes a panel timer listener.
+   * 
+   * @param listener
+   *          The listener.
+   */
+  public void removePanelTimerListener(IPanelTimerListener listener)
+  {
+    if (listener==null || timerListeners==null)
+      return;
+    timerListeners.remove(listener);  
+  }
+  
+  /**
+   * Removes all panel timer listener.
+   * 
+   * @param listener
+   *          The listener.
+   */
+  protected void removeAllPanelTimerListeners()
+  {
+    timerListeners.clear();
+  }
+  
+  /**
+   * Fires a panel timer event.
+   * 
+   * @param action
+   *          A consumer being fed with all registered
+   *          {@linkplain #timerListeners panel timer listeners}.
+   */
+  private void firePanelTimer(Consumer<IPanelTimerListener> action)
+  {
+    if (timerListeners==null)
+      return;
+    for (IPanelTimerListener listener : timerListeners)
+      try 
+      {
+        action.accept(listener);
+      } 
+      catch (Exception e) 
+      {
+        err(e); 
+      }
   }
 
   // -- Implementation of the IPanel interface --
