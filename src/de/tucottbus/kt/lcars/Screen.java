@@ -1,5 +1,6 @@
 package de.tucottbus.kt.lcars;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -433,14 +434,22 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
       composite.setData(bounds); // Remember bounds in LCARS panel coordinates
       composite.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
       composite.moveAbove(null);
-      component.setBounds(0,0,br.x-tl.x,br.y-tl.y);
+      FillLayout fl = new FillLayout(SWT.HORIZONTAL);
+      fl.marginHeight=0;
+      fl.marginHeight=0;
+      fl.spacing=0;
+      composite.setLayout(fl);
 
       Frame awtFrame = SWT_AWT.new_Frame(composite);
       awtFrame.setBackground(Color.BLACK);
       awtComponents.put(component, composite);
-      awtFrame.setBounds(component.getBounds());
-      awtFrame.add(component);
-      shell.redraw();
+      BorderLayout bl = new BorderLayout();
+      bl.setHgap(0);
+      bl.setVgap(0);
+      awtFrame.setLayout(bl); 
+      awtFrame.add(component,BorderLayout.CENTER);
+      
+      composite.layout(true);
     });
   }
 
@@ -480,7 +489,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         )
         {
           composite.setBounds(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
-          component.setBounds(0,0,br.x-tl.x,br.y-tl.y);
+          composite.layout(true);
         }
       });
     });
