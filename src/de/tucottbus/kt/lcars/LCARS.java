@@ -66,6 +66,7 @@ import de.tucottbus.kt.lcars.net.NetUtils;
 import de.tucottbus.kt.lcars.net.RmiScreenAdapter;
 import de.tucottbus.kt.lcars.net.panels.ServerPanel;
 import de.tucottbus.kt.lcars.speech.ISpeechEngine;
+import de.tucottbus.kt.lcars.speech.SpeechEnginePanel;
 import de.tucottbus.kt.lcars.swt.ColorMeta;
 import de.tucottbus.kt.lcars.swt.FontMeta;
 
@@ -554,7 +555,87 @@ public class LCARS
     return new Cursor(display, sourceData, 0, 0);
   }
   
-  // -- Service methods --
+  // -- Panel selector utilities
+  
+  /**
+   * List of panel classes to be displayed on the panel selector dialog.
+   */
+  private static AbstractList<Class<? extends Panel>> panelSelectorList;
+  static
+  {
+    panelSelectorList = getMainPanelClasses();
+  }
+
+  /**
+   * Returns a list of all available LCARS main panels.
+   */
+  private static AbstractList<Class<? extends Panel>> getMainPanelClasses()
+  {
+    ArrayList<Class<? extends Panel>> l = new ArrayList<Class<? extends Panel>>();
+
+    // Find and add main panel classes 
+    final Class<? extends Panel> subclass = onPADD() ? PaddMainPanel.class : MainPanel.class;
+    try
+    {
+      for (Class<?> cl : getClassesInPackage("",null))
+      {
+        if (!subclass.isAssignableFrom(cl)) continue;
+        Class<? extends Panel> clazz = cl.asSubclass(subclass);
+        if (clazz.equals(Panel.class)) continue;
+        if (Modifier.isAbstract(clazz.getModifiers())) continue;
+        l.add(clazz);
+      }
+    }
+    catch (Exception e)
+    {
+      Log.err("Creating list of all loadable LCARS main panels failed.", e);
+    }
+
+    return l;
+  }
+  
+  /**
+   * Returns the list of panel classes to be displayed on the panel selector dialog.
+   * 
+   * @see #addToPanelSelectorList(Class)
+   */
+  public static AbstractList<Class<? extends Panel>> getPanelSelectorList()
+  {
+    return panelSelectorList;
+  }
+
+  /**
+   * Adds a panel class to the list of panel classes to be displayed on the
+   * panel selector dialog.
+   * 
+   * @param panelClass
+   *          The panel class. If the argument is already on the list, the 
+   *          method will do nothing.
+   */
+  public static void addToPanelSelectorList(Class<? extends Panel> panelClass)
+  {
+    if (panelSelectorList.contains(panelClass))
+      return;
+    panelSelectorList.add(panelClass);
+  }
+
+  /**
+   * Removes a panel class from the list of panel classes to be displayed on the
+   * panel selector dialog.
+   * 
+   * @param panelClass
+   *          The panel class.
+   * @return <code>true</code> if an element was removed from the list,
+   *         <code>false</code> otherwise.
+   */
+  public static boolean removeFromPanelSelectorList(Class<? extends Panel> panelClass)
+  {
+    if (!panelSelectorList.contains(panelClass))
+      return false;
+    return panelSelectorList.remove(panelClass);
+  }
+  
+  // -- Service methods --  
   
   /**
    * Computes the shape of a text.
@@ -767,31 +848,6 @@ public class LCARS
         val1*clr1.getGreen() +val2*clr2.getGreen(),
         val1*clr1.getBlue () +val2*clr2.getBlue (),
         val1*clr1.getAlpha() +val2*clr2.getRed  ());
-  }
-  
-  /**
-   * Returns a list of all loadable LCARS main panels.
-   */
-  public static AbstractList<Class<? extends Panel>> getMainPanelClasses()
-  {
-    final Class<? extends Panel> subclass = onPADD() ? PaddMainPanel.class : MainPanel.class;
-    ArrayList<Class<? extends Panel>> l = new ArrayList<Class<? extends Panel>>();
-    try
-    {
-      for (Class<?> cl : getClassesInPackage("",null))
-      {
-        if (!subclass.isAssignableFrom(cl)) continue;
-        Class<? extends Panel> clazz = cl.asSubclass(subclass);
-        if (clazz.equals(Panel.class)) continue;
-        if (Modifier.isAbstract(clazz.getModifiers())) continue;
-        l.add(clazz);
-      }
-    }
-    catch (Exception e)
-    {
-      Log.err("Creating list of all loadable LCARS main panels failed.", e);
-    }
-    return l;
   }
   
   /**
@@ -1370,6 +1426,12 @@ public class LCARS
         iscreen = new RmiScreenAdapter((Screen)iscreen,clientOf);
       }
       
+      // Add special panels to panel selector list
+      if (LCARS.getArg("--server")!=null)
+        LCARS.addToPanelSelectorList(ServerPanel.class);
+      if (LCARS.getArg("--nospeech")==null)
+        LCARS.addToPanelSelectorList(SpeechEnginePanel.class);
+
       // Create initial panel and run screen
       if (iscreen!=null)
       {
