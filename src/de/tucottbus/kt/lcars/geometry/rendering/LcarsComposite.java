@@ -63,7 +63,7 @@ public class LcarsComposite extends Composite implements PaintListener
    */
   public LcarsComposite(Composite parent) 
   {
-    super(parent, SWT.DOUBLE_BUFFERED|SWT.EMBEDDED|SWT.NO_BACKGROUND);    
+    super(parent, SWT.DOUBLE_BUFFERED|SWT.NO_BACKGROUND);    
     display = parent.getDisplay();
     transform = new Transform(display);
     addPaintListener(this);

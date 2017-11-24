@@ -249,7 +249,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
   }
 
   /**
-   * Returns the SWT shell s´this screen is running on.
+   * Returns the SWT shell this screen is running on.
    */
   public Shell getSwtShell()
   {
