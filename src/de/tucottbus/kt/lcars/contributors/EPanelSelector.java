@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import de.tucottbus.kt.lcars.IPanel;
 import de.tucottbus.kt.lcars.IScreen;
 import de.tucottbus.kt.lcars.LCARS;
-import de.tucottbus.kt.lcars.MainPanel;
 import de.tucottbus.kt.lcars.Panel;
 import de.tucottbus.kt.lcars.elements.EElement;
 import de.tucottbus.kt.lcars.elements.EEvent;
@@ -53,6 +52,7 @@ public class EPanelSelector extends EMessageBox
     eDismiss = new ERect(null,0,d.height+16,123,53,style2|LCARS.ES_RECT_RND_W|LCARS.ES_LABEL_E,"DISMISS");
     eDismiss.addEEventListener(new EEventListenerAdapter() 
     {
+      @Override
       public void touchDown(EEvent ee)
       {
         close();
@@ -63,6 +63,7 @@ public class EPanelSelector extends EMessageBox
     ERect btn = new ERect(null,126,d.height+16,124,53,style2|LCARS.ES_RECT_RND_E|LCARS.ES_LABEL_E,"EXIT");
     btn.addEEventListener(new EEventListenerAdapter()
     {
+      @Override
       public void touchUp(EEvent ee)
       {
         Panel panel = getPanel();
@@ -95,6 +96,7 @@ public class EPanelSelector extends EMessageBox
       btn.setData(panelClass.getName());
       btn.addEEventListener(new EEventListenerAdapter()
       {
+        @Override
         public void touchDown(EEvent ee)
         {
           String className = (String)ee.el.getData();
@@ -170,28 +172,10 @@ public class EPanelSelector extends EMessageBox
    */
   public AbstractList<Class<? extends Panel>> getPanelList()
   {
-    if (this.panelList!=null)
-      return this.panelList;
-    
-    AbstractList<Class<? extends Panel>> list = LCARS.getMainPanelClasses();
-    if (LCARS.getArg("--server")!=null)
-      try
-      {
-        list.add(Class.forName("de.tucottbus.kt.lcars.net.panels.ServerPanel").asSubclass(Panel.class));
-      }
-      catch (Exception e)
-      {
-        Log.err("Cannot get 'de.tucottbus.kt.lcars.net.panels.ServerPanel'", e);
-      }
-    if (Panel.getSpeechEngine()!=null)
-      try
-      {
-        list.add(Class.forName("de.tucottbus.kt.lcars.speech.SpeechEnginePanel").asSubclass(Panel.class));
-      }
-      catch (Exception e)
-      {
-        Log.err("Cannot get 'de.tucottbus.kt.lcars.speech.SpeechEnginePanel'", e);
-      }
-    return list;
+    if (this.panelList==null)
+      this.panelList = LCARS.getPanelSelectorList();
+    return this.panelList;
   }
 }
+
+// EOF
