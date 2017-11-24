@@ -163,6 +163,7 @@ public class Screen implements IScreen, MouseListener, MouseMoveListener,
         long time = System.nanoTime();
         repostionAwtComponents();
         GC gc = e.gc;
+        gc.setAdvanced(true);
         gc.setTextAntialias(SWT.ON);
         gc.setInterpolation(SWT.LOW);
         gc.setAntialias(SWT.ON);

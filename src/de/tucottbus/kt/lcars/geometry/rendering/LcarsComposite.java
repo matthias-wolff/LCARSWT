@@ -207,7 +207,7 @@ public class LcarsComposite extends Composite implements PaintListener
     
     // Clipping setup
     final Rectangle dirtyArea = SWTUtils.toSwtRectangle(context.getDirtyArea().getBounds());
-    final Rectangle maxArea = e.widget.getDisplay().getBounds();
+    final Rectangle maxArea = getBounds();
 
     // Erase background
     gc.setBackground(getBackground());
