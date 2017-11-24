@@ -27,12 +27,13 @@ import de.tucottbus.kt.lcars.elements.EEventListener;
  */
 public abstract class ElementContributor implements EEventListener
 {
-  private transient WeakReference<Panel>   panel;
-  private final     ArrayList<EElement>    elements;
-  protected final   int                    x;
-  protected final   int                    y;
-  private final     Vector<EEventListener> listeners;
-  private final     IPanelTimerListener    panelTimerListener;
+  private transient WeakReference<Panel>           panel;
+  private final     ArrayList<EElement>            elements;
+  protected final   int                            x;
+  protected final   int                            y;
+  private final     Vector<EEventListener>         listeners;
+  private final     Collection<ElementContributor> children;
+  private final     IPanelTimerListener            panelTimerListener;
 
   // -- Constructors --
 
@@ -52,6 +53,7 @@ public abstract class ElementContributor implements EEventListener
     listeners  = new Vector<EEventListener>();
     timerTasks = new HashMap<String,TimerTask>();
     panel      = new WeakReference<Panel>(null);
+    children   = new ArrayList<ElementContributor>();
     panelTimerListener = new IPanelTimerListener()
     {
       
@@ -123,12 +125,16 @@ public abstract class ElementContributor implements EEventListener
    *          If <code>true</code>, offset all added elements by the coordinates
    *          of the top-left corner of this element contributor, i.e. by
    *          (<code>this.</code>{@link #x}, <code>this.</code>{@link #y}).
+   * @return The argument <code>ec</code>.
    */
-  protected void add(ElementContributor ec, boolean reposition)
+  protected ElementContributor add(ElementContributor ec, boolean reposition)
   {
     if (ec==null)
-      return;
+      return null;
+    children.add(ec);
     ec.forAllElements((el)->{ this.add(el,reposition); });
+    ec.onAddToPanelOrContributor();
+    return ec;
   }
 
   /**
@@ -137,10 +143,11 @@ public abstract class ElementContributor implements EEventListener
    * 
    * @param ec
    *          The other contributor.
+   * @return The argument <code>ec</code>.
    */
-  protected void add(ElementContributor ec)
+  protected ElementContributor add(ElementContributor ec)
   {
-    add(ec,true);
+    return add(ec,true);
   }
 
   protected void addAll(Collection<EElement> elements, boolean reposition)
@@ -197,6 +204,8 @@ public abstract class ElementContributor implements EEventListener
   {
     if (ec==null)
       return;
+    children.remove(ec);
+    ec.onRemoveFromPanelOrContributor();
     ec.forAllElements((el)->{ this.remove(el); });
   }
 
@@ -214,7 +223,12 @@ public abstract class ElementContributor implements EEventListener
     {
       Panel panel = getPanel();
       if (panel!=null)
+      {
+        for (ElementContributor ec : children)
+          panel.removePanelTimerListener(ec.panelTimerListener);
         panel.removeAll(this.elements);
+      }
+      this.children.clear();
       this.elements.clear();
     }
   }
@@ -420,7 +434,13 @@ public abstract class ElementContributor implements EEventListener
       });
       panel.invalidate();
     }
+    onAddToPanelOrContributor();
     panel.addPanelTimerListener(panelTimerListener);
+    for (ElementContributor ec : children)
+    {
+      ec.panel = new WeakReference<Panel>(panel);
+      panel.addPanelTimerListener(ec.panelTimerListener);
+    }
   }
 
   /**
@@ -439,7 +459,13 @@ public abstract class ElementContributor implements EEventListener
       Panel panel = getPanel();
       if (panel==null)
         return;
+      for (ElementContributor ec : children)
+      {
+        ec.panel = new WeakReference<Panel>(null);
+        panel.removePanelTimerListener(ec.panelTimerListener);
+      }
       panel.removePanelTimerListener(panelTimerListener);
+      onRemoveFromPanelOrContributor();
       this.panel = new WeakReference<Panel>(null);
 
       for (EElement el : this.elements)
@@ -449,6 +475,40 @@ public abstract class ElementContributor implements EEventListener
     }
   }
 
+  /**
+   * Called after the elements of this contributor have been added to an
+   * {@linkplain Panel LCARS panel} or another {@linkplain ElementContributor
+   * element contributor} but <em>before</em> one of the <code>fpsXXX()</code>
+   * methods is invoked for the first time. The base class implementation does
+   * nothing.
+   * 
+   * <h3>Remarks:</h3>
+   * <ul>
+   *   <li>Overrides should <em>not</em> invoke {@link #getPanel()} as the 
+   *   returned value may be <code>null</code>.</li>
+   * </ul>
+   */
+  protected void onAddToPanelOrContributor()
+  {
+    // The base class implementation does nothing.
+  }
+
+  /**
+   * Called before the elements of this contributor are removed from an
+   * {@linkplain Panel LCARS panel} or another {@linkplain ElementContributor
+   * element contributor}. The base class implementation does nothing.
+   * 
+   * <h3>Remarks:</h3>
+   * <ul>
+   *   <li>Overrides should <em>not</em> invoke {@link #getPanel()} as the 
+   *   returned value may be <code>null</code>.</li>
+   * </ul>
+   */
+  protected void onRemoveFromPanelOrContributor()
+  {
+    // The base class implementation does nothing.
+  }
+  
   /**
    * Determines if the elements of this contributor are displayed on an
    * {@linkplain Panel LCARS panel}.

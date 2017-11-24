@@ -2,10 +2,8 @@ package de.tucottbus.kt.lcars.contributors;
 
 import java.awt.Dimension;
 import java.awt.Point;
-import java.lang.ref.WeakReference;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.TimerTask;
 import java.util.Vector;
 import java.util.function.Consumer;
 
@@ -18,8 +16,8 @@ import de.tucottbus.kt.lcars.elements.ELabel;
 import de.tucottbus.kt.lcars.elements.ERect;
 import de.tucottbus.kt.lcars.elements.EScaledImage;
 import de.tucottbus.kt.lcars.elements.EValue;
-import de.tucottbus.kt.lcars.swt.ImageMeta;
 import de.tucottbus.kt.lcars.logging.Log;
+import de.tucottbus.kt.lcars.swt.ImageMeta;
 
 /**
  * An array of equally sized {@link ERect}s, {@link EValue}s, {@link ELabel}s or {@link EScaledImage}s..
@@ -41,10 +39,6 @@ public class EElementArray extends ElementContributor implements EEventListener
   protected EElement ePrev;
   protected EElement eNext;
   protected EElement eLock;
-
-  private static final String TT_ANIMATION = "ANIMATION";
-  private static final String TT_AUTOPAGE = "AUTOPAGE";
-  private static final String TT_UNHILITE = "UNHILITE";
 
   /**
    * Creates a new element array.
@@ -169,6 +163,7 @@ public class EElementArray extends ElementContributor implements EEventListener
   /**
    * Resets this array.
    */
+  @Override
   public void removeAll()
   {
     synchronized (eList)
@@ -223,6 +218,7 @@ public class EElementArray extends ElementContributor implements EEventListener
    * @param index
    *          The zero-based index of the label to remove.
    */
+  @Override
   public void remove(int index)
   {
     synchronized (eList)
@@ -247,7 +243,6 @@ public class EElementArray extends ElementContributor implements EEventListener
       this.firstItem = first;      
     }
     animate();
-    autopage();
   }
 
   /**
@@ -266,8 +261,11 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void setPageControls(EElement ePrev, EElement eNext)
   {
+    if (ePrev==null || eNext==null)
+      bindControls(false);
     this.ePrev = ePrev;
     this.eNext = eNext;
+    bindControls(true);
   }
 
   /**
@@ -284,7 +282,10 @@ public class EElementArray extends ElementContributor implements EEventListener
    */
   public void setLockControl(EElement eLock)
   {
+    if (eLock==null)
+      bindControls(false);
     this.eLock = eLock;
+    bindControls(true);
   }
 
   /**
@@ -474,12 +475,18 @@ public class EElementArray extends ElementContributor implements EEventListener
   {
     synchronized (eList)
     {
-      EElement e = this.eList.get(item);
-      e.setHighlighted(true);
-      scheduleTimerTask(new UnhiliteTask(e), TT_UNHILITE + e.hashCode(), time, 0);
-      Panel panel = getPanel();
-      if (panel != null)
-        panel.invalidate();
+      EElement el = this.eList.get(item);
+      el.setHighlighted(true);
+      LCARS.invokeLater(()->{
+        try
+        {
+          el.setHighlighted(false);
+        }
+        catch (Exception e)
+        {
+          Log.err("Unhighlighting element",e);
+        }
+      }, time);
     }
   }
 
@@ -554,62 +561,50 @@ public class EElementArray extends ElementContributor implements EEventListener
     }
   }
 
-  // -- Overrides --
-
-  /*
-   * (non-Javadoc)
+  /**
+   * Binds or unbinds any external controls by registering or unregistering this
+   * element array as {@link EEventListener}.
    * 
-   * @see de.tucottbus.kt.lcars.contributors.ElementContributor#addToPanel(de.
-   * tucottbus.kt.lcars.Panel)
+   * @param bind
+   *          <code>true</code> to bind, <code>false</code> to unbind.
    */
-  @Override
-  public void addToPanel(Panel panel)
+  protected void bindControls(boolean bind)
   {
-    super.addToPanel(panel);
-
-    Consumer<EElement> remove = e -> {
-      if (e == null)
+    if (getPanel()==null && bind)
+      return;
+    Consumer<EElement> bindControl = el ->
+    {
+      if (el==null)
         return;
-      e.removeAllEEventListeners();
-      e.addEEventListener(EElementArray.this);
+      el.removeAllEEventListeners();
+      if (bind)
+        el.addEEventListener(this);
     };
-    remove.accept(ePrev);
-    remove.accept(eNext);
-    remove.accept(eLock);
-
-    animate();
-    autopage();
+    bindControl.accept(eLock);
+    bindControl.accept(ePrev);
+    bindControl.accept(eNext);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.tucottbus.kt.lcars.contributors.ElementContributor#removeFromPanel()
-   */
+  // -- Overrides ---
+
   @Override
-  public void removeFromPanel()
+  protected void onAddToPanelOrContributor()
   {
-    cancelAllTimerTasks();
-    
-    if (ePrev != null)
-      ePrev.removeAllEEventListeners();
-    if (eNext != null)
-      eNext.removeAllEEventListeners();
-    if (eLock != null)
-      eLock.removeAllEEventListeners();
-    super.removeFromPanel();
+    super.onAddToPanelOrContributor();
+    bindControls(true);
+    animate();
   }
 
+  @Override
+  protected void onRemoveFromPanelOrContributor()
+  {
+    super.onRemoveFromPanelOrContributor();
+    bindControls(false);
+  }
+  
   // -- Implementation of the EEventlistener interface --
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.tucottbus.kt.lcars.elements.EEventListener#touchDown(de.tucottbus.kt.
-   * lcars.elements.EEvent)
-   */
+  @Override
   public void touchDown(EEvent ee)
   {
     if (ee.el.equals(ePrev))
@@ -632,13 +627,7 @@ public class EElementArray extends ElementContributor implements EEventListener
     super.touchDown(ee);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.tucottbus.kt.lcars.elements.EEventListener#touchDrag(de.tucottbus.kt.
-   * lcars.elements.EEvent)
-   */
+  @Override
   public void touchDrag(EEvent ee)
   {
     if (ee.el.equals(ePrev))
@@ -650,13 +639,7 @@ public class EElementArray extends ElementContributor implements EEventListener
     super.touchDrag(ee);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.tucottbus.kt.lcars.elements.EEventListener#touchHold(de.tucottbus.kt.
-   * lcars.elements.EEvent)
-   */
+  @Override
   public void touchHold(EEvent ee)
   {
     if (ee.el.equals(ePrev))
@@ -668,13 +651,7 @@ public class EElementArray extends ElementContributor implements EEventListener
     super.touchHold(ee);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.tucottbus.kt.lcars.elements.EEventListener#touchUp(de.tucottbus.kt.lcars
-   * .elements.EEvent)
-   */
+  @Override
   public void touchUp(EEvent ee)
   {
     if (ee.el.equals(ePrev))
@@ -688,105 +665,65 @@ public class EElementArray extends ElementContributor implements EEventListener
 
   // -- Animations --
 
+  private int autoPageCtr = -1;
+  private int animateCtr  = -1; // Animation off
+  
+  @Override
+  protected void fps10()
+  {
+    // Animate
+    if (animateCtr>=0)
+    {
+      if (animateCtr<=cols*rows)
+      {
+        int ctr;
+        int firstItem;
+        synchronized (eList)
+        {
+          ctr = ++this.animateCtr;
+          firstItem = this.firstItem;
+        }
+        showItemsInt(firstItem, ctr);
+        hiliteItem(firstItem + ctr - 1);
+      }
+      else
+      {
+        animateCtr = -1; // Stop animation
+        autoPageCtr = 0;
+      }
+    }
+    
+    // Auto-page
+    if (!getLock() && animateCtr<0)
+    {
+      autoPageCtr++;
+      if (autoPageCtr==50)
+      {
+        nextPage(true);
+        autoPageCtr = 0;
+      }
+    }
+    
+  }
+  
   /**
    * Animates the array.
    */
   public void animate()
   {
-    try
-    {
-      if (getPanel() == null)
-        cancelTimerTask(TT_ANIMATION);
-      scheduleTimerTask(new AnimationTask(), TT_ANIMATION, 1, 100);
-    } catch (IllegalStateException e)
-    {
-      Log.err("Cannot animate EElementArray", e);
-    }
-  }
-
-  /**
-   * (Re)starts auto-paging.
-   */
-  public void autopage()
-  {
-    if (getPanel() == null)
-      cancelTimerTask(TT_AUTOPAGE);
-    int timeout = this.cols * this.rows * 100 + 5000;
-    scheduleTimerTask(new AutoPagerTask(), TT_AUTOPAGE, timeout, timeout);
-  }
-
-  // -- Nested classes --
-
-  /**
-   * The array animation timer task.
-   */
-  class AnimationTask extends TimerTask
-  {
-    public int ctr = 0;
-
-    public void run()
-    {
-      if (getPanel() == null || ctr > cols * rows)
-      {
-        cancel();
-        return;
-      }
-      int ctr;
-      int firstItem;
-      synchronized (eList)
-      {
-        ctr = ++this.ctr;
-        firstItem = EElementArray.this.firstItem;
-      }
-      showItemsInt(firstItem, ctr);
-      hiliteItem(firstItem + ctr - 1);
-    }
-  }
-
-  /**
-   * The automatic page turning timer task.
-   */
-  class AutoPagerTask extends TimerTask
-  {
-    public void run()
-    {
-      if (getPanel() == null)
-      {
-        cancel();
-        return;
-      }
-      if (getLock())
-        return;
-      nextPage(true);
-    }
-  }
-
-  /**
-   * The item unhighlighting task.
-   */
-  class UnhiliteTask extends TimerTask
-  {
-    private WeakReference<EElement> elementRef;
-
-    public UnhiliteTask(EElement element)
-    {
-      this.elementRef = new WeakReference<EElement>(element);
-    }
-
-    @Override
-    public void run()
-    {
-      try
-      {
-        elementRef.get().setHighlighted(false);
-        Panel panel = getPanel();
-        if (panel != null)
-          panel.invalidate();
-      } catch (NullPointerException e)
-      {
-        Log.err("NullPointerException", e);
-      }
-    }
+    animateCtr = 0;
+//    
+//    try
+//    {
+//      if (getPanel() == null)
+//        cancelTimerTask(TT_ANIMATION);
+//      scheduleTimerTask(new AnimationTask(), TT_ANIMATION, 1, 100);
+//    } catch (IllegalStateException e)
+//    {
+//      Log.err("Cannot animate EElementArray", e);
+//    }
   }
 
 }
+
+// EOF
