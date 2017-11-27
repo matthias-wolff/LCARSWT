@@ -439,6 +439,7 @@ public abstract class ElementContributor implements EEventListener
     for (ElementContributor ec : children)
     {
       ec.panel = new WeakReference<Panel>(panel);
+      ec.onAddToPanelOrContributor();
       panel.addPanelTimerListener(ec.panelTimerListener);
     }
   }
@@ -463,6 +464,7 @@ public abstract class ElementContributor implements EEventListener
       {
         ec.panel = new WeakReference<Panel>(null);
         panel.removePanelTimerListener(ec.panelTimerListener);
+        ec.onRemoveFromPanelOrContributor();
       }
       panel.removePanelTimerListener(panelTimerListener);
       onRemoveFromPanelOrContributor();

@@ -712,16 +712,6 @@ public class EElementArray extends ElementContributor implements EEventListener
   public void animate()
   {
     animateCtr = 0;
-//    
-//    try
-//    {
-//      if (getPanel() == null)
-//        cancelTimerTask(TT_ANIMATION);
-//      scheduleTimerTask(new AnimationTask(), TT_ANIMATION, 1, 100);
-//    } catch (IllegalStateException e)
-//    {
-//      Log.err("Cannot animate EElementArray", e);
-//    }
   }
 
 }
