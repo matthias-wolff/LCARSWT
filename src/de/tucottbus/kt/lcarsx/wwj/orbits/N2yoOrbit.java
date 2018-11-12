@@ -1,8 +1,5 @@
 package de.tucottbus.kt.lcarsx.wwj.orbits;
 
-import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.Position;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,11 +10,13 @@ import java.util.Locale;
 import java.util.Vector;
 
 import de.tucottbus.kt.lcars.logging.Log;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
 
 /**
  * Instances of this class provide real time tracking of earth satellites
  * including the international space station. Orbit data are obtained from <a
- * href="http://www.n2yo.com">http://www.n2yo.com</a>.
+ * href="https://www.n2yo.com">http://www.n2yo.com</a>.
  * 
  * @author Matthias Wolff, BTU Cottbus
  * @author helloworld922@www.javaprogrammingforums.com (spline interpolation)
@@ -31,7 +30,7 @@ public abstract class N2yoOrbit extends Orbit
   /**
    * The HTTP-GET query retrieving a satellite orbit.
    */
-  private static final String Q_ORBIT = "http://www.n2yo.com/sat/gg.php?s=%s";
+  private static final String Q_ORBIT = "https://www.n2yo.com/sat/gg.php?s=%s";
 
   /**
    * The name of the satellite traveling this orbit. This field is initialized by
@@ -104,11 +103,18 @@ public abstract class N2yoOrbit extends Orbit
   protected OrbitState getState(Date date)
   {
     if (date==null) date = new Date();
-    if (date.before(getFirstDate())) return null;
-    if (date.after(getLastDate()))
+    try
     {
-      orbit = queryOrbit();
-      if (date.after(getLastDate())) return null;
+      if (date.before(getFirstDate())) return null;
+      if (date.after(getLastDate()))
+      {
+        orbit = queryOrbit();
+        if (date.after(getLastDate())) return null;
+      }
+    }
+    catch (Exception e)
+    {
+      return null;
     }
     
     for (int step=1; step<orbit.size()-2; step++)
@@ -167,14 +173,14 @@ public abstract class N2yoOrbit extends Orbit
       {
         String text = reader.readLine();
         if (text==null) break;
-        //LCARS.log("N2Y",line+": "+text);
+        //Log.info(line+": "+text);
         try
         {
           String[] tokens = text.split("\\|");
           if (line==1)
           {
             name = tokens[2];
-            //Log.info("("+line+") satname=\""+satName+"\"");
+            //Log.info("("+line+") satname=\""+getSatID()+"\"");
           }
           else
           {

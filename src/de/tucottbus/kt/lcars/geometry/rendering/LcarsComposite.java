@@ -226,19 +226,20 @@ public class LcarsComposite extends Composite implements PaintListener
 
     // Draw elements
     PanelState state = context.getPanelState();
-    try
+    for (ElementData el : context.getElementsToPaint())
     {
-      for (ElementData el : context.getElementsToPaint())
+      if (el==null)
+        continue;
+      if (el.serialNo == -1)
+        Log.debug(el.toString());
+      try
       {
-        if (el==null)
-          continue;
-        if (el.serialNo == -1)
-          Log.debug(el.toString());
         el.render2D(gc, state);
       }
-    } catch (Throwable ex)
-    {
-      Log.err("error drawing elements to the screen", ex);
+      catch (Throwable ex)
+      {
+        Log.err("error drawing elements to the screen", ex);
+      }
     }
     
     // -- DEBUG: Show repainted area -->
